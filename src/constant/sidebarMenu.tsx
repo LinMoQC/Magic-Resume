@@ -1,13 +1,14 @@
-import { FaBook, FaBriefcase, FaCertificate, FaCog, FaGamepad, FaGraduationCap, FaLanguage, FaLayerGroup, FaRegFileAlt, FaUser, FaUsers } from "react-icons/fa";
+import { FaBook, FaBriefcase, FaCertificate,FaGraduationCap, FaLanguage, FaLayerGroup, FaUser } from "react-icons/fa";
 import { ComponentType } from 'react';
 import { dynamicFormFields, FieldConfig } from './dynamicFormFileds';
+import { SectionItem } from "@/store/useResumeStore";
 
 export type SidebarMenuItem = {
   key: string;
-  icon: ComponentType<any>;
+  icon: ComponentType;
   label: string;
   formFields?: FieldConfig[];
-  itemRender?: (item: any) => React.ReactNode;
+  itemRender?: (item: SectionItem) => React.ReactNode;
 };
 
 const sidebarMenu: SidebarMenuItem[] = [

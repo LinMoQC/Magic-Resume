@@ -1,7 +1,7 @@
 "use client";
 
-import { useResumeStore, InfoType } from '@/store/useResumeStore';
-import { useState, useEffect, useRef } from 'react';
+import { useResumeStore } from '@/store/useResumeStore';
+import React, { useState, useEffect, useMemo, createRef } from 'react';
 import { FaUser } from 'react-icons/fa';
 import BasicForm from '../_components/BasicForm';
 import sidebarMenu from '@/constant/sidebarMenu';
@@ -28,6 +28,7 @@ import Modal from '@/components/ui/Modal';
 import ResumeEditSkeleton from './ResumeEditSkeleton';
 import TemplatePanel from './TemplatePanel';
 import ResumeContent from './ResumeContent';
+import { Section, SectionItem } from '@/store/useResumeStore';
 
 const ResumePreviewPanel = dynamic(() => import('../_components/ResumePreviewPanel'), { ssr: false });
 
@@ -69,17 +70,14 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
   const sectionItems = activeResume?.sections;
   const sectionOrder = activeResume?.sectionOrder;
 
-  const sectionRefs: Record<string, React.RefObject<HTMLDivElement | null>> = {
-    basics: useRef<HTMLDivElement>(null),
-    summary: useRef<HTMLDivElement>(null),
-    projects: useRef<HTMLDivElement>(null),
-    education: useRef<HTMLDivElement>(null),
-    skills: useRef<HTMLDivElement>(null),
-    languages: useRef<HTMLDivElement>(null),
-    certificates: useRef<HTMLDivElement>(null),
-    experience: useRef<HTMLDivElement>(null),
-    profiles: useRef<HTMLDivElement>(null),
-  };
+  const sectionKeys = useMemo(() => ['basics', 'summary', 'projects', 'education', 'skills', 'languages', 'certificates', 'experience', 'profiles'], []);
+
+  const sectionRefs = useMemo(() => 
+    sectionKeys.reduce((acc, key) => {
+      acc[key] = createRef<HTMLDivElement | null>();
+      return acc;
+    }, {} as Record<string, React.RefObject<HTMLDivElement | null>>), 
+  [sectionKeys]);
 
   const [previewScale, setPreviewScale] = useState(1);
   const [isJsonModalOpen, setIsJsonModalOpen] = useState(false);
@@ -94,7 +92,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     if (activeSection && sectionRefs[activeSection]?.current) {
       sectionRefs[activeSection].current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  }, [activeSection]);
+  }, [activeSection, sectionRefs]);
 
   useEffect(() => {
     loadResumeForEdit(id);
@@ -146,16 +144,16 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
                   </div>
                 )}
                 {key !== 'basics' && (
-                  <div ref={sectionRefs[key as keyof typeof sectionRefs]} key={key} id={key} className="scroll-mt-24">
+                  <div ref={sectionRefs[key]} key={key} id={key} className="scroll-mt-24">
                     <SectionListWithModal
-                      icon={(sidebarMenu.find(s => s.key === key)?.icon as any) || ''}
+                      icon={sidebarMenu.find(s => s.key === key)?.icon || FaUser}
                       label={sidebarMenu.find(s => s.key === key)?.label || ''}
-                      fields={(dynamicFormFields[key] || []).map(f => ({ name: f.key, label: f.label, placeholder: f.placeholder || '', required: f.required }))}
+                      fields={(dynamicFormFields[key as keyof typeof dynamicFormFields] || []).map(f => ({ name: f.key, label: f.label, placeholder: f.placeholder || '', required: f.required }))}
                       richtextKey="summary"
                       richtextPlaceholder="..."
                       itemRender={sidebarMenu.find(s => s.key === key)?.itemRender}
-                      items={sectionItems?.[key] ?? []}
-                      setItems={(items: any[]) => updateSectionItems(key, items)}
+                      items={sectionItems?.[key as keyof Section] ?? []}
+                      setItems={(items: SectionItem[]) => updateSectionItems(key, items)}
                       className={isLast ? 'mb-0' : ''}
                     />
                   </div>

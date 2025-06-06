@@ -9,7 +9,6 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import sidebarMenu from '@/constant/sidebarMenu';
 import { useResumeStore } from "@/store/useResumeStore";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: '/dashboard', label: 'Resumes', icon: FileText },
@@ -18,14 +17,14 @@ const navItems = [
 
 export default function DashboardSidebar() {
   const pathname = usePathname();
-  const { activeSection, setActiveSection } = useResumeStore();
+  const { setActiveSection } = useResumeStore();
 
   const menuItems = [...sidebarMenu];
 
   if (pathname.includes('/edit')) {
     return <aside className="border-r border-neutral-800 bg-neutral-900 flex flex-col p-4">
         <Link href="/dashboard">
-          <img src="/simple-logo.png" alt="simple-logo" width={40} height={40} />
+          <Image src="/simple-logo.png" alt="simple-logo" width={40} height={40} />
         </Link>
       <nav className="flex flex-col gap-2 flex-grow justify-center">
         {menuItems.map((item) => {

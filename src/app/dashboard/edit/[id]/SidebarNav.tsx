@@ -32,17 +32,14 @@ export default function SidebarNav({ sidebarMenu, handleSidebarClick }: SidebarN
 
         <div className='flex-1 flex flex-col items-center justify-center gap-2'>
           {sidebarMenu.map(item => (
-            // <Button
-            //   key={item.key}
-            //   title={item.label}
-            //   className="flex flex-col items-center justify-center transition text-sm text-neutral-400 hover:text-white w-12 h-12 rounded-lg hover:bg-neutral-800"
-            //   onClick={() => handleSidebarClick(item.key)}
-            // >
-            //   {item.icon}
-            // </Button>
-            <div key={item.key}>
-
-            </div>
+            <Button
+              key={item.key}
+              title={item.label}
+              className="flex flex-col items-center justify-center transition text-sm text-neutral-400 hover:text-white w-12 h-12 rounded-lg hover:bg-neutral-800"
+              onClick={() => handleSidebarClick(item.key)}
+            >
+              {item.icon}
+            </Button>
           ))}
         </div>
 

@@ -18,7 +18,7 @@ type Field = {
 
 interface Item {
   id: UniqueIdentifier;
-  [key: string]: any;
+  [key: string]: string | number;
 }
 
 type DynamicFormModalProps<T extends Item> = {
@@ -47,8 +47,12 @@ export default function DynamicFormModal<T extends Item>({
       setFormData(currentItem);
     } else {
       const emptyData: Partial<T> = {};
-      fields.forEach(field => { (emptyData as any)[field.name] = ''; });
-      if(richtextKey) (emptyData as any)[richtextKey] = '';
+      fields.forEach(field => { 
+        (emptyData as Record<string, string>)[field.name] = ''; 
+      });
+      if(richtextKey) {
+        (emptyData as Record<string, string>)[richtextKey] = '';
+      }
       setFormData(emptyData);
     }
   }, [currentItem, fields, richtextKey]);
@@ -84,7 +88,7 @@ export default function DynamicFormModal<T extends Item>({
                   id={field.name}
                   name={field.name}
                   placeholder={field.placeholder}
-                  value={formData[field.name] || ''}
+                  value={String(formData[field.name] || '')}
                   onChange={handleChange}
                   className="bg-neutral-800 border-neutral-700"
                 />
@@ -94,7 +98,7 @@ export default function DynamicFormModal<T extends Item>({
                   name={field.name}
                   type={field.type}
                   placeholder={field.placeholder}
-                  value={formData[field.name] || ''}
+                  value={String(formData[field.name] || '')}
                   onChange={handleChange}
                   className="bg-neutral-800 border-neutral-700"
                 />
@@ -106,7 +110,7 @@ export default function DynamicFormModal<T extends Item>({
           <div>
             <Label htmlFor={richtextKey}>Description</Label>
             <TiptapEditor
-              content={formData[richtextKey] || ''}
+              content={String(formData[richtextKey] || '')}
               onChange={handleQuillChange}
               placeholder={richtextPlaceholder}
             />
