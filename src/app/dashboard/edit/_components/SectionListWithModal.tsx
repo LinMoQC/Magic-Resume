@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   DndContext,
@@ -31,7 +31,7 @@ import { cn } from '@/lib/utils';
 interface BaseItem {
   id: UniqueIdentifier;
   visible?: boolean;
-  [key: string]: any;
+  [key: string]: string | number | boolean | undefined;
 }
 
 type SortableItemProps<T extends BaseItem> = {
@@ -46,7 +46,7 @@ type SortableItemProps<T extends BaseItem> = {
   label: string;
 };
 
-function SortableItem<T extends BaseItem>({ id, item, index, handleEdit, handleDelete, handleCopy, toggleVisibility, itemRender, label }: SortableItemProps<T>) {
+function SortableItem<T extends BaseItem>({ id, item, index, handleEdit, handleDelete, handleCopy, toggleVisibility, itemRender }: SortableItemProps<T>) {
   const {
     attributes,
     listeners,
@@ -133,7 +133,6 @@ export default function SectionListWithModal<T extends BaseItem>({
   const [isOpen, setIsOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState<T | null>(null);
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
-  const quillRef = useRef<any>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -143,7 +142,7 @@ export default function SectionListWithModal<T extends BaseItem>({
   );
 
   const handleOpenModal = (item: T | null, index: number | null) => {
-    setCurrentItem(item ? { ...item } : { id: Date.now().toString(), visible: true, ...fields.reduce((acc, f) => ({ ...acc, [f.name]: '' }), {}), [richtextKey]: '' } as T);
+    setCurrentItem(item ? { ...item } : { id: Date.now().toString(), visible: true, ...fields.reduce((acc, f) => ({ ...acc, [f.name]: '' }), {} as Record<string, string>), [richtextKey]: '' } as T);
     setCurrentIndex(index);
     setIsOpen(true);
   };
@@ -268,9 +267,9 @@ export default function SectionListWithModal<T extends BaseItem>({
                 <Input
                   id={field.name}
                   name={field.name}
-                  placeholder={field.placeholder}
-                  value={currentItem?.[field.name] || ''}
+                  value={String(currentItem?.[field.name] ?? '')}
                   onChange={handleInputChange}
+                  placeholder={field.placeholder}
                   className="bg-neutral-800 border-neutral-700"
                 />
               </div>
@@ -279,7 +278,7 @@ export default function SectionListWithModal<T extends BaseItem>({
           <div>
             <label className="block text-sm font-medium mb-1">{richtextKey.charAt(0).toUpperCase() + richtextKey.slice(1)}</label>
             <TiptapEditor
-              content={currentItem?.[richtextKey] || ''}
+              content={String(currentItem?.[richtextKey] ?? '')}
               onChange={handleQuillChange}
               placeholder={richtextPlaceholder}
             />

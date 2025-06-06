@@ -1,12 +1,13 @@
 "use client";
 
 import React from 'react';
-import { InfoType } from '@/store/useResumeStore';
+import { InfoType, Section } from '@/store/useResumeStore';
 import { FaEnvelope, FaPhone, FaGlobe, FaMapMarkerAlt } from 'react-icons/fa';
+import Image from 'next/image';
 
 interface Props {
   info: InfoType;
-  sections: Record<string, any[]>;
+  sections: Section;
   sectionOrder: string[];
 }
 
@@ -21,9 +22,11 @@ export default function ResumePreview({ info, sections, sectionOrder }: Props) {
         {/* 顶部信息 */}
         <div className="flex items-center space-x-4">
           {info.avatar && (
-            <img
+            <Image
               src={info.avatar}
               alt="avatar"
+              width={40}
+              height={40}
               className="w-10 h-10 rounded-full object-cover border border-neutral-300"
               style={{ background: '#f3f3f3' }}
             />

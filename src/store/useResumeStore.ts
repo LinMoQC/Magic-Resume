@@ -13,6 +13,15 @@ export type InfoType = {
   customFields: { icon: string; name: string; value: string }[];
 };
 
+export type SectionItem = {
+  id: string;
+  [key: string]: string | number | boolean | undefined;
+};
+
+export type Section = {
+  [key: string]: SectionItem[];
+}
+
 export type SectionOrder = {
   key: string;
   title: string;
@@ -21,7 +30,7 @@ export type SectionOrder = {
 
 export type ActiveResume = {
   info: InfoType;
-  sections: Record<string, any[]>;
+  sections: Section;
   sectionOrder: SectionOrder[];
 };
 
@@ -48,7 +57,7 @@ interface ResumeStore {
   setSectionOrder: (order: SectionOrder[]) => void;
   setRightCollapsed: (collapsed: boolean) => void;
   setActiveSection: (section: string) => void;
-  updateSectionItems: (key: string, items: any[]) => void;
+  updateSectionItems: (key: string, items: SectionItem[]) => void;
   updateInfo: (key: keyof InfoType, value: string | { icon: string; name: string; value: string }[]) => void;
   addCustomField: (field: { icon: string; name: string; value: string }) => void;
   removeCustomField: (index: number) => void;
@@ -157,7 +166,7 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
     set({ rightCollapsed: collapsed });
   },
   setActiveSection: (section: string) => set({ activeSection: section }),
-  updateSectionItems: (key: string, items: any[]) => {
+  updateSectionItems: (key: string, items: SectionItem[]) => {
     set(state => ({
       activeResume: state.activeResume ? { ...state.activeResume, sections: { ...state.activeResume.sections, [key]: items } } : null
     }));

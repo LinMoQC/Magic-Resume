@@ -1,26 +1,66 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+## 项目使用指南
 
-First, run the development server:
+首先，安装项目依赖：
+
+```bash
+npm install
+```
+
+然后，运行开发服务器：
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+打开 [http://localhost:3000](http://localhost:3000) 查看结果。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+你可以通过修改 `app/page.tsx` 文件来编辑页面。当你编辑文件时，页面会自动更新。
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 其他命令
 
-## Learn More
+**构建项目:**
+
+```bash
+npm run build
+```
+
+**启动生产环境服务器:**
+
+```bash
+npm run start
+```
+
+**代码规范检查:**
+
+```bash
+npm run lint
+```
+
+### 环境变量
+
+在运行项目之前，您需要创建一个 `.env.local` 文件，并添加必要的环境变量。
+
+首先，在项目根目录创建一个名为 `.env.local` 的文件，然后复制以下内容并填入您的密钥：
+
+```bash
+# Clerk
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_publishable_key
+CLERK_SECRET_KEY=your_secret_key
+
+# Add other environment variables here
+```
+
+**注意:** `.env.local` 文件不应该被提交到版本库中。
+
+### 代码规范
+
+本项目使用 [Husky](https://typicode.github.io/husky/) 在每次提交代码时自动进行代码规范检查。
+
+当您执行 `git commit` 时，`pre-commit` 钩子会自动运行 `npm run lint` 命令，以确保代码质量。
+
+## 了解更多
 
 To learn more about Next.js, take a look at the following resources:
 

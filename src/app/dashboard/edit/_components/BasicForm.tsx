@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { FaTrash } from 'react-icons/fa';
 import type { InfoType } from '@/store/useResumeStore';
+import Image from 'next/image';
 
 type CustomField = {
   icon: string;
@@ -14,7 +15,7 @@ type CustomField = {
 
 type BasicFormProps = {
   info: InfoType;
-  updateInfo: (key: keyof InfoType, value: any) => void;
+  updateInfo: (key: keyof InfoType, value: string | CustomField[]) => void;
   addCustomField: (field: CustomField) => void;
   removeCustomField: (index: number) => void;
 };
@@ -63,9 +64,11 @@ export default function BasicForm({
           return (
             <div key={field.name} className="flex flex-col gap-3">
               <div className="flex items-center gap-4">
-                <img
+                <Image
                   src={info.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${info.fullName || 'placeholder'}`}
                   alt="Avatar"
+                  width={40}
+                  height={40}
                   className="w-10 h-10 rounded-full object-cover bg-neutral-200"
                   onError={(e) => {
                     e.currentTarget.onerror = null; // Prevent infinite loop

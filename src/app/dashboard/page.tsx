@@ -2,15 +2,14 @@
 
 import { useResumeStore } from '@/store/useResumeStore';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { FaPlus, FaDownload, FaRegFileAlt, } from 'react-icons/fa';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogFooter as DialogFooterUI, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '@clerk/nextjs';
-import DashboardSkeleton from './DashboardSkeleton';
-import DashboardSidebar from './components/DashboardSidebar';
+import DashboardSkeleton from './skeleton/DashboardSkeleton';
 
 function formatTime(ts: number) {
   if (!ts) return '';
@@ -46,7 +45,7 @@ export default function Dashboard() {
   }
 
   return (
-    <>
+    <Fragment>
       {/* 新建简历弹窗 */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
@@ -143,6 +142,6 @@ export default function Dashboard() {
           </AnimatePresence>
         </div>
       </main>
-    </>
+    </Fragment>
   );
 } 

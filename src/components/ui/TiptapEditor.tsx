@@ -2,7 +2,7 @@
 
 import { useEditor, EditorContent, Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import { FaBold, FaItalic, FaStrikethrough, FaListUl, FaListOl, FaHeading, FaUndo, FaRedo, FaCode } from 'react-icons/fa';
+import { FaBold, FaItalic, FaStrikethrough, FaListUl, FaListOl, FaUndo, FaRedo, FaCode } from 'react-icons/fa';
 
 const TiptapToolbar = ({ editor }: { editor: Editor | null }) => {
   if (!editor) {

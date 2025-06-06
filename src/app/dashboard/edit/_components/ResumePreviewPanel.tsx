@@ -7,12 +7,12 @@ import { DownloadIcon } from '@radix-ui/react-icons';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { toast } from 'sonner';
-import { InfoType } from '@/store/useResumeStore';
+import { InfoType, Section } from '@/store/useResumeStore';
 import { oklchToRgb } from '@/lib/export';
 
 interface ResumePreviewPanelProps {
   info: InfoType;
-  sections: Record<string, any[]>;
+  sections: Section;
   sectionOrder: string[];
   previewScale: number;
   setPreviewScale: (scale: number) => void;
