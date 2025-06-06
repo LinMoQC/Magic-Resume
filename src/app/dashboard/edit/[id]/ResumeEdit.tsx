@@ -1,0 +1,204 @@
+"use client";
+
+import { useResumeStore, InfoType } from '@/store/useResumeStore';
+import { useState, useEffect, useRef } from 'react';
+import { FaUser } from 'react-icons/fa';
+import BasicForm from '../_components/BasicForm';
+import sidebarMenu from '@/constant/sidebarMenu';
+import dynamic from 'next/dynamic';
+import SectionListWithModal from '../_components/SectionListWithModal';
+import { dynamicFormFields } from '@/constant/dynamicFormFileds';
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  arrayMove,
+  useSortable,
+  verticalListSortingStrategy
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { toast } from 'sonner';
+import Modal from '@/components/ui/Modal';
+import ResumeEditSkeleton from './ResumeEditSkeleton';
+import TemplatePanel from './TemplatePanel';
+import ResumeContent from './ResumeContent';
+
+const ResumePreviewPanel = dynamic(() => import('../_components/ResumePreviewPanel'), { ssr: false });
+
+type ResumeEditProps = {
+  id: string;
+};
+
+function SortableSection({ id, children, disabled }: { id: string, children: React.ReactNode, disabled?: boolean }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id, disabled });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    cursor: disabled ? 'default' : 'grab'
+  };
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      {children}
+    </div>
+  );
+}
+
+export default function ResumeEdit({ id }: ResumeEditProps) {
+  const {
+    activeResume,
+    loadResumeForEdit,
+    saveResume: saveActiveResumeToResumes,
+    updateInfo,
+    setSectionOrder: updateSectionOrder,
+    updateSectionItems,
+    addCustomField,
+    removeCustomField,
+    rightCollapsed,
+    setRightCollapsed,
+    activeSection,
+  } = useResumeStore();
+
+  const info = activeResume?.info;
+  const sectionItems = activeResume?.sections;
+  const sectionOrder = activeResume?.sectionOrder;
+
+  const sectionRefs: Record<string, React.RefObject<HTMLDivElement | null>> = {
+    basics: useRef<HTMLDivElement>(null),
+    summary: useRef<HTMLDivElement>(null),
+    projects: useRef<HTMLDivElement>(null),
+    education: useRef<HTMLDivElement>(null),
+    skills: useRef<HTMLDivElement>(null),
+    languages: useRef<HTMLDivElement>(null),
+    certificates: useRef<HTMLDivElement>(null),
+    experience: useRef<HTMLDivElement>(null),
+    profiles: useRef<HTMLDivElement>(null),
+  };
+
+  const [previewScale, setPreviewScale] = useState(1);
+  const [isJsonModalOpen, setIsJsonModalOpen] = useState(false);
+  const openJsonModal = () => setIsJsonModalOpen(true);
+  const closeJsonModal = () => setIsJsonModalOpen(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  );
+
+  useEffect(() => {
+    if (activeSection && sectionRefs[activeSection]?.current) {
+      sectionRefs[activeSection].current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [activeSection]);
+
+  useEffect(() => {
+    loadResumeForEdit(id);
+  }, [id, loadResumeForEdit]);
+
+  const handleSave = () => {
+    saveActiveResumeToResumes();
+    toast.success('Saved!');
+  };
+
+  if (!activeResume || !info || !sectionItems || !sectionOrder) {
+    return <ResumeEditSkeleton />;
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (over && active.id !== over.id && sectionOrder) {
+      const oldIndex = sectionOrder.findIndex(item => item.key === active.id);
+      const newIndex = sectionOrder.findIndex(item => item.key === over.id);
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const newOrder = arrayMove(sectionOrder, oldIndex, newIndex);
+        updateSectionOrder(newOrder);
+      }
+    }
+  }
+
+  function renderSections() {
+    return (
+      <DndContext
+        key="dnd-context"
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext items={sectionOrder?.map(s => s.key) || []} strategy={verticalListSortingStrategy}>
+          {(sectionOrder || []).map(({ key }, index) => {
+            const isLast = index === (sectionOrder?.length || 0) - 1;
+            return (
+              <SortableSection key={key} id={key} disabled={key === 'basics'}>
+                {key === 'basics' && (
+                  <div ref={sectionRefs.basics} className={`scroll-mt-24 ${isLast ? '' : 'mb-8'}`} id="basics">
+                    <h2 className="text-2xl font-bold flex items-center gap-3 mb-8"><FaUser className="text-[16px]" /> Basics</h2>
+                    <BasicForm
+                      info={info!}
+                      updateInfo={updateInfo}
+                      addCustomField={addCustomField}
+                      removeCustomField={removeCustomField}
+                    />
+                  </div>
+                )}
+                {key !== 'basics' && (
+                  <div ref={sectionRefs[key as keyof typeof sectionRefs]} key={key} id={key} className="scroll-mt-24">
+                    <SectionListWithModal
+                      icon={(sidebarMenu.find(s => s.key === key)?.icon as any) || ''}
+                      label={sidebarMenu.find(s => s.key === key)?.label || ''}
+                      fields={(dynamicFormFields[key] || []).map(f => ({ name: f.key, label: f.label, placeholder: f.placeholder || '', required: f.required }))}
+                      richtextKey="summary"
+                      richtextPlaceholder="..."
+                      itemRender={sidebarMenu.find(s => s.key === key)?.itemRender}
+                      items={sectionItems?.[key] ?? []}
+                      setItems={(items: any[]) => updateSectionItems(key, items)}
+                      className={isLast ? 'mb-0' : ''}
+                    />
+                  </div>
+                )}
+              </SortableSection>
+            );
+          })}
+        </SortableContext>
+      </DndContext>
+    );
+  }
+
+  return (
+    <main className="flex h-screen bg-black text-white flex-1">
+      <div className="w-[300px] transition-all duration-300 bg-transparent h-full">
+        <ResumeContent
+          renderSections={renderSections}
+          handleSave={handleSave}
+          onShowJson={openJsonModal}
+        />
+      </div>
+      <ResumePreviewPanel
+        info={info}
+        sections={sectionItems}
+        sectionOrder={sectionOrder.map(s => s.key)}
+        previewScale={previewScale}
+        setPreviewScale={setPreviewScale}
+      />
+      <TemplatePanel
+        rightCollapsed={rightCollapsed}
+        setRightCollapsed={setRightCollapsed}
+      />
+      <Modal
+        isOpen={isJsonModalOpen}
+        onClose={closeJsonModal}
+        title="Resume JSON Data"
+      >
+        <pre className="bg-neutral-800 text-sm text-gray-300 p-4 rounded-md whitespace-pre-wrap break-all">
+          <code>
+            {JSON.stringify(activeResume, null, 2)}
+          </code>
+        </pre>
+      </Modal>
+    </main>
+  );
+} 

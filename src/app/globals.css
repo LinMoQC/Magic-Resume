@@ -24,3 +24,115 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* @layer components {
+  .add-btn {
+    @apply text-white inline-flex w-full scale-100 items-center justify-center rounded-sm text-sm font-medium ring-offset-background border border-secondary bg-transparent h-9 px-5 gap-x-2 border-dashed py-6 leading-relaxed;
+  }
+} */
+
+.wysiwyg ul,
+.wysiwyg ol {
+  margin-left: 1.2em;
+  padding-left: 1em;
+}
+
+.wysiwyg ul {
+  list-style-type: disc;
+}
+
+.wysiwyg ol {
+  list-style-type: decimal;
+}
+
+.wysiwyg blockquote {
+  border-left: 3px solid #ccc;
+  margin: 0.5em 0;
+  padding-left: 1em;
+  color: #888;
+  font-style: italic;
+  background: #f8f8f8;
+  border-radius: 0.25em;
+}
+
+.wysiwyg h1,
+.wysiwyg h2,
+.wysiwyg h3,
+.wysiwyg h4,
+.wysiwyg h5,
+.wysiwyg h6 {
+  font-weight: bold;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+  line-height: 1.2;
+}
+.wysiwyg h1 { font-size: 1.5em; }
+.wysiwyg h2 { font-size: 1.3em; }
+.wysiwyg h3 { font-size: 1.15em; }
+.wysiwyg h4, .wysiwyg h5, .wysiwyg h6 { font-size: 1em; }
+
+.wysiwyg p {
+  line-height: 1.5;
+}
+
+.wysiwyg a {
+  color: #2563eb;
+  text-decoration: underline;
+  word-break: break-all;
+}
+.wysiwyg a:hover {
+  color: #1d4ed8;
+}
+
+.wysiwyg code {
+  background: #f3f3f3;
+  color: #d6336c;
+  padding: 0.1em 0.3em;
+  border-radius: 0.2em;
+  font-size: 0.95em;
+}
+
+.wysiwyg pre {
+  background: #18181b;
+  color: #fff;
+  padding: 0.8em 1em;
+  border-radius: 0.3em;
+  overflow-x: auto;
+  font-size: 0.95em;
+  margin: 1em 0;
+}
+
+.wysiwyg img {
+  max-width: 100%;
+  border-radius: 0.3em;
+  margin: 0.5em 0;
+  display: block;
+}
+
+.wysiwyg hr {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 1.5em 0;
+}
+
+.wysiwyg table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+}
+.wysiwyg th,
+.wysiwyg td {
+  border: 1px solid #e5e7eb;
+  padding: 0.4em 0.7em;
+  text-align: left;
+}
+.wysiwyg th {
+  background: #f3f4f6;
+  font-weight: bold;
+}
+
+.wysiwyg strong,
+.wysiwyg b {
+  font-weight: 900;
+  color: #222;
+}
