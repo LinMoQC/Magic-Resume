@@ -21,7 +21,7 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed }: Tem
 
       {!rightCollapsed && (
         <div className="w-full p-4">
-          <h2 className="text-xl font-semibold mb-6 text-center">Template</h2>
+          <h2 className="text-xl font-semibold mb-6 text-left">Template</h2>
           <div className="grid grid-cols-2 gap-4">
             {[1,2,3,4,5,6].map(i => (
               <div key={i} className="bg-neutral-800 border border-neutral-700 aspect-[3/4] rounded-lg flex items-center justify-center text-neutral-500 hover:bg-neutral-700 hover:border-blue-500 cursor-pointer transition-colors">
