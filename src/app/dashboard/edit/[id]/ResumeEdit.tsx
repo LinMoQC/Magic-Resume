@@ -1,7 +1,7 @@
 "use client";
 
 import { useResumeStore } from '@/store/useResumeStore';
-import React, { useState, useEffect, useMemo, createRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FaUser } from 'react-icons/fa';
 import BasicForm from '../_components/BasicForm';
 import sidebarMenu from '@/constant/sidebarMenu';
@@ -70,14 +70,17 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
   const sectionItems = activeResume?.sections;
   const sectionOrder = activeResume?.sectionOrder;
 
-  const sectionKeys = useMemo(() => ['basics', 'summary', 'projects', 'education', 'skills', 'languages', 'certificates', 'experience', 'profiles'], []);
-
-  const sectionRefs = useMemo(() => 
-    sectionKeys.reduce((acc, key) => {
-      acc[key] = createRef<HTMLDivElement | null>();
-      return acc;
-    }, {} as Record<string, React.RefObject<HTMLDivElement | null>>), 
-  [sectionKeys]);
+  const sectionRefs: Record<string, React.RefObject<HTMLDivElement | null>> = {
+    basics: useRef<HTMLDivElement>(null),
+    summary: useRef<HTMLDivElement>(null),
+    projects: useRef<HTMLDivElement>(null),
+    education: useRef<HTMLDivElement>(null),
+    skills: useRef<HTMLDivElement>(null),
+    languages: useRef<HTMLDivElement>(null),
+    certificates: useRef<HTMLDivElement>(null),
+    experience: useRef<HTMLDivElement>(null),
+    profiles: useRef<HTMLDivElement>(null),
+  };
 
   const [previewScale, setPreviewScale] = useState(1);
   const [isJsonModalOpen, setIsJsonModalOpen] = useState(false);
@@ -144,7 +147,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
                   </div>
                 )}
                 {key !== 'basics' && (
-                  <div ref={sectionRefs[key]} key={key} id={key} className="scroll-mt-24">
+                  <div ref={sectionRefs[key as keyof typeof sectionRefs]} key={key} id={key} className="scroll-mt-24">
                     <SectionListWithModal
                       icon={sidebarMenu.find(s => s.key === key)?.icon || FaUser}
                       label={sidebarMenu.find(s => s.key === key)?.label || ''}
