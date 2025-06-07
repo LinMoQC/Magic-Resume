@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { redirect, usePathname } from 'next/navigation';
 import { FileText, Settings, LogOut } from 'lucide-react';
-import { ClerkLoading, ClerkLoaded, SignOutButton, UserButton, useUser, useAuth } from '@clerk/nextjs';
+import { ClerkLoading, ClerkLoaded, SignOutButton, UserButton, useAuth } from '@clerk/nextjs';
 import { Skeleton } from '@/components/ui/Skeleton';
 import sidebarMenu from '@/constant/sidebarMenu';
 import { useResumeStore } from "@/store/useResumeStore";
