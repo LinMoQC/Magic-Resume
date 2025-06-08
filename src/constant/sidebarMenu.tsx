@@ -1,7 +1,7 @@
 import { FaBook, FaBriefcase, FaCertificate,FaGraduationCap, FaLanguage, FaLayerGroup, FaUser } from "react-icons/fa";
 import { ComponentType } from 'react';
-import { dynamicFormFields, FieldConfig } from './dynamicFormFileds';
 import { SectionItem } from "@/store/useResumeStore";
+import { dynamicFormFields, FieldConfig } from "./dynamicFormFields";
 
 export type SidebarMenuItem = {
   key: string;

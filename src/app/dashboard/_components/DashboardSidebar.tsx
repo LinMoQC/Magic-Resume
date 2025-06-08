@@ -1,135 +1,182 @@
 'use client';
 
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { FileText, Settings, LogOut } from 'lucide-react';
-import { ClerkLoading, ClerkLoaded, SignOutButton, UserButton, useAuth } from '@clerk/nextjs';
+import { UserButton, useUser } from '@clerk/nextjs';
+import { motion, AnimatePresence } from 'framer-motion';
+import useMobile from '@/app/hooks/useMobile';
+import { FiMenu, FiX } from 'react-icons/fi';
+import { FaRegFileAlt, FaCog } from 'react-icons/fa';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { useResumeStore } from '@/store/useResumeStore';
 import sidebarMenu from '@/constant/sidebarMenu';
-import { useResumeStore } from "@/store/useResumeStore";
-import { Button } from "@/components/ui/button";
-import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
 
-const navItems = [
-  { href: '/dashboard', label: 'Resumes', icon: FileText },
-  { href: '/dashboard/settings', label: 'Settings', icon: Settings },
+const menuItems = [
+  { href: '/dashboard', label: 'Resumes', icon: FaRegFileAlt },
+  { href: '/dashboard/settings', label: 'Settings', icon: FaCog },
 ];
 
 export default function DashboardSidebar() {
+  const { isMobile } = useMobile();
+  const [isOpen, setIsOpen] = useState(false);
+  const { user } = useUser();
   const pathname = usePathname();
+  const [hasMounted, setHasMounted] = useState(false);
   const { setActiveSection } = useResumeStore();
-  const { isLoaded } = useAuth();
 
-  if (!isLoaded) {
-    if (pathname.includes('/edit')) {
-      return <div className="w-20 bg-black border-r border-neutral-800 flex flex-col items-center py-6 gap-6 flex-shrink-0">
-        <Skeleton className="h-8 w-8 rounded-full" />
-        <div className="flex flex-col gap-4">
-          {[...Array(7)].map((_, i) => (
-            <Skeleton key={i} className="h-8 w-8" />
-          ))}
-        </div>
-        <div className="mt-auto">
-          <Skeleton className="h-10 w-10 rounded-full" />
-        </div>
-      </div>;
-    }
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
-    return <div className="w-60 border-r border-neutral-800 p-6 flex flex-col justify-between">
-      <div>
-        <Skeleton className="h-8 w-32 mb-10" />
-        <div className="space-y-4">
-          <Skeleton className="h-9 w-full" />
-          <Skeleton className="h-9 w-full" />
-        </div>
-      </div>
-      <div>
-        <Skeleton className="h-10 w-full" />
-      </div>
-    </div>;
-  }
-
-  const menuItems = [...sidebarMenu];
-
-  if (pathname.includes('/edit')) {
-    return <aside className="border-r border-neutral-800 bg-neutral-900 flex flex-col p-4">
-      <Link href="/dashboard">
-        <Image src="/simple-logo.png" alt="simple-logo" width={40} height={40} />
-      </Link>
-      <nav className="flex flex-col gap-2 flex-grow justify-center">
-        {menuItems.map((item) => {
-          const Icon = item.icon;
-          return (
-            <Button
-              key={item.key}
-              variant="ghost"
-              className='hover:bg-neutral-800 bg-transparent'
-              onClick={() => setActiveSection(item.key)}
-            >
-              <Icon />
-            </Button>
-          )
-        })}
-      </nav>
-      <div className="mt-auto">
-        <div className="flex items-center gap-3 p-2">
-          <ClerkLoading>
-            <Skeleton className="w-8 h-8 rounded-full" />
-          </ClerkLoading>
-          <ClerkLoaded>
-            <UserButton />
-          </ClerkLoaded>
-        </div>
-      </div>
-    </aside>
-  }
-
-  return (
-    <motion.aside
-      initial={{ x: '-100%', opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      transition={{ type: 'spring', stiffness: 350, damping: 25, delay: 0.2 }}
-      className="w-[240px] bg-transparent border-r border-neutral-800 flex-col p-4 hidden md:flex"
-    >
-      <div className="mb-8 mt-4 flex justify-center">
+  const sidebarContent = (
+    <>
+      <div className="px-4 mb-8 flex justify-center">
         <Link href="/dashboard">
-          <Image src="/magic-resume-logo.png" alt="magic-resume-logo" width={140} height={0} style={{ height: 'auto' }} />
+          <Image src="/magic-resume-logo.png" alt="Magic Resume Logo" width={150} height={40} style={{ height: 'auto' }} />
         </Link>
       </div>
-      <nav className="flex flex-col gap-2 flex-grow">
-        {navItems.map((item) => (
+      <nav className="flex-1 px-4">
+        {menuItems.map(({ href, label, icon: Icon }) => (
           <Link
-            key={item.label}
-            href={item.href}
-            className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${pathname === item.href
-                ? 'bg-neutral-800 text-white'
-                : 'text-neutral-400 hover:bg-neutral-800 hover:text-white'
-              }`}
+            key={href}
+            href={href}
+            className={`flex items-center px-4 mt-2 py-3 text-lg rounded-lg transition-colors ${pathname === href ? 'bg-neutral-700 text-white' : 'text-neutral-400 hover:bg-neutral-800 hover:text-white'}`}
           >
-            <item.icon className="w-5 h-5" />
-            <span>{item.label}</span>
+            <Icon className="w-5 h-5 mr-4" />
+            {label}
           </Link>
         ))}
       </nav>
-      <div className="mt-auto">
-        <div className="flex items-center gap-3 p-2">
-          <ClerkLoading>
-            <Skeleton className="w-8 h-8 rounded-full" />
-          </ClerkLoading>
-          <ClerkLoaded>
-            <UserButton />
-          </ClerkLoaded>
-          <div className="text-sm">
-            {/* 可以加入用户名等信息 */}
-          </div>
-          <SignOutButton>
-            <button className="ml-auto p-2 text-neutral-400 hover:text-white">
-              <LogOut className="w-5 h-5" />
-            </button>
-          </SignOutButton>
+      <div className="px-6 mt-auto flex items-center gap-3">
+        <UserButton afterSignOutUrl="/" />
+        <div className='flex flex-col'>
+          <span className='text-sm font-bold'>{user?.fullName}</span>
+          <span className='text-xs text-neutral-400'>{user?.primaryEmailAddress?.emailAddress}</span>
         </div>
       </div>
-    </motion.aside>
+    </>
+  );
+
+  if (pathname.includes('/edit')) {
+    if (!hasMounted) {
+      return (
+        <aside className="w-20 bg-black border-r border-neutral-800 flex-col py-8 hidden md:flex items-center">
+          <Skeleton className="h-10 w-10 mb-8 rounded-md" />
+          <div className="flex-1 flex flex-col justify-center gap-4">
+            <Skeleton className="h-10 w-10 rounded-md" />
+            <Skeleton className="h-10 w-10 rounded-md" />
+            <Skeleton className="h-10 w-10 rounded-md" />
+            <Skeleton className="h-10 w-10 rounded-md" />
+          </div>
+          <div className="mt-auto">
+            <Skeleton className="h-8 w-8 rounded-full" />
+          </div>
+        </aside>
+      );
+    }
+    return (
+      <aside className="border-r border-neutral-800 bg-neutral-900 flex-col p-4 w-20 items-center hidden md:flex">
+        <Link href="/dashboard" className="mb-8">
+          <Image src="/simple-logo.png" alt="Magic Resume Logo" width={40} height={40} />
+        </Link>
+        <nav className="flex flex-col gap-2 flex-grow justify-center">
+          {sidebarMenu.map((item) => {
+            const Icon = item.icon;
+            return (
+              <Button
+                key={item.key}
+                variant="ghost"
+                className='h-12 w-12 hover:bg-neutral-800 bg-transparent'
+                onClick={() => setActiveSection(item.key)}
+                title={item.label}
+              >
+                <span className="h-5 w-5">
+                  <Icon />
+                </span>
+              </Button>
+            );
+          })}
+        </nav>
+        <div className="mt-auto">
+          <UserButton afterSignOutUrl="/" />
+        </div>
+      </aside>
+    );
+  }
+
+  if (!hasMounted) {
+    return (
+      <aside className="w-64 bg-black border-r border-neutral-800 flex-col py-8 hidden md:flex">
+        <div className="px-4 mb-8">
+          <Skeleton className="h-10 w-36" />
+        </div>
+        <nav className="flex-1 px-4 space-y-2">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+        </nav>
+        <div className="px-6 mt-auto flex items-center gap-3">
+          <Skeleton className="h-8 w-8 rounded-full" />
+          <div className="flex-1 space-y-1">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-3 w-32" />
+          </div>
+        </div>
+      </aside>
+    );
+  }
+
+  if (isMobile) {
+    return (
+      <>
+        <button
+          onClick={() => setIsOpen(true)}
+          className="fixed top-4 left-4 z-50 p-2 bg-neutral-800 rounded-md"
+          aria-label="Open sidebar"
+        >
+          <FiMenu className="h-6 w-6 text-white" />
+        </button>
+        <AnimatePresence>
+          {isOpen && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="fixed inset-0 bg-black/50 z-40"
+                onClick={() => setIsOpen(false)}
+              />
+              <motion.aside
+                initial={{ x: '-100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '-100%' }}
+                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                className="fixed top-0 left-0 h-full w-64 bg-black border-r border-neutral-800 flex flex-col py-8 z-50"
+              >
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="absolute top-4 right-4 p-2"
+                  aria-label="Close sidebar"
+                >
+                  <FiX className="h-6 w-6 text-neutral-400" />
+                </button>
+                <div className="flex flex-col flex-1">
+                  {sidebarContent}
+                </div>
+              </motion.aside>
+            </>
+          )}
+        </AnimatePresence>
+      </>
+    );
+  }
+
+  return (
+    <aside className="w-64 bg-black border-r border-neutral-800 flex flex-col py-8">
+      {sidebarContent}
+    </aside>
   );
 }

@@ -33,7 +33,7 @@ export default function Dashboard() {
   };
 
   return (
-    <main>
+    <main className="flex flex-col h-full">
       <NewResumeDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
