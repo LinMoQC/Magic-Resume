@@ -9,11 +9,11 @@ type ResumeContentProps = {
 
 export default function ResumeContent({ renderSections, handleSave, onShowJson }: ResumeContentProps) {
   return (
-    <div className="p-6 h-full flex flex-col bg-neutral-900 border-r border-neutral-800">
-      <div className="flex-1 overflow-y-auto pr-4 -mr-4">
+    <div className="p-6 px-0 h-full flex flex-col bg-neutral-900 border-r border-neutral-800">
+      <div className="flex-1 overflow-y-auto px-4">
         {renderSections()}
       </div>
-      <div className="mt-6 flex gap-2">
+      <div className="mt-6 flex gap-2 px-4">
         <Button onClick={onShowJson} className="w-full">
           查看 JSON
         </Button>

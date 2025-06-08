@@ -1,58 +1,67 @@
 import { create } from 'zustand';
-import { persist, PersistStorage } from 'zustand/middleware';
-import { MagicDebugger } from '@/lib/debuggger';
 import { dbClient } from '@/lib/IndexDBClient';
 
 if (typeof window !== 'undefined') {
-  dbClient.init().catch(err => MagicDebugger.error('Failed to init db for settings', err));
+  dbClient.init().catch(err => console.error('Failed to init db for settings', err));
 }
 
-interface SettingsState {
+interface SettingsData {
   apiKey: string;
   baseUrl: string;
   model: string;
   maxTokens: number;
+}
+
+interface SettingsState extends SettingsData {
+  initialSettings: SettingsData;
+  isDirty: boolean;
   setApiKey: (apiKey: string) => void;
   setBaseUrl: (baseUrl: string) => void;
   setModel: (model: string) => void;
   setMaxTokens: (maxTokens: number) => void;
+  saveSettings: () => Promise<void>;
+  resetSettings: () => void;
+  loadSettings: () => Promise<void>;
 }
 
-const indexDBStorage: PersistStorage<SettingsState> = {
-  getItem: async (name) => {
-    MagicDebugger.log('Getting item from IndexedDB', name);
-    const value = await dbClient.getItem('settings', name);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return value ? (value as any) : null;
-  },
-  setItem: async (name, value) => {
-    MagicDebugger.log('Setting item to IndexedDB', name, value);
-    await dbClient.setItem('settings', name, value);
-  },
-  removeItem: async (name) => {
-    MagicDebugger.log('Removing item from IndexedDB', name);
-    await dbClient.deleteItem('settings', name);
-  },
+const defaultSettings: SettingsData = {
+  apiKey: '',
+  baseUrl: 'http://localhost:11434/v1',
+  model: 'gpt-3.5-turbo',
+  maxTokens: 1024,
 };
 
-export const useSettingStore = create<SettingsState>()(
-  persist(
-    (set) => ({
-      apiKey: '',
-      baseUrl: 'http://localhost:11434/v1',
-      model: 'gpt-3.5-turbo',
-      maxTokens: 1024,
-      setApiKey: (apiKey) => set({ apiKey }),
-      setBaseUrl: (baseUrl) => set({ baseUrl }),
-      setModel: (model) => set({ model }),
-      setMaxTokens: (maxTokens) => set({ maxTokens }),
-    }),
-    {
-      name: 'Magic-Settings',
-      storage: indexDBStorage,
-      onRehydrateStorage: (state) => {
-        MagicDebugger.log('Rehydrating settings store from IndexedDB', state);
-      },
+export const useSettingStore = create<SettingsState>((set, get) => ({
+  ...defaultSettings,
+  initialSettings: { ...defaultSettings },
+  isDirty: false,
+  setApiKey: (apiKey) => set(state => ({ ...state, apiKey, isDirty: apiKey !== state.initialSettings.apiKey })),
+  setBaseUrl: (baseUrl) => set(state => ({ ...state, baseUrl, isDirty: baseUrl !== state.initialSettings.baseUrl })),
+  setModel: (model) => set(state => ({ ...state, model, isDirty: model !== state.initialSettings.model })),
+  setMaxTokens: (maxTokens) => set(state => ({ ...state, maxTokens, isDirty: maxTokens !== state.initialSettings.maxTokens })),
+  
+  saveSettings: async () => {
+    const { apiKey, baseUrl, model, maxTokens } = get();
+    const newSettings = { apiKey, baseUrl, model, maxTokens };
+    await dbClient.setItem('settings', 'Magic-Settings', newSettings);
+    set({ initialSettings: newSettings, isDirty: false });
+  },
+
+  resetSettings: () => {
+    set(state => ({
+      ...state.initialSettings,
+      isDirty: false,
+    }));
+  },
+
+  loadSettings: async () => {
+    const savedSettings = await dbClient.getItem('settings', 'Magic-Settings') as SettingsData | null;
+    if (savedSettings) {
+      set({ ...savedSettings, initialSettings: { ...savedSettings }, isDirty: false });
     }
-  )
-); 
+  },
+}));
+
+if (typeof window !== 'undefined') {
+  useSettingStore.getState().loadSettings();
+} 
