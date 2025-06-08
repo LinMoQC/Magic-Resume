@@ -181,7 +181,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
           onShowJson={openJsonModal}
         />
       </div>
-      <div className='flex-1'>
+      <div className='flex-1 flex items-center justify-center bg-black relative'>
         <ResumePreviewPanel
           info={info}
           sections={sectionItems}

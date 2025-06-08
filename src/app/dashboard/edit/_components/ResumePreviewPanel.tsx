@@ -98,12 +98,12 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
 
   return (
     <section
-      className="flex-1 flex items-center justify-center bg-black relative overflow-hidden"
+      className="flex-1 flex items-center justify-center bg-black relative overflow-hidden max-h-screen"
     >
       <TransformWrapper
-        initialScale={previewScale}
-        initialPositionX={0}
-        initialPositionY={0}
+        initialScale={0.8}
+        initialPositionX={80}
+        initialPositionY={20}
         minScale={0.5}
         maxScale={2}
         limitToBounds={false}
@@ -112,7 +112,7 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
         {({ zoomIn, zoomOut, resetTransform }) => (
           <>
             <TransformComponent
-              wrapperStyle={{ width: '100%', height: '100%' }}
+              wrapperStyle={{ width: '100%', height: '100%',maxHeight: '100vh' }}
               contentStyle={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', width: '100%', height: '100%', paddingTop: '5rem', paddingBottom: '5rem' }}
             >
               <ResumePreview info={info} sections={sections} sectionOrder={sectionOrder} />

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { redirect, usePathname } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { FileText, Settings, LogOut } from 'lucide-react';
 import { ClerkLoading, ClerkLoaded, SignOutButton, UserButton, useAuth } from '@clerk/nextjs';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -19,15 +19,7 @@ const navItems = [
 export default function DashboardSidebar() {
   const pathname = usePathname();
   const { setActiveSection } = useResumeStore();
-<<<<<<< HEAD
   const { isLoaded } = useAuth();
-=======
-  const { isLoaded, userId } = useAuth();
-
-  if (!userId) {
-    return redirect('/sign-in');
-  }
->>>>>>> master
 
   if (!isLoaded) {
     if (pathname.includes('/edit')) {
