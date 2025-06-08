@@ -171,7 +171,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
                   </div>
                 )}
                 {key !== 'basics' && (
-                  <div ref={sectionRefs[key as keyof typeof sectionRefs]} key={key} id={key} className="scroll-mt-24">
+                  <div ref={sectionRefs[key as keyof typeof sectionRefs]} key={key} id={key} className="scroll-mt-24 pl-1">
                     <SectionListWithModal
                       icon={sidebarMenu.find(s => s.key === key)?.icon || FaUser}
                       label={sidebarMenu.find(s => s.key === key)?.label || ''}

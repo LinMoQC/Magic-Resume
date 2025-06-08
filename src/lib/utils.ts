@@ -26,4 +26,4 @@ export function formatTime(ts: number) {
   } else {
     return date.toLocaleDateString();
   }
-}
+} 
