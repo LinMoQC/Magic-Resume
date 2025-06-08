@@ -11,6 +11,7 @@ export type SidebarMenuItem = {
   itemRender?: (item: SectionItem) => React.ReactNode;
 };
 
+// 菜单栏配置
 const sidebarMenu: SidebarMenuItem[] = [
   {
     key: 'projects',
