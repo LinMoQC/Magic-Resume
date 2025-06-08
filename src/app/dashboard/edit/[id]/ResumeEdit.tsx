@@ -178,13 +178,15 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
           onShowJson={openJsonModal}
         />
       </div>
-      <ResumePreviewPanel
-        info={info}
-        sections={sectionItems}
-        sectionOrder={sectionOrder.map(s => s.key)}
-        previewScale={previewScale}
-        setPreviewScale={setPreviewScale}
-      />
+      <div className='flex-1'>
+        <ResumePreviewPanel
+          info={info}
+          sections={sectionItems}
+          sectionOrder={sectionOrder.map(s => s.key)}
+          previewScale={previewScale}
+          setPreviewScale={setPreviewScale}
+        />
+      </div>
       <TemplatePanel
         rightCollapsed={rightCollapsed}
         setRightCollapsed={setRightCollapsed}
