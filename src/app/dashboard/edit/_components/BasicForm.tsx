@@ -65,7 +65,7 @@ export default function BasicForm({
             <div key={field.name} className="flex flex-col gap-3">
               <div className="flex items-center gap-4">
                 {info.avatar ? <Image
-                  src={i}
+                  src={info.avatar}
                   alt="Avatar"
                   width={40}
                   height={40}
