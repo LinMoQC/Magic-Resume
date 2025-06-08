@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { useResumeStore } from '@/store/useResumeStore';
 import { FaUser, FaCopy } from 'react-icons/fa';
