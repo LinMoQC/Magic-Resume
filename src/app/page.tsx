@@ -38,7 +38,7 @@ export default function Landing() {
     <div className="min-h-screen bg-black text-white font-sans">
       <header className="fixed top-0 left-0 right-0 bg-black/50 backdrop-blur-lg border-b border-neutral-800 z-50">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-            <Image src="/logo.png" alt="simple-logo" width={150} height={100} />
+        <Image src="/magic-resume-logo.png" alt="magic-resume-logo" width={150} height={0} style={{ height: 'auto' }} />
           <Link href="/dashboard" legacyBehavior>
             <a className="bg-white text-black px-5 py-2 rounded-lg font-semibold hover:bg-neutral-200 transition-colors">
               Go to App

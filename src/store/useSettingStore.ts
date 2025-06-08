@@ -22,6 +22,7 @@ const indexDBStorage: PersistStorage<SettingsState> = {
   getItem: async (name) => {
     MagicDebugger.log('Getting item from IndexedDB', name);
     const value = await dbClient.getItem('settings', name);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return value ? (value as any) : null;
   },
   setItem: async (name, value) => {

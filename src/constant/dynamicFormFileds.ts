@@ -1,3 +1,4 @@
+// 动态表单配置
 export type FieldConfig = {
     key: string;
     label: string;

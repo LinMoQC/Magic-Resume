@@ -5,15 +5,15 @@ class Debugger {
     this.log('欢迎使用 Magic-Resume ( ´ ∀ ` )ﾉ');
   }
 
-  log(...args: any[]) {
-    console.log(`%c${this.prefix}`, 'color: #DA70D6; font-weight: bold;', ...args);
+  log(...args: unknown[]) {
+    console.log(`%c${this.prefix}`, 'color: blue; font-weight: bold;', ...args);
   }
 
-  warn(...args: any[]) {
+  warn(...args: unknown[]) {
     console.warn(`%c${this.prefix}`, 'color: yellow; font-weight: bold;', ...args);
   }
 
-  error(...args: any[]) {
+  error(...args: unknown[]) {
     console.error(`%c${this.prefix}`, 'color: red; font-weight: bold;', ...args);
   }
 }

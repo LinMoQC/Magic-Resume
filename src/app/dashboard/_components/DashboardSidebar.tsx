@@ -92,9 +92,9 @@ export default function DashboardSidebar() {
       transition={{ type: 'spring', stiffness: 350, damping: 25, delay: 0.2 }}
       className="w-[240px] bg-transparent border-r border-neutral-800 flex-col p-4 hidden md:flex"
     >
-      <div className="mb-8">
+      <div className="mb-8 mt-4 flex justify-center">
         <Link href="/dashboard">
-          <Image src="/logo.png" alt="simple-logo" style={{ width: '100%' }} width={100} height={100} />
+          <Image src="/magic-resume-logo.png" alt="magic-resume-logo" width={140} height={0} style={{ height: 'auto' }} />
         </Link>
       </div>
       <nav className="flex flex-col gap-2 flex-grow">
