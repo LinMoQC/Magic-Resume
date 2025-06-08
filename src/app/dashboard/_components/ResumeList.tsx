@@ -23,7 +23,7 @@ export default function ResumeList({ resumes, onAdd, onImport, onDelete }: Resum
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-4xl font-bold">Resumes</h1>
       </div>
-      <div className="grid grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
         {/* 新建简历卡片 */}
         <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.98 }}>
           <Card className="group cursor-pointer h-64 flex flex-col items-center justify-center relative overflow-hidden" onClick={onAdd}>

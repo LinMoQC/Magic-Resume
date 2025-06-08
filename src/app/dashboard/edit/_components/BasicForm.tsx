@@ -64,17 +64,13 @@ export default function BasicForm({
           return (
             <div key={field.name} className="flex flex-col gap-3">
               <div className="flex items-center gap-4">
-                <Image
-                  src={info.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${info.fullName || 'placeholder'}`}
+                {info.avatar ? <Image
+                  src={i}
                   alt="Avatar"
                   width={40}
                   height={40}
                   className="w-10 h-10 rounded-full object-cover bg-neutral-200"
-                  onError={(e) => {
-                    e.currentTarget.onerror = null; // Prevent infinite loop
-                    e.currentTarget.src = `https://api.dicebear.com/7.x/pixel-art/svg?seed=${info.fullName || 'placeholder'}`;
-                  }}
-                />
+                /> : <div className="w-10 h-10 rounded-full bg-neutral-200" />}
                 <Input
                   id={field.name}
                   name={field.name}

@@ -10,6 +10,8 @@ import { toast } from 'sonner';
 import { InfoType, Section } from '@/store/useResumeStore';
 import { oklchToRgb } from '@/lib/export';
 import { MagicDebugger } from '@/lib/debuggger';
+import useMobile from '@/app/hooks/useMobile';
+import { cn } from '@/lib/utils';
 
 interface ResumePreviewPanelProps {
   info: InfoType;
@@ -25,11 +27,12 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
   sectionOrder,
   setPreviewScale,
 }) => {
+  const { isMobile } = useMobile();
+
   const handleExport = () => {
     const resumeElement = document.getElementById('resume-to-export');
     if (resumeElement) {
       const clonedResume = resumeElement.cloneNode(true) as HTMLElement;
-      // Position off-screen to avoid flicker and ensure computation
       clonedResume.style.position = 'absolute';
       clonedResume.style.left = '-9999px';
       clonedResume.style.top = '0px';
@@ -116,8 +119,12 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
               <ResumePreview info={info} sections={sections} sectionOrder={sectionOrder} />
             </TransformComponent>
 
-            {/* Function Buttons */}
-            <div className="absolute bottom-10 right-4 flex flex-col gap-2 z-20 overflow-hidden">
+            <div className={cn(
+              "absolute z-20 flex gap-2 overflow-hidden",
+              isMobile
+                ? "bottom-6 left-1/2 -translate-x-1/2 flex-row p-2 rounded-full bg-neutral-900/70 border border-neutral-700 backdrop-blur-sm"
+                : "bottom-10 right-4 flex-col"
+            )}>
               <button
                 className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"
                 onClick={handleExport}
