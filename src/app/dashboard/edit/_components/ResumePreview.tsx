@@ -77,8 +77,8 @@ export default function ResumePreview({ info, sections, sectionOrder }: Props) {
                         <div className="font-bold">{item.name || item.title || item.platform || item.certificate || item.language || item.skill || item.award || Object.values(item)[0]}</div>
                         {item.level && <div>{item.level}</div>}
                         {item.date && <div>{item.date}</div>}
-                        {item.description && <div className="" dangerouslySetInnerHTML={{ __html: item.description }} />}
-                        {item.summary && <div className="wysiwyg" dangerouslySetInnerHTML={{ __html: item.summary }} />}
+                        {item.description && <div className="" dangerouslySetInnerHTML={{ __html: String(item.description) }} />}
+                        {item.summary && <div className="wysiwyg" dangerouslySetInnerHTML={{ __html: String(item.summary) }} />}
                       </div>
                     </div>
                   ))}
@@ -106,8 +106,8 @@ export default function ResumePreview({ info, sections, sectionOrder }: Props) {
                           {item.degree && <div>{item.degree}</div>}
                         </div>
                       </div>
-                      {item.description && <div className="wysiwyg" dangerouslySetInnerHTML={{ __html: item.description }} />}
-                      {item.summary && <div className="wysiwyg" dangerouslySetInnerHTML={{ __html: item.summary }} />}
+                      {item.description && <div className="wysiwyg" dangerouslySetInnerHTML={{ __html: String(item.description) }} />}
+                      {item.summary && <div className="wysiwyg" dangerouslySetInnerHTML={{ __html: String(item.summary) }} />}
                     </div>
                   </div>
                 ))}

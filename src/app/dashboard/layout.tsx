@@ -1,4 +1,8 @@
+import { Metadata } from "next";
 import DashboardSidebar from "./_components/DashboardSidebar";
+import metaConfig from "@/constant/metaConfig";
+
+export const metadata: Metadata = metaConfig.Dashboard;
 
 export default function DashboardLayout({
   children,

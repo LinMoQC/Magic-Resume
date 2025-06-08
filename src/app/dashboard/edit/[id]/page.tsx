@@ -1,5 +1,10 @@
 import ResumeEdit from './ResumeEdit';
 
-export default function Page({ params }: { params: { id: string } }) {
-  return <ResumeEdit id={params.id} />;
-} 
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
+  return <ResumeEdit id={id}/>;
+}
