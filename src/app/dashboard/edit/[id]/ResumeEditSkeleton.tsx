@@ -2,7 +2,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 
 export default function ResumeEditSkeleton() {
   return (
-    <main className="flex h-screen bg-black text-white font-sans">
+    <main className="flex flex-1 h-screen bg-black text-white font-sans">
 
       {/* Main Form Panel */}
       <div className="w-[300px] p-8 overflow-y-auto flex-shrink-0">

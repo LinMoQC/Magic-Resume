@@ -36,7 +36,7 @@ export default function DashboardSidebar() {
       </div>;
     }
 
-    return <div className="w-64 border-r border-neutral-800 p-6 flex flex-col justify-between">
+    return <div className="w-60 border-r border-neutral-800 p-6 flex flex-col justify-between">
       <div>
         <Skeleton className="h-8 w-32 mb-10" />
         <div className="space-y-4">
