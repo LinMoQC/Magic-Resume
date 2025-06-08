@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '@/components/ui/button';
 
 type ResumeContentProps = {
   renderSections: () => React.ReactNode;
@@ -8,24 +9,18 @@ type ResumeContentProps = {
 
 export default function ResumeContent({ renderSections, handleSave, onShowJson }: ResumeContentProps) {
   return (
-    <div className="w-full bg-neutral-900 border-r border-neutral-800 flex flex-col h-full">
-      <div className="flex-grow px-6 py-6 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-800 scrollbar-track-neutral-900 pb-24">
+    <div className="p-6 px-0 h-full flex flex-col bg-neutral-900 border-r border-neutral-800">
+      <div className="flex-1 overflow-y-auto px-4">
         {renderSections()}
       </div>
-      <footer className="flex justify-end gap-3 items-center px-6 py-4 bg-neutral-900 border-t border-neutral-800 shrink-0">
-        <button
-          className="px-4 py-2 rounded-lg bg-neutral-700 hover:bg-neutral-600 transition text-sm"
-          onClick={onShowJson}
-        >
+      <div className="mt-6 flex gap-2 px-4">
+        <Button onClick={onShowJson} className="w-full">
           查看 JSON
-        </button>
-        <button 
-          className="px-6 py-2 rounded-lg bg-sky-600 hover:bg-sky-700 transition font-bold text-sm"
-          onClick={handleSave}
-        >
+        </Button>
+        <Button onClick={handleSave} className="w-full">
           保存
-        </button>
-      </footer>
+        </Button>
+      </div>
     </div>
   );
 }

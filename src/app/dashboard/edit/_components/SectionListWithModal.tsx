@@ -22,7 +22,13 @@ import { FaPlus, FaTrash, FaPen, FaGripVertical, FaRegCopy, FaEye, FaEyeSlash } 
 import { Input } from '@/components/ui/input';
 import Modal from '@/components/ui/Modal';
 import { toast } from 'sonner';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuPortal
+} from '@/components/ui/dropdown-menu';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
 import { UniqueIdentifier } from '@dnd-kit/core';
 import TiptapEditor from '@/components/ui/TiptapEditor';
@@ -63,7 +69,7 @@ function SortableItem<T extends BaseItem>({ id, item, index, handleEdit, handleD
   };
 
   return (
-    <div ref={setNodeRef} style={style} className={cn("flex items-center gap-2 mb-2 p-3 bg-neutral-900 rounded-md")}>
+    <div ref={setNodeRef} style={style} className={cn("relative flex items-center gap-2 mb-2 p-3 bg-neutral-900 rounded-md")}>
       <div {...attributes} {...listeners} className="cursor-grab p-2">
         <FaGripVertical />
       </div>
@@ -82,24 +88,26 @@ function SortableItem<T extends BaseItem>({ id, item, index, handleEdit, handleD
             <DotsHorizontalIcon className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-[160px] bg-neutral-900 border-neutral-700 text-white">
-          <DropdownMenuItem onSelect={() => toggleVisibility(index)} className="cursor-pointer">
-            {item.visible === false ? <FaEyeSlash className="mr-2 h-4 w-4" /> : <FaEye className="mr-2 h-4 w-4" />}
-            <span>{item.visible === false ? 'Show' : 'Hide'}</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => handleEdit(index)} className="cursor-pointer">
-            <FaPen className="mr-2 h-4 w-4" />
-            <span>Edit</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => handleCopy(index)} className="cursor-pointer">
-            <FaRegCopy className="mr-2 h-4 w-4" />
-            <span>Copy</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => handleDelete(index)} className="text-red-500 cursor-pointer focus:text-red-400 focus:bg-red-500/10">
-            <FaTrash className="mr-2 h-4 w-4" />
-            <span>Remove</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
+        <DropdownMenuPortal>
+          <DropdownMenuContent align="end" className="w-[160px] bg-neutral-900 border-neutral-700 text-white">
+            <DropdownMenuItem onSelect={() => toggleVisibility(index)} className="cursor-pointer">
+              {item.visible === false ? <FaEyeSlash className="mr-2 h-4 w-4" /> : <FaEye className="mr-2 h-4 w-4" />}
+              <span>{item.visible === false ? 'Show' : 'Hide'}</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => handleEdit(index)} className="cursor-pointer">
+              <FaPen className="mr-2 h-4 w-4" />
+              <span>Edit</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => handleCopy(index)} className="cursor-pointer">
+              <FaRegCopy className="mr-2 h-4 w-4" />
+              <span>Copy</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => handleDelete(index)} className="text-red-500 cursor-pointer focus:text-red-400 focus:bg-red-500/10">
+              <FaTrash className="mr-2 h-4 w-4" />
+              <span>Remove</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenuPortal>
       </DropdownMenu>
     </div>
   );
@@ -275,7 +283,7 @@ export default function SectionListWithModal<T extends BaseItem>({
               </div>
             ))}
           </div>
-          <div>
+          <div className='overflow-hidden'>
             <label className="block text-sm font-medium mb-1">{richtextKey.charAt(0).toUpperCase() + richtextKey.slice(1)}</label>
             <TiptapEditor
               content={String(currentItem?.[richtextKey] ?? '')}

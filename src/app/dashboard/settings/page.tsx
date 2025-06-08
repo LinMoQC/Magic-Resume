@@ -1,39 +1,47 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { useSettingStore } from '@/store/useSettingStore';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { InfoCircledIcon } from '@radix-ui/react-icons';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Settings() {
-  const [apiKey, setApiKey] = useState('');
-  const [baseUrl, setBaseUrl] = useState('');
-  const [model, setModel] = useState('');
-  const [maxTokens, setMaxTokens] = useState(1024);
+  const {
+    apiKey,
+    baseUrl,
+    model,
+    maxTokens,
+    setApiKey,
+    setBaseUrl,
+    setModel,
+    setMaxTokens,
+    isDirty,
+    saveSettings,
+    resetSettings,
+    loadSettings,
+  } = useSettingStore();
 
   useEffect(() => {
-    const savedApiKey = localStorage.getItem('llm_api_key');
-    const savedBaseUrl = localStorage.getItem('llm_base_url') || 'http://localhost:11434/v1';
-    const savedModel = localStorage.getItem('llm_model') || 'gpt-3.5-turbo';
-    const savedMaxTokens = localStorage.getItem('llm_max_tokens') || '1024';
-
-    if (savedApiKey) setApiKey(savedApiKey);
-    setBaseUrl(savedBaseUrl);
-    setModel(savedModel);
-    setMaxTokens(parseInt(savedMaxTokens, 10));
-  }, []);
+    loadSettings();
+  }, [loadSettings]);
 
   const handleSave = () => {
-    localStorage.setItem('llm_api_key', apiKey);
-    localStorage.setItem('llm_base_url', baseUrl);
-    localStorage.setItem('llm_model', model);
-    localStorage.setItem('llm_max_tokens', maxTokens.toString());
-    toast.success('Settings saved locally.');
+    saveSettings();
+    toast.success('Settings saved!');
+  };
+
+  const handleReset = () => {
+    resetSettings();
+    toast.info('Changes have been reset.');
   };
 
   return (
-    <div className="flex-1 px-12 py-10 overflow-y-auto">
+    <div className="flex-1 px-12 py-10 overflow-y-auto relative">
       <h1 className="text-3xl font-bold mb-4">Settings</h1>
       
-      <div className="space-y-12 max-w-4xl">
+      <div className="space-y-12 max-w-4xl pb-24">
         <section id="llm-settings">
           <h2 className="text-2xl font-semibold mb-2">OpenAI/Ollama Integration</h2>
           <p className="text-neutral-400 mb-4 text-sm">
@@ -92,17 +100,29 @@ export default function Settings() {
               />
             </div>
           </div>
-          
-          <div className="mt-8">
-            <button
-              onClick={handleSave}
-              className="px-6 py-2 bg-neutral-800 hover:bg-neutral-700 rounded-lg font-semibold transition-colors border border-neutral-700"
-            >
-              Save Locally
-            </button>
-          </div>
         </section>
       </div>
+
+      <AnimatePresence>
+        {isDirty && (
+          <motion.div
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 w-auto bg-neutral-800 border border-neutral-700 rounded-xl shadow-2xl px-6 py-3 flex items-center justify-between z-50"
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          >
+            <div className="flex items-center gap-3">
+              <InfoCircledIcon className="h-5 w-5 text-white" />
+              <p className="text-white font-medium text-sm">Unsaved changes</p>
+            </div>
+            <div className="flex items-center gap-3 ml-3">
+              <Button onClick={handleReset} size="sm" className="text-red-500 border-red-500 bg-red-500/20 hover:bg-red-500/10 hover:text-red-400">Reset</Button>
+              <Button onClick={handleSave} size="sm" className="text-gray-500 hover:text-gray-200 bg-green-500/20 hover:bg-green-500/10">Save</Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

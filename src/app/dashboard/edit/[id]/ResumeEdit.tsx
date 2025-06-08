@@ -1,8 +1,7 @@
 "use client";
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { useResumeStore } from '@/store/useResumeStore';
-import { FaUser } from 'react-icons/fa';
+import { FaUser, FaCopy } from 'react-icons/fa';
 import BasicForm from '../_components/BasicForm';
 import sidebarMenu from '@/constant/sidebarMenu';
 import dynamic from 'next/dynamic';
@@ -65,7 +64,6 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     setRightCollapsed,
     activeSection,
   } = useResumeStore();
-
   const info = activeResume?.info;
   const sectionItems = activeResume?.sections;
   const sectionOrder = activeResume?.sectionOrder;
@@ -93,7 +91,6 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
-
   useEffect(() => {
     if (activeSection && sectionRefs[activeSection]?.current) {
       sectionRefs[activeSection].current.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -109,9 +106,19 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     toast.success('Saved!');
   };
 
-  if (!activeResume || !info || !sectionItems || !sectionOrder) {
-    return <ResumeEditSkeleton />;
-  }
+  const handleCopyJson = () => {
+    if (!activeResume) return;
+    const jsonString = JSON.stringify(activeResume, null, 2);
+    navigator.clipboard.writeText(jsonString).then(
+      () => {
+        toast.success('Copied to clipboard!');
+      },
+      (err) => {
+        toast.error('Failed to copy!');
+        console.error('Could not copy text: ', err);
+      }
+    );
+  };
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
@@ -123,6 +130,10 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
         updateSectionOrder(newOrder);
       }
     }
+  }
+
+  if (!activeResume || !info || !sectionItems || !sectionOrder) {
+    return <ResumeEditSkeleton />;
   }
 
   function renderSections() {
@@ -150,7 +161,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
                   </div>
                 )}
                 {key !== 'basics' && (
-                  <div ref={sectionRefs[key as keyof typeof sectionRefs]} key={key} id={key} className="scroll-mt-24">
+                  <div ref={sectionRefs[key as keyof typeof sectionRefs]} key={key} id={key} className="scroll-mt-24 pl-1">
                     <SectionListWithModal
                       icon={sidebarMenu.find(s => s.key === key)?.icon || FaUser}
                       label={sidebarMenu.find(s => s.key === key)?.label || ''}
@@ -199,11 +210,20 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
         onClose={closeJsonModal}
         title="Resume JSON Data"
       >
-        <pre className="bg-neutral-800 text-sm text-gray-300 p-4 rounded-md whitespace-pre-wrap break-all">
-          <code>
-            {JSON.stringify(activeResume, null, 2)}
-          </code>
-        </pre>
+        <div className="relative">
+          <button
+            onClick={handleCopyJson}
+            className="absolute top-3 right-3 p-2 text-gray-400 rounded-md hover:bg-neutral-700 hover:text-white transition-colors"
+            aria-label="Copy JSON to clipboard"
+          >
+            <FaCopy />
+          </button>
+          <pre className="bg-neutral-800 text-sm text-gray-300 p-4 rounded-md whitespace-pre-wrap break-all max-h-[80vh] overflow-y-auto">
+            <code>
+              {JSON.stringify(activeResume, null, 2)}
+            </code>
+          </pre>
+        </div>
       </Modal>
     </main>
   );
