@@ -6,7 +6,7 @@ import BasicForm from '../_components/BasicForm';
 import sidebarMenu from '@/constant/sidebarMenu';
 import dynamic from 'next/dynamic';
 import SectionListWithModal from '../_components/SectionListWithModal';
-import { dynamicFormFields } from '@/constant/dynamicFormFileds';
+import { dynamicFormFields } from '@/constant/dynamicFormFields';
 import {
   DndContext,
   closestCenter,
@@ -28,7 +28,12 @@ import ResumeEditSkeleton from './ResumeEditSkeleton';
 import TemplatePanel from './TemplatePanel';
 import ResumeContent from './ResumeContent';
 import { Section, SectionItem } from '@/store/useResumeStore';
-
+import useMobile from '@/app/hooks/useMobile';
+import { Button } from '@/components/ui/button';
+import { FiEdit, FiLayout } from 'react-icons/fi';
+import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
+import Image from 'next/image';
 const ResumePreviewPanel = dynamic(() => import('../_components/ResumePreviewPanel'), { ssr: false });
 
 type ResumeEditProps = {
@@ -64,6 +69,11 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     setRightCollapsed,
     activeSection,
   } = useResumeStore();
+
+  const { isMobile } = useMobile();
+  const [leftPanelOpen, setLeftPanelOpen] = useState(false);
+  const [rightPanelOpen, setRightPanelOpen] = useState(false);
+
   const info = activeResume?.info;
   const sectionItems = activeResume?.sections;
   const sectionOrder = activeResume?.sectionOrder;
@@ -161,7 +171,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
                   </div>
                 )}
                 {key !== 'basics' && (
-                  <div ref={sectionRefs[key as keyof typeof sectionRefs]} key={key} id={key} className="scroll-mt-24 pl-1">
+                  <div ref={sectionRefs[key as keyof typeof sectionRefs]} key={key} id={key} className="scroll-mt-24">
                     <SectionListWithModal
                       icon={sidebarMenu.find(s => s.key === key)?.icon || FaUser}
                       label={sidebarMenu.find(s => s.key === key)?.label || ''}
@@ -181,6 +191,102 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
         </SortableContext>
       </DndContext>
     );
+  }
+
+  if (isMobile) {
+    return (
+      <main className="flex h-screen bg-black text-white flex-1">
+        <div className='flex-1 flex items-center justify-center bg-black relative'>
+          <ResumePreviewPanel
+            info={info}
+            sections={sectionItems}
+            sectionOrder={sectionOrder.map(s => s.key)}
+            previewScale={0.8}
+            setPreviewScale={setPreviewScale}
+          />
+        </div>
+
+        <div className="fixed w-[90vw] top-6 left-1/2 -translate-x-1/2 z-10 flex items-center justify-between gap-4">
+          <Button onClick={() => setLeftPanelOpen(true)} className="rounded-full h-12 w-12"><FiEdit /></Button>
+          <Link href="/dashboard" className="rounded-full h-12 w-12 flex items-center justify-center">
+            <Image src="/simple-logo.png" alt="Magic Resume Logo" width={50} height={50} />
+          </Link>
+          <Button onClick={() => setRightPanelOpen(true)} className="rounded-full h-12 w-12"><FiLayout /></Button>
+        </div>
+
+        <AnimatePresence>
+          {leftPanelOpen && (
+             <>
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="fixed inset-0 bg-black/50 z-20"
+                    onClick={() => setLeftPanelOpen(false)}
+                />
+                <motion.div
+                    initial={{ x: '-100%' }}
+                    animate={{ x: 0 }}
+                    exit={{ x: '-100%' }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                    className="fixed top-0 left-0 h-full w-[300px] z-30"
+                >
+                    <ResumeContent
+                        renderSections={renderSections}
+                        handleSave={handleSave}
+                        onShowJson={openJsonModal}
+                    />
+                </motion.div>
+             </>
+          )}
+          {rightPanelOpen && (
+            <>
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="fixed inset-0 bg-black/50 z-20"
+                    onClick={() => setRightPanelOpen(false)}
+                />
+                <motion.div
+                    initial={{ x: '100%' }}
+                    animate={{ x: 0 }}
+                    exit={{ x: '100%' }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                    className="fixed top-0 right-0 h-full w-[280px] z-30"
+                >
+                    <TemplatePanel
+                        rightCollapsed={false}
+                        setRightCollapsed={() => {}}
+                    />
+                </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+        <Modal
+            isOpen={isJsonModalOpen}
+            onClose={closeJsonModal}
+            title="Resume JSON Data"
+        >
+          <div className="relative">
+            <button
+              onClick={handleCopyJson}
+              className="absolute top-3 right-3 p-2 text-gray-400 rounded-md hover:bg-neutral-700 hover:text-white transition-colors"
+              aria-label="Copy JSON to clipboard"
+            >
+              <FaCopy />
+            </button>
+            <pre className="bg-neutral-800 text-sm text-gray-300 p-4 rounded-md whitespace-pre-wrap break-all max-h-[80vh] overflow-y-auto">
+              <code>
+                {JSON.stringify(activeResume, null, 2)}
+              </code>
+            </pre>
+          </div>
+        </Modal>
+      </main>
+    )
   }
 
   return (
