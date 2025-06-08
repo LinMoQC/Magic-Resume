@@ -7,7 +7,6 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { FaPlus, FaDownload, FaRegFileAlt } from 'react-icons/fa';
 import { Resume } from '@/store/useResumeStore';
 import { formatTime } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 
 type ResumeListProps = {
   resumes: Resume[];
