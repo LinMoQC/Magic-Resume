@@ -1,6 +1,5 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import Image from 'next/image';
 
 type ResumeContentProps = {
   renderSections: () => React.ReactNode;
