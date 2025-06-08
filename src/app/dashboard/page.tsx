@@ -79,7 +79,7 @@ export default function Dashboard() {
         </DialogContent>
       </Dialog>
       {/* 中间主内容区 */}
-      <main className="flex-1 flex flex-col px-12 py-10">
+      <main className="flex-1 flex flex-col px-12 py-10 overflow-auto">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-4xl font-bold">Resumes</h1>
         </div>

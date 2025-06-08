@@ -1,7 +1,7 @@
 "use client";
 
+import React, { useState, useEffect, useMemo } from 'react';
 import { useResumeStore } from '@/store/useResumeStore';
-import { useState, useEffect, useRef } from 'react';
 import { FaUser } from 'react-icons/fa';
 import BasicForm from '../_components/BasicForm';
 import sidebarMenu from '@/constant/sidebarMenu';
@@ -70,17 +70,20 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
   const sectionItems = activeResume?.sections;
   const sectionOrder = activeResume?.sectionOrder;
 
-  const sectionRefs: Record<string, React.RefObject<HTMLDivElement | null>> = {
-    basics: useRef<HTMLDivElement>(null),
-    summary: useRef<HTMLDivElement>(null),
-    projects: useRef<HTMLDivElement>(null),
-    education: useRef<HTMLDivElement>(null),
-    skills: useRef<HTMLDivElement>(null),
-    languages: useRef<HTMLDivElement>(null),
-    certificates: useRef<HTMLDivElement>(null),
-    experience: useRef<HTMLDivElement>(null),
-    profiles: useRef<HTMLDivElement>(null),
-  };
+  const sectionRefs = useMemo(() => {
+    const refs: Record<string, React.RefObject<HTMLDivElement | null>> = {
+      basics: React.createRef<HTMLDivElement>(),
+      summary: React.createRef<HTMLDivElement>(),
+      projects: React.createRef<HTMLDivElement>(),
+      education: React.createRef<HTMLDivElement>(),
+      skills: React.createRef<HTMLDivElement>(),
+      languages: React.createRef<HTMLDivElement>(),
+      certificates: React.createRef<HTMLDivElement>(),
+      experience: React.createRef<HTMLDivElement>(),
+      profiles: React.createRef<HTMLDivElement>(),
+    };
+    return refs;
+  }, []);
 
   const [previewScale, setPreviewScale] = useState(1);
   const [isJsonModalOpen, setIsJsonModalOpen] = useState(false);

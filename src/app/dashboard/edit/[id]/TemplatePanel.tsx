@@ -1,5 +1,5 @@
 import React from 'react';
-import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 type TemplatePanelProps = {
@@ -16,7 +16,7 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed }: Tem
         className="absolute top-1/2 -left-4 transform -translate-y-1/2 bg-neutral-800 hover:bg-neutral-700 text-white rounded-full h-8 w-8 z-10"
         onClick={() => setRightCollapsed(!rightCollapsed)}
       >
-        {rightCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
+        {rightCollapsed ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
       </Button>
 
       {!rightCollapsed && (

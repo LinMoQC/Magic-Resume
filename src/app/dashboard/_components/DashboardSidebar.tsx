@@ -2,13 +2,14 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { redirect, usePathname } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { FileText, Settings, LogOut } from 'lucide-react';
 import { ClerkLoading, ClerkLoaded, SignOutButton, UserButton, useAuth } from '@clerk/nextjs';
 import { Skeleton } from '@/components/ui/Skeleton';
 import sidebarMenu from '@/constant/sidebarMenu';
 import { useResumeStore } from "@/store/useResumeStore";
 import { Button } from "@/components/ui/button";
+import { motion } from 'framer-motion';
 
 const navItems = [
   { href: '/dashboard', label: 'Resumes', icon: FileText },
@@ -18,11 +19,7 @@ const navItems = [
 export default function DashboardSidebar() {
   const pathname = usePathname();
   const { setActiveSection } = useResumeStore();
-  const { isLoaded, userId } = useAuth();
-
-  if (!userId) {
-    return redirect('/sign-in');
-  }
+  const { isLoaded } = useAuth();
 
   if (!isLoaded) {
     if (pathname.includes('/edit')) {
@@ -89,7 +86,12 @@ export default function DashboardSidebar() {
   }
 
   return (
-    <aside className="w-[240px] bg-neutral-900 border-r border-neutral-800 flex flex-col p-4">
+    <motion.aside
+      initial={{ x: '-100%', opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{ type: 'spring', stiffness: 350, damping: 25, delay: 0.2 }}
+      className="w-[240px] bg-transparent border-r border-neutral-800 flex-col p-4 hidden md:flex"
+    >
       <div className="mb-8">
         <Link href="/dashboard">
           <Image src="/logo.png" alt="simple-logo" style={{ width: '100%' }} width={100} height={100} />
@@ -128,6 +130,6 @@ export default function DashboardSidebar() {
           </SignOutButton>
         </div>
       </div>
-    </aside>
+    </motion.aside>
   );
 }
