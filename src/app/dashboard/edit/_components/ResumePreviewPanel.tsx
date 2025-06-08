@@ -9,6 +9,7 @@ import jsPDF from 'jspdf';
 import { toast } from 'sonner';
 import { InfoType, Section } from '@/store/useResumeStore';
 import { oklchToRgb } from '@/lib/export';
+import { MagicDebugger } from '@/lib/debuggger';
 
 interface ResumePreviewPanelProps {
   info: InfoType;
@@ -22,11 +23,8 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
   info,
   sections,
   sectionOrder,
-  previewScale,
   setPreviewScale,
 }) => {
-  // This is a simplified conversion and might not be perfectly accurate,
-  // but it's a good-enough polyfill for html2canvas.
   const handleExport = () => {
     const resumeElement = document.getElementById('resume-to-export');
     if (resumeElement) {
@@ -53,7 +51,7 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
               const [r, g, b] = oklchToRgb(l, c, h);
               element.style.setProperty(prop, `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`, 'important');
             } catch (e) {
-              console.warn(`Could not convert oklch color: ${match[0]}`, e);
+              MagicDebugger.warn(`Could not convert oklch color: ${match[0]}`, e);
             }
           }
         });
@@ -87,7 +85,7 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
         pdf.save(`${info.fullName || 'resume'}.pdf`);
         toast.success('Resume exported successfully!');
       }).catch(error => {
-        console.error('Error exporting resume:', error);
+        MagicDebugger.error('Error exporting resume:', error);
         toast.error('Failed to export resume.');
       }).finally(() => {
         document.body.removeChild(clonedResume);
@@ -101,9 +99,9 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
       className="flex-1 flex items-center justify-center bg-black relative overflow-hidden max-h-screen"
     >
       <TransformWrapper
-        initialScale={0.8}
-        initialPositionX={80}
-        initialPositionY={20}
+        initialScale={1}
+        initialPositionX={10}
+        initialPositionY={10}
         minScale={0.5}
         maxScale={2}
         limitToBounds={false}

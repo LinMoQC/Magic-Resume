@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import sidebarMenu from '@/constant/sidebarMenu';
+import { dbClient } from '@/lib/IndexDBClient';
+import { MagicDebugger } from '@/lib/debuggger';
 
 export type InfoType = {
   avatar: string;
@@ -63,21 +65,11 @@ interface ResumeStore {
   removeCustomField: (index: number) => void;
 }
 
-const LOCAL_KEY = 'resumes';
+const RESUMES_KEY = 'resumes_data';
 
-function loadResumes(): Resume[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    const raw = localStorage.getItem(LOCAL_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveResumes(resumes: Resume[]) {
+async function saveResumes(resumes: Resume[]) {
   if (typeof window === 'undefined') return;
-  localStorage.setItem(LOCAL_KEY, JSON.stringify(resumes));
+  await dbClient.setItem('resumes', RESUMES_KEY, resumes);
 }
 
 const initialActiveResume: ActiveResume = {
@@ -203,5 +195,14 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
 }));
 
 if (typeof window !== 'undefined') {
-  useResumeStore.setState({ resumes: loadResumes() });
+  (async () => {
+    try {
+      await dbClient.init();
+      const resumes = await dbClient.getItem<Resume[]|null>('resumes', RESUMES_KEY);
+      useResumeStore.setState({ resumes: resumes || [], isStoreLoading: false });
+    } catch (error) {
+      MagicDebugger.error('Failed to load data from IndexedDB', error);
+      useResumeStore.setState({ isStoreLoading: false });
+    }
+  })();
 }

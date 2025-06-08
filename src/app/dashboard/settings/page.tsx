@@ -1,31 +1,21 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useSettingStore } from '@/store/useSettingStore';
 import { toast } from 'sonner';
 
 export default function Settings() {
-  const [apiKey, setApiKey] = useState('');
-  const [baseUrl, setBaseUrl] = useState('');
-  const [model, setModel] = useState('');
-  const [maxTokens, setMaxTokens] = useState(1024);
+  const {
+    apiKey,
+    baseUrl,
+    model,
+    maxTokens,
+    setApiKey,
+    setBaseUrl,
+    setModel,
+    setMaxTokens,
+  } = useSettingStore();
 
-  useEffect(() => {
-    const savedApiKey = localStorage.getItem('llm_api_key');
-    const savedBaseUrl = localStorage.getItem('llm_base_url') || 'http://localhost:11434/v1';
-    const savedModel = localStorage.getItem('llm_model') || 'gpt-3.5-turbo';
-    const savedMaxTokens = localStorage.getItem('llm_max_tokens') || '1024';
-
-    if (savedApiKey) setApiKey(savedApiKey);
-    setBaseUrl(savedBaseUrl);
-    setModel(savedModel);
-    setMaxTokens(parseInt(savedMaxTokens, 10));
-  }, []);
-
-  const handleSave = () => {
-    localStorage.setItem('llm_api_key', apiKey);
-    localStorage.setItem('llm_base_url', baseUrl);
-    localStorage.setItem('llm_model', model);
-    localStorage.setItem('llm_max_tokens', maxTokens.toString());
+  const handleSave = async () => {
     toast.success('Settings saved locally.');
   };
 
