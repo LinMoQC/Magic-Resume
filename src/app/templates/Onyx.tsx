@@ -1,6 +1,21 @@
 import React from 'react';
 
-const OnyxTemplate = ({ info, sections, sectionOrder }) => {
+interface OnyxTemplateProps {
+  info: {
+    fullName: string;
+    jobTitle: string;
+  };
+  sections: {
+    [key: string]: Array<{
+      title?: string;
+      name?: string;
+      description: string;
+    }>;
+  };
+  sectionOrder: string[];
+}
+
+const OnyxTemplate: React.FC<OnyxTemplateProps> = ({ info, sections, sectionOrder }) => {
   // A simple template structure
   return (
     <div className="p-8 bg-white text-black font-sans text-sm w-[210mm] h-[297mm]">
