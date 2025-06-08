@@ -15,7 +15,7 @@ export default function ResumePreview({ info, sections, sectionOrder }: Props) {
   return (
     <div
       id="resume-to-export"
-      className="mx-auto max-w-[794px] w-[500px] bg-white text-black rounded-md shadow-2xl relative font-serif"
+      className="mx-auto max-w-[794px] w-[500px] bg-white text-black rounded-md shadow-2xl relative font-serif min-h-[90vh]"
       style={{ fontFamily: '"IBM Plex Serif", serif' }}
     >
       <div className="p-3 space-y-4">
