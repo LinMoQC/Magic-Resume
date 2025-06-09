@@ -99,7 +99,7 @@ export default function BasicForm({
         );
       })}
 
-      <h3 className="text-lg font-semibold mt-4">Custom Fields</h3>
+      <h3 className="text-lg font-semibold mt-4 ">Custom Fields</h3>
       {info.customFields.map((field, index) => (
         <div key={index} className="grid grid-cols-[1fr_1fr_auto] gap-2 items-end">
           <Input 
@@ -114,8 +114,8 @@ export default function BasicForm({
             value={field.value} 
             onChange={(e) => handleCustomFieldChange(index, e)} 
           />
-          <Button variant="outline" onClick={() => removeCustomField(index)}>
-            <FaTrash />
+          <Button variant="outline" onClick={() => removeCustomField(index)} className='border-0 bg-gray-800'>
+            <FaTrash/>
           </Button>
         </div>
       ))}
