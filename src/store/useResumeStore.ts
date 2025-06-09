@@ -1,208 +1,287 @@
 import { create } from 'zustand';
 import sidebarMenu from '@/constant/sidebarMenu';
-import { dbClient } from '@/lib/IndexDBClient';
+import { dbClient, RESUMES_KEY } from '@/lib/IndexDBClient';
 import { MagicDebugger } from '@/lib/debuggger';
+import { toast } from "sonner";
 
 export type InfoType = {
-  avatar: string;
   fullName: string;
   headline: string;
   email: string;
+  phoneNumber: string;
+  address: string;
   website: string;
-  phone: string;
-  location: string;
-  summary: string;
+  link: string;
+  avatar: string;
   customFields: { icon: string; name: string; value: string }[];
 };
 
 export type SectionItem = {
   id: string;
-  [key: string]: string | number | boolean | undefined;
+  visible: boolean;
+  [key: string]: any;
 };
 
 export type Section = {
   [key: string]: SectionItem[];
-}
+};
 
 export type SectionOrder = {
   key: string;
-  title: string;
-  visible: boolean;
+  label: string;
 };
 
-export type ActiveResume = {
+export type Resume = {
+  id: string;
+  name: string;
+  updatedAt: number;
   info: InfoType;
   sections: Section;
   sectionOrder: SectionOrder[];
+  template: string;
+  themeColor: string;
+  typography: string;
+  snapshot?: Blob;
 };
 
-export interface Resume {
-  id: string;
-  name: string;
-  data: Partial<ActiveResume>;
-  updatedAt: number;
-}
-
-interface ResumeStore {
+type ResumeState = {
   resumes: Resume[];
-  activeResume: ActiveResume | null;
-  activeResumeId: string | null;
+  activeResume: Resume | null;
   isStoreLoading: boolean;
-  activeSection: string | null;
   rightCollapsed: boolean;
-  addResume: (name: string) => string;
+  activeSection: string;
+  loadResumes: () => Promise<void>;
+  addResume: (resume: Resume) => void;
+  updateResume: (id: string, updates: Partial<Resume>) => void;
+  duplicateResume: (id: string) => void;
   deleteResume: (id: string) => void;
-  updateResume: (id: string, data: Partial<ActiveResume>) => void;
-  getResume: (id: string) => Resume | undefined;
   loadResumeForEdit: (id: string) => void;
-  saveResume: () => Promise<void>;
-  setSectionOrder: (order: SectionOrder[]) => void;
-  setRightCollapsed: (collapsed: boolean) => void;
-  setActiveSection: (section: string) => void;
+  saveResume: (snapshot?: Blob) => void;
+  updateInfo: (info: Partial<InfoType>) => void;
+  setSectionOrder: (sectionOrder: SectionOrder[]) => void;
   updateSectionItems: (key: string, items: SectionItem[]) => void;
-  updateInfo: (key: keyof InfoType, value: string | { icon: string; name: string; value: string }[]) => void;
+  updateTemplate: (template: string) => void;
+  updateThemeColor: (themeColor: string) => void;
+  updateTypography: (typography: string) => void;
   addCustomField: (field: { icon: string; name: string; value: string }) => void;
   removeCustomField: (index: number) => void;
-}
+  setRightCollapsed: (collapsed: boolean) => void;
+  setActiveSection: (section: string) => void;
+};
 
-const RESUMES_KEY = 'resumes_data';
-
-async function saveResumes(resumes: Resume[]) {
-  if (typeof window === 'undefined') return;
-  await dbClient.setItem('resumes', RESUMES_KEY, resumes);
-}
-
-const initialActiveResume: ActiveResume = {
+export const initialResume: Omit<Resume, 'id' | 'updatedAt' | 'name'> = {
   info: {
-    avatar: '',
     fullName: '',
     headline: '',
     email: '',
+    phoneNumber: '',
+    address: '',
     website: '',
-    phone: '',
-    location: '',
-    summary: '',
+    link: '',
+    avatar: '',
     customFields: [],
   },
-  sections: {},
+  sections: Object.fromEntries(sidebarMenu.map(item => [item.key, []])),
   sectionOrder: [
-    { key: 'basics', title: 'Basics', visible: true },
-    ...sidebarMenu.map(s => ({ key: s.key, title: s.label, visible: true }))
+    { key: 'basics', label: 'Basics' },
+    ...sidebarMenu.map(item => ({ key: item.key, label: item.label }))
   ],
+  template: 'onyx',
+  themeColor: '#38bdf8',
+  typography: 'inter',
 };
-sidebarMenu.forEach(s => {
-  initialActiveResume.sections[s.key] = [];
-});
 
-export const useResumeStore = create<ResumeStore>((set, get) => ({
+const useResumeStore = create<ResumeState>((set, get) => ({
   resumes: [],
   activeResume: null,
-  activeResumeId: null,
   isStoreLoading: true,
-  activeSection: 'basics',
   rightCollapsed: false,
-  addResume: (name) => {
-    const id = Date.now().toString();
-    const newResume: Resume = { id, name, data: initialActiveResume, updatedAt: Date.now() };
-    const resumes = [...get().resumes, newResume];
-    set({ resumes });
-    saveResumes(resumes);
-    return id;
+  activeSection: 'basics',
+
+  loadResumes: async () => {
+    if (!get().isStoreLoading) {
+        set({ isStoreLoading: true });
+    }
+    try {
+        const resumes = await dbClient.getItem<Resume[]>(RESUMES_KEY);
+        set({ resumes: resumes || [], isStoreLoading: false });
+    } catch (error) {
+        MagicDebugger.error("Failed to load resumes:", error);
+        set({ isStoreLoading: false });
+    }
   },
+  
+  addResume: (resume) => {
+    const newResumes = [...get().resumes, resume];
+    set({ resumes: newResumes });
+    dbClient.setItem(RESUMES_KEY, newResumes);
+    toast.success(`Resume "${resume.name}" created.`);
+  },
+
+  updateResume: (id, updates) => {
+    const newResumes = get().resumes.map(r =>
+      r.id === id ? { ...r, ...updates, updatedAt: Date.now() } : r
+    );
+    set({ resumes: newResumes });
+    dbClient.setItem(RESUMES_KEY, newResumes);
+    
+    const activeResume = get().activeResume;
+    if (activeResume && activeResume.id === id) {
+      set({ activeResume: { ...activeResume, ...updates } });
+    }
+  },
+
+  duplicateResume: (id) => {
+    const resumeToDuplicate = get().resumes.find(r => r.id === id);
+    if (!resumeToDuplicate) {
+      toast.error("Resume not found for duplication.");
+      return;
+    }
+    const newResume: Resume = {
+      ...resumeToDuplicate,
+      id: Date.now().toString(),
+      name: `${resumeToDuplicate.name} (Copy)`,
+      updatedAt: Date.now(),
+      snapshot: undefined, // Do not copy the snapshot
+    };
+    get().addResume(newResume);
+    toast.success(`Resume "${resumeToDuplicate.name}" duplicated.`);
+  },
+
   deleteResume: (id) => {
-    const resumes = get().resumes.filter(r => r.id !== id);
-    set({ resumes });
-    saveResumes(resumes);
+    const resumeToDelete = get().resumes.find(r => r.id === id);
+    const newResumes = get().resumes.filter(r => r.id !== id);
+    set({ resumes: newResumes });
+    dbClient.setItem(RESUMES_KEY, newResumes);
+    toast.success(`Resume "${resumeToDelete?.name}" deleted.`);
   },
-  updateResume: (id, data) => {
-    const resumes = get().resumes.map(r => r.id === id ? { ...r, data: {...r.data, ...data}, updatedAt: Date.now() } : r);
-    set({ resumes });
-    saveResumes(resumes);
-  },
-  getResume: (id) => {
-    return get().resumes.find(r => r.id === id);
-  },
-  loadResumeForEdit: (id: string) => {
-    set({ isStoreLoading: true });
+
+  loadResumeForEdit: (id) => {
     const resume = get().resumes.find(r => r.id === id);
     if (resume) {
-      const activeData = { ...initialActiveResume, ...resume.data };
-      const sections = { ...initialActiveResume.sections, ...(resume.data.sections || {}) };
-      sidebarMenu.forEach(s => {
-        if (!sections[s.key]) {
-          sections[s.key] = [];
-        }
-      });
-      activeData.sections = sections;
-      
-      if (!activeData.sectionOrder || activeData.sectionOrder.length === 0) {
-        activeData.sectionOrder = initialActiveResume.sectionOrder;
+      // Data migration on the fly: Ensure 'basics' section exists
+      if (!resume.sectionOrder.find(s => s.key === 'basics')) {
+        const migratedResume = {
+          ...resume,
+          sectionOrder: [
+            { key: 'basics', label: 'Basics' },
+            ...resume.sectionOrder,
+          ],
+        };
+        set({ activeResume: migratedResume });
+      } else {
+        set({ activeResume: { ...resume } });
       }
-      set({ activeResume: activeData as ActiveResume, activeResumeId: id, isStoreLoading: false });
     } else {
-       set({ isStoreLoading: false });
+      MagicDebugger.warn(`Resume with id ${id} not found.`);
     }
   },
-  saveResume: async () => {
-    const { activeResume, activeResumeId } = get();
-    if (activeResume && activeResumeId) {
-      get().updateResume(activeResumeId, activeResume);
+
+  saveResume: (snapshot) => {
+    const { activeResume, updateResume } = get();
+    if (activeResume) {
+      const updates: Partial<Resume> = {
+        updatedAt: Date.now(),
+      };
+      if (snapshot) {
+        updates.snapshot = snapshot;
+      }
+      updateResume(activeResume.id, { ...activeResume, ...updates });
+      toast.success('Resume saved!');
     }
   },
-  setSectionOrder: (order: SectionOrder[]) => {
-    set(state => ({
-      activeResume: state.activeResume ? { ...state.activeResume, sectionOrder: order } : null
-    }));
+  
+  updateInfo: (info) => {
+    set(state => {
+      if (!state.activeResume) return state;
+      return {
+        activeResume: {
+          ...state.activeResume,
+          info: { ...state.activeResume.info, ...info }
+        }
+      };
+    });
   },
-  setRightCollapsed: (collapsed: boolean) => {
-    set({ rightCollapsed: collapsed });
+  
+  setSectionOrder: (sectionOrder) => {
+    set(state => {
+      if (!state.activeResume) return state;
+      return {
+        activeResume: { ...state.activeResume, sectionOrder }
+      };
+    });
   },
-  setActiveSection: (section: string) => set({ activeSection: section }),
-  updateSectionItems: (key: string, items: SectionItem[]) => {
-    set(state => ({
-      activeResume: state.activeResume ? { ...state.activeResume, sections: { ...state.activeResume.sections, [key]: items } } : null
-    }));
+
+  updateSectionItems: (key, items) => {
+    set(state => {
+      if (!state.activeResume) return state;
+      return {
+        activeResume: {
+          ...state.activeResume,
+          sections: { ...state.activeResume.sections, [key]: items }
+        }
+      };
+    });
   },
-  updateInfo: (key: keyof InfoType, value: string | { icon: string; name: string; value: string }[]) => {
-    set(state => ({
-      activeResume: state.activeResume ? { ...state.activeResume, info: { ...state.activeResume.info, [key]: value } } : null
-    }));
+
+  updateTemplate: (template) => {
+    set(state => {
+      if (!state.activeResume) return state;
+      return {
+        activeResume: { ...state.activeResume, template }
+      };
+    });
   },
+
+  updateThemeColor: (themeColor) => {
+    set(state => {
+      if (!state.activeResume) return state;
+      return {
+        activeResume: { ...state.activeResume, themeColor }
+      };
+    });
+  },
+
+  updateTypography: (typography) => {
+    set(state => {
+      if (!state.activeResume) return state;
+      return {
+        activeResume: { ...state.activeResume, typography }
+      };
+    });
+  },
+
   addCustomField: (field) => {
     set(state => {
-      if (!state.activeResume) return {};
-      const customFields = [...state.activeResume.info.customFields, field];
+      if (!state.activeResume) return state;
+      const newFields = [...state.activeResume.info.customFields, field];
       return {
         activeResume: {
           ...state.activeResume,
-          info: { ...state.activeResume.info, customFields }
+          info: { ...state.activeResume.info, customFields: newFields }
         }
       };
     });
   },
-  removeCustomField: (index: number) => {
+
+  removeCustomField: (index) => {
     set(state => {
-      if (!state.activeResume) return {};
-      const customFields = state.activeResume.info.customFields.filter((_, i) => i !== index);
+      if (!state.activeResume) return state;
+      const newFields = state.activeResume.info.customFields.filter((_, i) => i !== index);
       return {
         activeResume: {
           ...state.activeResume,
-          info: { ...state.activeResume.info, customFields }
+          info: { ...state.activeResume.info, customFields: newFields }
         }
       };
     });
-  }
+  },
+
+  setRightCollapsed: (collapsed) => set({ rightCollapsed: collapsed }),
+  
+  setActiveSection: (section) => set({ activeSection: section }),
 }));
 
-if (typeof window !== 'undefined') {
-  (async () => {
-    try {
-      await dbClient.init();
-      const resumes = await dbClient.getItem<Resume[]|null>('resumes', RESUMES_KEY);
-      useResumeStore.setState({ resumes: resumes || [], isStoreLoading: false });
-    } catch (error) {
-      MagicDebugger.error('Failed to load data from IndexedDB', error);
-      useResumeStore.setState({ isStoreLoading: false });
-    }
-  })();
-}
+useResumeStore.getState().loadResumes();
+
+export { useResumeStore };

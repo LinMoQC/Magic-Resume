@@ -106,7 +106,7 @@ export default function Settings() {
       <AnimatePresence>
         {isDirty && (
           <motion.div
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 w-auto bg-neutral-800 border border-neutral-700 rounded-xl shadow-2xl px-6 py-3 flex items-center justify-between z-50"
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 w-auto bg-neutral-800 border border-neutral-700 rounded-3xl shadow-2xl px-4 py-2 flex items-center justify-between z-50"
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
@@ -117,8 +117,8 @@ export default function Settings() {
               <p className="text-white font-medium text-sm">Unsaved changes</p>
             </div>
             <div className="flex items-center gap-3 ml-3">
-              <Button onClick={handleReset} size="sm" className="text-red-500 border-red-500 bg-red-500/20 hover:bg-red-500/10 hover:text-red-400">Reset</Button>
-              <Button onClick={handleSave} size="sm" className="text-gray-500 hover:text-gray-200 bg-green-500/20 hover:bg-green-500/10">Save</Button>
+              <Button onClick={handleReset} size="sm" className="h-6 rounded-2xl text-red-500 border-red-500 bg-red-500/20 hover:bg-red-500/10 hover:text-red-400">Reset</Button>
+              <Button onClick={handleSave} size="sm" className="h-6 rounded-2xl text-gray-300 hover:text-gray-200 bg-green-500/20 hover:bg-green-500/10">Save</Button>
             </div>
           </motion.div>
         )}
