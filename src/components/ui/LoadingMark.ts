@@ -1,7 +1,7 @@
 import { Mark, mergeAttributes } from '@tiptap/core';
 
 export interface LoadingOptions {
-  HTMLAttributes: Record<string, any>;
+  HTMLAttributes: Record<string, unknown>;
 }
 
 export const LoadingMark = Mark.create<LoadingOptions>({
@@ -22,7 +22,6 @@ export const LoadingMark = Mark.create<LoadingOptions>({
   },
 
   renderHTML({ HTMLAttributes }) {
-    // A single span is cleaner. The spinner will be an `::after` pseudo-element.
-    return ['span', mergeAttributes(this.options.HTMLAttributes, { class: 'ai-loading-effect' }), 0];
+    return ['span', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, { class: 'ai-loading-effect' }), 0];
   },
 }); 
