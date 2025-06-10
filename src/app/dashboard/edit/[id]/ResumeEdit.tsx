@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useMemo } from 'react';
 import { useResumeStore } from '@/store/useResumeStore';
-import { FaUser, FaCopy } from 'react-icons/fa';
+import { FaUser, FaDownload } from 'react-icons/fa';
 import BasicForm from '../_components/BasicForm';
 import sidebarMenu from '@/constant/sidebarMenu';
 import dynamic from 'next/dynamic';
@@ -30,7 +30,6 @@ import ResumeContent from './ResumeContent';
 import { Section, SectionItem } from '@/store/useResumeStore';
 import useMobile from '@/app/hooks/useMobile';
 import MobileResumEdit from '../_components/mobile/MobileResumEdit';
-import { MagicDebugger } from '@/lib/debuggger';
 import { generateSnapshot } from '@/lib/utils';
 import AIModal from '../_components/AIModal';
 import ReactJsonView from '@microlink/react-json-view';
@@ -85,6 +84,21 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
   const openAIModal = () => setIsAIModalOpen(true);
   const closeAIModal = () => setIsAIModalOpen(false);
 
+  const handleDownloadJson = () => {
+    if (!activeResume) return;
+    const jsonString = JSON.stringify(activeResume, null, 2);
+    const blob = new Blob([jsonString], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${activeResume.name || 'resume'}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success('JSON file download started!');
+  };
+
   const info = activeResume?.info;
   const sectionItems = activeResume?.sections;
   const sectionOrder = activeResume?.sectionOrder;
@@ -120,20 +134,6 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
   const handleSave = async () => {
     const snapshot = await generateSnapshot();
     saveActiveResumeToResumes(snapshot ?? undefined);
-  };
-
-  const handleCopyJson = () => {
-    if (!activeResume) return;
-    const jsonString = JSON.stringify(activeResume, null, 2);
-    navigator.clipboard.writeText(jsonString).then(
-      () => {
-        toast.success('Copied to clipboard!');
-      },
-      (err) => {
-        toast.error('Failed to copy!');
-        MagicDebugger.error('Could not copy text: ', err);
-      }
-    );
   };
 
   function handleDragEnd(event: DragEndEvent) {
@@ -218,7 +218,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
         isJsonModalOpen={isJsonModalOpen}
         closeJsonModal={closeJsonModal}
         openJsonModal={openJsonModal}
-        handleCopyJson={handleCopyJson}
+        handleCopyJson={handleDownloadJson}
         renderSections={renderSections}
         handleSave={handleSave}
         onShowAI={openAIModal}
@@ -256,14 +256,14 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
       >
         <div className="relative">
           <button
-            onClick={handleCopyJson}
+            onClick={handleDownloadJson}
             className="absolute top-3 right-3 p-2 text-gray-400 rounded-md hover:bg-neutral-700 hover:text-white transition-colors"
-            aria-label="Copy JSON to clipboard"
+            aria-label="Download JSON file"
           >
-            <FaCopy />
+            <FaDownload />
           </button>
           <pre className="text-sm bg-white p-4 rounded-md overflow-x-auto h-[80vh]">
-            {activeResume && <ReactJsonView src={activeResume} />}
+            {activeResume && <ReactJsonView src={activeResume} displayDataTypes={false}/>}
           </pre>
         </div>
       </Modal>
