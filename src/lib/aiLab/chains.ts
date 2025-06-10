@@ -1,27 +1,43 @@
 import { PromptTemplate } from "@langchain/core/prompts";
 import { z } from "zod";
-import { getModel } from "./aiService";
 import { StructuredOutputParser } from "langchain/output_parsers";
 import { resumeOptimizePrompt } from "@/prompts/agent-modify-prompt";
 import { jdAnalysisPrompt } from "@/prompts/jd-analysis-prompt";
-import { RunnablePassthrough } from "@langchain/core/runnables";
+import { polishTextPrompt } from "@/prompts/polish-text-prompt";
+import { StringOutputParser } from "@langchain/core/output_parsers";
+import { ChatOpenAI } from "@langchain/openai";
+import { resumeAnalysisPrompt } from "@/prompts/resume-analysis-prompt";
+import { JsonOutputParser } from "@langchain/core/output_parsers";
 
-const jdAnalysisSchema = z.object({
-  keySkills: z.array(z.string()).describe("List of key skills mentioned in the job description, e.g., 'React', 'Node.js', 'Project Management'"),
-  responsibilities: z.array(z.string()).describe("List of key responsibilities and tasks."),
-  qualifications: z.array(z.string()).describe("List of key qualifications and experience requirements."),
+export const jdAnalysisSchema = z.object({
+  keySkills: z
+    .array(z.string())
+    .describe(
+      "List of key skills mentioned in the job description, e.g., 'React', 'Node.js', 'Project Management'"
+    ),
+  responsibilities: z
+    .array(z.string())
+    .describe("List of key responsibilities and tasks."),
+  qualifications: z
+    .array(z.string())
+    .describe("List of key qualifications and experience requirements."),
+  optimized_content: z
+    .array(z.string())
+    .describe("The optimized bullet points for the resume section"),
 });
 
 export type JdAnalysis = z.infer<typeof jdAnalysisSchema>;
 
-const itemOptimizationSchema = z.object({
-  optimizedSummary: z.string().describe("The rewritten, impactful resume item summary."),
+export const itemOptimizationSchema = z.object({
+  optimizedSummary: z
+    .string()
+    .describe("The rewritten, impactful resume item summary."),
 });
 
 export type ItemOptimizationOutput = z.infer<typeof itemOptimizationSchema>;
 
-interface ChainConfig {
-  apiKey: string;
+interface CreateChatChainOptions {
+  apiKey?: string;
   baseUrl?: string;
   modelName?: string;
   maxTokens?: number;
@@ -33,47 +49,96 @@ interface ChainConfig {
  * It uses OpenAI's function calling feature for reliable JSON output.
  * @returns A runnable chain that takes a JD string and outputs a structured object.
  */
-export const createJdAnalysisChain = ({ apiKey, baseUrl, modelName, maxTokens }: ChainConfig) => {
-  const model = getModel({ 
-    apiKey, 
-    baseUrl, 
-    modelName, 
-    maxTokens,
-    streaming: true,
+export const createJdAnalysisChain = ({
+  apiKey,
+  baseUrl,
+  modelName,
+  maxTokens,
+}: CreateChatChainOptions) => {
+  const llm = new ChatOpenAI({
+    apiKey,
+    // @ts-expect-error - baseURL is a valid but untyped parameter
+    baseURL: baseUrl,
+    modelName: modelName ?? "gpt-4-turbo",
+    maxTokens: maxTokens ?? 2048,
   });
 
   const parser = StructuredOutputParser.fromZodSchema(jdAnalysisSchema);
 
-  const chain = RunnablePassthrough.assign({
-    format_instructions: () => parser.getFormatInstructions(),
-  })
-    .pipe(PromptTemplate.fromTemplate(jdAnalysisPrompt))
-    .pipe(model)
-    .pipe(parser);
-  
-  return chain;
+  const prompt = PromptTemplate.fromTemplate(jdAnalysisPrompt, {
+    partialVariables: { format_instructions: parser.getFormatInstructions() },
+  });
+
+  return prompt.pipe(llm).pipe(parser);
 };
 
 /**
  * Creates a chain to optimize a single resume item (e.g., experience, project, skill).
  * @returns A runnable chain that takes context and a specific item, and outputs an optimized summary.
  */
-export const createItemOptimizationChain = ({ apiKey, baseUrl, modelName, maxTokens }: ChainConfig) => {
-  const model = getModel({
+export const createItemOptimizationChain = ({
+  apiKey,
+  baseUrl,
+  modelName,
+  maxTokens,
+}: CreateChatChainOptions) => {
+  const model = new ChatOpenAI({
     apiKey,
-    baseUrl,
-    modelName,
-    maxTokens,
+    // @ts-expect-error - baseURL is a valid but untyped parameter
+    baseURL: baseUrl,
+    modelName: modelName ?? "gpt-3.5-turbo",
+    maxTokens: maxTokens ?? 2048,
   });
 
   const parser = StructuredOutputParser.fromZodSchema(itemOptimizationSchema);
 
-  const chain = RunnablePassthrough.assign({
-    format_instructions: () => parser.getFormatInstructions(),
-  })
-    .pipe(PromptTemplate.fromTemplate(resumeOptimizePrompt))
-    .pipe(model)
-    .pipe(parser);
+  const prompt = PromptTemplate.fromTemplate(resumeOptimizePrompt, {
+    partialVariables: { format_instructions: parser.getFormatInstructions() },
+  });
+
+  return prompt.pipe(model).pipe(parser);
+};
+
+export const createPolishTextChain = ({
+  apiKey,
+  baseUrl,
+  modelName,
+  maxTokens,
+}: CreateChatChainOptions) => {
+  const model = new ChatOpenAI({
+    apiKey,
+    // @ts-expect-error - baseURL is a valid but untyped parameter
+    baseURL: baseUrl,
+    modelName: modelName ?? "gpt-4-turbo",
+    maxTokens: maxTokens ?? 2048,
+  });
+  const prompt = PromptTemplate.fromTemplate(polishTextPrompt);
+
+  return prompt.pipe(model).pipe(new StringOutputParser());
+};
+
+export const createResumeAnalysisChain = ({
+  apiKey,
+  baseUrl,
+  modelName,
+  maxTokens,
+}: CreateChatChainOptions) => {
+  const llm = new ChatOpenAI({
+    apiKey,
+    configuration: { baseURL: baseUrl },
+    modelName: modelName ?? "gpt-4-turbo",
+    maxTokens: maxTokens ?? 4096,
+    temperature: 0.2,
+  });
+
+  // Force the model to output JSON
+  const jsonModeLlm = llm.bind({
+    response_format: { type: "json_object" },
+  });
+
+  const prompt = PromptTemplate.fromTemplate(resumeAnalysisPrompt);
+
+  const chain = prompt.pipe(jsonModeLlm).pipe(new JsonOutputParser());
 
   return chain;
 }; 

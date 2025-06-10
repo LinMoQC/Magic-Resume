@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Bot, Sparkles, FileText, Briefcase, Wand2, Paperclip, CheckCircle, AlertTriangle, Eye, Code, Loader2 } from 'lucide-react';
+import { Bot, Sparkles, Wand2, Paperclip, CheckCircle, AlertTriangle, Eye, Code, Loader2, BarChart3, RotateCw } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useSettingStore } from '@/store/useSettingStore';
-import { createJdAnalysisChain, createItemOptimizationChain, JdAnalysis } from '@/lib/aiLab/chains';
+import { createJdAnalysisChain, createItemOptimizationChain, createResumeAnalysisChain, jdAnalysisSchema, itemOptimizationSchema } from '@/lib/aiLab/chains';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -11,6 +11,9 @@ import { produce } from 'immer';
 import { Resume, Section } from '@/store/useResumeStore';
 import ResumePreview from './ResumePreview';
 import ReactJsonView from '@microlink/react-json-view';
+import { ResumeAnalysis } from '@/lib/types/analysis';
+import { ResumeAnalysisReport } from '@/components/ui/ResumeAnalysisReport';
+import { StructuredOutputParser } from 'langchain/output_parsers';
 
 type AIModalProps = {
   isOpen: boolean;
@@ -21,8 +24,7 @@ type AIModalProps = {
 
 const TABS = [
   { name: '智能优化', icon: <Wand2 size={18} /> },
-  { name: '模块润色', icon: <FileText size={18} /> },
-  { name: 'JD匹配度分析', icon: <Briefcase size={18} /> },
+  { name: '简历分析', icon: <BarChart3 size={18} /> },
 ];
 
 export default function AIModal({ isOpen, onClose, resumeData, onApplyChanges }: AIModalProps) {
@@ -34,6 +36,11 @@ export default function AIModal({ isOpen, onClose, resumeData, onApplyChanges }:
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState({ value: 0, text: '' });
   const [isPreview, setIsPreview] = useState(false);
+
+  // States for Resume Analysis
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<ResumeAnalysis | null>(null);
+  const [analysisProgress, setAnalysisProgress] = useState({ value: 0, text: '' });
 
   const handleOptimize = async () => {
     if (!apiKey) {
@@ -55,10 +62,16 @@ export default function AIModal({ isOpen, onClose, resumeData, onApplyChanges }:
       const config = { apiKey, baseUrl, modelName: model, maxTokens };
 
       const jdAnalysisChain = createJdAnalysisChain(config);
-      const jdAnalysis = (await jdAnalysisChain.invoke({ jd })) as JdAnalysis;
+      const jdAnalysisParser = StructuredOutputParser.fromZodSchema(jdAnalysisSchema);
+      const jdAnalysis = await jdAnalysisChain.invoke({ 
+        jd,
+        format_instructions: jdAnalysisParser.getFormatInstructions(),
+      });
+
       const jdContext = `Key Skills: ${jdAnalysis.keySkills.join(', ')}. Responsibilities: ${jdAnalysis.responsibilities.join(', ')}.`;
 
       const optimizationChain = createItemOptimizationChain(config);
+      const optimizationParser = StructuredOutputParser.fromZodSchema(itemOptimizationSchema);
 
       // 定义需要优化的模块的key
       const sectionsToOptimizeKeys = ['experience', 'projects', 'skills'];
@@ -74,18 +87,15 @@ export default function AIModal({ isOpen, onClose, resumeData, onApplyChanges }:
 
       const optimizationPromises = itemsToOptimize.map(item => {
         const optimizeSingleItem = async () => {
-          const resultStream = await optimizationChain.stream({
+          const result = await optimizationChain.invoke({
             jd_context: jdContext,
             resume_context: JSON.stringify(resumeData),
             item_to_optimize: JSON.stringify(item),
+            format_instructions: optimizationParser.getFormatInstructions(),
           });
 
-          let finalOptimizedSummary = "";
-          for await (const chunk of resultStream) {
-            if (chunk.optimizedSummary) {
-              finalOptimizedSummary = chunk.optimizedSummary;
-            }
-          }
+          // The output from this chain is now the full structured object, not a stream
+          const finalOptimizedSummary = result.optimizedSummary;
           
           completedCount++;
           const progressPercentage = (completedCount / totalItems) * 100;
@@ -125,6 +135,54 @@ export default function AIModal({ isOpen, onClose, resumeData, onApplyChanges }:
     }
   };
 
+  const handleAnalyzeResume = async () => {
+    if (!apiKey) {
+      toast.error('API Key not found. Please set it in the settings page.');
+      return;
+    }
+
+    setIsAnalyzing(true);
+    setAnalysisResult(null);
+    setAnalysisProgress({ value: 0, text: '正在启动分析引擎...' });
+
+    const analysisSteps = [
+      { value: 15, text: '评估简历的「影响与行动力」...' },
+      { value: 35, text: '检查「量化成就」的使用情况...' },
+      { value: 55, text: '分析「清晰与可读性」...' },
+      { value: 75, text: '审核「完整性与结构」...' },
+      { value: 90, text: '评估「专业概述」质量...' },
+      { value: 95, text: '综合评分并生成报告...' },
+    ];
+
+    const timeouts = analysisSteps.map((step, index) => {
+      return setTimeout(() => {
+        setAnalysisProgress(step);
+      }, (index + 1) * 1200);
+    });
+
+    try {
+      const config = { apiKey, baseUrl, modelName: model, maxTokens: 4096 };
+      const analysisChain = createResumeAnalysisChain(config);
+      
+      const result = await analysisChain.invoke({ resume: JSON.stringify(resumeData) }) as ResumeAnalysis;
+
+      timeouts.forEach(clearTimeout);
+      setAnalysisProgress({ value: 100, text: '分析完成！' });
+      
+      await new Promise(resolve => setTimeout(resolve, 500)); 
+
+      setAnalysisResult(result);
+      toast.success("分析报告已生成!");
+      setIsAnalyzing(false);
+    } catch (error) {
+      console.error("[RESUME_ANALYSIS_ERROR]", error);
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+      toast.error(`分析失败: ${errorMessage}`);
+      timeouts.forEach(clearTimeout);
+      setIsAnalyzing(false);
+    }
+  };
+
   const handleApplyChanges = () => {
     if (optimizedResume) {
       onApplyChanges(optimizedResume.sections);
@@ -138,10 +196,10 @@ export default function AIModal({ isOpen, onClose, resumeData, onApplyChanges }:
         <DialogHeader className="p-4 pb-4 border-b border-neutral-800">
           <DialogTitle className="flex items-center text-xl">
             <Bot className="mr-3 text-sky-400" size={28}/>
-            AI 简历助手
+            AI Lab
           </DialogTitle>
           <DialogDescription className="text-neutral-400">
-            AI将分析您的简历和目标岗位，然后优化您的工作经历描述。
+            分析并优化您的简历，以匹配目标岗位要求，或获取专业的Lighthouse风格分析报告。
           </DialogDescription>
         </DialogHeader>
 
@@ -171,10 +229,10 @@ export default function AIModal({ isOpen, onClose, resumeData, onApplyChanges }:
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.2 }}
-                className="px-6 flex flex-col py-6"
+                className="px-6 flex flex-col"
               >
                 {activeTab === '智能优化' && (
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full mt-6">
                     <div className="space-y-4 flex flex-col">
                       <div>
                         <label htmlFor="jd" className="font-semibold text-neutral-300 flex items-center mb-2"><Paperclip size={16} className="mr-2"/> 目标岗位描述 (JD)</label>
@@ -250,9 +308,9 @@ export default function AIModal({ isOpen, onClose, resumeData, onApplyChanges }:
                             </div>
                           ) : (
                             <div className="p-4 max-h-96 overflow-y-auto">
-                              <pre className="text-xs whitespace-pre-wrap bg-neutral-800 p-3 rounded-md">
+                              <pre className="text-xs whitespace-pre-wrap bg-white p-3 rounded-md">
                                 <code>
-                                  <ReactJsonView src={optimizedResume} />
+                                  <ReactJsonView src={optimizedResume} displayDataTypes={false}/>
                                 </code>
                               </pre>
                             </div>
@@ -270,16 +328,47 @@ export default function AIModal({ isOpen, onClose, resumeData, onApplyChanges }:
                     </div>
                   </div>
                 )}
-                {activeTab === '模块润色' && (
-                  <div className="flex flex-col items-center justify-center h-96 text-neutral-500">
-                    <FileText size={48} className="mb-4" />
-                    <p>该功能正在开发中，敬请期待！</p>
-                  </div>
-                )}
-                {activeTab === 'JD匹配度分析' && (
-                  <div className="flex flex-col items-center justify-center h-96 text-neutral-500">
-                    <Briefcase size={48} className="mb-4" />
-                    <p>该功能正在开发中，敬请期待！</p>
+                {activeTab === '简历分析' && (
+                  <div>
+                    {isAnalyzing ? (
+                      <div className="flex flex-col items-center justify-center h-[65vh] text-neutral-500 text-center p-4">
+                        <Sparkles size={48} className="animate-pulse text-purple-500" />
+                        <p className="mt-4 mb-2 text-white">{analysisProgress.text || 'AI正在全力分析和创作中...'}</p>
+                        <div className="w-[60%] bg-neutral-700 rounded-full h-2.5">
+                          <div className="bg-purple-600 h-2.5 rounded-full" style={{ width: `${analysisProgress.value}%` }}></div>
+                        </div>
+                      </div>
+                    ) : analysisResult ? (
+                      <div className='relative py-4'>
+                        <div className="flex justify-end mb-4 absolute top-6 right-4">
+                          <Button 
+                            onClick={() => setAnalysisResult(null)} 
+                            variant="ghost" 
+                            className="text-neutral-300 hover:bg-neutral-800 hover:text-white"
+                          >
+                            <RotateCw size={16} className="mr-2" />
+                            重新分析
+                          </Button>
+                        </div>
+                        <ResumeAnalysisReport analysis={analysisResult} />
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center text-center h-[65vh] p-4">
+                        <div className="p-6 rounded-full bg-purple-500/10 border-2 border-dashed border-purple-500/30 mb-6">
+                          <BarChart3 size={48} className="text-purple-300" />
+                        </div>
+                        <h2 className="text-2xl font-bold text-white mb-2">简历健康度分析</h2>
+                        <p className="text-neutral-400 max-w-md mb-8">
+                          获取一份专业的、类似 Lighthouse 的简历分析报告。AI 将从多个维度评估您的简历，并提供可行的改进建议，助您脱颖而出。
+                        </p>
+                        <Button onClick={handleAnalyzeResume} disabled={isAnalyzing} className="bg-purple-600 hover:bg-purple-700 text-white font-bold text-lg px-8 py-6">
+                          {isAnalyzing ? (
+                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                          ) : <Sparkles className="mr-2 h-5 w-5" />}
+                          {isAnalyzing ? '正在分析...' : '开始分析'}
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )}
               </motion.div>

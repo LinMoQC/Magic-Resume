@@ -144,6 +144,7 @@ export default function SectionListWithModal<T extends BaseItem>({
   const [isOpen, setIsOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState<T | null>(null);
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
+  const [isPolishing, setIsPolishing] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -295,6 +296,8 @@ export default function SectionListWithModal<T extends BaseItem>({
               content={String(currentItem?.[richtextKey] ?? '')}
               onChange={handleQuillChange}
               placeholder={richtextPlaceholder}
+              isPolishing={isPolishing}
+              setIsPolishing={setIsPolishing}
             />
           </div>
           <div className="flex justify-end gap-2">
