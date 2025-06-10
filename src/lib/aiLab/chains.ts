@@ -57,7 +57,7 @@ export const createJdAnalysisChain = ({
 }: CreateChatChainOptions) => {
   const llm = new ChatOpenAI({
     apiKey,
-    // @ts-expect-error
+    // @ts-expect-error - baseURL is a valid but untyped parameter
     baseURL: baseUrl,
     modelName: modelName ?? "gpt-4-turbo",
     maxTokens: maxTokens ?? 2048,
@@ -84,7 +84,7 @@ export const createItemOptimizationChain = ({
 }: CreateChatChainOptions) => {
   const model = new ChatOpenAI({
     apiKey,
-    // @ts-expect-error
+    // @ts-expect-error - baseURL is a valid but untyped parameter
     baseURL: baseUrl,
     modelName: modelName ?? "gpt-3.5-turbo",
     maxTokens: maxTokens ?? 2048,
@@ -107,7 +107,7 @@ export const createPolishTextChain = ({
 }: CreateChatChainOptions) => {
   const model = new ChatOpenAI({
     apiKey,
-    // @ts-expect-error
+    // @ts-expect-error - baseURL is a valid but untyped parameter
     baseURL: baseUrl,
     modelName: modelName ?? "gpt-4-turbo",
     maxTokens: maxTokens ?? 2048,
