@@ -250,9 +250,9 @@ export default function AIModal({ isOpen, onClose, resumeData, onApplyChanges }:
                             </div>
                           ) : (
                             <div className="p-4 max-h-96 overflow-y-auto">
-                              <pre className="text-xs whitespace-pre-wrap bg-neutral-800 p-3 rounded-md">
+                              <pre className="text-xs whitespace-pre-wrap bg-white p-3 rounded-md">
                                 <code>
-                                  <ReactJsonView src={optimizedResume} />
+                                  <ReactJsonView src={optimizedResume} displayDataTypes={false}/>
                                 </code>
                               </pre>
                             </div>
