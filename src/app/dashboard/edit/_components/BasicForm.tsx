@@ -15,7 +15,7 @@ type CustomField = {
 
 type BasicFormProps = {
   info: InfoType;
-  updateInfo: (key: keyof InfoType, value: string | CustomField[]) => void;
+  updateInfo: (info: Partial<InfoType>) => void;
   addCustomField: (field: CustomField) => void;
   removeCustomField: (index: number) => void;
 };
@@ -27,13 +27,13 @@ export default function BasicForm({
   removeCustomField
 }: BasicFormProps) {
   const handleInfoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    updateInfo(e.target.name as keyof InfoType, e.target.value);
+    updateInfo({ [e.target.name]: e.target.value });
   };
   
   const handleCustomFieldChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const updatedCustomFields = [...info.customFields];
     updatedCustomFields[index] = { ...updatedCustomFields[index], [e.target.name]: e.target.value };
-    updateInfo('customFields', updatedCustomFields);
+    updateInfo({ customFields: updatedCustomFields });
   };
 
   const handleAddCustom = () => {
@@ -41,7 +41,7 @@ export default function BasicForm({
   };
 
   type BasicField = {
-    name: keyof Omit<InfoType, 'customFields' | 'summary'>;
+    name: keyof Omit<InfoType, 'customFields'>;
     label: string;
     type?: string;
     placeholder?: string;
@@ -53,8 +53,9 @@ export default function BasicForm({
     { name: 'headline', label: 'Headline' },
     { name: 'email', label: 'Email', type: 'email' },
     { name: 'website', label: 'Website' },
-    { name: 'phone', label: 'Phone' },
-    { name: 'location', label: 'Location' },
+    { name: 'phoneNumber', label: 'Phone' },
+    { name: 'address', label: 'Location' },
+    { name: 'link', label: 'Link' },
   ];
 
   return (
@@ -65,7 +66,7 @@ export default function BasicForm({
             <div key={field.name} className="flex flex-col gap-3">
               <div className="flex items-center gap-4">
                 {info.avatar ? <Image
-                  src={i}
+                  src={info.avatar}
                   alt="Avatar"
                   width={40}
                   height={40}

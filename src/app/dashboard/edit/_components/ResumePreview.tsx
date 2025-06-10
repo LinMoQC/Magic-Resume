@@ -9,14 +9,15 @@ interface Props {
   info: InfoType;
   sections: Section;
   sectionOrder: string[];
+  customStyle?: React.CSSProperties;
 }
 
-export default function ResumePreview({ info, sections, sectionOrder }: Props) {
+export default function ResumePreview({ info, sections, sectionOrder,customStyle }: Props) {
   return (
     <div
       id="resume-to-export"
-      className="mx-auto max-w-[794px] w-[500px] bg-white text-black rounded-md shadow-2xl relative font-serif min-h-[90vh]"
-      style={{ fontFamily: '"IBM Plex Serif", serif' }}
+      className="mx-auto max-w-[794px] w-[794px] bg-white text-black rounded-md shadow-2xl relative font-serif min-h-[1100px]"
+      style={{ fontFamily: '"IBM Plex Serif", serif',...customStyle }}
     >
       <div className="p-3 space-y-4">
         {/* 顶部信息 */}
@@ -35,16 +36,16 @@ export default function ResumePreview({ info, sections, sectionOrder }: Props) {
             <div className="text-sm font-bold">{info.fullName || 'Your Name'}</div>
             <div className="text-xs">{info.headline}</div>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px]">
-              {info.location && (
+              {info.address && (
                 <div className="flex items-center gap-x-1.5 border-r pr-2 last:border-r-0 last:pr-0">
                   <FaMapMarkerAlt className="text-primary" />
-                  <div>{info.location}</div>
+                  <div>{info.address}</div>
                 </div>
               )}
-              {info.phone && (
+              {info.phoneNumber && (
                 <div className="flex items-center gap-x-1.5 border-r pr-2 last:border-r-0 last:pr-0">
                   <FaPhone className="text-primary" />
-                  <a href={`tel:${info.phone}`}>{info.phone}</a>
+                  <a href={`tel:${info.phoneNumber}`}>{info.phoneNumber}</a>
                 </div>
               )}
               {info.email && (
@@ -74,11 +75,12 @@ export default function ResumePreview({ info, sections, sectionOrder }: Props) {
                   {items.map((item, idx) => (
                     <div className="space-y-2" key={idx}>
                       <div>
-                        <div className="font-bold">{item.name || item.title || item.platform || item.certificate || item.language || item.skill || item.award || Object.values(item)[0]}</div>
-                        {item.level && <div>{item.level}</div>}
-                        {item.date && <div>{item.date}</div>}
-                        {item.description && <div className="" dangerouslySetInnerHTML={{ __html: String(item.description) }} />}
-                        {item.summary && <div className="wysiwyg" dangerouslySetInnerHTML={{ __html: String(item.summary) }} />}
+                        <div className="font-bold">
+                          {String(item.name || item.title || item.platform || item.certificate || item.language || item.skill || item.award || Object.values(item)[0])}
+                        </div>
+                        {item.level && <div>{String(item.level)}</div>}
+                        {item.date && <div>{String(item.date)}</div>}
+                        {item?.summary && <div className="wysiwyg" dangerouslySetInnerHTML={{ __html: String(item.summary) }} />}
                       </div>
                     </div>
                   ))}

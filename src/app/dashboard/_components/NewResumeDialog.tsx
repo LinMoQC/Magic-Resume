@@ -33,7 +33,7 @@ export default function NewResumeDialog({ open, onOpenChange, newName, setNewNam
           autoFocus
         />
         <DialogFooter>
-          <Button onClick={() => onOpenChange(false)} variant="outline">取消</Button>
+          <Button onClick={() => onOpenChange(false)} variant="outline" className='text-black'>取消</Button>
           <Button onClick={handleCreate} disabled={!newName.trim()}>创建</Button>
         </DialogFooter>
       </DialogContent>

@@ -1,23 +1,126 @@
 "use client";
 
-import React from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { FaPlus, FaDownload, FaRegFileAlt } from 'react-icons/fa';
+import { FaPlus, FaDownload, FaRegClone, FaEdit, FaTrash } from 'react-icons/fa';
 import { Resume } from '@/store/useResumeStore';
 import { formatTime } from '@/lib/utils';
+import Image from 'next/image';
+import Link from 'next/link';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
+import { FiMoreVertical } from 'react-icons/fi';
 
 type ResumeListProps = {
   resumes: Resume[];
   onAdd: () => void;
   onImport: () => void;
   onDelete: (id: string) => void;
+  onDuplicate: (id: string) => void;
+  onRename: (resume: Resume) => void;
 };
 
-export default function ResumeList({ resumes, onAdd, onImport, onDelete }: ResumeListProps) {
-  const router = useRouter();
+function ResumeCard({ 
+  resume, 
+  onDelete,
+  onDuplicate,
+  onRename,
+}: { 
+  resume: Resume, 
+  onDelete: (id: string) => void,
+  onDuplicate: (id: string) => void,
+  onRename: (resume: Resume) => void,
+}) {
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (resume.snapshot instanceof Blob) {
+      const url = URL.createObjectURL(resume.snapshot);
+      setImageUrl(url);
+
+      return () => {
+        URL.revokeObjectURL(url);
+      };
+    }
+  }, [resume.snapshot]);
+
+  return (
+    <motion.div
+      key={resume.id}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      whileHover={{ scale: 1.04 }}
+      whileTap={{ scale: 0.98 }}
+      layout
+    >
+      <Card className="group h-64 flex flex-col justify-between cursor-pointer relative overflow-hidden bg-neutral-900 border border-neutral-800 hover:border-neutral-700">
+        <Link href={`/dashboard/edit/${resume.id}`} className="block w-full h-full">
+          <div className="relative w-full h-full">
+            {imageUrl ? (
+              <Image
+                src={imageUrl}
+                alt={resume.name}
+                layout="fill"
+                objectFit="contain"
+                className="opacity-50 group-hover:opacity-75 transition-opacity duration-300"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-neutral-800">
+                <FaRegClone className="text-4xl text-neutral-600" />
+              </div>
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
+          </div>
+        </Link>
+        
+        <CardFooter className="absolute bottom-0 left-0 w-full p-4 z-10">
+          <div>
+            <div className="font-semibold text-white text-base truncate group-hover:text-sky-400 transition-colors">{resume.name}</div>
+            <div className="text-xs text-neutral-400 mt-1">Last updated {formatTime(resume.updatedAt)}</div>
+          </div>
+        </CardFooter>
+
+        <div className="absolute top-2 right-2 z-20">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <motion.button 
+                whileHover={{ scale: 1.2 }}
+                className="p-2 rounded-full bg-black hover:bg-neutral-700 text-white transition-colors focus:outline-none"
+                onClick={e => e.stopPropagation()}
+              >
+                <FiMoreVertical />
+              </motion.button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent onClick={e => e.stopPropagation()} side="bottom" align="end" className='bg-neutral-900 border-neutral-700 text-white'>
+              <DropdownMenuItem onClick={() => onRename(resume)} className='cursor-pointer'>
+                <FaEdit className="mr-2" />
+                Rename
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onDuplicate(resume.id)} className='cursor-pointer'>
+                <FaRegClone className="mr-2" />
+                Duplicate
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => onDelete(resume.id)} className='cursor-pointer text-red-500 focus:text-red-500 focus:bg-red-500/10'>
+                <FaTrash className="mr-2" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </Card>
+    </motion.div>
+  );
+}
+
+export default function ResumeList({ resumes, onAdd, onImport, onDelete, onDuplicate, onRename }: ResumeListProps) {
   return (
     <div className="flex-1 flex flex-col px-12 py-10 overflow-auto">
       <div className="flex items-center justify-between mb-8">
@@ -48,36 +151,14 @@ export default function ResumeList({ resumes, onAdd, onImport, onDelete }: Resum
         </motion.div>
         {/* 简历卡片列表 */}
         <AnimatePresence>
-          {resumes.map(r => (
-            <motion.div
-              key={r.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.98 }}
-              layout
-            >
-              <Card className="group h-64 flex flex-col justify-between cursor-pointer relative overflow-hidden" onClick={() => router.push(`/dashboard/edit/${r.id}`)}>
-                 <CardContent className="flex-1 flex items-center justify-center">
-                   <FaRegFileAlt className="text-6xl text-neutral-700 group-hover:text-blue-500 transition" />
-                 </CardContent>
-                 <CardFooter className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent p-4">
-                   <div>
-                     <div className="font-semibold text-white text-base truncate">{r.name}</div>
-                     <div className="text-xs text-neutral-400 mt-1">Last updated {formatTime(r.updatedAt)}</div>
-                   </div>
-                 </CardFooter>
-                 {/* 删除按钮 */}
-                 <motion.button
-                   whileHover={{ scale: 1.2, backgroundColor: '#ef4444' }}
-                   className="absolute top-3 right-3 bg-black/60 hover:bg-red-600 text-white rounded-full p-2 transition"
-                   onClick={e => { e.stopPropagation(); onDelete(r.id); }}
-                 >
-                   <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 6 6 18M6 6l12 12"/></svg>
-                 </motion.button>
-              </Card>
-            </motion.div>
+          {resumes.map(resume => (
+            <ResumeCard 
+              key={resume.id} 
+              resume={resume} 
+              onDelete={onDelete}
+              onDuplicate={onDuplicate}
+              onRename={onRename}
+            />
           ))}
         </AnimatePresence>
       </div>

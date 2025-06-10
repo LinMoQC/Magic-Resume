@@ -35,15 +35,32 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
   ...defaultSettings,
   initialSettings: { ...defaultSettings },
   isDirty: false,
-  setApiKey: (apiKey) => set(state => ({ ...state, apiKey, isDirty: apiKey !== state.initialSettings.apiKey })),
-  setBaseUrl: (baseUrl) => set(state => ({ ...state, baseUrl, isDirty: baseUrl !== state.initialSettings.baseUrl })),
-  setModel: (model) => set(state => ({ ...state, model, isDirty: model !== state.initialSettings.model })),
-  setMaxTokens: (maxTokens) => set(state => ({ ...state, maxTokens, isDirty: maxTokens !== state.initialSettings.maxTokens })),
+  
+  setApiKey: (apiKey) => {
+    const currentState = { ...get(), apiKey };
+    const { initialSettings, ...currentSettings } = currentState;
+    set({ apiKey, isDirty: JSON.stringify(currentSettings) !== JSON.stringify(initialSettings) });
+  },
+  setBaseUrl: (baseUrl) => {
+    const currentState = { ...get(), baseUrl };
+    const { initialSettings, ...currentSettings } = currentState;
+    set({ baseUrl, isDirty: JSON.stringify(currentSettings) !== JSON.stringify(initialSettings) });
+  },
+  setModel: (model) => {
+    const currentState = { ...get(), model };
+    const { initialSettings, ...currentSettings } = currentState;
+    set({ model, isDirty: JSON.stringify(currentSettings) !== JSON.stringify(initialSettings) });
+  },
+  setMaxTokens: (maxTokens) => {
+    const currentState = { ...get(), maxTokens };
+    const { initialSettings, ...currentSettings } = currentState;
+    set({ maxTokens, isDirty: JSON.stringify(currentSettings) !== JSON.stringify(initialSettings) });
+  },
   
   saveSettings: async () => {
     const { apiKey, baseUrl, model, maxTokens } = get();
     const newSettings = { apiKey, baseUrl, model, maxTokens };
-    await dbClient.setItem('settings', 'Magic-Settings', newSettings);
+    await dbClient.setItem('settings', newSettings);
     set({ initialSettings: newSettings, isDirty: false });
   },
 
@@ -55,7 +72,7 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
   },
 
   loadSettings: async () => {
-    const savedSettings = await dbClient.getItem('settings', 'Magic-Settings') as SettingsData | null;
+    const savedSettings = await dbClient.getItem('settings') as SettingsData | null;
     if (savedSettings) {
       set({ ...savedSettings, initialSettings: { ...savedSettings }, isDirty: false });
     }
