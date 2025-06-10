@@ -4,7 +4,9 @@ import { getModel } from "./aiService";
 import { StructuredOutputParser } from "langchain/output_parsers";
 import { resumeOptimizePrompt } from "@/prompts/agent-modify-prompt";
 import { jdAnalysisPrompt } from "@/prompts/jd-analysis-prompt";
+import { polishTextPrompt } from "@/prompts/polish-text-prompt";
 import { RunnablePassthrough } from "@langchain/core/runnables";
+import { StringOutputParser } from "@langchain/core/output_parsers";
 
 const jdAnalysisSchema = z.object({
   keySkills: z.array(z.string()).describe("List of key skills mentioned in the job description, e.g., 'React', 'Node.js', 'Project Management'"),
@@ -76,4 +78,18 @@ export const createItemOptimizationChain = ({ apiKey, baseUrl, modelName, maxTok
     .pipe(parser);
 
   return chain;
-}; 
+};
+
+export const createPolishTextChain = ({ apiKey, baseUrl, modelName, maxTokens }: ChainConfig) => {
+  const model = getModel({
+    apiKey,
+    baseUrl,
+    modelName,
+    maxTokens,
+  });
+
+  const prompt = PromptTemplate.fromTemplate(polishTextPrompt);
+  const parser = new StringOutputParser();
+
+  return prompt.pipe(model).pipe(parser);
+} 

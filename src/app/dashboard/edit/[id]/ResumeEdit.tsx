@@ -30,7 +30,6 @@ import ResumeContent from './ResumeContent';
 import { Section, SectionItem } from '@/store/useResumeStore';
 import useMobile from '@/app/hooks/useMobile';
 import MobileResumEdit from '../_components/mobile/MobileResumEdit';
-import { MagicDebugger } from '@/lib/debuggger';
 import { generateSnapshot } from '@/lib/utils';
 import AIModal from '../_components/AIModal';
 import ReactJsonView from '@microlink/react-json-view';

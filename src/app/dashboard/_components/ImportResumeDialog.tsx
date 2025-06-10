@@ -85,7 +85,7 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
             {isDragActive ? (
               <p>Drop the file here ...</p>
             ) : (
-              <p>Drag 'n' drop a JSON file here, or click to select file</p>
+              <p>Drag &apos;n&apos; drop a JSON file here, or click to select file</p>
             )}
             <p className="text-xs mt-1">(.json file only)</p>
           </div>

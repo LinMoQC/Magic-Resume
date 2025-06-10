@@ -264,3 +264,32 @@ button {
   padding-left: 1.5em; /* Adjust padding to make space for the bullet */
   position: relative;
 }
+
+.ai-loading-effect {
+  background-color: rgba(56, 189, 248, 0.3);
+  border-radius: 3px;
+  padding: 1px 2px;
+  margin: -1px -2px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.ai-loading-effect::after {
+  content: '';
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid #a78bfa;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  transform-origin: center;
+  vertical-align: middle;
+  margin-left: 6px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

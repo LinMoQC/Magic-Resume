@@ -21,8 +21,7 @@ type AIModalProps = {
 
 const TABS = [
   { name: '智能优化', icon: <Wand2 size={18} /> },
-  { name: '模块润色', icon: <FileText size={18} /> },
-  { name: 'JD匹配度分析', icon: <Briefcase size={18} /> },
+  { name: '简历分析', icon: <Briefcase size={18} /> },
 ];
 
 export default function AIModal({ isOpen, onClose, resumeData, onApplyChanges }: AIModalProps) {
