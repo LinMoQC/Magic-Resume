@@ -29,11 +29,11 @@ import TemplatePanel from './TemplatePanel';
 import ResumeContent from './ResumeContent';
 import { Section, SectionItem } from '@/store/useResumeStore';
 import useMobile from '@/app/hooks/useMobile';
-import { Button } from '@/components/ui/button';
-import { FiEdit, FiLayout } from 'react-icons/fi';
-import { motion, AnimatePresence } from 'framer-motion';
-import Link from 'next/link';
-import Image from 'next/image';
+import MobileResumEdit from '../_components/mobile/MobileResumEdit';
+import { MagicDebugger } from '@/lib/debuggger';
+import { generateSnapshot } from '@/lib/utils';
+import AIModal from '../_components/AIModal';
+import ReactJsonView from '@microlink/react-json-view';
 const ResumePreviewPanel = dynamic(() => import('../_components/ResumePreviewPanel'), { ssr: false });
 
 type ResumeEditProps = {
@@ -63,6 +63,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     updateInfo,
     setSectionOrder: updateSectionOrder,
     updateSectionItems,
+    updateSections,
     addCustomField,
     removeCustomField,
     rightCollapsed,
@@ -73,6 +74,16 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
   const { isMobile } = useMobile();
   const [leftPanelOpen, setLeftPanelOpen] = useState(false);
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
+  const [isAnyModalOpen, setIsAnyModalOpen] = useState(false);
+
+  const [previewScale, setPreviewScale] = useState(1);
+  const [isJsonModalOpen, setIsJsonModalOpen] = useState(false);
+  const openJsonModal = () => setIsJsonModalOpen(true);
+  const closeJsonModal = () => setIsJsonModalOpen(false);
+
+  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+  const openAIModal = () => setIsAIModalOpen(true);
+  const closeAIModal = () => setIsAIModalOpen(false);
 
   const info = activeResume?.info;
   const sectionItems = activeResume?.sections;
@@ -93,11 +104,6 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     return refs;
   }, []);
 
-  const [previewScale, setPreviewScale] = useState(1);
-  const [isJsonModalOpen, setIsJsonModalOpen] = useState(false);
-  const openJsonModal = () => setIsJsonModalOpen(true);
-  const closeJsonModal = () => setIsJsonModalOpen(false);
-
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
@@ -111,9 +117,9 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     loadResumeForEdit(id);
   }, [id, loadResumeForEdit]);
 
-  const handleSave = () => {
-    saveActiveResumeToResumes();
-    toast.success('Saved!');
+  const handleSave = async () => {
+    const snapshot = await generateSnapshot();
+    saveActiveResumeToResumes(snapshot ?? undefined);
   };
 
   const handleCopyJson = () => {
@@ -125,7 +131,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
       },
       (err) => {
         toast.error('Failed to copy!');
-        console.error('Could not copy text: ', err);
+        MagicDebugger.error('Could not copy text: ', err);
       }
     );
   };
@@ -158,7 +164,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
           {(sectionOrder || []).map(({ key }, index) => {
             const isLast = index === (sectionOrder?.length || 0) - 1;
             return (
-              <SortableSection key={key} id={key} disabled={key === 'basics'}>
+              <SortableSection key={key} id={key} disabled={key === 'basics' || isAnyModalOpen}>
                 {key === 'basics' && (
                   <div ref={sectionRefs.basics} className={`scroll-mt-24 ${isLast ? '' : 'mb-8'}`} id="basics">
                     <h2 className="text-2xl font-bold flex items-center gap-3 mb-8"><FaUser className="text-[16px]" /> Basics</h2>
@@ -178,10 +184,13 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
                       fields={(dynamicFormFields[key as keyof typeof dynamicFormFields] || []).map(f => ({ name: f.key, label: f.label, placeholder: f.placeholder || '', required: f.required }))}
                       richtextKey="summary"
                       richtextPlaceholder="..."
-                      itemRender={sidebarMenu.find(s => s.key === key)?.itemRender}
-                      items={sectionItems?.[key as keyof Section] ?? []}
-                      setItems={(items: SectionItem[]) => updateSectionItems(key, items)}
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      itemRender={sidebarMenu.find(s => s.key === key)?.itemRender as any}
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      items={(sectionItems?.[key as keyof Section] ?? []).map(item => ({...item, id: String(item.id)})) as any}
+                      setItems={(items) => updateSectionItems(key, items as SectionItem[])}
                       className={isLast ? 'mb-0' : ''}
+                      onModalStateChange={setIsAnyModalOpen}
                     />
                   </div>
                 )}
@@ -193,100 +202,28 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     );
   }
 
+  // 移动端适配
   if (isMobile) {
     return (
-      <main className="flex h-screen bg-black text-white flex-1">
-        <div className='flex-1 flex items-center justify-center bg-black relative'>
-          <ResumePreviewPanel
-            info={info}
-            sections={sectionItems}
-            sectionOrder={sectionOrder.map(s => s.key)}
-            previewScale={0.8}
-            setPreviewScale={setPreviewScale}
-          />
-        </div>
-
-        <div className="fixed w-[90vw] top-6 left-1/2 -translate-x-1/2 z-10 flex items-center justify-between gap-4">
-          <Button onClick={() => setLeftPanelOpen(true)} className="rounded-full h-12 w-12"><FiEdit /></Button>
-          <Link href="/dashboard" className="rounded-full h-12 w-12 flex items-center justify-center">
-            <Image src="/simple-logo.png" alt="Magic Resume Logo" width={50} height={50} />
-          </Link>
-          <Button onClick={() => setRightPanelOpen(true)} className="rounded-full h-12 w-12"><FiLayout /></Button>
-        </div>
-
-        <AnimatePresence>
-          {leftPanelOpen && (
-             <>
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="fixed inset-0 bg-black/50 z-20"
-                    onClick={() => setLeftPanelOpen(false)}
-                />
-                <motion.div
-                    initial={{ x: '-100%' }}
-                    animate={{ x: 0 }}
-                    exit={{ x: '-100%' }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                    className="fixed top-0 left-0 h-full w-[300px] z-30"
-                >
-                    <ResumeContent
-                        renderSections={renderSections}
-                        handleSave={handleSave}
-                        onShowJson={openJsonModal}
-                    />
-                </motion.div>
-             </>
-          )}
-          {rightPanelOpen && (
-            <>
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="fixed inset-0 bg-black/50 z-20"
-                    onClick={() => setRightPanelOpen(false)}
-                />
-                <motion.div
-                    initial={{ x: '100%' }}
-                    animate={{ x: 0 }}
-                    exit={{ x: '100%' }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                    className="fixed top-0 right-0 h-full w-[280px] z-30"
-                >
-                    <TemplatePanel
-                        rightCollapsed={false}
-                        setRightCollapsed={() => {}}
-                    />
-                </motion.div>
-            </>
-          )}
-        </AnimatePresence>
-        <Modal
-            isOpen={isJsonModalOpen}
-            onClose={closeJsonModal}
-            title="Resume JSON Data"
-        >
-          <div className="relative">
-            <button
-              onClick={handleCopyJson}
-              className="absolute top-3 right-3 p-2 text-gray-400 rounded-md hover:bg-neutral-700 hover:text-white transition-colors"
-              aria-label="Copy JSON to clipboard"
-            >
-              <FaCopy />
-            </button>
-            <pre className="bg-neutral-800 text-sm text-gray-300 p-4 rounded-md whitespace-pre-wrap break-all max-h-[80vh] overflow-y-auto">
-              <code>
-                {JSON.stringify(activeResume, null, 2)}
-              </code>
-            </pre>
-          </div>
-        </Modal>
-      </main>
-    )
+      <MobileResumEdit
+        info={info}
+        sectionItems={sectionItems}
+        sectionOrder={sectionOrder}
+        activeResume={activeResume}
+        setPreviewScale={setPreviewScale}
+        leftPanelOpen={leftPanelOpen}
+        setLeftPanelOpen={setLeftPanelOpen}
+        rightPanelOpen={rightPanelOpen}
+        setRightPanelOpen={setRightPanelOpen}
+        isJsonModalOpen={isJsonModalOpen}
+        closeJsonModal={closeJsonModal}
+        openJsonModal={openJsonModal}
+        handleCopyJson={handleCopyJson}
+        renderSections={renderSections}
+        handleSave={handleSave}
+        onShowAI={openAIModal}
+      />
+    );
   }
 
   return (
@@ -305,6 +242,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
           sectionOrder={sectionOrder.map(s => s.key)}
           previewScale={previewScale}
           setPreviewScale={setPreviewScale}
+          onShowAI={openAIModal}
         />
       </div>
       <TemplatePanel
@@ -324,13 +262,12 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
           >
             <FaCopy />
           </button>
-          <pre className="bg-neutral-800 text-sm text-gray-300 p-4 rounded-md whitespace-pre-wrap break-all max-h-[80vh] overflow-y-auto">
-            <code>
-              {JSON.stringify(activeResume, null, 2)}
-            </code>
+          <pre className="text-sm bg-white p-4 rounded-md overflow-x-auto h-[80vh]">
+            {activeResume && <ReactJsonView src={activeResume} />}
           </pre>
         </div>
       </Modal>
+      <AIModal isOpen={isAIModalOpen} onClose={closeAIModal} resumeData={activeResume} onApplyChanges={updateSections}/>
     </main>
   );
 } 

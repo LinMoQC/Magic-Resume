@@ -50,9 +50,10 @@ type SortableItemProps<T extends BaseItem> = {
   toggleVisibility: (index: number) => void;
   itemRender?: (item: T) => React.ReactNode;
   label: string;
+  disabled?: boolean;
 };
 
-function SortableItem<T extends BaseItem>({ id, item, index, handleEdit, handleDelete, handleCopy, toggleVisibility, itemRender }: SortableItemProps<T>) {
+function SortableItem<T extends BaseItem>({ id, item, index, handleEdit, handleDelete, handleCopy, toggleVisibility, itemRender, disabled }: SortableItemProps<T>) {
   const {
     attributes,
     listeners,
@@ -60,7 +61,7 @@ function SortableItem<T extends BaseItem>({ id, item, index, handleEdit, handleD
     transform,
     transition,
     isDragging,
-  } = useSortable({ id });
+  } = useSortable({ id, disabled });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -70,7 +71,7 @@ function SortableItem<T extends BaseItem>({ id, item, index, handleEdit, handleD
 
   return (
     <div ref={setNodeRef} style={style} className={cn("relative flex items-center gap-2 mb-2 p-3 bg-neutral-900 rounded-md")}>
-      <div {...attributes} {...listeners} className="cursor-grab p-2">
+      <div {...attributes} {...listeners} className={cn("p-2", disabled ? "cursor-default" : "cursor-grab")}>
         <FaGripVertical />
       </div>
       <div className="flex-grow">
@@ -125,6 +126,7 @@ interface SectionListWithModalProps<T extends BaseItem> {
   setItems: (items: T[]) => void;
   itemRender?: (item: T) => React.ReactNode;
   className?: string;
+  onModalStateChange?: (isOpen: boolean) => void;
 }
 
 export default function SectionListWithModal<T extends BaseItem>({
@@ -137,6 +139,7 @@ export default function SectionListWithModal<T extends BaseItem>({
   setItems,
   itemRender,
   className,
+  onModalStateChange,
 }: SectionListWithModalProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState<T | null>(null);
@@ -153,12 +156,14 @@ export default function SectionListWithModal<T extends BaseItem>({
     setCurrentItem(item ? { ...item } : { id: Date.now().toString(), visible: true, ...fields.reduce((acc, f) => ({ ...acc, [f.name]: '' }), {} as Record<string, string>), [richtextKey]: '' } as T);
     setCurrentIndex(index);
     setIsOpen(true);
+    onModalStateChange?.(true);
   };
 
   const handleCloseModal = () => {
     setIsOpen(false);
     setCurrentItem(null);
     setCurrentIndex(null);
+    onModalStateChange?.(false);
   };
 
   const handleSave = () => {
@@ -257,6 +262,7 @@ export default function SectionListWithModal<T extends BaseItem>({
               toggleVisibility={() => toggleVisibility(index)}
               itemRender={itemRender}
               label={label}
+              disabled={isOpen}
             />
           ))}
         </SortableContext>
