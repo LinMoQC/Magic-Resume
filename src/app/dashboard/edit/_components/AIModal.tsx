@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Bot, Sparkles, FileText, Briefcase, Wand2, Paperclip, CheckCircle, AlertTriangle, ArrowRight, Eye, Code, Loader2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Bot, Sparkles, FileText, Briefcase, Wand2, Paperclip, CheckCircle, AlertTriangle, Eye, Code, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useSettingStore } from '@/store/useSettingStore';
 import { createJdAnalysisChain, createItemOptimizationChain, JdAnalysis } from '@/lib/aiLab/chains';
@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { AnimatePresence, motion } from 'framer-motion';
-import { produce, Draft } from 'immer';
+import { produce } from 'immer';
 import { Resume, Section } from '@/store/useResumeStore';
 import ResumePreview from './ResumePreview';
 import ReactJsonView from '@microlink/react-json-view';
@@ -234,7 +234,7 @@ export default function AIModal({ isOpen, onClose, resumeData, onApplyChanges }:
                         {!isLoading && !optimizedResume && (
                           <div className="flex-1 flex flex-col items-center justify-center text-neutral-500 text-center p-4">
                             <AlertTriangle size={48} className="mb-4" />
-                            <p>请在左侧粘贴JD，然后点击"开始智能优化"</p>
+                            <p>请在左侧粘贴JD，然后点击&quot;开始智能优化&quot;</p>
                           </div>
                         )}
                         {optimizedResume && (

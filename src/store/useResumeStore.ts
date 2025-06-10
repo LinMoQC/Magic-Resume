@@ -19,7 +19,7 @@ export type InfoType = {
 export type SectionItem = {
   id: string;
   visible: boolean;
-  [key: string]: any;
+  [key: string]: string | boolean;
 };
 
 export type Section = {

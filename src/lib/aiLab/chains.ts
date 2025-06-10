@@ -1,8 +1,10 @@
 import { PromptTemplate } from "@langchain/core/prompts";
 import { z } from "zod";
 import { getModel } from "./aiService";
-import { JsonOutputParser } from "@langchain/core/output_parsers";
+import { StructuredOutputParser } from "langchain/output_parsers";
 import { resumeOptimizePrompt } from "@/prompts/agent-modify-prompt";
+import { jdAnalysisPrompt } from "@/prompts/jd-analysis-prompt";
+import { RunnablePassthrough } from "@langchain/core/runnables";
 
 const jdAnalysisSchema = z.object({
   keySkills: z.array(z.string()).describe("List of key skills mentioned in the job description, e.g., 'React', 'Node.js', 'Project Management'"),
@@ -10,10 +12,8 @@ const jdAnalysisSchema = z.object({
   qualifications: z.array(z.string()).describe("List of key qualifications and experience requirements."),
 });
 
-// Exporting the type for external use
 export type JdAnalysis = z.infer<typeof jdAnalysisSchema>;
 
-// Zod schema for the item optimization output
 const itemOptimizationSchema = z.object({
   optimizedSummary: z.string().describe("The rewritten, impactful resume item summary."),
 });
@@ -34,7 +34,6 @@ interface ChainConfig {
  * @returns A runnable chain that takes a JD string and outputs a structured object.
  */
 export const createJdAnalysisChain = ({ apiKey, baseUrl, modelName, maxTokens }: ChainConfig) => {
-  // 1. Initialize the model with all its configuration
   const model = getModel({ 
     apiKey, 
     baseUrl, 
@@ -43,30 +42,16 @@ export const createJdAnalysisChain = ({ apiKey, baseUrl, modelName, maxTokens }:
     streaming: true,
   });
 
-  const prompt = PromptTemplate.fromTemplate(
-`You are an expert HR analyst. Analyze the following job description and extract the key information.
+  const parser = StructuredOutputParser.fromZodSchema(jdAnalysisSchema);
 
-Job Description:
-{jd}
-
-IMPORTANT: Your response MUST be a valid JSON object that conforms to the following Zod schema:
-\`\`\`json
-{{
-  "keySkills": ["List of key skills mentioned in the job description, e.g., 'React', 'Node.js', 'Project Management'"],
-  "responsibilities": ["List of key responsibilities and tasks."],
-  "qualifications": ["List of key qualifications and experience requirements."]
-}}
-\`\`\`
-
-Return ONLY the JSON object, without any markdown formatting or extra text.
-
-JSON Output:`
-  );
+  const chain = RunnablePassthrough.assign({
+    format_instructions: () => parser.getFormatInstructions(),
+  })
+    .pipe(PromptTemplate.fromTemplate(jdAnalysisPrompt))
+    .pipe(model)
+    .pipe(parser);
   
-  const parser = new JsonOutputParser<JdAnalysis>();
-
-  // 3. Pipe the components together
-  return prompt.pipe(model).pipe(parser);
+  return chain;
 };
 
 /**
@@ -81,9 +66,14 @@ export const createItemOptimizationChain = ({ apiKey, baseUrl, modelName, maxTok
     maxTokens,
   });
 
-  const prompt = PromptTemplate.fromTemplate(resumeOptimizePrompt);
+  const parser = StructuredOutputParser.fromZodSchema(itemOptimizationSchema);
 
-  const parser = new JsonOutputParser<ItemOptimizationOutput>();
+  const chain = RunnablePassthrough.assign({
+    format_instructions: () => parser.getFormatInstructions(),
+  })
+    .pipe(PromptTemplate.fromTemplate(resumeOptimizePrompt))
+    .pipe(model)
+    .pipe(parser);
 
-  return prompt.pipe(model).pipe(parser);
+  return chain;
 }; 

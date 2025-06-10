@@ -33,7 +33,6 @@ import MobileResumEdit from '../_components/mobile/MobileResumEdit';
 import { MagicDebugger } from '@/lib/debuggger';
 import { generateSnapshot } from '@/lib/utils';
 import AIModal from '../_components/AIModal';
-import Editor from '../_components/Editor';
 import ReactJsonView from '@microlink/react-json-view';
 const ResumePreviewPanel = dynamic(() => import('../_components/ResumePreviewPanel'), { ssr: false });
 

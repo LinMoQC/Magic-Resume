@@ -10,7 +10,6 @@ import Modal from "@/components/ui/Modal";
 import Image from "next/image";
 import { InfoType, Section, Resume } from "@/store/useResumeStore";
 import React from "react";
-import { OutputData } from '@editorjs/editorjs';
 import ReactJsonView from '@microlink/react-json-view'
 
 interface MobileResumEditProps {
