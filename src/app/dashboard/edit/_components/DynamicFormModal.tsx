@@ -41,6 +41,7 @@ export default function DynamicFormModal<T extends Item>({
   richtextPlaceholder,
 }: DynamicFormModalProps<T>) {
   const [formData, setFormData] = useState<Partial<T>>({});
+  const [isPolishing, setIsPolishing] = useState(false);
 
   useEffect(() => {
     if (currentItem) {
@@ -113,6 +114,8 @@ export default function DynamicFormModal<T extends Item>({
               content={String(formData[richtextKey] || '')}
               onChange={handleQuillChange}
               placeholder={richtextPlaceholder}
+              isPolishing={isPolishing}
+              setIsPolishing={setIsPolishing}
             />
           </div>
         )}
