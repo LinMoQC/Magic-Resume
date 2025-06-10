@@ -33,6 +33,8 @@ import MobileResumEdit from '../_components/mobile/MobileResumEdit';
 import { MagicDebugger } from '@/lib/debuggger';
 import { generateSnapshot } from '@/lib/utils';
 import AIModal from '../_components/AIModal';
+import Editor from '../_components/Editor';
+import ReactJsonView from '@microlink/react-json-view';
 const ResumePreviewPanel = dynamic(() => import('../_components/ResumePreviewPanel'), { ssr: false });
 
 type ResumeEditProps = {
@@ -62,6 +64,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     updateInfo,
     setSectionOrder: updateSectionOrder,
     updateSectionItems,
+    updateSections,
     addCustomField,
     removeCustomField,
     rightCollapsed,
@@ -72,6 +75,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
   const { isMobile } = useMobile();
   const [leftPanelOpen, setLeftPanelOpen] = useState(false);
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
+  const [isAnyModalOpen, setIsAnyModalOpen] = useState(false);
 
   const [previewScale, setPreviewScale] = useState(1);
   const [isJsonModalOpen, setIsJsonModalOpen] = useState(false);
@@ -161,7 +165,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
           {(sectionOrder || []).map(({ key }, index) => {
             const isLast = index === (sectionOrder?.length || 0) - 1;
             return (
-              <SortableSection key={key} id={key} disabled={key === 'basics'}>
+              <SortableSection key={key} id={key} disabled={key === 'basics' || isAnyModalOpen}>
                 {key === 'basics' && (
                   <div ref={sectionRefs.basics} className={`scroll-mt-24 ${isLast ? '' : 'mb-8'}`} id="basics">
                     <h2 className="text-2xl font-bold flex items-center gap-3 mb-8"><FaUser className="text-[16px]" /> Basics</h2>
@@ -181,10 +185,13 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
                       fields={(dynamicFormFields[key as keyof typeof dynamicFormFields] || []).map(f => ({ name: f.key, label: f.label, placeholder: f.placeholder || '', required: f.required }))}
                       richtextKey="summary"
                       richtextPlaceholder="..."
-                      itemRender={sidebarMenu.find(s => s.key === key)?.itemRender}
-                      items={sectionItems?.[key as keyof Section] ?? []}
-                      setItems={(items: SectionItem[]) => updateSectionItems(key, items)}
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      itemRender={sidebarMenu.find(s => s.key === key)?.itemRender as any}
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      items={(sectionItems?.[key as keyof Section] ?? []).map(item => ({...item, id: String(item.id)})) as any}
+                      setItems={(items) => updateSectionItems(key, items as SectionItem[])}
                       className={isLast ? 'mb-0' : ''}
+                      onModalStateChange={setIsAnyModalOpen}
                     />
                   </div>
                 )}
@@ -256,12 +263,12 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
           >
             <FaCopy />
           </button>
-          <pre className="text-sm bg-neutral-800 p-4 rounded-md overflow-x-auto">
-            <code>{JSON.stringify(activeResume, null, 2)}</code>
+          <pre className="text-sm bg-white p-4 rounded-md overflow-x-auto h-[80vh]">
+            {activeResume && <ReactJsonView src={activeResume} />}
           </pre>
         </div>
       </Modal>
-      <AIModal isOpen={isAIModalOpen} onClose={closeAIModal} />
+      <AIModal isOpen={isAIModalOpen} onClose={closeAIModal} resumeData={activeResume} onApplyChanges={updateSections}/>
     </main>
   );
 } 

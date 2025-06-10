@@ -60,6 +60,7 @@ type ResumeState = {
   updateInfo: (info: Partial<InfoType>) => void;
   setSectionOrder: (sectionOrder: SectionOrder[]) => void;
   updateSectionItems: (key: string, items: SectionItem[]) => void;
+  updateSections: (sections: Section) => void;
   updateTemplate: (template: string) => void;
   updateThemeColor: (themeColor: string) => void;
   updateTypography: (typography: string) => void;
@@ -220,6 +221,15 @@ const useResumeStore = create<ResumeState>((set, get) => ({
           ...state.activeResume,
           sections: { ...state.activeResume.sections, [key]: items }
         }
+      };
+    });
+  },
+
+  updateSections: (sections) => {
+    set(state => {
+      if (!state.activeResume) return state;
+      return {
+        activeResume: { ...state.activeResume, sections }
       };
     });
   },

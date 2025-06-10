@@ -8,14 +8,16 @@ import ResumeContent from "../../[id]/ResumeContent";
 import TemplatePanel from "../../[id]/TemplatePanel";
 import Modal from "@/components/ui/Modal";
 import Image from "next/image";
-import { InfoType, Section } from "@/store/useResumeStore";
+import { InfoType, Section, Resume } from "@/store/useResumeStore";
 import React from "react";
+import { OutputData } from '@editorjs/editorjs';
+import ReactJsonView from '@microlink/react-json-view'
 
 interface MobileResumEditProps {
     info: InfoType;
     sectionItems: Section;
     sectionOrder: { key: string }[];
-    activeResume: any;
+    activeResume: Resume | null;
     setPreviewScale: (scale: number) => void;
     leftPanelOpen: boolean;
     setLeftPanelOpen: (open: boolean) => void;
@@ -132,10 +134,8 @@ export default function MobileResumEdit({
                 >
                     <FaCopy />
                 </button>
-                <pre className="bg-neutral-800 text-sm text-gray-300 p-4 rounded-md whitespace-pre-wrap break-all max-h-[80vh] overflow-y-auto">
-                    <code>
-                        {JSON.stringify(activeResume, null, 2)}
-                    </code>
+                <pre className="text-sm bg-neutral-800 p-4 rounded-md overflow-x-auto">
+                    {activeResume && <ReactJsonView src={activeResume} />}
                 </pre>
             </div>
         </Modal>

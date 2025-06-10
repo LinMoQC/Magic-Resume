@@ -9,14 +9,15 @@ interface Props {
   info: InfoType;
   sections: Section;
   sectionOrder: string[];
+  customStyle?: React.CSSProperties;
 }
 
-export default function ResumePreview({ info, sections, sectionOrder }: Props) {
+export default function ResumePreview({ info, sections, sectionOrder,customStyle }: Props) {
   return (
     <div
       id="resume-to-export"
       className="mx-auto max-w-[794px] w-[794px] bg-white text-black rounded-md shadow-2xl relative font-serif min-h-[1100px]"
-      style={{ fontFamily: '"IBM Plex Serif", serif' }}
+      style={{ fontFamily: '"IBM Plex Serif", serif',...customStyle }}
     >
       <div className="p-3 space-y-4">
         {/* 顶部信息 */}
@@ -74,11 +75,12 @@ export default function ResumePreview({ info, sections, sectionOrder }: Props) {
                   {items.map((item, idx) => (
                     <div className="space-y-2" key={idx}>
                       <div>
-                        <div className="font-bold">{item.name || item.title || item.platform || item.certificate || item.language || item.skill || item.award || Object.values(item)[0]}</div>
-                        {item.level && <div>{item.level}</div>}
-                        {item.date && <div>{item.date}</div>}
-                        {item.description && <div className="" dangerouslySetInnerHTML={{ __html: String(item.description) }} />}
-                        {item.summary && <div className="wysiwyg" dangerouslySetInnerHTML={{ __html: String(item.summary) }} />}
+                        <div className="font-bold">
+                          {String(item.name || item.title || item.platform || item.certificate || item.language || item.skill || item.award || Object.values(item)[0])}
+                        </div>
+                        {item.level && <div>{String(item.level)}</div>}
+                        {item.date && <div>{String(item.date)}</div>}
+                        {item?.summary && <div className="wysiwyg" dangerouslySetInnerHTML={{ __html: String(item.summary) }} />}
                       </div>
                     </div>
                   ))}

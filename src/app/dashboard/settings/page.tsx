@@ -94,6 +94,8 @@ export default function Settings() {
                 id="maxTokens"
                 type="number"
                 value={maxTokens}
+                max={65536}
+                min={1024}
                 onChange={(e) => setMaxTokens(parseInt(e.target.value, 10))}
                 placeholder="1024"
                 className="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-4 py-2 focus:ring-sky-500 focus:border-sky-500"
@@ -106,7 +108,7 @@ export default function Settings() {
       <AnimatePresence>
         {isDirty && (
           <motion.div
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 w-auto bg-neutral-800 border border-neutral-700 rounded-3xl shadow-2xl px-4 py-2 flex items-center justify-between z-50"
+            className="rounded-3xl fixed bottom-6 left-1/2 -translate-x-1/2 w-auto bg-neutral-800 border border-neutral-700 shadow-2xl px-4 py-2 flex items-center justify-between z-50"
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}

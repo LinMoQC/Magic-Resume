@@ -1,10 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { FaPlus, FaDownload, FaRegFileAlt, FaRegClone, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaPlus, FaDownload, FaRegClone, FaEdit, FaTrash } from 'react-icons/fa';
 import { Resume } from '@/store/useResumeStore';
 import { formatTime } from '@/lib/utils';
 import Image from 'next/image';
@@ -38,7 +37,6 @@ function ResumeCard({
   onDuplicate: (id: string) => void,
   onRename: (resume: Resume) => void,
 }) {
-  const router = useRouter();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   useEffect(() => {

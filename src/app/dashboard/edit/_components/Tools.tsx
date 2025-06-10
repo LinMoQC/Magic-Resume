@@ -20,14 +20,16 @@ export function Tools({ isMobile, zoomIn, zoomOut, resetTransform, info, onShowA
         ? "fixed bottom-6 left-1/2 -translate-x-1/2 flex-row p-2 rounded-full bg-neutral-900/70 border border-neutral-700 backdrop-blur-sm"
         : "absolute bottom-10 right-4 flex-col"
     )}>
-        <button
+
+      {!isMobile &&         <button
         className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"
         title="AI Assistant"
         type="button"
         onClick={onShowAI}
       >
         <Bot size={18}/>
-      </button>
+      </button>}
+      
       <button
         className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"
         onClick={() => handleExport(info)}
