@@ -4,8 +4,8 @@
     "llm": {
       "title": "OpenAI/Ollama 集成",
       "description1": "您可以利用 OpenAI API 来帮助您生成内容，或在撰写简历时改进您的写作。",
-      "description2": "您可以选择<1>获取您自己的 OpenAI API 密钥</1>。此密钥使您能够根据自己的需要使用该 API。或者，如果您希望完全禁用 Reactive Resume 中的 AI 功能，只需从设置中删除该密钥即可。",
-      "description3": "您还可以通过将 API 密钥设置为 `sk-1234567890abcdef` 并将基础 URL 设置为您的 Ollama URL（例如 `http://localhost:11434/v1`）来与 Ollama 集成。您还可以根据自己的喜好选择模型并设置最大令牌数。",
+      "description2": "您可以选择<1>获取您自己的 OpenAI API 密钥</1>。此密钥使您能够根据需要利用 API。或者，如果您希望完全禁用 Reactive Resume 中的 AI 功能，您可以从设置中删除该密钥。",
+      "description3": "您还可以通过将 API 密钥设置为 `sk-1234567890abcdef` 并将 Base URL 设置为您的 Ollama URL（即 `http://localhost:11434/v1`）来与 Ollama 集成。您还可以根据自己的喜好选择模型并设置最大令牌数。",
       "apiKeyLabel": "OpenAI/Ollama API 密钥",
       "baseUrlLabel": "基础 URL",
       "modelLabel": "模型",
@@ -13,7 +13,7 @@
       "modelPlaceholder": "选择一个模型"
     },
     "notifications": {
-      "unsavedChanges": "有未保存的更改",
+      "unsavedChanges": "未保存的更改",
       "settingsSaved": "设置已保存！",
       "changesReset": "更改已重置。"
     },
@@ -24,46 +24,66 @@
   },
   "landing": {
     "nav": {
-      "goToApp": "进入应用"
+      "goToApp": "进入应用",
+      "starOnGithub": "在 GitHub 上点赞"
     },
     "hero": {
-      "title": "现代化的 AI 驱动<1/>简历构建器",
-      "subtitle": "在几分钟内创建专业简历。利用 AI 撰写引人入胜的内容，从时尚的模板中进行选择，找到您梦想的工作。",
-      "getStarted": "免费开始",
-      "morphingTexts": {
-        "modernResume": "现代简历",
-        "aiPowered": "AI 驱动",
-        "beautifulTemplates": "精美模板",
-        "getStarted": "即刻开始",
-        "standOut": "脱颖而出"
-      }
+      "title": "现代化的 AI 简历构建器",
+      "subtitle": "用 AI 的力量打造完美的简历。简单、智能、安全。",
+      "getStarted": "开始使用",
+      "browseTemplates": "浏览模板",
+      "tag": "✨ 智能简历创建"
+    },
+    "morphingTexts": {
+      "simpleAndSmart": "简单 & 智能",
+      "aiPowered": "AI 驱动",
+      "beautifulTemplates": "精美模板",
+      "freeAndSecure": "免费 & 安全"
     },
     "features": {
+      "main": {
+        "title": "为什么选择 Magic Resume？",
+        "subtitle": "我们提供一站式简历解决方案，让您的求职之旅更顺畅"
+      },
       "ai": {
-        "title": "AI 助手",
-        "description": "克服写作障碍。通过我们集成的 OpenAI/Ollama 支持，生成专业的摘要和描述。"
+        "tag": {
+          "name": "AI",
+          "description": "智能润色"
+        },
+        "title": "智能检测，专业建议",
+        "description": "内置智能语法检查，自动识别不当表述，提供专业修改建议，让您的简历更出色。",
+        "benefit1": "智能增强",
+        "benefit2": "语法检查",
+        "alt": "AI 增强预览"
       },
-      "preview": {
-        "title": "实时预览",
-        "description": "在您输入时实时查看更改。不再需要猜测您的最终简历会是什么样子。"
-      },
-      "dnd": {
-        "title": "拖放界面",
-        "description": "通过直观的拖放界面，轻松重新排序各个部分以突出您的优势。"
+      "export": {
+        "tag": "导出多种格式",
+        "description": "支持多种格式导出，方便分享和备份。",
+        "alt": "导出格式示例"
       },
       "privacy": {
-        "title": "隐私优先",
-        "description": "你的数据只属于你。我们尊重您的隐私并确保您的信息安全。"
+        "tag": {
+          "name": "安全",
+          "description": "数据安全，隐私至上"
+        },
+        "description": "所有简历数据完全本地存储，无需担心隐私泄露。支持数据导出备份，确保您的简历数据永远可用。",
+        "benefit1": "本地文件存储",
+        "benefit2": "多种导出格式"
       }
     },
+    "contact": {
+      "title": "联系我们",
+      "subtitle": "有任何问题或反馈吗？我们很乐意倾听您的声音。请联系我们，我们会尽快给您回复。",
+      "button": "联系我们"
+    },
     "footer": {
-      "copyright": "© {{year}} Magic Resume. 版权所有。"
+      "copyright": "© {{year}} Magic Resume. 保留所有权利。"
     }
   },
   "modals": {
     "dynamicForm": {
-      "editTitle": "编辑条目",
-      "addTitle": "添加新条目",
+      "editTitle": "编辑项目",
+      "addTitle": "添加新项目",
       "descriptionLabel": "描述",
       "cancelButton": "取消",
       "saveButton": "保存"
@@ -74,60 +94,60 @@
         "analyze": "简历分析"
       },
       "title": "AI 实验室",
-      "description": "分析并优化您的简历，以匹配目标岗位要求，或获取专业的Lighthouse风格分析报告。",
+      "description": "分析和优化您的简历以匹配目标工作要求，或获取专业的灯塔式分析报告。",
       "optimizeTab": {
-        "jdLabel": "目标岗位描述 (JD)",
-        "jdPlaceholder": "在此处粘贴目标岗位的JD，AI将根据JD优化您的简历...",
+        "jdLabel": "目标职位描述 (JD)",
+        "jdPlaceholder": "在此处粘贴目标职位的 JD，AI 将据此优化您的简历...",
         "optimizeButton": "开始优化",
         "optimizingButton": "优化中...",
         "previewButton": "预览",
-        "rawJsonButton": "查看原始JSON",
+        "rawJsonButton": "查看原始 JSON",
         "applyChangesButton": "应用更改",
         "revertChangesButton": "还原更改",
         "outputTitle": "优化建议",
         "jsonButton": "JSON",
         "optimizationProgress": {
           "analyzingJD": "正在分析职位描述...",
-          "preparing": "准备优化 {{count}} 个条目...",
-          "optimizingItem": "已优化 {{sectionKey}} 条目 {{completed}} / {{total}}...",
+          "preparing": "准备优化 {{count}} 个项目...",
+          "optimizingItem": "已优化 {{sectionKey}} 项目 {{completed}} / {{total}}...",
           "done": "完成！"
         }
       },
       "analysisTab": {
-        "title": "简历健康度分析",
+        "title": "简历健康分析",
         "analyzeButton": "分析简历",
         "analyzingButton": "分析中...",
         "viewReportButton": "查看报告",
         "reAnalyzeButton": "重新分析",
         "analysisProgress": {
           "start": "正在启动分析引擎...",
-          "impact": "评估简历的「影响与行动力」...",
-          "quantification": "检查「量化成就」的使用情况...",
-          "clarity": "分析「清晰与可读性」...",
-          "completeness": "审核「完整性与结构」...",
-          "summary": "评估「专业概述」质量...",
-          "finalizing": "综合评分并生成报告...",
+          "impact": "正在评估简历的'影响力与行动'...",
+          "quantification": "正在检查'可量化成就'的使用情况...",
+          "clarity": "正在分析'清晰度与可读性'...",
+          "completeness": "正在审查'完整性与结构'...",
+          "summary": "正在评估'专业摘要'的质量...",
+          "finalizing": "正在编译分数并生成报告...",
           "done": "分析完成！"
         },
         "placeholder": {
-          "title": "获取专业分析报告",
-          "description": "我们的 AI 将对您的简历进行详细分析，提供关于影响力、清晰度和关键词优化等方面的评分和可行的反馈意见。"
+          "title": "获取专业分析",
+          "description": "我们的 AI 将对您的简历进行详细分析，提供关于影响力、清晰度和关键词优化等方面的分数和可操作反馈。"
         }
       },
       "notifications": {
         "apiKeyMissing": "未找到 API 密钥。请在设置页面中设置。",
         "jdMissing": "请提供职位描述。",
         "optimizationComplete": "AI 优化完成！",
-        "optimizationFailed": "优化失败: {{error}}",
+        "optimizationFailed": "优化失败：{{error}}",
         "analysisComplete": "分析报告已生成！",
-        "analysisFailed": "分析失败: {{error}}",
+        "analysisFailed": "分析失败：{{error}}",
         "unknownError": "发生未知错误。"
       },
       "optimizePlaceholder": {
         "title": "准备好提升您的简历了吗？",
-        "description": "粘贴职位描述并点击「开始优化」，让 AI 为您的梦想工作量身定制简历。"
+        "description": "粘贴职位描述并点击\"开始优化\"，让 AI 为您的梦想工作量身定制简历。"
       },
-      "progressText": "AI正在全力分析和创作中..."
+      "progressText": "AI 正在努力进行分析和创作..."
     }
   },
   "resumePreview": {
@@ -141,13 +161,13 @@
     "resetZoom": "重置缩放"
   },
   "sections": {
-    "projects": "项目经历",
-    "education": "教育背景",
-    "skills": "专业技能",
-    "languages": "语言能力",
+    "projects": "项目",
+    "education": "教育",
+    "skills": "技能",
+    "languages": "语言",
     "certificates": "证书",
-    "experience": "工作经历",
-    "profiles": "个人链接",
+    "experience": "经历",
+    "profiles": "个人资料",
     "shared": {
       "untitled": "无标题",
       "show": "显示",
@@ -155,18 +175,18 @@
       "edit": "编辑",
       "copy": "复制",
       "remove": "移除",
-      "addItem": "添加",
+      "addItem": "添加项目",
       "openMenu": "打开菜单",
       "editTitle": "编辑 {{label}}",
-      "addTitle": "添加 {{label}}"
+      "addTitle": "添加新的 {{label}}"
     },
     "notifications": {
-      "requiredFields": "请填写以下必填项: {{fields}}",
-      "sectionUpdated": "{{label}} 部分更新成功。",
-      "sectionAdded": "{{label}} 部分添加成功。",
-      "itemRemoved": "条目已成功移除。",
-      "itemCopied": "条目已成功复制。",
-      "visibilityToggled": "条目可见性已{{status}}。"
+      "requiredFields": "请填写以下必填字段：{{fields}}",
+      "sectionUpdated": "{{label}} 部分已成功更新。",
+      "sectionAdded": "{{label}} 部分已成功添加。",
+      "itemRemoved": "项目已成功移除。",
+      "itemCopied": "项目已成功复制。",
+      "visibilityToggled": "项目可见性 {{status}}。"
     }
   },
   "avatarAlt": "头像",
@@ -176,7 +196,7 @@
   },
   "editPage": {
     "sections": {
-      "basics": "基础信息"
+      "basics": "基本信息"
     },
     "notifications": {
       "jsonDownloadStarted": "JSON 文件下载已开始！"
@@ -247,18 +267,18 @@
   "basicForm": {
     "fields": {
       "avatar": "头像",
-      "fullName": "名称",
+      "fullName": "全名",
       "headline": "标题",
-      "email": "电子邮箱",
-      "website": "个人网站",
-      "phoneNumber": "电话号码",
-      "address": "所在地",
+      "email": "电子邮件",
+      "website": "网站",
+      "phoneNumber": "电话",
+      "address": "地点",
       "link": "链接"
     },
     "customFields": {
       "title": "自定义字段",
-      "namePlaceholder": "字段名称（例如，领英）",
-      "valuePlaceholder": "值（例如，你的领英网址）",
+      "namePlaceholder": "字段名称（例如，LinkedIn）",
+      "valuePlaceholder": "值（例如，your-linkedin-url）",
       "addButton": "添加自定义字段"
     },
     "avatarAlt": "头像"
@@ -327,6 +347,56 @@
       "resumeDuplicated": "简历 \"{{name}}\" 已成功复制。",
       "resumeDeleted": "简历 \"{{name}}\" 已删除。",
       "resumeSaved": "简历已保存！"
+    }
+  },
+  "report": {
+    "title": "简历分析报告",
+    "subtitle": "由 AI 驱动，灵感源自 Lighthouse",
+    "overallScore": "综合得分",
+    "detailedAnalysis": "详细分析",
+    "suggestions": "改进建议:",
+    "categories": {
+      "impactAndActionability": "影响与行动力",
+      "quantifiableAchievements": "量化成就",
+      "clarityAndReadability": "清晰与可读性",
+      "completenessAndStructure": "完整性与结构",
+      "educationProfile": "教育背景"
+    }
+  },
+  "builder": {
+    "sections": {
+      "title": "板块",
+      "add": "添加板块",
+      "remove": "移除板块",
+      "reorder": "重新排序板块"
+    },
+    "templates": {
+      "title": "模板",
+      "change": "更换模板"
+    },
+    "layout": {
+      "title": "布局",
+      "change": "调整布局"
+    },
+    "settings": {
+      "title": "设置",
+      "change": "打开设置"
+    }
+  },
+  "rightSidebar": {
+    "import": {
+      "title": "导入",
+      "linkedin": "从 LinkedIn 导入",
+      "json": "从 JSON 文件导入"
+    },
+    "export": {
+      "title": "导出",
+      "pdf": "导出为 PDF",
+      "json": "导出为 JSON"
+    },
+    "share": {
+      "title": "分享",
+      "link": "分享公共链接"
     }
   }
 } 

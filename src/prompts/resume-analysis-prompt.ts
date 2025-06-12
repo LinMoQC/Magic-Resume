@@ -26,11 +26,11 @@ export const resumeAnalysisPrompt = `You are an elite career coach and resume an
     *   **69-50**: Missing a key section like Work Experience or Education.
     *   **<50**: Missing multiple key sections. The structure is chaotic.
 
-5.  **Professional Summary (Weight: 10%)**:
-    *   **100-90**: A compelling, concise (2-3 sentences) summary that immediately grabs attention and highlights the candidate's key value proposition.
-    *   **89-70**: A decent summary, but it might be too generic, too long, or not impactful enough.
-    *   **69-50**: The summary is just a list of skills or a generic objective statement.
-    *   **<50**: No summary, or the summary is very poorly written.
+5.  **Education Profile (Weight: 10%)**:
+    *   **100-90**: Top-tier university (e.g., Ivy League, QS Top 50) with a highly relevant major and excellent academic record.
+    *   **89-70**: Well-regarded university with a relevant major and solid academic standing.
+    *   **69-50**: University education is present, but the institution or major might be less relevant to the target role.
+    *   **<50**: No formal higher education listed, or information is very sparse.
 
 **Task:**
 Analyze the following resume data based on the criteria above. Your response MUST be a single, valid JSON object that strictly adheres to the schema provided below. Do not include any markdown formatting, comments, or other text outside of the JSON object.
