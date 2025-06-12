@@ -38,7 +38,7 @@ export default function DashboardSidebar() {
     <>
       <div className="px-4 mb-8 flex justify-center">
         <Link href="/dashboard">
-          <Image src="/magic-resume-logo.png" alt="Magic Resume Logo" width={150} height={40} style={{ height: 'auto' }} />
+          <Image src="/magic-resume-logo.png" alt="Magic Resume Logo" width={150} height={0} />
         </Link>
       </div>
       <nav className="flex-1 px-4">

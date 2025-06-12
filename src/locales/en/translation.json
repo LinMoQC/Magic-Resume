@@ -20,28 +20,60 @@
     "buttons": {
       "reset": "Reset",
       "save": "Save"
-    }
+    },
+    "goToApp": "Go to App",
+    "starOnGithub": "Star on GitHub"
   },
   "landing": {
     "nav": {
-      "goToApp": "Go to App"
+      "goToApp": "Go to App",
+      "starOnGithub": "Star on GitHub"
     },
     "hero": {
       "title": "The Modern, AI-Powered <1/> Resume Builder",
-      "subtitle": "Create a professional resume in minutes. Leverage AI to craft compelling content, choose from sleek templates, and land your dream job.",
-      "getStarted": "Get Started for Free",
-      "morphingTexts": {
-        "modernResume": "Modern Resumes",
-        "aiPowered": "AI-Powered",
-        "beautifulTemplates": "Beautiful Templates",
-        "getStarted": "Get Started Now",
-        "standOut": "Stand Out"
-      }
+      "subtitle": "Craft your perfect resume with the power of AI. Simple, smart, and secure.",
+      "getStarted": "Get Started",
+      "browseTemplates": "Browse Templates",
+      "tag": "✨ Smart Resume Creation"
+    },
+    "morphingTexts": {
+      "simpleAndSmart": "Simple & Smart",
+      "aiPowered": "AI-Powered",
+      "beautifulTemplates": "Beautiful Templates",
+      "freeAndSecure": "Free & Secure",
+      "modernResume": "Modern Resumes",
+      "getStarted": "Get Started Now",
+      "standOut": "Stand Out"
     },
     "features": {
+      "main": {
+        "title": "Why Choose Magic Resume?",
+        "subtitle": "We provide an all-in-one resume solution to make your job search journey smoother"
+      },
       "ai": {
-        "title": "AI Assistant",
-        "description": "Overcome writer's block. Generate professional summaries and descriptions with our integrated OpenAI/Ollama support."
+        "tag": {
+          "name": "AI",
+          "description": "Smart Polish"
+        },
+        "title": "Smart Detection, Professional Advice",
+        "description": "Built-in smart grammar check, automatically identifies inappropriate expressions, provides professional modification suggestions, making your resume more outstanding.",
+        "benefit1": "Intelligent enhancement",
+        "benefit2": "Grammar check",
+        "alt": "AI Enhancement Preview"
+      },
+      "export": {
+        "tag": "Export to Multiple Formats",
+        "description": "Supports exporting in multiple formats for easy sharing and backup.",
+        "alt": "Export format illustration"
+      },
+      "privacy": {
+        "tag": {
+          "name": "Secure",
+          "description": "Data Security, Privacy First"
+        },
+        "description": "All resume data is fully stored locally, no need to worry about privacy leaks. Support data export backup, ensure your resume data is always available.",
+        "benefit1": "Local file storage",
+        "benefit2": "Multiple export formats"
       },
       "preview": {
         "title": "Live Preview",
@@ -50,11 +82,12 @@
       "dnd": {
         "title": "Drag & Drop Interface",
         "description": "Effortlessly reorder sections to highlight your strengths with an intuitive drag-and-drop interface."
-      },
-      "privacy": {
-        "title": "Data Privacy",
-        "description": "Your data is yours. We respect your privacy and ensure your information is secure."
       }
+    },
+    "contact": {
+      "title": "Connect with Us",
+      "subtitle": "Have questions or feedback? We'd love to hear from you. Reach out to us and we'll get back to you as soon as possible.",
+      "button": "Contact Us"
     },
     "footer": {
       "copyright": "© {{year}} Magic Resume. All rights reserved."
@@ -326,6 +359,20 @@
       "resumeDuplicated": "Resume \"{{name}}\" duplicated.",
       "resumeDeleted": "Resume \"{{name}}\" deleted.",
       "resumeSaved": "Resume saved!"
+    }
+  },
+  "report": {
+    "title": "Resume Analysis Report",
+    "subtitle": "Powered by AI, inspired by Lighthouse",
+    "overallScore": "Overall Score",
+    "detailedAnalysis": "Detailed Analysis",
+    "suggestions": "Suggestions for Improvement:",
+    "categories": {
+      "impactAndActionability": "Impact & Actionability",
+      "quantifiableAchievements": "Quantifiable Achievements",
+      "clarityAndReadability": "Clarity & Readability",
+      "completenessAndStructure": "Completeness & Structure",
+      "professionalSummary": "Professional Summary"
     }
   }
 }
