@@ -32,9 +32,12 @@ import useMobile from '@/app/hooks/useMobile';
 import MobileResumEdit from '../_components/mobile/MobileResumEdit';
 import { generateSnapshot } from '@/lib/utils';
 import AIModal from '../_components/AIModal';
-import ReactJsonView from '@microlink/react-json-view';
 import { useTranslation } from 'react-i18next';
+
 const ResumePreviewPanel = dynamic(() => import('../_components/ResumePreviewPanel'), { ssr: false });
+const ReactJsonView = dynamic(() => import('@microlink/react-json-view'), {
+  ssr: false,
+});
 
 type ResumeEditProps = {
   id: string;
@@ -73,6 +76,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
   const [leftPanelOpen, setLeftPanelOpen] = useState(false);
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
   const [isAnyModalOpen, setIsAnyModalOpen] = useState(false);
+  const [currentTemplateId, setCurrentTemplateId] = useState('default-classic');
 
   const [previewScale, setPreviewScale] = useState(1);
   const [isJsonModalOpen, setIsJsonModalOpen] = useState(false);
@@ -241,11 +245,14 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
           previewScale={previewScale}
           setPreviewScale={setPreviewScale}
           onShowAI={openAIModal}
+          templateId={currentTemplateId}
         />
       </div>
       <TemplatePanel
         rightCollapsed={rightCollapsed}
         setRightCollapsed={setRightCollapsed}
+        onSelectTemplate={setCurrentTemplateId}
+        currentTemplateId={currentTemplateId}
       />
       <Modal
         isOpen={isJsonModalOpen}

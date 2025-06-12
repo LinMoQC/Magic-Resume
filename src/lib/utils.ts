@@ -106,6 +106,7 @@ export function generateSnapshot(): Promise<Blob | null> {
 export function handleExport(info: InfoType){
   const resumeElement = document.getElementById('resume-to-export');
   if (resumeElement) {
+    const originalStyle = resumeElement.style.transform;
     const clonedResume = resumeElement.cloneNode(true) as HTMLElement;
     clonedResume.style.width = `${resumeElement.offsetWidth}px`;
     clonedResume.style.position = 'absolute';
@@ -113,86 +114,112 @@ export function handleExport(info: InfoType){
     clonedResume.style.top = '0px';
     document.body.appendChild(clonedResume);
     
-    const elements = [clonedResume, ...Array.from(clonedResume.getElementsByTagName('*')) as HTMLElement[]];
-    
-    elements.forEach(element => {
-      const style = window.getComputedStyle(element);
-      const colorProps = ['color', 'background-color', 'border-top-color', 'border-right-color', 'border-bottom-color', 'border-left-color'];
-      const oklchRegex = /oklch\(([^)]+)\)/;
-      
-      colorProps.forEach(prop => {
-        const value = style.getPropertyValue(prop);
-        const match = value.match(oklchRegex);
-        if (match) {
-          try {
-            const [l, c, h] = match[1].split(' ').map(s => parseFloat(s.replace('%', '')));
-            const [r, g, b] = oklchToRgb(l, c, h);
-            element.style.setProperty(prop, `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`, 'important');
-          } catch (e) {
-            MagicDebugger.warn(`Could not convert oklch color: ${match[0]}`, e);
-          }
-        }
-      });
-    });
-
-    const originalStyle = resumeElement.style.transform;
     clonedResume.style.transform = '';
 
-    const images = Array.from(clonedResume.getElementsByTagName('img'));
-    const imageLoadPromises = images.map(img => {
-      if (img.complete) return Promise.resolve();
-      return new Promise((resolve, reject) => {
-        img.onload = resolve;
-        img.onerror = reject;
-      });
-    });
+    setTimeout(() => {
+      const originalElements = [resumeElement, ...Array.from(resumeElement.getElementsByTagName('*')) as HTMLElement[]];
+      const clonedElements = [clonedResume, ...Array.from(clonedResume.getElementsByTagName('*')) as HTMLElement[]];
+      const oklchRegex = /oklch\([^)]+\)/g;
 
-    Promise.all(imageLoadPromises).then(() => {
-      html2canvas(clonedResume, {
-        scale: 2,
-        useCORS: true,
-        logging: true,
-      }).then(canvas => {
-        const imgData = canvas.toDataURL('image/png');
+      for (let i = 0; i < originalElements.length; i++) {
+        const originalEl = originalElements[i];
+        const clonedEl = clonedElements[i] as HTMLElement;
+        const computedStyle = window.getComputedStyle(originalEl);
         
-        const canvasWidth = canvas.width;
-        const canvasHeight = canvas.height;
-        const imgRatio = canvasWidth / canvasHeight;
+        for (const prop of computedStyle) {
+          const rawValue = computedStyle.getPropertyValue(prop);
+          const priority = computedStyle.getPropertyPriority(prop);
+          let finalValue = rawValue;
 
-        const pdfWidth = 210; // A4 width in mm
-        const pdfHeight = pdfWidth / imgRatio;
-        
-        const pdf = new jsPDF({
-          orientation: 'portrait',
-          unit: 'mm',
-          format: [pdfWidth, pdfHeight]
+          if (rawValue.includes('oklch')) {
+            try {
+              finalValue = rawValue.replace(oklchRegex, (match) => {
+                const oklchContent = match.match(/oklch\(([^)]+)\)/);
+                if (!oklchContent) return 'rgb(0,0,0)';
+
+                const [l, c, h] = oklchContent[1].split(' ').map(s => {
+                  const num = parseFloat(s.replace('%', ''));
+                  return isNaN(num) ? 0 : num;
+                });
+
+                const [r, g, b] = oklchToRgb(l, c, h);
+                return `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
+              });
+            } catch (e) {
+              MagicDebugger.warn(`Could not convert oklch in property "${prop}": "${rawValue}". Skipping this property.`, e);
+              continue;
+            }
+          }
+
+          clonedEl.style.setProperty(prop, finalValue, priority);
+
+          if (originalEl.tagName.toLowerCase() === 'svg') {
+            const parent = originalEl.parentElement;
+            if (parent && window.getComputedStyle(parent).display === 'flex' && window.getComputedStyle(parent).alignItems === 'center') {
+              clonedEl.style.setProperty('overflow', 'visible', 'important');
+            }
+          }
+        }
+      }
+
+      const images = Array.from(clonedResume.getElementsByTagName('img'));
+      const imageLoadPromises = images.map(img => {
+        if (img.complete) return Promise.resolve();
+        return new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
         });
-        
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-        
-        pdf.save(`${info.fullName || 'resume'}.pdf`);
-        toast.success(i18n.t('export.notifications.success'));
-      }).catch(error => {
-        MagicDebugger.error('Error exporting resume:', error);
-        toast.error(i18n.t('export.notifications.error'));
-      }).finally(() => {
-        document.body.removeChild(clonedResume);
-        resumeElement.style.transform = originalStyle;
       });
-    }).catch(error => {
-      MagicDebugger.error('Error loading images for export:', error);
-      toast.error(i18n.t('export.notifications.imageError'));
-      document.body.removeChild(clonedResume);
-      resumeElement.style.transform = originalStyle;
-    });
+
+      Promise.all(imageLoadPromises).then(() => {
+        html2canvas(clonedResume, {
+          scale: 2,
+          useCORS: true,
+          logging: true,
+        }).then(canvas => {
+          const imgData = canvas.toDataURL('image/png');
+          
+          const canvasWidth = canvas.width;
+          const canvasHeight = canvas.height;
+          const imgRatio = canvasWidth / canvasHeight;
+
+          const pdfWidth = 210;
+          const pdfHeight = pdfWidth / imgRatio;
+          
+          const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: [pdfWidth, pdfHeight]
+          });
+          
+          pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+          
+          pdf.save(`${info.fullName || 'resume'}.pdf`);
+          toast.success(i18n.t('export.notifications.success'));
+
+        }).catch(error => {
+          MagicDebugger.error('Error exporting resume:', error);
+          toast.error(i18n.t('export.notifications.error'));
+        }).finally(() => {
+          document.body.removeChild(clonedResume);
+          if (resumeElement) {
+            resumeElement.style.transform = originalStyle;
+          }
+        });
+      }).catch(error => {
+        MagicDebugger.error('Error loading images for export:', error);
+        toast.error(i18n.t('export.notifications.imageError'));
+        document.body.removeChild(clonedResume);
+        if (resumeElement) {
+          resumeElement.style.transform = originalStyle;
+        }
+      });
+    }, 100);
   }
 };
 
 // 颜色解析
 function oklchToRgb(l: number, c: number, h: number){
-  l /= 100;
-  c /= 100;
-
   const a = c * Math.cos(h * Math.PI / 180);
   const b = c * Math.sin(h * Math.PI / 180);
 

@@ -27,9 +27,11 @@ export default function RootLayout({
               {children}
               <Toaster />
             </Theme>
+            {/* 语言切换 */}
             <LanguageSwitcher />
           </I18nProvider>
 
+          {/* Umami Analytics */}
           <Script async src="https://cloud.umami.is/script.js" data-website-id="566da2ef-02bf-4b3f-9374-14ec66075e32" />
         </body>
       </html>
