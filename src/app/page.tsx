@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiArrowRight, FiCheckCircle } from 'react-icons/fi';
+import { FiArrowRight, FiCheckCircle, FiEye } from 'react-icons/fi';
 import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
 import { InteractiveBackground } from '@/app/components/interactive-background';
@@ -19,6 +19,12 @@ export default function Landing() {
   const { t } = useTranslation();
   const [stars, setStars] = useState<number | null>(null);
 
+  const aiCarouselImages = [
+    '/magic-resume-optimize.png',
+    '/magic-resume-analysis.png',
+  ];
+  const [currentAiImageIndex, setCurrentAiImageIndex] = useState(0);
+
   const exportImportImages = [
     '/magic-resume-export.png',
     '/magic-resume-import.png',
@@ -26,11 +32,19 @@ export default function Landing() {
   const [currentExportImageIndex, setCurrentExportImageIndex] = useState(0);
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    const aiInterval = setInterval(() => {
+      setCurrentAiImageIndex((prevIndex) => (prevIndex + 1) % aiCarouselImages.length);
+    }, 3000);
+
+    const exportInterval = setInterval(() => {
       setCurrentExportImageIndex((prevIndex) => (prevIndex + 1) % exportImportImages.length);
     }, 3000);
-    return () => clearInterval(interval);
-  }, [exportImportImages.length]);
+
+    return () => {
+      clearInterval(aiInterval);
+      clearInterval(exportInterval);
+    };
+  }, [aiCarouselImages.length, exportImportImages.length]);
 
   useEffect(() => {
     fetch('/api/github-stars')
@@ -107,7 +121,6 @@ export default function Landing() {
                     alt={t("landing.features.ai.alt")}
                     width={800}
                     height={0}
-                    unoptimized
                   />
                 </div>
               </motion.div>
@@ -144,10 +157,10 @@ export default function Landing() {
                   </ul>
                 </motion.div>
                 <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn}>
-                  <div className="bg-neutral-900 border border-neutral-800 rounded-xl aspect-[4/3] flex items-center justify-center overflow-hidden">
+                  <div className="group relative bg-neutral-900 border border-neutral-800 rounded-xl aspect-[4/3] flex items-center justify-center overflow-hidden transition-transform duration-300 hover:-translate-y-2">
                     <AnimatePresence mode="wait">
                       <motion.div
-                        key={currentExportImageIndex}
+                        key={currentAiImageIndex}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
@@ -155,12 +168,11 @@ export default function Landing() {
                         className="w-full h-full"
                       >
                         <Image
-                          src={exportImportImages[currentExportImageIndex]}
-                          alt={t("landing.features.export.alt")}
+                          src={aiCarouselImages[currentAiImageIndex]}
+                          alt={t("landing.features.ai.alt")}
                           width={800}
-                          height={450}
-                          className="object-cover w-full h-full"
-                          unoptimized
+                          height={600}
+                          className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
                         />
                       </motion.div>
                     </AnimatePresence>
@@ -170,7 +182,7 @@ export default function Landing() {
             </div>
           </section>
 
-          <section className="py-20">
+          <section className="py-20 bg-neutral-900/50">
             <div className="container mx-auto px-6">
               <div className="grid md:grid-cols-2 gap-12 items-center">
                 <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-8">
@@ -178,7 +190,7 @@ export default function Landing() {
                     {t("landing.features.export.tag")}
                   </div>
                   <p className="text-neutral-400 mb-6">{t("landing.features.export.description")}</p>
-                  <div className="bg-neutral-900 border border-neutral-800 rounded-xl aspect-video flex items-center justify-center overflow-hidden">
+                  <div className="group relative bg-neutral-900 border border-neutral-800 rounded-xl aspect-video flex items-center justify-center overflow-hidden transition-transform duration-300 hover:-translate-y-2">
                     <AnimatePresence mode="wait">
                       <motion.div
                         key={currentExportImageIndex}
@@ -193,8 +205,7 @@ export default function Landing() {
                           alt={t("landing.features.export.alt")}
                           width={800}
                           height={450}
-                          className="object-cover w-full h-full"
-                          unoptimized
+                          className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
                         />
                       </motion.div>
                     </AnimatePresence>
@@ -228,7 +239,7 @@ export default function Landing() {
             </div>
           </section>
 
-          <section className="py-20 text-center">
+          <section className="py-20 text-center bg-neutral-900/50">
             <div className="container mx-auto px-6">
               <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn}>
                 <h2 className="text-3xl md:text-4xl font-bold mb-4">{t("landing.contact.title")}</h2>
