@@ -1,0 +1,24 @@
+/**
+ * Maps model names to their official API base URL.
+ */
+export const MODEL_API_URL_MAP: Record<string, string> = {
+  'gpt-3.5-turbo': 'https://api.openai.com/v1',
+  'gpt-4': 'https://api.openai.com/v1',
+  'claude-2': 'https://api.anthropic.com/v1',
+  'claude-3': 'https://api.anthropic.com/v1',
+  'claude-3-5-sonnet': 'https://api.anthropic.com/v1',
+  'claude-3-opus': 'https://api.anthropic.com/v1',
+  'claude-3-haiku': 'https://api.anthropic.com/v1',
+  'claude-3-5-sonnet-20240620': 'https://api.anthropic.com/v1',
+  'claude-3-opus-20240229': 'https://api.anthropic.com/v1',
+  'claude-3-haiku-20240307': 'https://api.anthropic.com/v1',
+  'gemini-pro': 'https://generativelanguage.googleapis.com/v1beta',
+  'gemini-1.5-pro': 'https://generativelanguage.googleapis.com/v1beta',
+  'gemini-1.5-flash': 'https://generativelanguage.googleapis.com/v1beta',
+  'gemini-1.5-pro-002': 'https://generativelanguage.googleapis.com/v1beta',
+  'gemini-1.5-flash-002': 'https://generativelanguage.googleapis.com/v1beta',
+  'gemini-1.5-pro-001': 'https://generativelanguage.googleapis.com/v1beta',
+  'gemini-1.5-flash-001': 'https://generativelanguage.googleapis.com/v1beta',
+  'deepseek-chat': 'https://api.deepseek.com',
+  'deepseek-reasoner': 'https://api.deepseek.com',
+};

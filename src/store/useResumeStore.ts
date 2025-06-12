@@ -3,6 +3,7 @@ import sidebarMenu from '@/constant/sidebarMenu';
 import { dbClient, RESUMES_KEY } from '@/lib/IndexDBClient';
 import { MagicDebugger } from '@/lib/debuggger';
 import { toast } from "sonner";
+import i18n from '@/i18n';
 
 export type InfoType = {
   fullName: string;
@@ -11,9 +12,7 @@ export type InfoType = {
   phoneNumber: string;
   address: string;
   website: string;
-  link: string;
   avatar: string;
-  customFields: { icon: string; name: string; value: string }[];
 };
 
 export type SectionItem = {
@@ -64,8 +63,6 @@ type ResumeState = {
   updateTemplate: (template: string) => void;
   updateThemeColor: (themeColor: string) => void;
   updateTypography: (typography: string) => void;
-  addCustomField: (field: { icon: string; name: string; value: string }) => void;
-  removeCustomField: (index: number) => void;
   setRightCollapsed: (collapsed: boolean) => void;
   setActiveSection: (section: string) => void;
 };
@@ -78,9 +75,7 @@ export const initialResume: Omit<Resume, 'id' | 'updatedAt' | 'name'> = {
     phoneNumber: '',
     address: '',
     website: '',
-    link: '',
     avatar: '',
-    customFields: [],
   },
   sections: Object.fromEntries(sidebarMenu.map(item => [item.key, []])),
   sectionOrder: [
@@ -116,7 +111,7 @@ const useResumeStore = create<ResumeState>((set, get) => ({
     const newResumes = [...get().resumes, resume];
     set({ resumes: newResumes });
     dbClient.setItem(RESUMES_KEY, newResumes);
-    toast.success(`Resume "${resume.name}" created.`);
+    toast.success(i18n.t('store.notifications.resumeCreated', { name: resume.name }));
   },
 
   updateResume: (id, updates) => {
@@ -135,7 +130,7 @@ const useResumeStore = create<ResumeState>((set, get) => ({
   duplicateResume: (id) => {
     const resumeToDuplicate = get().resumes.find(r => r.id === id);
     if (!resumeToDuplicate) {
-      toast.error("Resume not found for duplication.");
+      toast.error(i18n.t('store.notifications.resumeNotFound'));
       return;
     }
     const newResume: Resume = {
@@ -146,7 +141,7 @@ const useResumeStore = create<ResumeState>((set, get) => ({
       snapshot: undefined, // Do not copy the snapshot
     };
     get().addResume(newResume);
-    toast.success(`Resume "${resumeToDuplicate.name}" duplicated.`);
+    toast.success(i18n.t('store.notifications.resumeDuplicated', { name: resumeToDuplicate.name }));
   },
 
   deleteResume: (id) => {
@@ -154,7 +149,7 @@ const useResumeStore = create<ResumeState>((set, get) => ({
     const newResumes = get().resumes.filter(r => r.id !== id);
     set({ resumes: newResumes });
     dbClient.setItem(RESUMES_KEY, newResumes);
-    toast.success(`Resume "${resumeToDelete?.name}" deleted.`);
+    toast.success(i18n.t('store.notifications.resumeDeleted', { name: resumeToDelete?.name || '' }));
   },
 
   loadResumeForEdit: (id) => {
@@ -188,7 +183,7 @@ const useResumeStore = create<ResumeState>((set, get) => ({
         updates.snapshot = snapshot;
       }
       updateResume(activeResume.id, { ...activeResume, ...updates });
-      toast.success('Resume saved!');
+      toast.success(i18n.t('store.notifications.resumeSaved'));
     }
   },
   
@@ -257,32 +252,6 @@ const useResumeStore = create<ResumeState>((set, get) => ({
       if (!state.activeResume) return state;
       return {
         activeResume: { ...state.activeResume, typography }
-      };
-    });
-  },
-
-  addCustomField: (field) => {
-    set(state => {
-      if (!state.activeResume) return state;
-      const newFields = [...state.activeResume.info.customFields, field];
-      return {
-        activeResume: {
-          ...state.activeResume,
-          info: { ...state.activeResume.info, customFields: newFields }
-        }
-      };
-    });
-  },
-
-  removeCustomField: (index) => {
-    set(state => {
-      if (!state.activeResume) return state;
-      const newFields = state.activeResume.info.customFields.filter((_, i) => i !== index);
-      return {
-        activeResume: {
-          ...state.activeResume,
-          info: { ...state.activeResume.info, customFields: newFields }
-        }
       };
     });
   },

@@ -7,11 +7,12 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+} from '@/app/components/ui/dialog';
+import { Button } from '@/app/components/ui/button';
 import { useResumeStore, Resume } from '@/store/useResumeStore';
 import { toast } from 'sonner';
 import { FaFileUpload } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 
 type ImportResumeDialogProps = {
   open: boolean;
@@ -21,6 +22,7 @@ type ImportResumeDialogProps = {
 export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeDialogProps) {
   const { addResume } = useResumeStore();
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     setError(null);
@@ -28,8 +30,8 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onabort = () => toast.error('File reading was aborted.');
-    reader.onerror = () => toast.error('File reading has failed.');
+    reader.onabort = () => toast.error(t('importDialog.errors.fileReadAborted'));
+    reader.onerror = () => toast.error(t('importDialog.errors.fileReadFailed'));
     reader.onload = () => {
       try {
         const result = JSON.parse(reader.result as string);
@@ -39,23 +41,23 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
           const newResume: Resume = {
             ...result,
             id: Date.now().toString(),
-            name: `${result.name || 'Imported Resume'} (Imported)`,
+            name: t('importDialog.importedName', { name: result.name || 'Imported Resume' }),
             updatedAt: Date.now(),
           };
           addResume(newResume);
-          toast.success('Resume imported successfully!');
+          toast.success(t('importDialog.success'));
           onOpenChange(false);
         } else {
-          throw new Error('Invalid resume JSON format.');
+          throw new Error(t('importDialog.errors.invalidFormat'));
         }
       } catch (e) {
-        const message = e instanceof Error ? e.message : 'Failed to parse JSON file.';
+        const message = e instanceof Error ? e.message : t('importDialog.errors.parseFailed');
         toast.error(message);
         setError(message);
       }
     };
     reader.readAsText(file);
-  }, [addResume, onOpenChange]);
+  }, [addResume, onOpenChange, t]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -67,9 +69,9 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className='text-white'>Import Resume from JSON</DialogTitle>
+          <DialogTitle className='text-white'>{t('importDialog.title')}</DialogTitle>
           <DialogDescription>
-            Select or drop a JSON file below to create a new resume.
+            {t('importDialog.description')}
           </DialogDescription>
         </DialogHeader>
 
@@ -83,18 +85,18 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
           <div className="flex flex-col items-center justify-center text-neutral-400">
             <FaFileUpload className="w-12 h-12 mb-4" />
             {isDragActive ? (
-              <p>Drop the file here ...</p>
+              <p>{t('importDialog.dropzone.active')}</p>
             ) : (
-              <p>Drag &apos;n&apos; drop a JSON file here, or click to select file</p>
+              <p>{t('importDialog.dropzone.default')}</p>
             )}
-            <p className="text-xs mt-1">(.json file only)</p>
+            <p className="text-xs mt-1">{t('importDialog.dropzone.jsonOnly')}</p>
           </div>
         </div>
         
         {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
 
         <DialogFooter className="mt-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t('importDialog.cancel')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

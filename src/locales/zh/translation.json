@@ -1,0 +1,325 @@
+{
+  "settings": {
+    "title": "设置",
+    "llm": {
+      "title": "OpenAI/Ollama 集成",
+      "description1": "您可以利用 OpenAI API 来帮助您生成内容，或在撰写简历时改进您的写作。",
+      "description2": "您可以选择<1>获取您自己的 OpenAI API 密钥</1>。此密钥使您能够根据自己的需要使用该 API。或者，如果您希望完全禁用 Reactive Resume 中的 AI 功能，只需从设置中删除该密钥即可。",
+      "description3": "您还可以通过将 API 密钥设置为 `sk-1234567890abcdef` 并将基础 URL 设置为您的 Ollama URL（例如 `http://localhost:11434/v1`）来与 Ollama 集成。您还可以根据自己的喜好选择模型并设置最大令牌数。",
+      "apiKeyLabel": "OpenAI/Ollama API 密钥",
+      "baseUrlLabel": "基础 URL",
+      "modelLabel": "模型",
+      "maxTokensLabel": "最大令牌数",
+      "modelPlaceholder": "选择一个模型"
+    },
+    "notifications": {
+      "unsavedChanges": "有未保存的更改",
+      "settingsSaved": "设置已保存！",
+      "changesReset": "更改已重置。"
+    },
+    "buttons": {
+      "reset": "重置",
+      "save": "保存"
+    }
+  },
+  "landing": {
+    "nav": {
+      "goToApp": "进入应用"
+    },
+    "hero": {
+      "title": "现代化的 AI 驱动<1/>简历构建器",
+      "subtitle": "在几分钟内创建专业简历。利用 AI 撰写引人入胜的内容，从时尚的模板中进行选择，找到您梦想的工作。",
+      "getStarted": "开始使用"
+    },
+    "features": {
+      "ai": {
+        "title": "AI 助手",
+        "description": "克服写作障碍。通过我们集成的 OpenAI/Ollama 支持，生成专业的摘要和描述。"
+      },
+      "preview": {
+        "title": "实时预览",
+        "description": "在您输入时实时查看更改。不再需要猜测您的最终简历会是什么样子。"
+      },
+      "dnd": {
+        "title": "拖放界面",
+        "description": "通过直观的拖放界面，轻松重新排序各个部分以突出您的优势。"
+      },
+      "privacy": {
+        "title": "隐私优先",
+        "description": "您的数据属于您自己。您所有的简历信息都安全地存储在您的浏览器中——永远不会离开您的机器。"
+      }
+    },
+    "footer": {
+      "copyright": "© {{year}} Magic Resume. 为现代专业人士打造。"
+    }
+  },
+  "modals": {
+    "dynamicForm": {
+      "editTitle": "编辑条目",
+      "addTitle": "添加新条目",
+      "descriptionLabel": "描述",
+      "cancelButton": "取消",
+      "saveButton": "保存"
+    },
+    "aiModal": {
+      "tabs": {
+        "optimize": "智能优化",
+        "analyze": "简历分析"
+      },
+      "title": "AI 实验室",
+      "description": "分析并优化您的简历，以匹配目标岗位要求，或获取专业的Lighthouse风格分析报告。",
+      "optimizeTab": {
+        "jdLabel": "目标岗位描述 (JD)",
+        "jdPlaceholder": "在此处粘贴目标岗位的JD，AI将根据JD优化您的简历...",
+        "optimizeButton": "开始优化",
+        "optimizingButton": "优化中...",
+        "previewButton": "预览",
+        "rawJsonButton": "查看原始JSON",
+        "applyChangesButton": "应用更改",
+        "revertChangesButton": "还原更改",
+        "outputTitle": "优化建议",
+        "jsonButton": "JSON",
+        "optimizationProgress": {
+          "analyzingJD": "正在分析职位描述...",
+          "preparing": "准备优化 {{count}} 个条目...",
+          "optimizingItem": "已优化 {{sectionKey}} 条目 {{completed}} / {{total}}...",
+          "done": "完成！"
+        }
+      },
+      "analysisTab": {
+        "title": "简历健康度分析",
+        "analyzeButton": "分析简历",
+        "analyzingButton": "分析中...",
+        "viewReportButton": "查看报告",
+        "reAnalyzeButton": "重新分析",
+        "analysisProgress": {
+          "start": "正在启动分析引擎...",
+          "impact": "评估简历的「影响与行动力」...",
+          "quantification": "检查「量化成就」的使用情况...",
+          "clarity": "分析「清晰与可读性」...",
+          "completeness": "审核「完整性与结构」...",
+          "summary": "评估「专业概述」质量...",
+          "finalizing": "综合评分并生成报告...",
+          "done": "分析完成！"
+        },
+        "placeholder": {
+          "title": "获取专业分析报告",
+          "description": "我们的 AI 将对您的简历进行详细分析，提供关于影响力、清晰度和关键词优化等方面的评分和可行的反馈意见。"
+        }
+      },
+      "notifications": {
+        "apiKeyMissing": "未找到 API 密钥。请在设置页面中设置。",
+        "jdMissing": "请提供职位描述。",
+        "optimizationComplete": "AI 优化完成！",
+        "optimizationFailed": "优化失败: {{error}}",
+        "analysisComplete": "分析报告已生成！",
+        "analysisFailed": "分析失败: {{error}}",
+        "unknownError": "发生未知错误。"
+      },
+      "optimizePlaceholder": {
+        "title": "准备好提升您的简历了吗？",
+        "description": "粘贴职位描述并点击「开始优化」，让 AI 为您的梦想工作量身定制简历。"
+      },
+      "progressText": "AI正在全力分析和创作中..."
+    }
+  },
+  "resumePreview": {
+    "yourName": "你的名字"
+  },
+  "tools": {
+    "aiAssistant": "AI 助手",
+    "exportPDF": "导出 PDF",
+    "zoomIn": "放大",
+    "zoomOut": "缩小",
+    "resetZoom": "重置缩放"
+  },
+  "sections": {
+    "projects": "项目经历",
+    "education": "教育背景",
+    "skills": "专业技能",
+    "languages": "语言能力",
+    "certificates": "证书",
+    "experience": "工作经历",
+    "profiles": "个人链接",
+    "shared": {
+      "untitled": "无标题",
+      "show": "显示",
+      "hide": "隐藏",
+      "edit": "编辑",
+      "copy": "复制",
+      "remove": "移除",
+      "addItem": "添加",
+      "openMenu": "打开菜单",
+      "editTitle": "编辑 {{label}}",
+      "addTitle": "添加 {{label}}"
+    },
+    "notifications": {
+      "requiredFields": "请填写以下必填项: {{fields}}",
+      "sectionUpdated": "{{label}} 部分更新成功。",
+      "sectionAdded": "{{label}} 部分添加成功。",
+      "itemRemoved": "条目已成功移除。",
+      "itemCopied": "条目已成功复制。",
+      "visibilityToggled": "条目可见性已{{status}}。"
+    }
+  },
+  "avatarAlt": "头像",
+  "mobileEdit": {
+    "jsonData": "简历 JSON 数据",
+    "copyJson": "将 JSON 复制到剪贴板"
+  },
+  "editPage": {
+    "sections": {
+      "basics": "基础信息"
+    },
+    "notifications": {
+      "jsonDownloadStarted": "JSON 文件下载已开始！"
+    }
+  },
+  "templatePanel": {
+    "title": "模板",
+    "placeholder": "模板 {{index}}"
+  },
+  "resumeContent": {
+    "viewJson": "查看 JSON",
+    "save": "保存"
+  },
+  "renameDialog": {
+    "title": "重命名简历",
+    "placeholder": "输入新的简历名称",
+    "cancel": "取消",
+    "rename": "重命名"
+  },
+  "newResumeDialog": {
+    "title": "新建简历",
+    "description": "请输入新简历的名称。",
+    "placeholder": "简历名称",
+    "cancel": "取消",
+    "create": "创建"
+  },
+  "dashboard": {
+    "title": "我的简历",
+    "newResumeCard": {
+      "title": "创建新简历",
+      "description": "从头开始构建"
+    },
+    "importResumeCard": {
+      "title": "导入现有简历",
+      "description": "领英、JSON简历等"
+    },
+    "resumeCard": {
+      "lastUpdated": "最后更新于 {{time}}",
+      "rename": "重命名",
+      "duplicate": "复制",
+      "delete": "删除"
+    }
+  },
+  "sidebar": {
+    "resumes": "我的简历",
+    "settings": "设置",
+    "open": "打开侧边栏",
+    "close": "关闭侧边栏"
+  },
+  "importDialog": {
+    "title": "从 JSON 导入简历",
+    "description": "在下方选择或拖放一个 JSON 文件以创建新简历。",
+    "dropzone": {
+      "active": "在此处放下文件...",
+      "default": "将 JSON 文件拖放到此处，或点击选择文件",
+      "jsonOnly": "（仅限 .json 文件）"
+    },
+    "errors": {
+      "fileReadAborted": "文件读取已中止。",
+      "fileReadFailed": "文件读取失败。",
+      "invalidFormat": "无效的简历 JSON 格式。",
+      "parseFailed": "解析 JSON 文件失败。"
+    },
+    "success": "简历导入成功！",
+    "importedName": "{{name}}（已导入）",
+    "cancel": "取消"
+  },
+  "basicForm": {
+    "fields": {
+      "avatar": "头像",
+      "fullName": "名称",
+      "headline": "标题",
+      "email": "电子邮箱",
+      "website": "个人网站",
+      "phoneNumber": "电话号码",
+      "address": "所在地",
+      "link": "链接"
+    },
+    "customFields": {
+      "title": "自定义字段",
+      "namePlaceholder": "字段名称（例如，领英）",
+      "valuePlaceholder": "值（例如，你的领英网址）",
+      "addButton": "添加自定义字段"
+    },
+    "avatarAlt": "头像"
+  },
+  "dynamicForm": {
+    "fields": {
+      "education": {
+        "school": { "label": "学校", "placeholder": "学校名称" },
+        "degree": { "label": "学位", "placeholder": "学位" },
+        "major": { "label": "专业", "placeholder": "专业" },
+        "date": { "label": "日期或日期范围", "placeholder": "2019-2023" },
+        "location": { "label": "地点", "placeholder": "城市" }
+      },
+      "experience": {
+        "company": { "label": "公司", "placeholder": "公司名称" },
+        "position": { "label": "职位", "placeholder": "职位" },
+        "date": { "label": "日期或日期范围", "placeholder": "2023年3月至今" },
+        "location": { "label": "地点", "placeholder": "城市" },
+        "website": { "label": "网站", "placeholder": "公司网址" }
+      },
+      "profiles": {
+        "platform": { "label": "平台", "placeholder": "如 领英, GitHub" },
+        "url": { "label": "网址", "placeholder": "链接地址" }
+      },
+      "skills": {
+        "name": { "label": "技能名称", "placeholder": "技能名称" },
+        "level": { "label": "熟练度", "placeholder": "如 精通, 熟练, 初级" }
+      },
+      "projects": {
+        "name": { "label": "项目名称", "placeholder": "项目名称" },
+        "role": { "label": "角色", "placeholder": "担任角色" },
+        "date": { "label": "日期或日期范围", "placeholder": "2022.01-2022.12" },
+        "link": { "label": "链接", "placeholder": "项目链接" }
+      },
+      "languages": {
+        "language": { "label": "语言", "placeholder": "语言" },
+        "level": { "label": "熟练度", "placeholder": "如 母语, 流利, 中级" }
+      },
+      "certificates": {
+        "name": { "label": "证书名称", "placeholder": "证书名称" },
+        "issuer": { "label": "颁发机构", "placeholder": "颁发机构" },
+        "date": { "label": "获得时间", "placeholder": "获得时间" }
+      }
+    }
+  },
+  "tiptap": {
+    "prompt": {
+      "url": "网址"
+    },
+    "notifications": {
+      "polishingInProgress": "AI 已经在润色中，请等待完成。",
+      "polishFailed": "润色文本失败: {{message}}"
+    }
+  },
+  "export": {
+    "notifications": {
+      "success": "简历导出成功！",
+      "error": "导出简历失败。",
+      "imageError": "加载用于导出的图片失败。"
+    }
+  },
+  "store": {
+    "notifications": {
+      "resumeCreated": "简历 \"{{name}}\" 已创建。",
+      "resumeNotFound": "未找到要复制的简历。",
+      "resumeDuplicated": "简历 \"{{name}}\" 已成功复制。",
+      "resumeDeleted": "简历 \"{{name}}\" 已删除。",
+      "resumeSaved": "简历已保存！"
+    }
+  }
+} 

@@ -9,17 +9,20 @@ import { motion, AnimatePresence } from 'framer-motion';
 import useMobile from '@/app/hooks/useMobile';
 import { FiMenu, FiX } from 'react-icons/fi';
 import { FaRegFileAlt, FaCog } from 'react-icons/fa';
-import { Skeleton } from '@/components/ui/Skeleton';
+import { Skeleton } from '@/app/components/ui/Skeleton';
 import { useResumeStore } from '@/store/useResumeStore';
 import sidebarMenu from '@/constant/sidebarMenu';
-import { Button } from '@/components/ui/button';
-
-const menuItems = [
-  { href: '/dashboard', label: 'Resumes', icon: FaRegFileAlt },
-  { href: '/dashboard/settings', label: 'Settings', icon: FaCog },
-];
+import { Button } from '@/app/components/ui/button';
+import { useTranslation } from 'react-i18next';
 
 export default function DashboardSidebar() {
+  const { t } = useTranslation();
+
+  const menuItems = [
+    { href: '/dashboard', label: t('sidebar.resumes'), icon: FaRegFileAlt },
+    { href: '/dashboard/settings', label: t('sidebar.settings'), icon: FaCog },
+  ];
+
   const { isMobile } = useMobile();
   const [isOpen, setIsOpen] = useState(false);
   const { user } = useUser();
@@ -91,7 +94,7 @@ export default function DashboardSidebar() {
                 variant="ghost"
                 className='h-12 w-12 hover:bg-neutral-800 bg-transparent'
                 onClick={() => setActiveSection(item.key)}
-                title={item.label}
+                title={t(item.label)}
               >
                 <span className="h-5 w-5">
                   <Icon />
@@ -134,7 +137,7 @@ export default function DashboardSidebar() {
         <button
           onClick={() => setIsOpen(true)}
           className="fixed top-4 right-4 z-50 p-2 bg-neutral-800 rounded-md"
-          aria-label="Open sidebar"
+          aria-label={t('sidebar.open')}
         >
           <FiMenu className="h-6 w-6 text-white" />
         </button>
@@ -159,7 +162,7 @@ export default function DashboardSidebar() {
                 <button
                   onClick={() => setIsOpen(false)}
                   className="absolute top-4 right-4 p-2"
-                  aria-label="Close sidebar"
+                  aria-label={t('sidebar.close')}
                 >
                   <FiX className="h-6 w-6 text-neutral-400" />
                 </button>

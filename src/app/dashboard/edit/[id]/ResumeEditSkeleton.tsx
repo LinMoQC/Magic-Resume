@@ -1,5 +1,4 @@
-import { Skeleton } from '@/components/ui/Skeleton';
-
+import { Skeleton } from '@/app/components/ui/Skeleton';
 export default function ResumeEditSkeleton() {
   return (
     <main className="flex flex-1 h-screen bg-black text-white font-sans">

@@ -1,0 +1,324 @@
+{
+  "settings": {
+    "title": "Settings",
+    "llm": {
+      "title": "OpenAI/Ollama Integration",
+      "description1": "You can make use of the OpenAI API to help you generate content, or improve your writing while composing your resume.",
+      "description2": "You have the option to <1>obtain your own OpenAI API key</1>. This key empowers you to leverage the API as you see fit. Alternatively, if you wish to disable the AI features in Reactive Resume altogether, you can simply remove the key from your settings.",
+      "description3": "You can also integrate with Ollama simply by setting the API key to `sk-1234567890abcdef` and the Base URL to your Ollama URL, i.e. `http://localhost:11434/v1`. You can also pick and choose models and set the max tokens as per your preference.",
+      "apiKeyLabel": "OpenAI/Ollama API Key",
+      "baseUrlLabel": "Base URL",
+      "modelLabel": "Model",
+      "maxTokensLabel": "Max Tokens",
+      "modelPlaceholder": "Select a model"
+    },
+    "notifications": {
+      "unsavedChanges": "Unsaved changes",
+      "settingsSaved": "Settings saved!",
+      "changesReset": "Changes have been reset."
+    },
+    "buttons": {
+      "reset": "Reset",
+      "save": "Save"
+    }
+  },
+  "landing": {
+    "nav": {
+      "goToApp": "Go to App"
+    },
+    "hero": {
+      "title": "The Modern, AI-Powered <1/> Resume Builder",
+      "subtitle": "Create a professional resume in minutes. Leverage AI to craft compelling content, choose from sleek templates, and land your dream job.",
+      "getStarted": "Get Started"
+    },
+    "features": {
+      "ai": {
+        "title": "AI Assistant",
+        "description": "Overcome writer's block. Generate professional summaries and descriptions with our integrated OpenAI/Ollama support."
+      },
+      "preview": {
+        "title": "Live Preview",
+        "description": "See your changes in real-time as you type. No more guessing how your final resume will look."
+      },
+      "dnd": {
+        "title": "Drag & Drop Interface",
+        "description": "Effortlessly reorder sections to highlight your strengths with an intuitive drag-and-drop interface."
+      },
+      "privacy": {
+        "title": "Privacy First",
+        "description": "Your data is yours. All your resume information is stored securely in your browser—never leaving your machine."
+      }
+    },
+    "footer": {
+      "copyright": "© {{year}} Magic Resume. Built for modern professionals."
+    }
+  },
+  "modals": {
+    "dynamicForm": {
+      "editTitle": "Edit Item",
+      "addTitle": "Add New Item",
+      "descriptionLabel": "Description",
+      "cancelButton": "Cancel",
+      "saveButton": "Save"
+    },
+    "aiModal": {
+      "tabs": {
+        "optimize": "Smart Optimize",
+        "analyze": "Resume Analysis"
+      },
+      "title": "AI Lab",
+      "description": "Analyze and optimize your resume to match target job requirements, or get a professional Lighthouse-style analysis report.",
+      "optimizeTab": {
+        "jdLabel": "Target Job Description (JD)",
+        "jdPlaceholder": "Paste the target job's JD here, and the AI will optimize your resume based on it...",
+        "optimizeButton": "Start Optimization",
+        "optimizingButton": "Optimizing...",
+        "previewButton": "Preview",
+        "rawJsonButton": "View Raw JSON",
+        "applyChangesButton": "Apply Changes",
+        "revertChangesButton": "Revert Changes",
+        "outputTitle": "Optimization Suggestions",
+        "jsonButton": "JSON",
+        "optimizationProgress": {
+          "analyzingJD": "Analyzing Job Description...",
+          "preparing": "Preparing to optimize {{count}} items...",
+          "optimizingItem": "Optimized {{sectionKey}} item {{completed}} of {{total}}...",
+          "done": "Done!"
+        }
+      },
+      "analysisTab": {
+        "title": "Resume Health Analysis",
+        "analyzeButton": "Analyze Resume",
+        "analyzingButton": "Analyzing...",
+        "viewReportButton": "View Report",
+        "reAnalyzeButton": "Re-analyze",
+        "analysisProgress": {
+          "start": "Starting analysis engine...",
+          "impact": "Assessing resume 'Impact & Action'...",
+          "quantification": "Checking use of 'Quantifiable Achievements'...",
+          "clarity": "Analyzing 'Clarity & Readability'...",
+          "completeness": "Reviewing 'Completeness & Structure'...",
+          "summary": "Evaluating 'Professional Summary' quality...",
+          "finalizing": "Compiling score and generating report...",
+          "done": "Analysis complete!"
+        },
+        "placeholder": {
+          "title": "Get a Professional Analysis",
+          "description": "Our AI will perform a detailed analysis of your resume, providing scores and actionable feedback on aspects like impact, clarity, and keyword optimization."
+        }
+      },
+      "notifications": {
+        "apiKeyMissing": "API Key not found. Please set it in the settings page.",
+        "jdMissing": "Please provide the Job Description.",
+        "optimizationComplete": "AI optimization complete!",
+        "optimizationFailed": "Optimization failed: {{error}}",
+        "analysisComplete": "Analysis report generated!",
+        "analysisFailed": "Analysis failed: {{error}}",
+        "unknownError": "An unknown error occurred."
+      },
+      "optimizePlaceholder": {
+        "title": "Ready to Elevate Your Resume?",
+        "description": "Paste a job description and click \"Start Optimization\" to let the AI tailor your resume for your dream job."
+      },
+      "progressText": "AI is working hard on analysis and creation..."
+    }
+  },
+  "resumePreview": {
+    "yourName": "Your Name"
+  },
+  "tools": {
+    "aiAssistant": "AI Assistant",
+    "exportPDF": "Export PDF",
+    "zoomIn": "Zoom In",
+    "zoomOut": "Zoom Out",
+    "resetZoom": "Reset Zoom"
+  },
+  "sections": {
+    "projects": "Projects",
+    "education": "Education",
+    "skills": "Skills",
+    "languages": "Languages",
+    "certificates": "Certificates",
+    "experience": "Experience",
+    "profiles": "Profiles",
+    "shared": {
+      "untitled": "Untitled",
+      "show": "Show",
+      "hide": "Hide",
+      "edit": "Edit",
+      "copy": "Copy",
+      "remove": "Remove",
+      "addItem": "Add Item",
+      "openMenu": "Open menu",
+      "editTitle": "Edit {{label}}",
+      "addTitle": "Add New {{label}}"
+    },
+    "notifications": {
+      "requiredFields": "Please fill in the following required fields: {{fields}}",
+      "sectionUpdated": "{{label}} section updated successfully.",
+      "sectionAdded": "{{label}} section added successfully.",
+      "itemRemoved": "Item removed successfully.",
+      "itemCopied": "Item copied successfully.",
+      "visibilityToggled": "Item visibility {{status}}."
+    }
+  },
+  "basicForm": {
+    "fields": {
+      "avatar": "Avatar",
+      "fullName": "Full Name",
+      "headline": "Headline",
+      "email": "Email",
+      "website": "Website",
+      "phoneNumber": "Phone",
+      "address": "Location",
+      "link": "Link"
+    },
+    "customFields": {
+      "title": "Custom Fields",
+      "namePlaceholder": "Field Name (e.g., LinkedIn)",
+      "valuePlaceholder": "Value (e.g., your-linkedin-url)",
+      "addButton": "Add Custom Field"
+    },
+    "avatarAlt": "Avatar"
+  },
+  "mobileEdit": {
+    "jsonData": "Resume JSON Data",
+    "copyJson": "Copy JSON to clipboard"
+  },
+  "editPage": {
+    "sections": {
+      "basics": "Basics"
+    },
+    "notifications": {
+      "jsonDownloadStarted": "JSON file download started!"
+    }
+  },
+  "templatePanel": {
+    "title": "Template",
+    "placeholder": "Template {{index}}"
+  },
+  "resumeContent": {
+    "viewJson": "View JSON",
+    "save": "Save"
+  },
+  "renameDialog": {
+    "title": "Rename Resume",
+    "placeholder": "Enter new resume name",
+    "cancel": "Cancel",
+    "rename": "Rename"
+  },
+  "newResumeDialog": {
+    "title": "Create New Resume",
+    "description": "Please enter a name for your new resume.",
+    "placeholder": "Resume Name",
+    "cancel": "Cancel",
+    "create": "Create"
+  },
+  "dashboard": {
+    "title": "Resumes",
+    "newResumeCard": {
+      "title": "Create a new resume",
+      "description": "Start building from scratch"
+    },
+    "importResumeCard": {
+      "title": "Import an existing resume",
+      "description": "LinkedIn, JSON Resume, etc."
+    },
+    "resumeCard": {
+      "lastUpdated": "Last updated {{time}}",
+      "rename": "Rename",
+      "duplicate": "Duplicate",
+      "delete": "Delete"
+    }
+  },
+  "sidebar": {
+    "resumes": "Resumes",
+    "settings": "Settings",
+    "open": "Open sidebar",
+    "close": "Close sidebar"
+  },
+  "importDialog": {
+    "title": "Import Resume from JSON",
+    "description": "Select or drop a JSON file below to create a new resume.",
+    "dropzone": {
+      "active": "Drop the file here...",
+      "default": "Drag 'n' drop a JSON file here, or click to select file",
+      "jsonOnly": "(.json file only)"
+    },
+    "errors": {
+      "fileReadAborted": "File reading was aborted.",
+      "fileReadFailed": "File reading has failed.",
+      "invalidFormat": "Invalid resume JSON format.",
+      "parseFailed": "Failed to parse JSON file."
+    },
+    "success": "Resume imported successfully!",
+    "importedName": "{{name}} (Imported)",
+    "cancel": "Cancel"
+  },
+  "dynamicForm": {
+    "fields": {
+      "education": {
+        "school": { "label": "School", "placeholder": "School Name" },
+        "degree": { "label": "Degree", "placeholder": "Degree" },
+        "major": { "label": "Major", "placeholder": "Major" },
+        "date": { "label": "Date or Date Range", "placeholder": "2019-2023" },
+        "location": { "label": "Location", "placeholder": "City" }
+      },
+      "experience": {
+        "company": { "label": "Company", "placeholder": "Company Name" },
+        "position": { "label": "Position", "placeholder": "Position" },
+        "date": { "label": "Date or Date Range", "placeholder": "March 2023 - Present" },
+        "location": { "label": "Location", "placeholder": "City" },
+        "website": { "label": "Website", "placeholder": "Website URL" }
+      },
+      "profiles": {
+        "platform": { "label": "Platform", "placeholder": "e.g., LinkedIn, GitHub" },
+        "url": { "label": "URL", "placeholder": "URL" }
+      },
+      "skills": {
+        "name": { "label": "Skill Name", "placeholder": "Skill Name" },
+        "level": { "label": "Level", "placeholder": "e.g., Expert, Intermediate, Beginner" }
+      },
+      "projects": {
+        "name": { "label": "Project Name", "placeholder": "Project Name" },
+        "role": { "label": "Role", "placeholder": "Your Role" },
+        "date": { "label": "Date or Date Range", "placeholder": "Jan 2022 - Dec 2022" },
+        "link": { "label": "Link", "placeholder": "Project Link" }
+      },
+      "languages": {
+        "language": { "label": "Language", "placeholder": "Language" },
+        "level": { "label": "Level", "placeholder": "e.g., Native, Fluent, Intermediate" }
+      },
+      "certificates": {
+        "name": { "label": "Certificate Name", "placeholder": "Certificate Name" },
+        "issuer": { "label": "Issuer", "placeholder": "Issuing Organization" },
+        "date": { "label": "Date", "placeholder": "Date Received" }
+      }
+    }
+  },
+  "tiptap": {
+    "prompt": {
+      "url": "URL"
+    },
+    "notifications": {
+      "polishingInProgress": "AI is already polishing. Please wait for it to finish.",
+      "polishFailed": "Failed to polish text: {{message}}"
+    }
+  },
+  "export": {
+    "notifications": {
+      "success": "Resume exported successfully!",
+      "error": "Failed to export resume.",
+      "imageError": "Failed to load images for export."
+    }
+  },
+  "store": {
+    "notifications": {
+      "resumeCreated": "Resume \"{{name}}\" created.",
+      "resumeNotFound": "Resume not found for duplication.",
+      "resumeDuplicated": "Resume \"{{name}}\" duplicated.",
+      "resumeDeleted": "Resume \"{{name}}\" deleted.",
+      "resumeSaved": "Resume saved!"
+    }
+  }
+}
