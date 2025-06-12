@@ -10,7 +10,7 @@ export interface ResumeData {
 export interface ComponentBlock {
   component: string; // 组件名称
   dataBinding?: string; // 数据绑定路径，例如：'info', 'sections.experience'
-  props?: Record<string, any>; // 组件属性，例如：{ title: 'Work Experience' }
+  props?: Record<string, unknown>; // 组件属性，例如：{ title: 'Work Experience' }
   fieldMap?: Record<string, string | string[]>; // 字段映射，例如：{ mainTitle: 'company' }
   className?: string; // Tailwind 样式类
   style?: React.CSSProperties; // Inline styles for style overrides

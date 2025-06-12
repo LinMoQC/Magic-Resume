@@ -3,7 +3,7 @@ import get from 'lodash.get';
 import { WysiwygContent } from './WysiwygContent';
 
 interface Item {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface Props {

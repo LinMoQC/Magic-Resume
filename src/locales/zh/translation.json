@@ -34,10 +34,10 @@
       "browseTemplates": "浏览模板",
       "tag": "✨ 智能简历创建"
     },
-    "morphingTexts": {
+      "morphingTexts": {
       "simpleAndSmart": "简单 & 智能",
-      "aiPowered": "AI 驱动",
-      "beautifulTemplates": "精美模板",
+        "aiPowered": "AI 驱动",
+        "beautifulTemplates": "精美模板",
       "freeAndSecure": "免费 & 安全"
     },
     "features": {
@@ -49,7 +49,7 @@
         "tag": {
           "name": "AI",
           "description": "智能润色"
-        },
+      },
         "title": "智能检测，专业建议",
         "description": "内置智能语法检查，自动识别不当表述，提供专业修改建议，让您的简历更出色。",
         "benefit1": "智能增强",

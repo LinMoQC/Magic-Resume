@@ -2,7 +2,7 @@ import React from 'react';
 import * as templates from '../templateLayout';
 import { TemplateDSL, ResumeData, ComponentBlock } from '../types';
 
-const componentRegistry: Record<string, React.ComponentType<any>> = templates;
+const componentRegistry: Record<string, React.ComponentType<unknown>> = templates;
 
 interface Props {
   template: TemplateDSL;
