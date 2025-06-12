@@ -7,6 +7,7 @@ import { Toaster } from "sonner";
 import metaConfig from "@/constant/metaConfig";
 import I18nProvider from "@/app/dashboard/_components/I18nProvider";
 import LanguageSwitcher from "@/app/dashboard/_components/LanguageSwitcher";
+import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -28,6 +29,8 @@ export default function RootLayout({
             </Theme>
             <LanguageSwitcher />
           </I18nProvider>
+
+          <Script async src="https://cloud.umami.is/script.js" data-website-id="566da2ef-02bf-4b3f-9374-14ec66075e32" />
         </body>
       </html>
     </ClerkProvider>
