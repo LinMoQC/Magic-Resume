@@ -29,7 +29,14 @@
     "hero": {
       "title": "现代化的 AI 驱动<1/>简历构建器",
       "subtitle": "在几分钟内创建专业简历。利用 AI 撰写引人入胜的内容，从时尚的模板中进行选择，找到您梦想的工作。",
-      "getStarted": "开始使用"
+      "getStarted": "免费开始",
+      "morphingTexts": {
+        "modernResume": "现代简历",
+        "aiPowered": "AI 驱动",
+        "beautifulTemplates": "精美模板",
+        "getStarted": "即刻开始",
+        "standOut": "脱颖而出"
+      }
     },
     "features": {
       "ai": {
@@ -46,11 +53,11 @@
       },
       "privacy": {
         "title": "隐私优先",
-        "description": "您的数据属于您自己。您所有的简历信息都安全地存储在您的浏览器中——永远不会离开您的机器。"
+        "description": "你的数据只属于你。我们尊重您的隐私并确保您的信息安全。"
       }
     },
     "footer": {
-      "copyright": "© {{year}} Magic Resume. 为现代专业人士打造。"
+      "copyright": "© {{year}} Magic Resume. 版权所有。"
     }
   },
   "modals": {
