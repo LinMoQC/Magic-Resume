@@ -117,7 +117,7 @@
         "rawJsonButton": "View Raw JSON",
         "applyChangesButton": "Apply Changes",
         "revertChangesButton": "Revert Changes",
-        "outputTitle": "Optimization Suggestions",
+        "outputTitle": "Optimization Result",
         "jsonButton": "JSON",
         "optimizationProgress": {
           "analyzingJD": "Analyzing Job Description...",
