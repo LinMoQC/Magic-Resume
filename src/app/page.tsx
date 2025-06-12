@@ -19,6 +19,12 @@ export default function Landing() {
   const { t } = useTranslation();
   const [stars, setStars] = useState<number | null>(null);
 
+  const aiCarouselImages = [
+    '/magic-resume-optimize.png',
+    '/magic-resume-analysis.png',
+  ];
+  const [currentAiImageIndex, setCurrentAiImageIndex] = useState(0);
+
   const exportImportImages = [
     '/magic-resume-export.png',
     '/magic-resume-import.png',
@@ -26,11 +32,19 @@ export default function Landing() {
   const [currentExportImageIndex, setCurrentExportImageIndex] = useState(0);
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    const aiInterval = setInterval(() => {
+      setCurrentAiImageIndex((prevIndex) => (prevIndex + 1) % aiCarouselImages.length);
+    }, 3000);
+
+    const exportInterval = setInterval(() => {
       setCurrentExportImageIndex((prevIndex) => (prevIndex + 1) % exportImportImages.length);
     }, 3000);
-    return () => clearInterval(interval);
-  }, [exportImportImages.length]);
+
+    return () => {
+      clearInterval(aiInterval);
+      clearInterval(exportInterval);
+    };
+  }, [aiCarouselImages.length, exportImportImages.length]);
 
   useEffect(() => {
     fetch('/api/github-stars')
@@ -107,10 +121,64 @@ export default function Landing() {
                     alt={t("landing.features.ai.alt")}
                     width={800}
                     height={0}
-                    unoptimized
                   />
                 </div>
               </motion.div>
+            </div>
+          </section>
+
+          <section className="py-20 bg-neutral-900/50">
+            <div className="container mx-auto px-6 text-center">
+              <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn}>
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">{t("landing.features.main.title")}</h2>
+                <p className="text-lg text-neutral-400 max-w-3xl mx-auto mb-12">
+                  {t("landing.features.main.subtitle")}
+                </p>
+              </motion.div>
+              <div className="grid md:grid-cols-2 gap-12 items-center">
+                <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} className="text-left">
+                  <div className="p-4 bg-blue-500/10 rounded-lg inline-flex items-center gap-2 text-blue-400 mb-6">
+                    <span className="font-bold">{t("landing.features.ai.tag.name")}</span>
+                    <span>{t("landing.features.ai.tag.description")}</span>
+                  </div>
+                  <h3 className="text-3xl font-bold mb-4">{t("landing.features.ai.title")}</h3>
+                  <p className="text-neutral-400 mb-6">
+                    {t("landing.features.ai.description")}
+                  </p>
+                  <ul className="space-y-3">
+                    <li className="flex items-center gap-3">
+                      <FiCheckCircle className="text-green-500 w-5 h-5 flex-shrink-0" />
+                      <span>{t("landing.features.ai.benefit1")}</span>
+                    </li>
+                    <li className="flex items-center gap-3">
+                      <FiCheckCircle className="text-green-500 w-5 h-5 flex-shrink-0" />
+                      <span>{t("landing.features.ai.benefit2")}</span>
+                    </li>
+                  </ul>
+                </motion.div>
+                <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn}>
+                  <div className="group relative bg-neutral-900 border border-neutral-800 rounded-xl aspect-[4/3] flex items-center justify-center overflow-hidden transition-transform duration-300 hover:-translate-y-2">
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={currentAiImageIndex}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.5 }}
+                        className="w-full h-full"
+                      >
+                        <Image
+                          src={aiCarouselImages[currentAiImageIndex]}
+                          alt={t("landing.features.ai.alt")}
+                          width={800}
+                          height={600}
+                          className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
+                        />
+                      </motion.div>
+                    </AnimatePresence>
+                  </div>
+                </motion.div>
+              </div>
             </div>
           </section>
 
@@ -178,7 +246,7 @@ export default function Landing() {
                     {t("landing.features.export.tag")}
                   </div>
                   <p className="text-neutral-400 mb-6">{t("landing.features.export.description")}</p>
-                  <div className="bg-neutral-900 border border-neutral-800 rounded-xl aspect-video flex items-center justify-center overflow-hidden">
+                  <div className="group relative bg-neutral-900 border border-neutral-800 rounded-xl aspect-video flex items-center justify-center overflow-hidden transition-transform duration-300 hover:-translate-y-2">
                     <AnimatePresence mode="wait">
                       <motion.div
                         key={currentExportImageIndex}
@@ -193,8 +261,7 @@ export default function Landing() {
                           alt={t("landing.features.export.alt")}
                           width={800}
                           height={450}
-                          className="object-cover w-full h-full"
-                          unoptimized
+                          className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
                         />
                       </motion.div>
                     </AnimatePresence>
@@ -228,7 +295,7 @@ export default function Landing() {
             </div>
           </section>
 
-          <section className="py-20 text-center">
+          <section className="py-20 text-center bg-neutral-900/50">
             <div className="container mx-auto px-6">
               <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn}>
                 <h2 className="text-3xl md:text-4xl font-bold mb-4">{t("landing.contact.title")}</h2>
