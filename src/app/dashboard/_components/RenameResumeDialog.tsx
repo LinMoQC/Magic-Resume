@@ -7,9 +7,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+} from '@/app/components/ui/dialog';
+import { Button } from '@/app/components/ui/button';
+import { Input } from '@/app/components/ui/input';
+import { useTranslation } from 'react-i18next';
 
 type RenameResumeDialogProps = {
   open: boolean;
@@ -26,23 +27,24 @@ export default function RenameResumeDialog({
   setNewName,
   handleRename,
 }: RenameResumeDialogProps) {
+  const { t } = useTranslation();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className='text-white'>
         <DialogHeader>
-          <DialogTitle>Rename Resume</DialogTitle>
+          <DialogTitle>{t('renameDialog.title')}</DialogTitle>
         </DialogHeader>
         <div className="py-4">
           <Input
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
-            placeholder="Enter new resume name"
+            placeholder={t('renameDialog.placeholder')}
             onKeyDown={(e) => e.key === 'Enter' && handleRename()}
           />
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={handleRename}>Rename</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t('renameDialog.cancel')}</Button>
+          <Button onClick={handleRename}>{t('renameDialog.rename')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -5,6 +5,7 @@ import html2canvas from "html2canvas";
 import { toast } from "sonner";
 import { InfoType } from "@/store/useResumeStore";
 import jsPDF from "jspdf";
+import i18n from "@/i18n";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -45,6 +46,7 @@ export function generateSnapshot(): Promise<Blob | null> {
     }
     
     const clonedResume = element.cloneNode(true) as HTMLElement;
+    clonedResume.style.width = `${element.offsetWidth}px`;
     clonedResume.style.position = 'absolute';
     clonedResume.style.left = '-9999px';
     clonedResume.style.top = '0px';
@@ -73,6 +75,16 @@ export function generateSnapshot(): Promise<Blob | null> {
     });
 
     try {
+      const images = Array.from(clonedResume.getElementsByTagName('img'));
+      const imageLoadPromises = images.map(img => {
+        if (img.complete) return Promise.resolve();
+        return new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+        });
+      });
+      await Promise.all(imageLoadPromises);
+
       const canvas = await html2canvas(clonedResume, {
         scale: 0.5,
         useCORS: true,
@@ -95,6 +107,7 @@ export function handleExport(info: InfoType){
   const resumeElement = document.getElementById('resume-to-export');
   if (resumeElement) {
     const clonedResume = resumeElement.cloneNode(true) as HTMLElement;
+    clonedResume.style.width = `${resumeElement.offsetWidth}px`;
     clonedResume.style.position = 'absolute';
     clonedResume.style.left = '-9999px';
     clonedResume.style.top = '0px';
@@ -125,34 +138,50 @@ export function handleExport(info: InfoType){
     const originalStyle = resumeElement.style.transform;
     clonedResume.style.transform = '';
 
-    html2canvas(clonedResume, {
-      scale: 2,
-      useCORS: true,
-      logging: true,
-    }).then(canvas => {
-      const imgData = canvas.toDataURL('image/png');
-      
-      const canvasWidth = canvas.width;
-      const canvasHeight = canvas.height;
-      const imgRatio = canvasWidth / canvasHeight;
-
-      const pdfWidth = 210; // A4 width in mm
-      const pdfHeight = pdfWidth / imgRatio;
-      
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: [pdfWidth, pdfHeight]
+    const images = Array.from(clonedResume.getElementsByTagName('img'));
+    const imageLoadPromises = images.map(img => {
+      if (img.complete) return Promise.resolve();
+      return new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
       });
-      
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      
-      pdf.save(`${info.fullName || 'resume'}.pdf`);
-      toast.success('Resume exported successfully!');
+    });
+
+    Promise.all(imageLoadPromises).then(() => {
+      html2canvas(clonedResume, {
+        scale: 2,
+        useCORS: true,
+        logging: true,
+      }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+        const imgRatio = canvasWidth / canvasHeight;
+
+        const pdfWidth = 210; // A4 width in mm
+        const pdfHeight = pdfWidth / imgRatio;
+        
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: [pdfWidth, pdfHeight]
+        });
+        
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        
+        pdf.save(`${info.fullName || 'resume'}.pdf`);
+        toast.success(i18n.t('export.notifications.success'));
+      }).catch(error => {
+        MagicDebugger.error('Error exporting resume:', error);
+        toast.error(i18n.t('export.notifications.error'));
+      }).finally(() => {
+        document.body.removeChild(clonedResume);
+        resumeElement.style.transform = originalStyle;
+      });
     }).catch(error => {
-      MagicDebugger.error('Error exporting resume:', error);
-      toast.error('Failed to export resume.');
-    }).finally(() => {
+      MagicDebugger.error('Error loading images for export:', error);
+      toast.error(i18n.t('export.notifications.imageError'));
       document.body.removeChild(clonedResume);
       resumeElement.style.transform = originalStyle;
     });

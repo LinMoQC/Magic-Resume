@@ -3,11 +3,22 @@
 import React, { useEffect } from 'react';
 import { useSettingStore } from '@/store/useSettingStore';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/app/components/ui/button';
+import { Input } from '@/app/components/ui/input';
 import { InfoCircledIcon } from '@radix-ui/react-icons';
 import { motion, AnimatePresence } from 'framer-motion';
+import { MODEL_API_URL_MAP } from '@/constant/modals';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/app/components/ui/select";
+import { useTranslation, Trans } from 'react-i18next';
 
 export default function Settings() {
+  const { t } = useTranslation();
   const {
     apiKey,
     baseUrl,
@@ -29,35 +40,48 @@ export default function Settings() {
 
   const handleSave = () => {
     saveSettings();
-    toast.success('Settings saved!');
+    toast.success(t('settings.notifications.settingsSaved'));
   };
 
   const handleReset = () => {
     resetSettings();
-    toast.info('Changes have been reset.');
+    toast.info(t('settings.notifications.changesReset'));
+  };
+
+  const handleModelChange = (newModel: string) => {
+    setModel(newModel);
+
+    const officialUrl = MODEL_API_URL_MAP[newModel as keyof typeof MODEL_API_URL_MAP];
+    const isOfficialUrl = Object.values(MODEL_API_URL_MAP).includes(baseUrl);
+
+    if (officialUrl && (!baseUrl || isOfficialUrl)) {
+      setBaseUrl(officialUrl);
+    }
   };
 
   return (
     <div className="flex-1 px-12 py-10 overflow-y-auto relative">
-      <h1 className="text-3xl font-bold mb-4">Settings</h1>
+      <h1 className="text-3xl font-bold mb-4">{t('settings.title')}</h1>
       
       <div className="space-y-12 max-w-4xl pb-24">
         <section id="llm-settings">
-          <h2 className="text-2xl font-semibold mb-2">OpenAI/Ollama Integration</h2>
+          <h2 className="text-2xl font-semibold mb-2">{t('settings.llm.title')}</h2>
           <p className="text-neutral-400 mb-4 text-sm">
-            You can make use of the OpenAI API to help you generate content, or improve your writing while composing your resume.
+            {t('settings.llm.description1')}
           </p>
           <p className="text-neutral-400 mb-4 text-sm">
-            You have the option to <a href="https://platform.openai.com/account/api-keys" target="_blank" rel="noopener noreferrer" className="text-sky-400 hover:underline">obtain your own OpenAI API key</a>. This key empowers you to leverage the API as you see fit. Alternatively, if you wish to disable the AI features in Reactive Resume altogether, you can simply remove the key from your settings.
+            <Trans i18nKey="settings.llm.description2">
+              You have the option to <a href="https://platform.openai.com/account/api-keys" target="_blank" rel="noopener noreferrer" className="text-sky-400 hover:underline">obtain your own OpenAI API key</a>. This key empowers you to leverage the API as you see fit. Alternatively, if you wish to disable the AI features in Reactive Resume altogether, you can simply remove the key from your settings.
+            </Trans>
           </p>
           <p className="text-neutral-400 mb-4 text-sm">
-            You can also integrate with Ollama simply by setting the API key to `sk-1234567890abcdef` and the Base URL to your Ollama URL, i.e. `http://localhost:11434/v1`. You can also pick and choose models and set the max tokens as per your preference.
+            {t('settings.llm.description3')}
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
             <div>
-              <label htmlFor="apiKey" className="block text-sm font-medium text-neutral-300 mb-2">OpenAI/Ollama API Key</label>
-              <input
+              <label htmlFor="apiKey" className="block text-sm font-medium text-neutral-300 mb-2">{t('settings.llm.apiKeyLabel')}</label>
+              <Input
                 id="apiKey"
                 type="text"
                 value={apiKey}
@@ -67,8 +91,8 @@ export default function Settings() {
               />
             </div>
             <div>
-              <label htmlFor="baseUrl" className="block text-sm font-medium text-neutral-300 mb-2">Base URL</label>
-              <input
+              <label htmlFor="baseUrl" className="block text-sm font-medium text-neutral-300 mb-2">{t('settings.llm.baseUrlLabel')}</label>
+              <Input
                 id="baseUrl"
                 type="text"
                 value={baseUrl}
@@ -78,19 +102,23 @@ export default function Settings() {
               />
             </div>
             <div>
-              <label htmlFor="model" className="block text-sm font-medium text-neutral-300 mb-2">Model</label>
-              <input
-                id="model"
-                type="text"
-                value={model}
-                onChange={(e) => setModel(e.target.value)}
-                placeholder="gpt-3.5-turbo"
-                className="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-4 py-2 focus:ring-sky-500 focus:border-sky-500"
-              />
+              <label htmlFor="model" className="block text-sm font-medium text-neutral-300 mb-2">{t('settings.llm.modelLabel')}</label>
+              <Select onValueChange={handleModelChange} value={model}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={t('settings.llm.modelPlaceholder')} />
+                </SelectTrigger>
+                <SelectContent className='bg-neutral-800 focus:outline-0 border-0 text-white'>
+                  {Object.keys(MODEL_API_URL_MAP).map((modelName) => (
+                    <SelectItem key={modelName} value={modelName}>
+                      {modelName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
-              <label htmlFor="maxTokens" className="block text-sm font-medium text-neutral-300 mb-2">Max Tokens</label>
-              <input
+              <label htmlFor="maxTokens" className="block text-sm font-medium text-neutral-300 mb-2">{t('settings.llm.maxTokensLabel')}</label>
+              <Input
                 id="maxTokens"
                 type="number"
                 value={maxTokens}
@@ -116,11 +144,11 @@ export default function Settings() {
           >
             <div className="flex items-center gap-3">
               <InfoCircledIcon className="h-5 w-5 text-white" />
-              <p className="text-white font-medium text-sm">Unsaved changes</p>
+              <p className="text-white font-medium text-sm">{t('settings.notifications.unsavedChanges')}</p>
             </div>
             <div className="flex items-center gap-3 ml-3">
-              <Button onClick={handleReset} size="sm" className="h-6 rounded-2xl text-red-500 border-red-500 bg-red-500/20 hover:bg-red-500/10 hover:text-red-400">Reset</Button>
-              <Button onClick={handleSave} size="sm" className="h-6 rounded-2xl text-gray-300 hover:text-gray-200 bg-green-500/20 hover:bg-green-500/10">Save</Button>
+              <Button onClick={handleReset} size="sm" className="h-6 rounded-2xl text-red-500 border-red-500 bg-red-500/20 hover:bg-red-500/10 hover:text-red-400">{t('settings.buttons.reset')}</Button>
+              <Button onClick={handleSave} size="sm" className="h-6 rounded-2xl text-gray-300 hover:text-gray-200 bg-green-500/20 hover:bg-green-500/10">{t('settings.buttons.save')}</Button>
             </div>
           </motion.div>
         )}

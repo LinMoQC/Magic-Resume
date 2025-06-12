@@ -4,6 +4,7 @@ import React from 'react';
 import { InfoType, Section } from '@/store/useResumeStore';
 import { FaEnvelope, FaPhone, FaGlobe, FaMapMarkerAlt } from 'react-icons/fa';
 import Image from 'next/image';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   info: InfoType;
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export default function ResumePreview({ info, sections, sectionOrder,customStyle }: Props) {
+  const { t } = useTranslation();
   return (
     <div
       id="resume-to-export"
@@ -30,10 +32,11 @@ export default function ResumePreview({ info, sections, sectionOrder,customStyle
               height={40}
               className="w-10 h-10 rounded-full object-cover border border-neutral-300"
               style={{ background: '#f3f3f3' }}
+              unoptimized
             />
           )}
           <div className="space-y-0.5">
-            <div className="text-sm font-bold">{info.fullName || 'Your Name'}</div>
+            <div className="text-sm font-bold">{info.fullName || t('resumePreview.yourName')}</div>
             <div className="text-xs">{info.headline}</div>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px]">
               {info.address && (
@@ -71,7 +74,7 @@ export default function ResumePreview({ info, sections, sectionOrder,customStyle
             return (
               <section id={key} className="grid text-[12px]" key={key}>
                 <h4 className="font-bold text-primary text-[1.2em] text-blue-500">{key.charAt(0).toUpperCase() + key.slice(1)}</h4>
-                <div className="grid gap-x-6 gap-y-3" style={{ gridTemplateColumns: 'repeat(1, 1fr)' }}>
+                <div className="grid gap-x-6 gap-y-1" style={{ gridTemplateColumns: 'repeat(1, 1fr)' }}>
                   {items.map((item, idx) => (
                     <div className="space-y-2" key={idx}>
                       <div>
@@ -96,8 +99,8 @@ export default function ResumePreview({ info, sections, sectionOrder,customStyle
                 {items.map((item, idx) => (
                   <div className="space-y-2" key={idx}>
                     <div>
-                      <div className="flex items-start justify-between">
-                        <div className="text-left">
+                      <div className="flex items-start">
+                        <div className="flex-1 text-left">
                           <div className="font-bold">{item.school || item.company || item.project || item.platform || item.title || item.name || Object.values(item)[0]}</div>
                           {item.location && <div>{item.location}</div>}
                           {item.major && <div>{item.major}</div>}

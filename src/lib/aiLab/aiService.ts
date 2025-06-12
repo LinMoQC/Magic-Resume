@@ -1,4 +1,7 @@
 import { ChatOpenAI } from "@langchain/openai";
+import { ChatAnthropic } from "@langchain/anthropic";
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { MODEL_API_URL_MAP } from "@/constant/modals";
 
 interface ModelConfig {
   apiKey: string;
@@ -10,9 +13,9 @@ interface ModelConfig {
 }
 
 /**
- * Initializes and returns a ChatOpenAI model instance based on provided config.
+ * Initializes and returns a model instance based on provided config.
  * @param {ModelConfig} config - The configuration object for the model.
- * @returns A ChatOpenAI model instance.
+ * @returns A model instance from LangChain (e.g., ChatOpenAI, ChatAnthropic).
  */
 export const getModel = ({
   apiKey,
@@ -26,14 +29,32 @@ export const getModel = ({
     throw new Error("API key is required to initialize the model.");
   }
 
-  return new ChatOpenAI({
+  const effectiveBaseUrl = baseUrl || MODEL_API_URL_MAP[modelName as keyof typeof MODEL_API_URL_MAP];
+
+  console.log("effectiveBaseUrl", effectiveBaseUrl);
+
+  const commonProps = {
     modelName,
     temperature,
-    streaming: streaming,
     maxTokens,
+    streaming,
+    apiKey,
+  };
+
+  if (effectiveBaseUrl.includes("anthropic")) {
+    return new ChatAnthropic({ ...commonProps, anthropicApiUrl: effectiveBaseUrl });
+  }
+
+  if (effectiveBaseUrl.includes("google")) {
+    const { modelName, ...rest } = commonProps;
+    return new ChatGoogleGenerativeAI({ ...rest, model: modelName });
+  }
+
+  return new ChatOpenAI({
+    ...commonProps,
     configuration: {
       apiKey,
-      baseURL: baseUrl,
-    }
+      baseURL: effectiveBaseUrl,
+    },
   });
 }; 

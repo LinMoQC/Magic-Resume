@@ -16,9 +16,9 @@ const sidebarMenu: SidebarMenuItem[] = [
   {
     key: 'projects',
     icon: FaBook,
-    label: 'Projects',
+    label: 'sections.projects',
     itemRender: (item) => (
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 max-w-[155px]">
         <div className="font-bold text-sm">{item.name}</div>
         <div className="text-xs text-neutral-400">{item.role}</div>
       </div>
@@ -27,10 +27,10 @@ const sidebarMenu: SidebarMenuItem[] = [
   {
     key: 'education',
     icon: FaGraduationCap,
-    label: 'Education',
+    label: 'sections.education',
     formFields: dynamicFormFields.education,
     itemRender: (item) => (
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 max-w-[155px]">
         <div className="font-bold text-sm">{item.school}</div>
         <div className="text-xs text-neutral-400">{item.major}</div>
       </div>
@@ -39,28 +39,28 @@ const sidebarMenu: SidebarMenuItem[] = [
   {
     key: 'skills',
     icon: FaLayerGroup,
-    label: 'Skills',
-    itemRender: (item) => <div className="font-bold text-sm">{item.skill}</div>
+    label: 'sections.skills',
+    itemRender: (item) => <div className="font-bold text-sm max-w-[155px]">{item.name}</div>
   },
   {
     key: 'languages',
     icon: FaLanguage,
-    label: 'Languages',
-    itemRender: (item) => <div className="font-bold text-sm">{item.language}</div>
+    label: 'sections.languages',
+    itemRender: (item) => <div className="font-bold text-sm max-w-[155px]">{item.language}</div>
   },
   {
     key: 'certificates',
     icon: FaCertificate,
-    label: 'Certificates',
-    itemRender: (item) => <div className="font-bold text-sm">{item.certificate}</div>
+    label: 'sections.certificates',
+    itemRender: (item) => <div className="font-bold text-sm max-w-[155px]">{item.certificate}</div>
   },
   {
     key: 'experience',
     icon: FaBriefcase,
-    label: 'Experience',
+    label: 'sections.experience',
     formFields: dynamicFormFields.experience,
     itemRender: (item) => (
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 max-w-[155px]">
         <div className="font-bold text-sm">{item.company}</div>
         <div className="text-xs text-neutral-400">{item.location}</div>
       </div>
@@ -69,10 +69,10 @@ const sidebarMenu: SidebarMenuItem[] = [
   {
     key: 'profiles',
     icon: FaUser,
-    label: 'Profiles',
+    label: 'sections.profiles',
     formFields: dynamicFormFields.profiles,
     itemRender: (item) => (
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 max-w-[155px] ">
         <div className="font-bold text-sm">{item.platform}</div>
         <div className="text-xs text-neutral-400">{item.url}</div>
       </div>

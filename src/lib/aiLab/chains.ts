@@ -5,9 +5,9 @@ import { resumeOptimizePrompt } from "@/prompts/agent-modify-prompt";
 import { jdAnalysisPrompt } from "@/prompts/jd-analysis-prompt";
 import { polishTextPrompt } from "@/prompts/polish-text-prompt";
 import { StringOutputParser } from "@langchain/core/output_parsers";
-import { ChatOpenAI } from "@langchain/openai";
 import { resumeAnalysisPrompt } from "@/prompts/resume-analysis-prompt";
 import { JsonOutputParser } from "@langchain/core/output_parsers";
+import { getModel } from "./aiService";
 
 export const jdAnalysisSchema = z.object({
   keySkills: z
@@ -41,6 +41,7 @@ interface CreateChatChainOptions {
   baseUrl?: string;
   modelName?: string;
   maxTokens?: number;
+  temperature?: number;
 }
 
 /**
@@ -55,10 +56,11 @@ export const createJdAnalysisChain = ({
   modelName,
   maxTokens,
 }: CreateChatChainOptions) => {
-  const llm = new ChatOpenAI({
+  if (!apiKey) throw new Error("API key is required for JD analysis chain.");
+
+  const llm = getModel({
     apiKey,
-    // @ts-expect-error - baseURL is a valid but untyped parameter
-    baseURL: baseUrl,
+    baseUrl,
     modelName: modelName ?? "gpt-4-turbo",
     maxTokens: maxTokens ?? 2048,
   });
@@ -82,10 +84,11 @@ export const createItemOptimizationChain = ({
   modelName,
   maxTokens,
 }: CreateChatChainOptions) => {
-  const model = new ChatOpenAI({
+  if (!apiKey) throw new Error("API key is required for item optimization chain.");
+
+  const model = getModel({
     apiKey,
-    // @ts-expect-error - baseURL is a valid but untyped parameter
-    baseURL: baseUrl,
+    baseUrl,
     modelName: modelName ?? "gpt-3.5-turbo",
     maxTokens: maxTokens ?? 2048,
   });
@@ -105,10 +108,11 @@ export const createPolishTextChain = ({
   modelName,
   maxTokens,
 }: CreateChatChainOptions) => {
-  const model = new ChatOpenAI({
+  if (!apiKey) throw new Error("API key is required for polish text chain.");
+
+  const model = getModel({
     apiKey,
-    // @ts-expect-error - baseURL is a valid but untyped parameter
-    baseURL: baseUrl,
+    baseUrl,
     modelName: modelName ?? "gpt-4-turbo",
     maxTokens: maxTokens ?? 2048,
   });
@@ -122,16 +126,18 @@ export const createResumeAnalysisChain = ({
   baseUrl,
   modelName,
   maxTokens,
+  temperature,
 }: CreateChatChainOptions) => {
-  const llm = new ChatOpenAI({
+  if (!apiKey) throw new Error("API key is required for resume analysis chain.");
+
+  const llm = getModel({
     apiKey,
-    configuration: { baseURL: baseUrl },
+    baseUrl,
     modelName: modelName ?? "gpt-4-turbo",
     maxTokens: maxTokens ?? 4096,
-    temperature: 0.2,
+    temperature: temperature ?? 0.2,
   });
 
-  // Force the model to output JSON
   const jsonModeLlm = llm.bind({
     response_format: { type: "json_object" },
   });

@@ -15,6 +15,7 @@ import { LoadingMark } from './LoadingMark';
 import { useSettingStore } from '@/store/useSettingStore';
 import { createPolishTextChain } from '@/lib/aiLab/chains';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 type LastPolishedState = {
   from: number;
@@ -23,10 +24,11 @@ type LastPolishedState = {
 };
 
 const TiptapToolbar = ({ editor }: { editor: Editor | null }) => {
+  const { t } = useTranslation();
   const setLink = useCallback(() => {
     if (!editor) return;
     const previousUrl = editor.getAttributes('link').href;
-    const url = window.prompt('URL', previousUrl);
+    const url = window.prompt(t('tiptap.prompt.url'), previousUrl);
 
     if (url === null) {
       return;
@@ -38,7 +40,7 @@ const TiptapToolbar = ({ editor }: { editor: Editor | null }) => {
     }
 
     editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
-  }, [editor]);
+  }, [editor, t]);
 
   if (!editor) {
     return null
@@ -49,27 +51,6 @@ const TiptapToolbar = ({ editor }: { editor: Editor | null }) => {
 
   return (
     <div className="flex flex-wrap items-center gap-1 p-2 bg-neutral-800 border border-neutral-700 rounded-t-md text-white">
-      <button onClick={() => editor.chain().focus().toggleBold().run()} disabled={!editor.can().chain().focus().toggleBold().run()} className={editor.isActive('bold') ? buttonClass(true) : buttonClass(false)} aria-label="Bold"><FaBold /></button>
-      <button onClick={() => editor.chain().focus().toggleItalic().run()} disabled={!editor.can().chain().focus().toggleItalic().run()} className={editor.isActive('italic') ? buttonClass(true) : buttonClass(false)} aria-label="Italic"><FaItalic /></button>
-      <button onClick={() => editor.chain().focus().toggleUnderline().run()} disabled={!editor.can().chain().focus().toggleUnderline().run()} className={editor.isActive('underline') ? buttonClass(true) : buttonClass(false)} aria-label="Underline"><FaUnderline /></button>
-      <button onClick={() => editor.chain().focus().toggleStrike().run()} disabled={!editor.can().chain().focus().toggleStrike().run()} className={editor.isActive('strike') ? buttonClass(true) : buttonClass(false)} aria-label="Strike"><FaStrikethrough /></button>
-      <button onClick={setLink} className={editor.isActive('link') ? buttonClass(true) : buttonClass(false)} aria-label="Link"><FaLink /></button>
-      <button onClick={() => editor.chain().focus().toggleCode().run()} disabled={!editor.can().chain().focus().toggleCode().run()} className={editor.isActive('code') ? buttonClass(true) : buttonClass(false)} aria-label="Inline Code"><FaCode /></button>
-      <div className="h-4 w-px bg-neutral-600 mx-1"></div>
-      <button onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className={editor.isActive('heading', { level: 1 }) ? buttonClass(true) : buttonClass(false)} aria-label="Heading 1">H1</button>
-      <button onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={editor.isActive('heading', { level: 2 }) ? buttonClass(true) : buttonClass(false)} aria-label="Heading 2">H2</button>
-      <button onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} className={editor.isActive('heading', { level: 3 }) ? buttonClass(true) : buttonClass(false)} aria-label="Heading 3">H3</button>
-      <div className="h-4 w-px bg-neutral-600 mx-1"></div>
-      <button onClick={() => editor.chain().focus().setTextAlign('left').run()} className={editor.isActive({ textAlign: 'left' }) ? buttonClass(true) : buttonClass(false)} aria-label="Align Left"><FaAlignLeft /></button>
-      <button onClick={() => editor.chain().focus().setTextAlign('center').run()} className={editor.isActive({ textAlign: 'center' }) ? buttonClass(true) : buttonClass(false)} aria-label="Align Center"><FaAlignCenter /></button>
-      <button onClick={() => editor.chain().focus().setTextAlign('right').run()} className={editor.isActive({ textAlign: 'right' }) ? buttonClass(true) : buttonClass(false)} aria-label="Align Right"><FaAlignRight /></button>
-      <button onClick={() => editor.chain().focus().setTextAlign('justify').run()} className={editor.isActive({ textAlign: 'justify' }) ? buttonClass(true) : buttonClass(false)} aria-label="Align Justify"><FaAlignJustify /></button>
-      <div className="h-4 w-px bg-neutral-600 mx-1"></div>
-      <button onClick={() => editor.chain().focus().toggleBulletList().run()} className={editor.isActive('bulletList') ? buttonClass(true) : buttonClass(false)} aria-label="Bullet List"><FaListUl /></button>
-      <button onClick={() => editor.chain().focus().toggleOrderedList().run()} className={editor.isActive('orderedList') ? buttonClass(true) : buttonClass(false)} aria-label="Ordered List"><FaListOl /></button>
-      <div className="h-4 w-px bg-neutral-600 mx-1"></div>
-      <button onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().chain().focus().undo().run()} className={!editor.can().chain().focus().undo().run() ? disabledButtonClass : buttonClass(false)} aria-label="Undo"><FaUndo /></button>
-      <button onClick={() => editor.chain().focus().redo().run()} disabled={!editor.can().chain().focus().redo().run()} className={!editor.can().chain().focus().redo().run() ? disabledButtonClass : buttonClass(false)} aria-label="Redo"><FaRedo /></button>
       <button onClick={() => editor.chain().focus().toggleBold().run()} disabled={!editor.can().chain().focus().toggleBold().run()} className={editor.isActive('bold') ? buttonClass(true) : buttonClass(false)} aria-label="Bold"><FaBold /></button>
       <button onClick={() => editor.chain().focus().toggleItalic().run()} disabled={!editor.can().chain().focus().toggleItalic().run()} className={editor.isActive('italic') ? buttonClass(true) : buttonClass(false)} aria-label="Italic"><FaItalic /></button>
       <button onClick={() => editor.chain().focus().toggleUnderline().run()} disabled={!editor.can().chain().focus().toggleUnderline().run()} className={editor.isActive('underline') ? buttonClass(true) : buttonClass(false)} aria-label="Underline"><FaUnderline /></button>
@@ -106,6 +87,7 @@ interface TiptapEditorProps {
 const TiptapEditor = ({ content, onChange, placeholder, isPolishing, setIsPolishing }: TiptapEditorProps) => {
   const { apiKey, baseUrl, model, maxTokens } = useSettingStore();
   const [lastPolished, setLastPolished] = useState<LastPolishedState | null>(null);
+  const { t } = useTranslation();
   
   const editor = useEditor({
     extensions: [
@@ -167,7 +149,7 @@ const TiptapEditor = ({ content, onChange, placeholder, isPolishing, setIsPolish
   const handleAIPolishClick = async () => {
     if (!editor || editor.state.selection.empty || isPolishing) {
       if(isPolishing) {
-        toast.error('AI is already polishing. Please wait for it to finish.');
+        toast.error(t('tiptap.notifications.polishingInProgress'));
       }
       return;
     };
@@ -183,7 +165,7 @@ const TiptapEditor = ({ content, onChange, placeholder, isPolishing, setIsPolish
 
     try {
       if (!apiKey) {
-        toast.error('API Key not found. Please set it in the settings page.');
+        toast.error(t('modals.aiModal.notifications.apiKeyMissing'));
         throw new Error('API Key not found');
       }
       const chain = createPolishTextChain({ apiKey, baseUrl, modelName: model, maxTokens });
@@ -192,11 +174,10 @@ const TiptapEditor = ({ content, onChange, placeholder, isPolishing, setIsPolish
       await typewriterInsert(from, to, selectedText, polishedText);
 
     } catch (error) {
-      const message = error instanceof Error ? error.message : "An unknown error occurred.";
+      const message = error instanceof Error ? error.message : t('modals.aiModal.notifications.unknownError');
       if (message !== 'API Key not found') {
-        toast.error(`Failed to polish text: ${message}`);
+        toast.error(t('tiptap.notifications.polishFailed', { message }));
       }
-      // Revert the loading mark on failure
       editor.chain().focus().setTextSelection({ from, to }).unsetMark('loading').run();
     } finally {
       setIsPolishing(false);

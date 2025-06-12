@@ -5,6 +5,8 @@ import { ClerkProvider } from '@clerk/nextjs';
 import { Theme } from "@radix-ui/themes";
 import { Toaster } from "sonner";
 import metaConfig from "@/constant/metaConfig";
+import I18nProvider from "@/app/dashboard/_components/I18nProvider";
+import LanguageSwitcher from "@/app/dashboard/_components/LanguageSwitcher";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,10 +21,13 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body className={inter.className}>
-          <Theme appearance="dark">
-            {children}
-            <Toaster />
-          </Theme>
+          <I18nProvider>
+            <Theme appearance="dark">
+              {children}
+              <Toaster />
+            </Theme>
+            <LanguageSwitcher />
+          </I18nProvider>
         </body>
       </html>
     </ClerkProvider>
