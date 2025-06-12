@@ -23,7 +23,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { toast } from 'sonner';
-import Modal from '@/components/ui/Modal';
+import Modal from '@/app/components/ui/Modal';
 import ResumeEditSkeleton from './ResumeEditSkeleton';
 import TemplatePanel from './TemplatePanel';
 import ResumeContent from './ResumeContent';
@@ -33,6 +33,7 @@ import MobileResumEdit from '../_components/mobile/MobileResumEdit';
 import { generateSnapshot } from '@/lib/utils';
 import AIModal from '../_components/AIModal';
 import ReactJsonView from '@microlink/react-json-view';
+import { useTranslation } from 'react-i18next';
 const ResumePreviewPanel = dynamic(() => import('../_components/ResumePreviewPanel'), { ssr: false });
 
 type ResumeEditProps = {
@@ -63,8 +64,6 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     setSectionOrder: updateSectionOrder,
     updateSectionItems,
     updateSections,
-    addCustomField,
-    removeCustomField,
     rightCollapsed,
     setRightCollapsed,
     activeSection,
@@ -83,6 +82,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
   const openAIModal = () => setIsAIModalOpen(true);
   const closeAIModal = () => setIsAIModalOpen(false);
+  const { t } = useTranslation();
 
   const handleDownloadJson = () => {
     if (!activeResume) return;
@@ -96,7 +96,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    toast.success('JSON file download started!');
+    toast.success(t('editPage.notifications.jsonDownloadStarted'));
   };
 
   const info = activeResume?.info;
@@ -167,12 +167,10 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
               <SortableSection key={key} id={key} disabled={key === 'basics' || isAnyModalOpen}>
                 {key === 'basics' && (
                   <div ref={sectionRefs.basics} className={`scroll-mt-24 ${isLast ? '' : 'mb-8'}`} id="basics">
-                    <h2 className="text-2xl font-bold flex items-center gap-3 mb-8"><FaUser className="text-[16px]" /> Basics</h2>
+                    <h2 className="text-2xl font-bold flex items-center gap-3 mb-8"><FaUser className="text-[16px]" /> {t('editPage.sections.basics')}</h2>
                     <BasicForm
                       info={info!}
                       updateInfo={updateInfo}
-                      addCustomField={addCustomField}
-                      removeCustomField={removeCustomField}
                     />
                   </div>
                 )}
@@ -181,7 +179,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
                     <SectionListWithModal
                       icon={sidebarMenu.find(s => s.key === key)?.icon || FaUser}
                       label={sidebarMenu.find(s => s.key === key)?.label || ''}
-                      fields={(dynamicFormFields[key as keyof typeof dynamicFormFields] || []).map(f => ({ name: f.key, label: f.label, placeholder: f.placeholder || '', required: f.required }))}
+                      fields={(dynamicFormFields[key as keyof typeof dynamicFormFields] || []).map(f => ({ name: f.key, label: t(f.labelKey), placeholder: f.placeholderKey ? t(f.placeholderKey) : '', required: f.required }))}
                       richtextKey="summary"
                       richtextPlaceholder="..."
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -252,7 +250,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
       <Modal
         isOpen={isJsonModalOpen}
         onClose={closeJsonModal}
-        title="Resume JSON Data"
+        title={t('mobileEdit.jsonData')}
       >
         <div className="relative">
           <button

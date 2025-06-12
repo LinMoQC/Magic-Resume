@@ -4,29 +4,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FiFeather, FiEye, FiMove, FiLock, FiArrowRight } from 'react-icons/fi';
 import Image from 'next/image';
-
-const features = [
-  {
-    icon: <FiFeather className="h-8 w-8 text-sky-400" />,
-    title: 'AI Assistant',
-    description: "Overcome writer's block. Generate professional summaries and descriptions with our integrated OpenAI/Ollama support.",
-  },
-  {
-    icon: <FiEye className="h-8 w-8 text-sky-400" />,
-    title: 'Live Preview',
-    description: 'See your changes in real-time as you type. No more guessing how your final resume will look.',
-  },
-  {
-    icon: <FiMove className="h-8 w-8 text-sky-400" />,
-    title: 'Drag & Drop Interface',
-    description: 'Effortlessly reorder sections to highlight your strengths with an intuitive drag-and-drop interface.',
-  },
-  {
-    icon: <FiLock className="h-8 w-8 text-sky-400" />,
-    title: 'Privacy First',
-    description: 'Your data is yours. All your resume information is stored securely in your browser—never leaving your machine.',
-  },
-];
+import { useTranslation, Trans } from 'react-i18next';
 
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
@@ -34,6 +12,31 @@ const fadeIn = {
 };
 
 export default function Landing() {
+  const { t } = useTranslation();
+
+  const features = [
+    {
+      icon: <FiFeather className="h-8 w-8 text-sky-400" />,
+      title: t('landing.features.ai.title'),
+      description: t('landing.features.ai.description'),
+    },
+    {
+      icon: <FiEye className="h-8 w-8 text-sky-400" />,
+      title: t('landing.features.preview.title'),
+      description: t('landing.features.preview.description'),
+    },
+    {
+      icon: <FiMove className="h-8 w-8 text-sky-400" />,
+      title: t('landing.features.dnd.title'),
+      description: t('landing.features.dnd.description'),
+    },
+    {
+      icon: <FiLock className="h-8 w-8 text-sky-400" />,
+      title: t('landing.features.privacy.title'),
+      description: t('landing.features.privacy.description'),
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-black text-white font-sans">
       <header className="fixed top-0 left-0 right-0 bg-black/50 backdrop-blur-lg border-b border-neutral-800 z-50">
@@ -41,7 +44,7 @@ export default function Landing() {
         <Image src="/magic-resume-logo.png" alt="magic-resume-logo" width={150} height={0} style={{ height: 'auto' }} />
           <Link href="/dashboard" legacyBehavior>
             <a className="bg-white text-black px-5 py-2 rounded-lg font-semibold hover:bg-neutral-200 transition-colors">
-              Go to App
+              {t('landing.nav.goToApp')}
             </a>
           </Link>
         </div>
@@ -51,14 +54,16 @@ export default function Landing() {
         <section className="text-center container mx-auto px-6 py-20 md:py-32">
           <motion.div initial="hidden" animate="visible" variants={fadeIn}>
             <h2 className="text-4xl md:text-6xl font-bold tracking-tighter leading-tight mb-4">
-              The Modern, AI-Powered <br className="hidden md:inline" /> Resume Builder
+              <Trans i18nKey="landing.hero.title">
+                The Modern, AI-Powered <br className="hidden md:inline" /> Resume Builder
+              </Trans>
             </h2>
             <p className="text-lg md:text-xl text-neutral-400 max-w-3xl mx-auto mb-8">
-              Create a professional resume in minutes. Leverage AI to craft compelling content, choose from sleek templates, and land your dream job.
+              {t('landing.hero.subtitle')}
             </p>
             <Link href="/dashboard" legacyBehavior>
               <a className="bg-sky-500 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-sky-600 transition-colors inline-flex items-center gap-2">
-                Get Started <FiArrowRight />
+                {t('landing.hero.getStarted')} <FiArrowRight />
               </a>
             </Link>
           </motion.div>
@@ -89,7 +94,7 @@ export default function Landing() {
 
       <footer className="border-t border-neutral-800">
         <div className="container mx-auto px-6 py-8 text-center text-neutral-500">
-          <p>&copy; {new Date().getFullYear()} Magic Resume. Built for modern professionals.</p>
+          <p>{t('landing.footer.copyright', { year: new Date().getFullYear() })}</p>
         </div>
       </footer>
     </div>

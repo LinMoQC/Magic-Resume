@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/app/components/ui/button";
 import ResumePreviewPanel from "../ResumePreviewPanel";
 import Link from "next/link";
 import { FiEdit, FiLayout } from "react-icons/fi";
@@ -6,11 +6,12 @@ import { AnimatePresence, motion } from "framer-motion";
 import { FaCopy } from "react-icons/fa";
 import ResumeContent from "../../[id]/ResumeContent";
 import TemplatePanel from "../../[id]/TemplatePanel";
-import Modal from "@/components/ui/Modal";
+import Modal from "@/app/components/ui/Modal";
 import Image from "next/image";
 import { InfoType, Section, Resume } from "@/store/useResumeStore";
 import React from "react";
 import dynamic from 'next/dynamic';
+import { useTranslation } from "react-i18next";
 
 const ReactJsonView = dynamic(() => import('@microlink/react-json-view'), { ssr: false });
 
@@ -51,6 +52,7 @@ export default function MobileResumEdit({
     handleSave,
     onShowAI
 }: MobileResumEditProps) {
+    const { t } = useTranslation();
     return <main className="flex h-screen bg-black text-white flex-1">
         <div className='flex-1 flex items-center justify-center bg-black relative'>
             <ResumePreviewPanel
@@ -125,13 +127,13 @@ export default function MobileResumEdit({
         <Modal
             isOpen={isJsonModalOpen}
             onClose={closeJsonModal}
-            title="Resume JSON Data"
+            title={t('mobileEdit.jsonData')}
         >
             <div className="relative">
                 <button
                     onClick={handleCopyJson}
                     className="absolute top-3 right-3 p-2 text-gray-400 rounded-md hover:bg-neutral-700 hover:text-white transition-colors"
-                    aria-label="Copy JSON to clipboard"
+                    aria-label={t('mobileEdit.copyJson')}
                 >
                     <FaCopy />
                 </button>

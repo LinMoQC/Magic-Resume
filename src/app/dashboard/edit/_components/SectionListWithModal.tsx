@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/app/components/ui/button';
 import {
   DndContext,
   closestCenter,
@@ -19,8 +19,8 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { FaPlus, FaTrash, FaPen, FaGripVertical, FaRegCopy, FaEye, FaEyeSlash } from 'react-icons/fa';
-import { Input } from '@/components/ui/input';
-import Modal from '@/components/ui/Modal';
+import { Input } from '@/app/components/ui/input';
+import Modal from '@/app/components/ui/Modal';
 import { toast } from 'sonner';
 import {
   DropdownMenu,
@@ -28,11 +28,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuPortal
-} from '@/components/ui/dropdown-menu';
+} from '@/app/components/ui/dropdown-menu';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
 import { UniqueIdentifier } from '@dnd-kit/core';
-import TiptapEditor from '@/components/ui/TiptapEditor';
+import TiptapEditor from '@/app/components/ui/TiptapEditor';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
+import { Label } from '@/app/components/ui/label';
 
 interface BaseItem {
   id: UniqueIdentifier;
@@ -54,6 +56,7 @@ type SortableItemProps<T extends BaseItem> = {
 };
 
 function SortableItem<T extends BaseItem>({ id, item, index, handleEdit, handleDelete, handleCopy, toggleVisibility, itemRender, disabled }: SortableItemProps<T>) {
+  const { t } = useTranslation();
   const {
     attributes,
     listeners,
@@ -77,7 +80,7 @@ function SortableItem<T extends BaseItem>({ id, item, index, handleEdit, handleD
       <div className="flex-grow">
         {itemRender ? itemRender(item) : (
           <div>
-            <p className="font-semibold">{item.title || item.name || item.degree || 'Untitled'}</p>
+            <p className="font-semibold">{item.title || item.name || item.degree || t('sections.shared.untitled')}</p>
             <p className="text-sm text-neutral-400">{item.subtitle || item.company || item.school || ''}</p>
           </div>
         )}
@@ -85,7 +88,7 @@ function SortableItem<T extends BaseItem>({ id, item, index, handleEdit, handleD
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
+            <span className="sr-only">{t('sections.shared.openMenu')}</span>
             <DotsHorizontalIcon className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
@@ -93,19 +96,19 @@ function SortableItem<T extends BaseItem>({ id, item, index, handleEdit, handleD
           <DropdownMenuContent align="end" className="w-[160px] bg-neutral-900 border-neutral-700 text-white">
             <DropdownMenuItem onSelect={() => toggleVisibility(index)} className="cursor-pointer">
               {item.visible === false ? <FaEyeSlash className="mr-2 h-4 w-4" /> : <FaEye className="mr-2 h-4 w-4" />}
-              <span>{item.visible === false ? 'Show' : 'Hide'}</span>
+              <span>{item.visible === false ? t('sections.shared.show') : t('sections.shared.hide')}</span>
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => handleEdit(index)} className="cursor-pointer">
               <FaPen className="mr-2 h-4 w-4" />
-              <span>Edit</span>
+              <span>{t('sections.shared.edit')}</span>
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => handleCopy(index)} className="cursor-pointer">
               <FaRegCopy className="mr-2 h-4 w-4" />
-              <span>Copy</span>
+              <span>{t('sections.shared.copy')}</span>
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => handleDelete(index)} className="text-red-500 cursor-pointer focus:text-red-400 focus:bg-red-500/10">
               <FaTrash className="mr-2 h-4 w-4" />
-              <span>Remove</span>
+              <span>{t('sections.shared.remove')}</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenuPortal>
@@ -145,6 +148,9 @@ export default function SectionListWithModal<T extends BaseItem>({
   const [currentItem, setCurrentItem] = useState<T | null>(null);
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
   const [isPolishing, setIsPolishing] = useState(false);
+  const { t } = useTranslation();
+
+  const translatedLabel = t(label);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -183,7 +189,7 @@ export default function SectionListWithModal<T extends BaseItem>({
       const missingLabels = missingFieldNames
         .map(name => fields.find(f => f.name === name)?.label || name)
         .join(', ');
-      toast.error(`请填写以下必填项：${missingLabels}`);
+      toast.error(t('sections.notifications.requiredFields', { fields: missingLabels }));
       return;
     }
 
@@ -195,13 +201,16 @@ export default function SectionListWithModal<T extends BaseItem>({
     }
     setItems(newItems as T[]);
     handleCloseModal();
-    toast.success(`${label} section ${currentIndex !== null ? 'updated' : 'added'} successfully.`);
+    const notificationMessage = currentIndex !== null
+      ? t('sections.notifications.sectionUpdated', { label: translatedLabel })
+      : t('sections.notifications.sectionAdded', { label: translatedLabel });
+    toast.success(notificationMessage);
   };
 
   const handleDelete = (index: number) => {
     const newItems = items.filter((_, i) => i !== index);
     setItems(newItems);
-    toast.success('Item removed successfully.');
+    toast.success(t('sections.notifications.itemRemoved'));
   };
 
   const handleCopy = (index: number) => {
@@ -209,7 +218,7 @@ export default function SectionListWithModal<T extends BaseItem>({
     const newItem = { ...itemToCopy, id: Date.now().toString() } as T;
     const newItems = [...items.slice(0, index + 1), newItem, ...items.slice(index + 1)];
     setItems(newItems);
-    toast.success('Item copied successfully.');
+    toast.success(t('sections.notifications.itemCopied'));
   };
 
   const toggleVisibility = (index: number) => {
@@ -217,7 +226,8 @@ export default function SectionListWithModal<T extends BaseItem>({
     const currentVisibility = newItems[index].visible;
     newItems[index] = { ...newItems[index], visible: currentVisibility === false ? true : false };
     setItems(newItems);
-    toast.success(`Item visibility ${newItems[index].visible ? 'shown' : 'hidden'}.`);
+    const status = newItems[index].visible ? t('sections.shared.show') : t('sections.shared.hide');
+    toast.success(t('sections.notifications.visibilityToggled', { status }));
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -245,65 +255,69 @@ export default function SectionListWithModal<T extends BaseItem>({
 
   return (
     <div className={cn("mb-8", className)}>
-      <h2 className="text-xl font-bold flex items-center gap-3 mb-6">
-        {React.createElement(icon, { className: "w-4 h-4" })} {label}
-      </h2>
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-bold flex items-center gap-3">
+          {React.createElement(icon, { className: "w-4 h-4" })} {translatedLabel}
+        </h2>
+      </div>
 
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={items} strategy={verticalListSortingStrategy}>
-          {items.map((item, index) => (
-            <SortableItem<T>
-              key={item.id}
-              id={item.id}
-              item={item}
-              index={index}
-              handleEdit={() => handleOpenModal(item, index)}
-              handleDelete={() => handleDelete(index)}
-              handleCopy={() => handleCopy(index)}
-              toggleVisibility={() => toggleVisibility(index)}
-              itemRender={itemRender}
-              label={label}
-              disabled={isOpen}
-            />
-          ))}
-        </SortableContext>
-      </DndContext>
-      
-      <Button variant="outline" onClick={() => handleOpenModal(null, null)} className="inline-flex w-full scale-100 items-center justify-center rounded-sm text-sm font-medium ring-offset-background transition-[transform,background-color] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-95 disabled:pointer-events-none disabled:opacity-50 border border-secondary bg-transparent hover:text-secondary-foreground h-9 px-5 gap-x-2 border-dashed py-6 leading-relaxed hover:bg-secondary-accent" style={{borderColor: 'rgba(255,255,255,0.2)'}}>
-        <FaPlus className="mr-2" /> Add Item
+      <div className="mt-4">
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={items} strategy={verticalListSortingStrategy}>
+            {items.map((item, index) => (
+              <SortableItem<T>
+                key={item.id}
+                id={item.id}
+                item={item}
+                index={index}
+                handleEdit={(i) => handleOpenModal(items[i], i)}
+                handleDelete={handleDelete}
+                handleCopy={handleCopy}
+                toggleVisibility={toggleVisibility}
+                itemRender={itemRender}
+                label={label}
+                disabled={items.length === 1}
+              />
+            ))}
+          </SortableContext>
+        </DndContext>
+      </div>
+
+      <Button variant="outline" onClick={() => handleOpenModal(null, null)} className="inline-flex w-full scale-100 items-center justify-center rounded-sm text-sm font-medium ring-offset-background transition-[transform,background-color] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-95 disabled:pointer-events-none disabled:opacity-50 border border-secondary bg-transparent hover:text-secondary-foreground h-9 px-5 gap-x-2 border-dashed py-6 leading-relaxed hover:bg-secondary-accent" style={{ borderColor: 'rgba(255,255,255,0.2)' }}>
+        <FaPlus className="mr-2" />  {t('sections.shared.addItem')}
       </Button>
-
-      <Modal isOpen={isOpen} onClose={handleCloseModal} title={currentIndex !== null ? `Edit ${label}` : `Add ${label}`}>
+      <Modal
+        isOpen={isOpen}
+        onClose={handleCloseModal}
+        title={currentIndex !== null ? t('sections.shared.editTitle', { label: translatedLabel }) : t('sections.shared.addTitle', { label: translatedLabel })}
+      >
         <div className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 px-2">
-            {fields.map((field, index) => (
-              <div key={`${field.name}-${index}`}>
-                <label className="block text-sm font-medium mb-1" htmlFor={field.name}>{field.label}</label>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 p-2">
+            {fields.map((field) => (
+              <div key={field.name}>
+                <Label htmlFor={field.name}>{field.label}</Label>
                 <Input
                   id={field.name}
                   name={field.name}
-                  value={String(currentItem?.[field.name] ?? '')}
-                  onChange={handleInputChange}
                   placeholder={field.placeholder}
+                  value={(currentItem?.[field.name] as string) || ''}
+                  onChange={handleInputChange}
                   className="bg-neutral-800 border-neutral-700"
                 />
               </div>
             ))}
           </div>
-          <div className='overflow-hidden'>
-            <label className="block text-sm font-medium mb-1">{richtextKey.charAt(0).toUpperCase() + richtextKey.slice(1)}</label>
-            <TiptapEditor
-              content={String(currentItem?.[richtextKey] ?? '')}
-              onChange={handleQuillChange}
-              placeholder={richtextPlaceholder}
-              isPolishing={isPolishing}
-              setIsPolishing={setIsPolishing}
-            />
-          </div>
-          <div className="flex justify-end gap-2">
-            <Button onClick={handleCloseModal} variant="ghost">Cancel</Button>
-            <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white">Save</Button>
-          </div>
+          <TiptapEditor
+            content={(currentItem?.[richtextKey] as string) || ''}
+            onChange={handleQuillChange}
+            placeholder={richtextPlaceholder}
+            isPolishing={isPolishing}
+            setIsPolishing={setIsPolishing}
+          />
+        </div>
+        <div className="mt-6 flex justify-end gap-2">
+          <Button variant="outline" onClick={handleCloseModal}>{t('modals.dynamicForm.cancelButton')}</Button>
+          <Button onClick={handleSave}>{t('modals.dynamicForm.saveButton')}</Button>
         </div>
       </Modal>
     </div>

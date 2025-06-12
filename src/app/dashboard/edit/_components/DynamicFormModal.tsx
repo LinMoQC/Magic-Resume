@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import Modal from '@/components/ui/Modal';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import TiptapEditor from '@/components/ui/TiptapEditor';
+import Modal from '@/app/components/ui/Modal';
+import { Button } from '@/app/components/ui/button';
+import { Input } from '@/app/components/ui/input';
+import { Label } from '@/app/components/ui/label';
+import TiptapEditor from '@/app/components/ui/TiptapEditor';
 import { UniqueIdentifier } from '@dnd-kit/core';
-import { Textarea } from '@/components/ui/textarea';
+import { Textarea } from '@/app/components/ui/textarea';
+import { useTranslation } from 'react-i18next';
 
 type Field = {
   name: string;
@@ -42,6 +43,7 @@ export default function DynamicFormModal<T extends Item>({
 }: DynamicFormModalProps<T>) {
   const [formData, setFormData] = useState<Partial<T>>({});
   const [isPolishing, setIsPolishing] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (currentItem) {
@@ -77,7 +79,7 @@ export default function DynamicFormModal<T extends Item>({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={currentItem ? 'Edit Item' : 'Add New Item'}
+      title={currentItem ? t('modals.dynamicForm.editTitle') : t('modals.dynamicForm.addTitle')}
     >
       <div className="space-y-4">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 p-2">
@@ -109,7 +111,7 @@ export default function DynamicFormModal<T extends Item>({
         </div>
         {richtextKey && (
           <div>
-            <Label htmlFor={richtextKey}>Description</Label>
+            <Label htmlFor={richtextKey}>{t('modals.dynamicForm.descriptionLabel')}</Label>
             <TiptapEditor
               content={String(formData[richtextKey] || '')}
               onChange={handleQuillChange}
@@ -121,8 +123,8 @@ export default function DynamicFormModal<T extends Item>({
         )}
       </div>
       <div className="mt-6 flex justify-end gap-2">
-        <Button variant="outline" onClick={onClose}>Cancel</Button>
-        <Button onClick={handleSave}>Save</Button>
+        <Button variant="outline" onClick={onClose}>{t('modals.dynamicForm.cancelButton')}</Button>
+        <Button onClick={handleSave}>{t('modals.dynamicForm.saveButton')}</Button>
       </div>
     </Modal>
   );

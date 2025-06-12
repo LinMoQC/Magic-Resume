@@ -5,9 +5,9 @@ import {
   ClerkLoading,
   ClerkLoaded,
 } from "@clerk/nextjs";
-import { Skeleton } from "@/components/ui/Skeleton";
+import { Skeleton } from "Skeleton";
 import Image from 'next/image';
-import { Button } from '@/components/ui/button';
+import { Button } from 'button';
 
 export type SidebarMenuItem = {
   key: string;

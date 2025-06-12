@@ -1,54 +1,54 @@
 // 动态表单配置
 export type FieldConfig = {
     key: string;
-    label: string;
+    labelKey: string;
     type: 'input' | 'richtext';
-    placeholder?: string;
+    placeholderKey?: string;
     required?: boolean;
 };
 
 const educationFields: FieldConfig[] = [
-    { key: 'school', label: 'School', type: 'input', placeholder: '学校', required: true },
-    { key: 'degree', label: 'Degree', type: 'input', placeholder: '学位' },
-    { key: 'major', label: 'Major', type: 'input', placeholder: '专业' },
-    { key: 'date', label: 'Date or Date Range', type: 'input', placeholder: '2019-2023' },
-    { key: 'location', label: 'Location', type: 'input', placeholder: '城市' }
+    { key: 'school', labelKey: 'dynamicForm.fields.education.school.label', type: 'input', placeholderKey: 'dynamicForm.fields.education.school.placeholder', required: true },
+    { key: 'degree', labelKey: 'dynamicForm.fields.education.degree.label', type: 'input', placeholderKey: 'dynamicForm.fields.education.degree.placeholder' },
+    { key: 'major', labelKey: 'dynamicForm.fields.education.major.label', type: 'input', placeholderKey: 'dynamicForm.fields.education.major.placeholder' },
+    { key: 'date', labelKey: 'dynamicForm.fields.education.date.label', type: 'input', placeholderKey: 'dynamicForm.fields.education.date.placeholder' },
+    { key: 'location', labelKey: 'dynamicForm.fields.education.location.label', type: 'input', placeholderKey: 'dynamicForm.fields.education.location.placeholder' }
 ];
 
 const experienceFields: FieldConfig[] = [
-    { key: 'company', label: 'Company', type: 'input', placeholder: '公司名称', required: true },
-    { key: 'position', label: 'Position', type: 'input', placeholder: '职位', required: true },
-    { key: 'date', label: 'Date or Date Range', type: 'input', placeholder: '2023年3月至今' },
-    { key: 'location', label: 'Location', type: 'input', placeholder: '城市' },
-    { key: 'website', label: 'Website', type: 'input', placeholder: '网址' },
+    { key: 'company', labelKey: 'dynamicForm.fields.experience.company.label', type: 'input', placeholderKey: 'dynamicForm.fields.experience.company.placeholder', required: true },
+    { key: 'position', labelKey: 'dynamicForm.fields.experience.position.label', type: 'input', placeholderKey: 'dynamicForm.fields.experience.position.placeholder', required: true },
+    { key: 'date', labelKey: 'dynamicForm.fields.experience.date.label', type: 'input', placeholderKey: 'dynamicForm.fields.experience.date.placeholder' },
+    { key: 'location', labelKey: 'dynamicForm.fields.experience.location.label', type: 'input', placeholderKey: 'dynamicForm.fields.experience.location.placeholder' },
+    { key: 'website', labelKey: 'dynamicForm.fields.experience.website.label', type: 'input', placeholderKey: 'dynamicForm.fields.experience.website.placeholder' },
 ];
 
 const profilesFields: FieldConfig[] = [
-    { key: 'platform', label: 'Platform', type: 'input', placeholder: '如 LinkedIn, GitHub', required: true },
-    { key: 'url', label: 'URL', type: 'input', placeholder: '链接地址', required: true },
+    { key: 'platform', labelKey: 'dynamicForm.fields.profiles.platform.label', type: 'input', placeholderKey: 'dynamicForm.fields.profiles.platform.placeholder', required: true },
+    { key: 'url', labelKey: 'dynamicForm.fields.profiles.url.label', type: 'input', placeholderKey: 'dynamicForm.fields.profiles.url.placeholder', required: true },
 ];
 
 const skillsFields: FieldConfig[] = [
-    { key: 'name', label: 'Skill Name', type: 'input', placeholder: '技能名称', required: true },
-    { key: 'level', label: 'Level', type: 'input', placeholder: '熟练度（如 Expert, Intermediate, Beginner）' },
+    { key: 'name', labelKey: 'dynamicForm.fields.skills.name.label', type: 'input', placeholderKey: 'dynamicForm.fields.skills.name.placeholder', required: true },
+    { key: 'level', labelKey: 'dynamicForm.fields.skills.level.label', type: 'input', placeholderKey: 'dynamicForm.fields.skills.level.placeholder' },
 ];
 
 const projectsFields: FieldConfig[] = [
-    { key: 'name', label: 'Project Name', type: 'input', placeholder: '项目名称', required: true },
-    { key: 'role', label: 'Role', type: 'input', placeholder: '担任角色' },
-    { key: 'date', label: 'Date or Date Range', type: 'input', placeholder: '2022.01-2022.12' },
-    { key: 'link', label: 'Link', type: 'input', placeholder: '项目链接' },
+    { key: 'name', labelKey: 'dynamicForm.fields.projects.name.label', type: 'input', placeholderKey: 'dynamicForm.fields.projects.name.placeholder', required: true },
+    { key: 'role', labelKey: 'dynamicForm.fields.projects.role.label', type: 'input', placeholderKey: 'dynamicForm.fields.projects.role.placeholder' },
+    { key: 'date', labelKey: 'dynamicForm.fields.projects.date.label', type: 'input', placeholderKey: 'dynamicForm.fields.projects.date.placeholder' },
+    { key: 'link', labelKey: 'dynamicForm.fields.projects.link.label', type: 'input', placeholderKey: 'dynamicForm.fields.projects.link.placeholder' },
 ];
 
 const languagesFields: FieldConfig[] = [
-    { key: 'language', label: 'Language', type: 'input', placeholder: '语言', required: true },
-    { key: 'level', label: 'Level', type: 'input', placeholder: '熟练度（如 Native, Fluent, Intermediate）' },
+    { key: 'language', labelKey: 'dynamicForm.fields.languages.language.label', type: 'input', placeholderKey: 'dynamicForm.fields.languages.language.placeholder', required: true },
+    { key: 'level', labelKey: 'dynamicForm.fields.languages.level.label', type: 'input', placeholderKey: 'dynamicForm.fields.languages.level.placeholder' },
 ];
 
 const certificatesFields: FieldConfig[] = [
-    { key: 'name', label: 'Certificate Name', type: 'input', placeholder: '证书名称', required: true },
-    { key: 'issuer', label: 'Issuer', type: 'input', placeholder: '颁发机构' },
-    { key: 'date', label: 'Date', type: 'input', placeholder: '获得时间' },
+    { key: 'name', labelKey: 'dynamicForm.fields.certificates.name.label', type: 'input', placeholderKey: 'dynamicForm.fields.certificates.name.placeholder', required: true },
+    { key: 'issuer', labelKey: 'dynamicForm.fields.certificates.issuer.label', type: 'input', placeholderKey: 'dynamicForm.fields.certificates.issuer.placeholder' },
+    { key: 'date', labelKey: 'dynamicForm.fields.certificates.date.label', type: 'input', placeholderKey: 'dynamicForm.fields.certificates.date.placeholder' },
 ];
 
 export const dynamicFormFields: Record<string, FieldConfig[]> = {
