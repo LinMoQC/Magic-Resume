@@ -29,7 +29,14 @@
     "hero": {
       "title": "The Modern, AI-Powered <1/> Resume Builder",
       "subtitle": "Create a professional resume in minutes. Leverage AI to craft compelling content, choose from sleek templates, and land your dream job.",
-      "getStarted": "Get Started"
+      "getStarted": "Get Started for Free",
+      "morphingTexts": {
+        "modernResume": "Modern Resumes",
+        "aiPowered": "AI-Powered",
+        "beautifulTemplates": "Beautiful Templates",
+        "getStarted": "Get Started Now",
+        "standOut": "Stand Out"
+      }
     },
     "features": {
       "ai": {
@@ -45,12 +52,12 @@
         "description": "Effortlessly reorder sections to highlight your strengths with an intuitive drag-and-drop interface."
       },
       "privacy": {
-        "title": "Privacy First",
-        "description": "Your data is yours. All your resume information is stored securely in your browser—never leaving your machine."
+        "title": "Data Privacy",
+        "description": "Your data is yours. We respect your privacy and ensure your information is secure."
       }
     },
     "footer": {
-      "copyright": "© {{year}} Magic Resume. Built for modern professionals."
+      "copyright": "© {{year}} Magic Resume. All rights reserved."
     }
   },
   "modals": {
