@@ -10,7 +10,7 @@ function Stars(props: { count?: number }) {
   const { count = 5000 } = props;
 
   const positions = useMemo(() => {
-    let positions = [];
+    const positions = [];
     for (let i = 0; i < count; i++) {
       positions.push((Math.random() - 0.5) * 10);
       positions.push((Math.random() - 0.5) * 10);
@@ -19,7 +19,7 @@ function Stars(props: { count?: number }) {
     return new Float32Array(positions);
   }, [count]);
 
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     if (ref.current) {
       ref.current.rotation.x -= delta / 10;
       ref.current.rotation.y -= delta / 15;
@@ -42,7 +42,7 @@ function Stars(props: { count?: number }) {
 }
 
 function CameraRig() {
-  useFrame((state, delta) => {
+  useFrame((state) => {
     state.camera.position.x = THREE.MathUtils.lerp(state.camera.position.x, state.mouse.x / 2, 0.05);
     state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, -state.mouse.y / 2, 0.05);
     state.camera.lookAt(0, 0, 0);

@@ -16,7 +16,7 @@ function Stars(props: { count?: number }) {
     return new Float32Array(positions);
   }, [count]);
 
-  useFrame((state, delta) => {
+  useFrame((state) => {
     state.camera.position.x = THREE.MathUtils.lerp(state.camera.position.x, state.mouse.x / 2, 0.05);
     state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, -state.mouse.y / 2, 0.05);
   });
