@@ -272,7 +272,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
           </pre>
         </div>
       </Modal>
-      <AIModal isOpen={isAIModalOpen} onClose={closeAIModal} resumeData={activeResume} onApplyChanges={updateSections}/>
+      <AIModal isOpen={isAIModalOpen} onClose={closeAIModal} resumeData={activeResume} onApplyChanges={updateSections} templateId={currentTemplateId}/>
     </main>
   );
 } 
