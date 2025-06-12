@@ -28,10 +28,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuPortal
-} from '@/app/components/ui/dropdown-menu';
+} from '@/app/components/dropdown-menu';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
 import { UniqueIdentifier } from '@dnd-kit/core';
-import TiptapEditor from '@/app/components/ui/TiptapEditor';
+import TiptapEditor from '@/app/components/TiptapEditor';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import { Label } from '@/app/components/ui/label';

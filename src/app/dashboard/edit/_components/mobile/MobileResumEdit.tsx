@@ -53,6 +53,8 @@ export default function MobileResumEdit({
     onShowAI
 }: MobileResumEditProps) {
     const { t } = useTranslation();
+    const [currentTemplateId, setCurrentTemplateId] = React.useState('default-classic');
+
     return <main className="flex h-screen bg-black text-white flex-1">
         <div className='flex-1 flex items-center justify-center bg-black relative'>
             <ResumePreviewPanel
@@ -62,6 +64,7 @@ export default function MobileResumEdit({
                 previewScale={0.8}
                 setPreviewScale={setPreviewScale}
                 onShowAI={onShowAI}
+                templateId={currentTemplateId}
             />
         </div>
 
@@ -119,6 +122,8 @@ export default function MobileResumEdit({
                         <TemplatePanel
                             rightCollapsed={false}
                             setRightCollapsed={() => { }}
+                            onSelectTemplate={setCurrentTemplateId}
+                            currentTemplateId={currentTemplateId}
                         />
                     </motion.div>
                 </>

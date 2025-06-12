@@ -14,7 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-} from '@/app/components/ui/dropdown-menu';
+} from '@/app/components/dropdown-menu';
 import { FiMoreVertical } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 

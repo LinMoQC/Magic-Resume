@@ -10,11 +10,15 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { produce } from 'immer';
 import { Resume, Section } from '@/store/useResumeStore';
 import ResumePreview from './ResumePreview';
-import ReactJsonView from '@microlink/react-json-view';
+import dynamic from 'next/dynamic';
 import { ResumeAnalysis } from '@/lib/types/analysis';
 import { StructuredOutputParser } from 'langchain/output_parsers';
-import { ResumeAnalysisReport } from '@/app/components/ui/ResumeAnalysisReport';
+import { ResumeAnalysisReport } from '@/app/components/ResumeAnalysisReport';
 import { useTranslation } from 'react-i18next';
+
+const ReactJsonView = dynamic(() => import('@microlink/react-json-view'), {
+    ssr: false,
+});
 
 type AIModalProps = {
   isOpen: boolean;

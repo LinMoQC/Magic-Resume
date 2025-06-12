@@ -14,6 +14,7 @@ interface ResumePreviewPanelProps {
   previewScale: number;
   setPreviewScale: (scale: number) => void;
   onShowAI: () => void;
+  templateId: string;
 }
 
 const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
@@ -22,6 +23,7 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
   sectionOrder,
   setPreviewScale,
   onShowAI,
+  templateId,
 }) => {
   const { isMobile } = useMobile();
 
@@ -43,7 +45,12 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
               wrapperStyle={{ width: '100%', height: '100%',maxHeight: '100vh' }}
               contentStyle={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', width: '100%', height: '100%', paddingTop: '5rem', paddingBottom: '5rem' }}
             >
-              <ResumePreview info={info} sections={sections} sectionOrder={sectionOrder} />
+              <ResumePreview 
+                info={info} 
+                sections={sections} 
+                sectionOrder={sectionOrder} 
+                templateId={templateId} 
+              />
             </TransformComponent>
 
             <Tools isMobile={isMobile} zoomIn={zoomIn} zoomOut={zoomOut} resetTransform={resetTransform} info={info} onShowAI={onShowAI} />

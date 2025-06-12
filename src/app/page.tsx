@@ -76,9 +76,9 @@ export default function Landing() {
               <Image src="/magic-resume-logo.png" alt="magic-resume-logo" width={160} height={0} />
             </Link>
             <nav className="flex items-center md:gap-4">
-              <a href="https://github.com/LinMoQC/Magic-Resume" target="_blank" rel="noopener noreferrer" className="bg-[#211E2D] border flex border-neutral-700 rounded-lg px-4 py-2 items-center gap-3 text-sm font-medium text-neutral-300 hover:bg-neutral-800 transition-colors">
+              <a href="https://github.com/LinMoQC/Magic-Resume" target="_blank" rel="noopener noreferrer" className="bg-[#211E2D] border hidden md:flex border-neutral-700 rounded-lg px-4 py-2 items-center gap-3 text-sm font-medium text-neutral-300 hover:bg-neutral-800 transition-colors">
                 <FaStar className="text-yellow-400" />
-                <span>{t("landing.nav.starOnGithub")}</span>
+                <span>Star on GitHub</span>
                 <span className="text-neutral-600">|</span>
                 <span className="font-semibold text-white">
                   {stars !== null ? new Intl.NumberFormat().format(stars) : '...'}
@@ -266,11 +266,16 @@ export default function Landing() {
                 </p>
               </div>
               <div className="flex items-center gap-6 text-neutral-400">
-                <Link href="/dashboard">
-                  <p className="hover:text-white transition-colors">{t("landing.hero.getStarted")}</p>
-                </Link>
+              <a href="https://github.com/LinMoQC/Magic-Resume" target="_blank" rel="noopener noreferrer" className="bg-[#211E2D] border flex md:hidden border-neutral-700 rounded-lg px-4 py-2 items-center gap-3 text-sm font-medium text-neutral-300 hover:bg-neutral-800 transition-colors">
+                <FaStar className="text-yellow-400" />
+                <span>Star on GitHub</span>
+                <span className="text-neutral-600">|</span>
+                <span className="font-semibold text-white">
+                  {stars !== null ? new Intl.NumberFormat().format(stars) : '...'}
+                </span>
+              </a>
                 <a href="https://github.com/LinMoQC/Magic-Resume" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-                  <FaGithub className="w-6 h-6" />
+                  <FaGithub className="w-10 h-10 md:w-6 md:h-6" />
                 </a>
               </div>
             </div>
