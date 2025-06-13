@@ -9,6 +9,10 @@
     "lint": "next lint",
     "prepare": "husky"
   },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": "eslint --fix",
+    "*.{json,md,yml,yaml}": "prettier --write"
+  },
   "dependencies": {
     "@clerk/nextjs": "^6.21.0",
     "@dnd-kit/core": "^6.3.1",

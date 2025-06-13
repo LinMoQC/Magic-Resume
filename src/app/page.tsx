@@ -5,13 +5,6 @@ import { FeatureSections } from '@/app/components/landing/FeatureSections';
 import { Footer } from '@/app/components/landing/Footer';
 import { Suspense } from 'react';
 
-const t = (key: string, options?: Record<string, unknown>) => {
-  const texts: { [key: string]: string } = {
-    "landing.footer.copyright": `© ${options?.year || new Date().getFullYear()} Magic Resume. All rights reserved.`,
-  };
-  return texts[key] || key;
-};
-
 export default async function LandingPage() {
   return (
     <div className="min-h-screen bg-black text-white font-sans">
@@ -23,7 +16,7 @@ export default async function LandingPage() {
           <FeatureSections />
         </main>
         <Suspense fallback={<div>Loading...</div>}>
-          <Footer t={t} />
+          <Footer />
         </Suspense>
       </div>
     </div>
