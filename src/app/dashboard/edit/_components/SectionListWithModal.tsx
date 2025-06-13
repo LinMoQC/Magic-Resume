@@ -28,7 +28,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuPortal
-} from '@/app/components/dropdown-menu';
+} from '@/app/components/ui/dropdown-menu';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
 import { UniqueIdentifier } from '@dnd-kit/core';
 import TiptapEditor from '@/app/components/TiptapEditor';

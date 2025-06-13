@@ -11,6 +11,10 @@ class IndexedDBClient {
   private initializationPromise: Promise<void> | null = null;
 
   init(): Promise<void> {
+    // 客户端环境判断
+    if (typeof window === 'undefined') {
+      return Promise.resolve();
+    }
     if (!this.initializationPromise) {
       this.initializationPromise = this._init();
     }
@@ -40,14 +44,14 @@ class IndexedDBClient {
 
   async setItem<T>(key: string, value: T): Promise<void> {
     await this.init();
-    if (!this.dbPromise) throw new Error('Database not initialized');
+    if (!this.dbPromise) return;
     const db = await this.dbPromise;
     await db.put(STORE_NAME, value, key);
   }
 
   async getItem<T>(key: string): Promise<T | null> {
     await this.init();
-    if (!this.dbPromise) throw new Error('Database not initialized');
+    if (!this.dbPromise) return null;
     const db = await this.dbPromise;
     const value = await db.get(STORE_NAME, key);
     return value === undefined ? null : value;
@@ -55,7 +59,7 @@ class IndexedDBClient {
 
   async removeItem(key: string): Promise<void> {
     await this.init();
-    if (!this.dbPromise) throw new Error('Database not initialized');
+    if (!this.dbPromise) return;
     const db = await this.dbPromise;
     await db.delete(STORE_NAME, key);
   }

@@ -6,21 +6,32 @@ import { Theme } from "@radix-ui/themes";
 import { Toaster } from "sonner";
 import metaConfig from "@/constant/metaConfig";
 import I18nProvider from "@/app/dashboard/_components/I18nProvider";
-import LanguageSwitcher from "@/app/dashboard/_components/LanguageSwitcher";
+import LanguageSwitcher from "@/app/components/LanguageSwitcher";
 import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = metaConfig.Landing;
+export const metadata: Metadata = {
+  ...metaConfig.Landing,
+  alternates: {
+    canonical: '/',
+    languages: {
+      'en-US': '/en',
+      'zh-CN': '/zh',
+    },
+  },
+};
 
 export default function RootLayout({
   children,
+  params: { lang }
 }: Readonly<{
   children: React.ReactNode;
+  params: { lang: string };
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html lang={lang} className="hide-scrollbar">
         <body className={inter.className}>
           <I18nProvider>
             <Theme appearance="dark">
