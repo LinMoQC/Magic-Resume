@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { ClerkProvider } from '@clerk/nextjs';
 import { Theme } from "@radix-ui/themes";
 import { Toaster } from "sonner";
 import metaConfig from "@/constant/metaConfig";
@@ -30,7 +29,6 @@ export default function RootLayout({
   params: { lang: string };
 }>) {
   return (
-    <ClerkProvider>
       <html lang={lang} className="hide-scrollbar">
         <body className={inter.className}>
           <I18nProvider>
@@ -46,6 +44,5 @@ export default function RootLayout({
           <Script async src="https://cloud.umami.is/script.js" data-website-id="566da2ef-02bf-4b3f-9374-14ec66075e32" />
         </body>
       </html>
-    </ClerkProvider>
   );
 }

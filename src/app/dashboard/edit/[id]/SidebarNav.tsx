@@ -1,12 +1,6 @@
 import Link from 'next/link';
 import React from 'react';
-import {
-  UserButton,
-  ClerkLoading,
-  ClerkLoaded,
-} from "@clerk/nextjs";
 import Image from 'next/image';
-import { Skeleton } from '@/app/components/ui/Skeleton';
 import { Button } from '@/app/components/ui/button';
 
 export type SidebarMenuItem = {
@@ -41,17 +35,6 @@ export default function SidebarNav({ sidebarMenu, handleSidebarClick }: SidebarN
               {item.icon}
             </Button>
           ))}
-        </div>
-
-        <div className="mt-auto">
-          <div className="flex flex-col items-center gap-2 mb-2">
-            <ClerkLoading>
-              <Skeleton className="w-8 h-8 rounded-full" />
-            </ClerkLoading>
-            <ClerkLoaded>
-              <UserButton afterSignOutUrl="/" />
-            </ClerkLoaded>
-          </div>
         </div>
       </div>
     </aside>
