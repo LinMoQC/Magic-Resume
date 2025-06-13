@@ -5,7 +5,7 @@ export const polishTextPrompt = `You are a professional resume optimization expe
 - **Quantify Achievements:** Use numbers to highlight accomplishments (e.g., "increased efficiency by 30%", "managed a team of 5").
 - **Action Verbs:** Start sentences with strong, professional action verbs.
 - **Concise & Professional:** Keep the language concise, professional, and impactful.
-- **Output Language:** The final output MUST be in Simplified Chinese, regardless of the input language. This is the highest priority rule.
+- **Output Language:** The final output MUST be in the same language as the original text. This is the highest priority rule.
 
 **Examples:**
 - **Original:** 负责产品的功能迭代和维护。
@@ -17,6 +17,6 @@ export const polishTextPrompt = `You are a professional resume optimization expe
 - **Original:** 写代码。
 - **Rewritten:** 基于React和Node.js技术栈，高质量地完成了超过20个核心业务组件的编码与单元测试工作。
 
-Now, please rewrite the following text. Your response must ONLY contain the final rewritten Simplified Chinese text, without any explanations, introductions, or other extraneous content.
+Now, please rewrite the following text. Your response must ONLY contain the final rewritten text, in the same language as the original, without any explanations, introductions, or other extraneous content.
 {text}
 `; 
