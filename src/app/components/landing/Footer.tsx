@@ -3,11 +3,7 @@ import Image from 'next/image';
 import { FaGithub } from 'react-icons/fa';
 import StarOnGitHub from './StarOnGitHub';
 
-interface FooterProps {
-  t: (key: string, options?: Record<string, unknown>) => string;
-}
-
-export function Footer({ t }: FooterProps) {
+export function Footer() {
   return (
     <footer className="border-t border-neutral-800">
       <div className="container mx-auto px-6 py-8">
@@ -17,7 +13,7 @@ export function Footer({ t }: FooterProps) {
               <Image src="/magic-resume-logo.png" alt="magic-resume-logo" width={140} height={0} />
             </Link>
             <p className="text-sm text-neutral-500 mt-2 md:mt-0 md:ml-4 md:border-l md:pl-4 border-neutral-700">
-              {t("landing.footer.copyright", { year: new Date().getFullYear() })}
+            {`© ${new Date().getFullYear()} Magic Resume. All rights reserved.`}
             </p>
           </div>
           <div className="flex items-center gap-6 text-neutral-400">
