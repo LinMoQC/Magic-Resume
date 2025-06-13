@@ -1,6 +1,6 @@
 # Magic Resume
 
-[![License](https://img.shields.io/github/license/LinMoQC/Magic-Resume?style=flat-square)](https://github.com/LinMoQC/Magic-Resume/blob/main/LICENSE) [![Stars](https://img.shields.io/github/stars/LinMoQC/Magic-Resume?style=flat-square)](https://github.com/LinMoQC/Magic-Resume/stargazers) [![Forks](https://img.shields.io/github/forks/LinMoQC/Magic-Resume?style=flat-square)](https://github.com/LinMoQC/Magic-Resume/network/members) [![Issues](https://img.shields.io/github/issues/LinMoQC/Magic-Resume?style=flat-square)](https://github.com/LinMoQC/Magic-Resume/issues)
+[![License](https://img.shields.io/github/license/LinMoQC/Magic-Resume?style=flat-square)](https://github.com/LinMoQC/Magic-Resume/blob/master/LICENSE) [![Stars](https://img.shields.io/github/stars/LinMoQC/Magic-Resume?style=flat-square)](https://github.com/LinMoQC/Magic-Resume/stargazers) [![Forks](https://img.shields.io/github/forks/LinMoQC/Magic-Resume?style=flat-square)](https://github.com/LinMoQC/Magic-Resume/network/members) [![Issues](https://img.shields.io/github/issues/LinMoQC/Magic-Resume?style=flat-square)](https://github.com/LinMoQC/Magic-Resume/issues)
 
 <br/>
 
