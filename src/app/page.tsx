@@ -5,7 +5,7 @@ import { FeatureSections } from '@/app/components/landing/FeatureSections';
 import { Footer } from '@/app/components/landing/Footer';
 import { Suspense } from 'react';
 
-const t = (key: string, options?: any) => {
+const t = (key: string, options?: Record<string, unknown>) => {
   const texts: { [key: string]: string } = {
     "landing.footer.copyright": `© ${options?.year || new Date().getFullYear()} Magic Resume. All rights reserved.`,
   };

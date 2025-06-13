@@ -4,7 +4,7 @@ import { FaGithub } from 'react-icons/fa';
 import StarOnGitHub from './StarOnGitHub';
 
 interface FooterProps {
-  t: (key: string, options?: any) => string;
+  t: (key: string, options?: Record<string, unknown>) => string;
 }
 
 export function Footer({ t }: FooterProps) {

@@ -2,7 +2,6 @@
 
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
-import { Languages, CaseSensitive } from 'lucide-react';
 
 export default function LanguageSwitcher() {
   const { i18n } = useTranslation();

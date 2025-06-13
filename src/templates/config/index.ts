@@ -1,5 +1,7 @@
 import {defaultTemplate} from "./default";
 
-export default {
+const templates = {
   default: defaultTemplate,
 };
+
+export default templates;
