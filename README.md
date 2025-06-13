@@ -1,14 +1,14 @@
-<h3 align="center"><img width="455" alt="Magic Resume Logo" src="./public/magic-resume-logo.png"></h3>
+# Magic Resume
 
-<p align="center"><strong>一个由 AI 驱动的智能简历优化器</strong></p>
+[![License](https://img.shields.io/github/license/LinMoQC/Magic-Resume?style=flat-square)](https://github.com/LinMoQC/Magic-Resume/blob/master/LICENSE) [![Stars](https://img.shields.io/github/stars/LinMoQC/Magic-Resume?style=flat-square)](https://github.com/LinMoQC/Magic-Resume/stargazers) [![Forks](https://img.shields.io/github/forks/LinMoQC/Magic-Resume?style=flat-square)](https://github.com/LinMoQC/Magic-Resume/network/members) [![Issues](https://img.shields.io/github/issues/LinMoQC/Magic-Resume?style=flat-square)](https://github.com/LinMoQC/Magic-Resume/issues)
 
-<p align="center">
-  本仓库是一个基于 Next.js 的 AI 简历助手，旨在帮助用户根据目标岗位（JD）智能优化个人简历。
-</p>
+<br/>
 
-<p align="center">
-  欢迎体验 AI 为您优化简历的强大功能！
-</p>
+<p align="center"><img width="455" alt="Magic Resume Logo" src="./public/magic-resume-logo.png"></p>
+
+## :scroll: 简介
+
+**Magic Resume** 是一个由 AI 驱动的智能简历优化器。它基于 Next.js 构建，旨在帮助用户根据目标岗位（JD）的要求，智能地分析、优化个人简历，并提供专业建议。
 
 ---
 
@@ -90,20 +90,46 @@ npm run start
 npm run lint
 ```
 
-<!-- 
 ## :camera: 项目截图
 
 <table>
   <tr>
-    <td align="center"><strong>主编辑页</strong></td>
-    <td align="center"><strong>AI 优化模态框</strong></td>
+    <td align="center"><strong>在线编辑</strong></td>
+    <td align="center"><strong>AI 智能优化</strong></td>
   </tr>
   <tr>
-    <td><img src="https://i.postimg.cc/kX4DRq9g/image.png" alt="主编辑页截图"></td>
-    <td><img src="https://i.postimg.cc/1XW9Pypz/image.png" alt="AI 优化模态框截图"></td>
+    <td><img src="./public/magic-resume-preview.png" alt="在线编辑"></td>
+    <td><img src="./public/magic-resume-optimize.png" alt="AI 智能优化"></td>
   </tr>
-</table> -->
+  <tr>
+    <td align="center"><strong>AI 智能分析</strong></td>
+    <td align="center"><strong>多种导入方式</strong></td>
+  </tr>
+  <tr>
+    <td><img src="./public/magic-resume-analysis.png" alt="AI 智能分析"></td>
+    <td><img src="./public/magic-resume-import.png" alt="多种导入方式"></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>简历导出</strong></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td><img src="./public/magic-resume-export.png" alt="简历导出"></td>
+    <td></td>
+  </tr>
+</table>
 
+## :handshake: 贡献
+
+我们非常欢迎各种形式的贡献！如果您在使用过程中发现任何问题，或有任何好的建议，请随时 [提交 issue](https://github.com/LinMoQC/Magic-Resume/issues/new) 或提交 Pull Request。
+
+### :busts_in_silhouette: 贡献者
+
+感谢以下开发者对 Magic Resume 作出的贡献：
+
+<a href="https://github.com/nonebot/nonebot2/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=LinMoQC/Magic-Resume" alt="contributors" />
+</a>
 
 ## Star History
 
