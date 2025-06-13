@@ -2,7 +2,8 @@ import React from 'react';
 import * as templates from '../templateLayout';
 import { TemplateDSL, ResumeData, ComponentBlock } from '../types';
 
-const componentRegistry: Record<string, React.ComponentType<unknown>> = templates;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const componentRegistry: Record<string, React.ComponentType<any>> = templates;
 
 interface Props {
   template: TemplateDSL;

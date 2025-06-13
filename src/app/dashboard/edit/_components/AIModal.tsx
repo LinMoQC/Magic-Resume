@@ -25,6 +25,7 @@ type AIModalProps = {
   onClose: () => void;
   resumeData: Resume;
   onApplyChanges: (newSections: Section) => void;
+  templateId: string;
 };
 
 const TABS_CONFIG = [
@@ -32,7 +33,7 @@ const TABS_CONFIG = [
   { key: 'analyze', name: 'modals.aiModal.tabs.analyze', icon: <BarChart3 size={18} /> },
 ];
 
-export default function AIModal({ isOpen, onClose, resumeData, onApplyChanges }: AIModalProps) {
+export default function AIModal({ isOpen, onClose, resumeData, onApplyChanges, templateId }: AIModalProps) {
   const { t } = useTranslation();
   const [activeTabKey, setActiveTabKey] = React.useState(TABS_CONFIG[0].key);
 
@@ -304,6 +305,7 @@ export default function AIModal({ isOpen, onClose, resumeData, onApplyChanges }:
                                   info={optimizedResume.info}
                                   sections={optimizedResume.sections}
                                   sectionOrder={optimizedResume.sectionOrder.map(s => s.key)}
+                                  templateId={templateId}
                                 />
                               </div>
                             </div>

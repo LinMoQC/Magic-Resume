@@ -8,8 +8,8 @@ import {
   SheetTitle,
 } from "@/app/components/ui/sheet";
 import { ResumeAnalysis } from "@/lib/types/analysis";
-import { ResumeAnalysisReport } from "../ResumeAnalysisReport";
 import { BarChart3 } from "lucide-react";
+import { ResumeAnalysisReport } from "./ResumeAnalysisReport";
 
 interface AnalysisSheetProps {
   open: boolean;
