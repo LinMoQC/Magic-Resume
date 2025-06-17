@@ -10,6 +10,23 @@ export interface LogEntry {
     isExpanded?: boolean;
   }
 
+export interface NodeState {
+  analysisReport?: unknown;
+  jdAnalysis?: unknown;
+  queries?: string[];
+  summaries?: string[];
+  analysisTasks?: string[];
+  currentAnalysisTask?: string;
+  parallelAnalysisResults?: Record<string, unknown>;
+  rewriteTasks?: string[];
+  taskCompleted?: string;
+  optimizedSections?: Record<string, unknown>;
+  optimizedResume?: Resume;
+  [key: string]: unknown;
+}
+
+export type StreamData = Record<string, NodeState>;
+
 interface ResumeOptimizerState {
   isLoading: boolean;
   logs: LogEntry[];

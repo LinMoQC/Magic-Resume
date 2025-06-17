@@ -3,9 +3,7 @@ import {
   createJdAnalysisChain,
   createPolishTextChain,
   CreateChatChainOptions,
-  jdAnalysisSchema,
 } from "./chains";
-import { StructuredOutputParser } from "langchain/output_parsers";
 import { z } from "zod";
 import { DynamicStructuredTool } from "@langchain/core/tools";;
 import { createResumeAnalysisChain } from "./chains";

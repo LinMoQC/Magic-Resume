@@ -40,6 +40,15 @@ export const LogItem: React.FC<LogItemProps> = ({ log, isLast, onToggleExpand, e
     return translation;
   }
 
+  let contentElement = null;
+  if (expandedLogId === log.id && log.content) {
+    if (typeof log.content === 'object' && log.content !== null) {
+      contentElement = <ReactJsonView src={log.content as object} theme="ocean" displayDataTypes={false} name={false} />;
+    } else {
+      contentElement = <pre className="text-sm text-white whitespace-pre-wrap">{String(log.content)}</pre>;
+    }
+  }
+
   return (
     <div className="relative">
       <div className="flex items-start">
@@ -71,7 +80,7 @@ export const LogItem: React.FC<LogItemProps> = ({ log, isLast, onToggleExpand, e
             <p className="text-sm text-neutral-400 mt-1">{getStatusText(log)}</p>
 
             <AnimatePresence>
-              {/* {expandedLogId === log.id && log.content && (
+              {contentElement && (
                 <motion.div
                   initial={{ opacity: 0, height: 0, marginTop: -10 }}
                   animate={{ opacity: 1, height: 'auto', marginTop: 10 }}
@@ -79,10 +88,10 @@ export const LogItem: React.FC<LogItemProps> = ({ log, isLast, onToggleExpand, e
                   className="mb-2"
                 >
                   <div className="p-2 bg-black rounded-md max-h-48 overflow-y-auto">
-                    <ReactJsonView src={log.content} theme="ocean" displayDataTypes={false} name={false} />
+                    {contentElement}
                   </div>
                 </motion.div>
-              )} */}
+              )}
             </AnimatePresence>
 
             {hasChildren && log.isExpanded && (

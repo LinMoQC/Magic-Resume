@@ -8,7 +8,6 @@ import {
 import { getModel } from "./aiService";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { JsonOutputParser, StringOutputParser } from "@langchain/core/output_parsers";
-import { resumeRewritePrompt } from "@/prompts/resume-rewrite-prompt";
 import { Resume } from "@/store/useResumeStore";
 import { extractTextFromResume } from "./utils";
 import { ANALYSIS_CATEGORIES } from "@/prompts/resume-analysis-prompt";
@@ -66,17 +65,6 @@ User Context:
 
 Summaries:
 {summaries}`;
-
-interface QueryWriterOutput {
-  rationale: string;
-  query: string[];
-}
-
-interface ReflectionOutput {
-  is_sufficient: boolean;
-  knowledge_gap: string;
-  follow_up_queries: string[];
-}
 
 type SubAnalysisResult = {
   score: number;
@@ -234,6 +222,7 @@ export const createResumeOptimizationGraph = (
 
   const prepareAnalysisTasksNode = (state: GraphState): Partial<GraphState> => {
     console.log("--- Preparing Analysis Tasks ---");
+    console.log(state)
     return { analysisTasks: analysisCategories, parallelAnalysisResults: {} };
   }
   
