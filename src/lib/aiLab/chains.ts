@@ -1,15 +1,20 @@
 import { PromptTemplate } from "@langchain/core/prompts";
 import { z } from "zod";
-import { StructuredOutputParser } from "langchain/output_parsers";
+import { StructuredOutputParser, OutputFixingParser } from "langchain/output_parsers";
 import { resumeOptimizePrompt } from "@/prompts/agent-modify-prompt";
 import { jdAnalysisPrompt } from "@/prompts/jd-analysis-prompt";
 import { polishTextPrompt } from "@/prompts/polish-text-prompt";
 import { StringOutputParser } from "@langchain/core/output_parsers";
-import { resumeAnalysisPrompt } from "@/prompts/resume-analysis-prompt";
-import { JsonOutputParser } from "@langchain/core/output_parsers";
+import { resumeAnalysisPrompt, createSubAnalysisPrompt } from "@/prompts/resume-analysis-prompt";
 import { getModel } from "./aiService";
+import { Runnable } from "@langchain/core/runnables";
 
 export const jdAnalysisSchema = z.object({
+  jobTitle: z
+    .string()
+    .describe(
+      "The job title, e.g., 'Senior Frontend Engineer', 'Product Manager'."
+    ),
   keySkills: z
     .array(z.string())
     .describe(
@@ -21,9 +26,6 @@ export const jdAnalysisSchema = z.object({
   qualifications: z
     .array(z.string())
     .describe("List of key qualifications and experience requirements."),
-  optimized_content: z
-    .array(z.string())
-    .describe("The optimized bullet points for the resume section"),
 });
 
 export type JdAnalysis = z.infer<typeof jdAnalysisSchema>;
@@ -36,7 +38,7 @@ export const itemOptimizationSchema = z.object({
 
 export type ItemOptimizationOutput = z.infer<typeof itemOptimizationSchema>;
 
-interface CreateChatChainOptions {
+export interface CreateChatChainOptions {
   apiKey?: string;
   baseUrl?: string;
   modelName?: string;
@@ -61,7 +63,7 @@ export const createJdAnalysisChain = ({
   const llm = getModel({
     apiKey,
     baseUrl,
-    modelName: modelName ?? "gpt-4-turbo",
+    modelName,
     maxTokens: maxTokens ?? 2048,
   });
 
@@ -71,7 +73,9 @@ export const createJdAnalysisChain = ({
     partialVariables: { format_instructions: parser.getFormatInstructions() },
   });
 
-  return prompt.pipe(llm).pipe(parser);
+  const chain: Runnable<{ jd: string }, JdAnalysis> = prompt.pipe(llm).pipe(parser);
+
+  return chain;
 };
 
 /**
@@ -89,7 +93,7 @@ export const createItemOptimizationChain = ({
   const model = getModel({
     apiKey,
     baseUrl,
-    modelName: modelName ?? "gpt-3.5-turbo",
+    modelName,
     maxTokens: maxTokens ?? 2048,
   });
 
@@ -113,13 +117,29 @@ export const createPolishTextChain = ({
   const model = getModel({
     apiKey,
     baseUrl,
-    modelName: modelName ?? "gpt-4-turbo",
+    modelName,
     maxTokens: maxTokens ?? 2048,
   });
   const prompt = PromptTemplate.fromTemplate(polishTextPrompt);
 
   return prompt.pipe(model).pipe(new StringOutputParser());
 };
+
+export const subAnalysisSchema = z.object({
+  score: z.number().describe("The numeric score from 0 to 100 for this category."),
+  justification: z.string().describe("A brief justification for the score."),
+  suggestions: z.array(z.string()).describe("2-3 specific, actionable suggestions for improvement."),
+});
+
+export const resumeAnalysisSchema = z.object({
+  overallScore: z.number().describe("The overall score for the resume, from 0 to 100."),
+  summary: z.string().describe("A brief summary of the resume's strengths and weaknesses."),
+  detailedAnalysis: z.record(z.object({
+    score: z.number().describe("The numeric score from 0 to 100 for this category."),
+    justification: z.string().describe("A brief justification for the score."),
+    suggestions: z.array(z.string()).describe("2-3 specific, actionable suggestions for improvement."),
+  })).describe("A detailed breakdown of the analysis by category."),
+});
 
 export const createResumeAnalysisChain = ({
   apiKey,
@@ -133,18 +153,67 @@ export const createResumeAnalysisChain = ({
   const llm = getModel({
     apiKey,
     baseUrl,
-    modelName: modelName ?? "gpt-4-turbo",
+    modelName,
     maxTokens: maxTokens ?? 4096,
     temperature: temperature ?? 0.2,
   });
 
-  const jsonModeLlm = llm.bind({
-    response_format: { type: "json_object" },
+  const parser = StructuredOutputParser.fromZodSchema(resumeAnalysisSchema);
+
+  const prompt = new PromptTemplate({
+    template: resumeAnalysisPrompt,
+    inputVariables: ["resume"],
+    partialVariables: { format_instructions: parser.getFormatInstructions() },
   });
 
-  const prompt = PromptTemplate.fromTemplate(resumeAnalysisPrompt);
+  const mainChain = prompt.pipe(llm).pipe(parser);
+  
+  const fixingParser = OutputFixingParser.fromLLM(llm, parser);
+  const fixingChain = prompt.pipe(llm).pipe(fixingParser);
 
-  const chain = prompt.pipe(jsonModeLlm).pipe(new JsonOutputParser());
+  const chain = mainChain.withFallbacks({
+    fallbacks: [fixingChain],
+  });
+
+  return chain;
+};
+
+export const createSubAnalysisChain = (
+  {
+    apiKey,
+    baseUrl,
+    modelName,
+    maxTokens,
+    temperature,
+  }: CreateChatChainOptions,
+  category: string
+) => {
+  if (!apiKey) throw new Error("API key is required for resume analysis chain.");
+
+  const llm = getModel({
+    apiKey,
+    baseUrl,
+    modelName,
+    maxTokens: maxTokens ?? 1024, // Reduced tokens for smaller tasks
+    temperature: temperature ?? 0.2,
+  });
+
+  const parser = StructuredOutputParser.fromZodSchema(subAnalysisSchema);
+
+  const prompt = new PromptTemplate({
+    template: createSubAnalysisPrompt(category),
+    inputVariables: ["resume", "jd_analysis", "web_search_results"],
+    partialVariables: { format_instructions: parser.getFormatInstructions() },
+  });
+  
+  const mainChain = prompt.pipe(llm).pipe(parser);
+
+  const fixingParser = OutputFixingParser.fromLLM(llm, parser);
+  const fixingChain = prompt.pipe(llm).pipe(fixingParser);
+
+  const chain = mainChain.withFallbacks({
+    fallbacks: [fixingChain],
+  });
 
   return chain;
 }; 
