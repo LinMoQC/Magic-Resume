@@ -25,11 +25,6 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 },
-};
-
 export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSelectTemplate, currentTemplateId }: TemplatePanelProps) {
   const { t } = useTranslation();
 
@@ -54,9 +49,8 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
             animate="show"
           >
             {Object.values(templates).map((template: TemplateDSL) => (
-              <motion.div
+              <div
                 key={template.id}
-                variants={itemVariants}
                 className={`bg-neutral-800 border-2 aspect-[3/4] rounded-lg flex items-end justify-center text-neutral-500 hover:border-blue-500 cursor-pointer transition-all relative group overflow-hidden ${currentTemplateId === template.id ? 'border-blue-500' : 'border-neutral-700'}`}
                 onClick={() => onSelectTemplate(template.id)}
               >
@@ -75,7 +69,7 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
                 <div className="absolute bottom-10 pt-4 left-0 right-0 z-10 bg-gradient-to-t from-black/80 to-transparent pb-2 text-white text-sm font-medium text-center backdrop-blur-md translate-y-full">
                   {template.name}
                 </div>
-              </motion.div>
+              </div>
             ))}
           </motion.div>
         </div>

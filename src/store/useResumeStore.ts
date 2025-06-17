@@ -3,7 +3,6 @@ import sidebarMenu from '@/constant/sidebarMenu';
 import { dbClient, RESUMES_KEY } from '@/lib/IndexDBClient';
 import { MagicDebugger } from '@/lib/debuggger';
 import { toast } from "sonner";
-import i18n from '@/i18n';
 
 export type InfoType = {
   fullName: string;
@@ -111,7 +110,7 @@ const useResumeStore = create<ResumeState>((set, get) => ({
     const newResumes = [...get().resumes, resume];
     set({ resumes: newResumes });
     dbClient.setItem(RESUMES_KEY, newResumes);
-    toast.success(i18n.t('store.notifications.resumeCreated', { name: resume.name }));
+    toast.success(`Resume "${resume.name}" created.`);
   },
 
   updateResume: (id, updates) => {
@@ -130,7 +129,7 @@ const useResumeStore = create<ResumeState>((set, get) => ({
   duplicateResume: (id) => {
     const resumeToDuplicate = get().resumes.find(r => r.id === id);
     if (!resumeToDuplicate) {
-      toast.error(i18n.t('store.notifications.resumeNotFound'));
+      toast.error(`Resume not found.`);
       return;
     }
     const newResume: Resume = {
@@ -141,7 +140,7 @@ const useResumeStore = create<ResumeState>((set, get) => ({
       snapshot: undefined, // Do not copy the snapshot
     };
     get().addResume(newResume);
-    toast.success(i18n.t('store.notifications.resumeDuplicated', { name: resumeToDuplicate.name }));
+    toast.success(`Resume "${resumeToDuplicate.name}" duplicated.`);
   },
 
   deleteResume: (id) => {
@@ -149,7 +148,7 @@ const useResumeStore = create<ResumeState>((set, get) => ({
     const newResumes = get().resumes.filter(r => r.id !== id);
     set({ resumes: newResumes });
     dbClient.setItem(RESUMES_KEY, newResumes);
-    toast.success(i18n.t('store.notifications.resumeDeleted', { name: resumeToDelete?.name || '' }));
+    toast.success(`Resume "${resumeToDelete?.name || ''}" deleted.`);
   },
 
   loadResumeForEdit: (id) => {
@@ -183,7 +182,7 @@ const useResumeStore = create<ResumeState>((set, get) => ({
         updates.snapshot = snapshot;
       }
       updateResume(activeResume.id, { ...activeResume, ...updates });
-      toast.success(i18n.t('store.notifications.resumeSaved'));
+      toast.success('Resume saved!');
     }
   },
   
