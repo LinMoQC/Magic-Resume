@@ -19,6 +19,8 @@ export default function DashboardSidebar() {
   const { t } = useTranslation();
 
   const menuItems = [
+
+
     { href: '/dashboard', label: t('sidebar.resumes'), icon: FaRegFileAlt },
     { href: '/dashboard/settings', label: t('sidebar.settings'), icon: FaCog },
   ];
@@ -28,7 +30,7 @@ export default function DashboardSidebar() {
   const { user } = useUser();
   const pathname = usePathname();
   const [hasMounted, setHasMounted] = useState(false);
-  const { setActiveSection } = useResumeStore();
+  const { activeResume, setActiveSection } = useResumeStore();
 
   useEffect(() => {
     setHasMounted(true);
@@ -86,16 +88,19 @@ export default function DashboardSidebar() {
           <Image src="/simple-logo.png" alt="Magic Resume Logo" width={40} height={40} />
         </Link>
         <nav className="flex flex-col gap-2 flex-grow justify-center">
-          {sidebarMenu.map((item) => {
-            const Icon = item.icon;
+          {activeResume?.sectionOrder.map((section) => {
+            const iconItem = sidebarMenu.find((item) => item.key === section.key);
+            if (!iconItem) return null;
+            const Icon = iconItem.icon;
+
             return (
-              <Button
-                key={item.key}
-                variant="ghost"
-                className='h-12 w-12 hover:bg-neutral-800 bg-transparent z-[1]'
-                onClick={() => setActiveSection(item.key)}
-                title={t(item.label)}
-              >
+            <Button
+              key={section.key}
+              variant="ghost"
+              className="h-12 w-12 hover:bg-neutral-800 bg-transparent"
+              onClick={() => setActiveSection(section.key)}
+              title={section.label}
+            >
                 <span className="h-5 w-5">
                   <Icon />
                 </span>
