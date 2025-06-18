@@ -8,7 +8,6 @@ import { z } from "zod";
 import { DynamicStructuredTool } from "@langchain/core/tools";;
 import { createResumeAnalysisChain } from "./chains";
 import { Operation, applyPatch } from 'fast-json-patch';
-import { Resume, initialResume } from "@/store/useResumeStore";
 
 export function createJsonUpdateTool() {
   const jsonUpdaterSchema = z.object({

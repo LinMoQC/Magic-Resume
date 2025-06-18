@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useSettingStore } from '@/store/useSettingStore';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';

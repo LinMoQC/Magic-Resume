@@ -154,7 +154,7 @@ export default function CreateTab({ onApplyChanges, isAiJobRunning, setIsAiJobRu
                             <ResumePreview
                                 info={resumeDraft.info}
                                 sections={resumeDraft.sections}
-                                sectionOrder={resumeDraft.sectionOrder.map((s: any) => s.key)}
+                                sectionOrder={resumeDraft.sectionOrder.map((s: { key: string }) => s.key)}
                                 templateId={templateId}
                             />
                         </div>
