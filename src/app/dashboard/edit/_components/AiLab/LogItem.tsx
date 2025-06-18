@@ -6,6 +6,8 @@ import { useTranslation } from 'react-i18next';
 import dynamic from 'next/dynamic';
 import { LogEntry } from '@/store/useResumeOptimizerStore';
 
+const ReactMarkdown = dynamic(() => import('react-markdown'), { ssr: false });
+
 const ReactJsonView = dynamic(() => import('@microlink/react-json-view'), { ssr: false });
 
 type LogItemProps = {
@@ -45,7 +47,13 @@ export const LogItem: React.FC<LogItemProps> = ({ log, isLast, onToggleExpand, e
     if (typeof log.content === 'object' && log.content !== null) {
       contentElement = <ReactJsonView src={log.content as object} theme="ocean" displayDataTypes={false} name={false} />;
     } else {
-      contentElement = <pre className="text-sm text-white whitespace-pre-wrap">{String(log.content)}</pre>;
+      contentElement = (
+        <div className="prose prose-sm prose-invert max-w-none text-sm font-sans">
+          <ReactMarkdown>
+            {String(log.content)}
+          </ReactMarkdown>
+        </div>
+      );
     }
   }
 

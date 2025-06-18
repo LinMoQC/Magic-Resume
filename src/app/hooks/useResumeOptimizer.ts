@@ -29,28 +29,56 @@ export const useResumeOptimizer = () => {
   ): Promise<Partial<GraphState>> => {
     const finalState: Partial<GraphState> = { ...initialState };
     const decoder = new TextDecoder();
+    let buffer = '';
+
+    const processMessage = (message: string) => {
+      if (message.startsWith('data: ')) {
+        const jsonString = message.substring('data: '.length);
+        if (jsonString) {
+          try {
+            const chunk: StreamData = JSON.parse(jsonString);
+            const nodeState = Object.values(chunk)[0];
+
+            if (nodeState) {
+              Object.assign(finalState, nodeState);
+              updateLogs(chunk);
+            }
+          } catch (e) {
+            console.error("Error parsing stream chunk", e, `Chunk: "${jsonString}"`);
+          }
+        }
+      }
+    };
 
     while (true) {
       const { value, done } = await reader.read();
-      if (done) break;
-
-      const lines = decoder.decode(value).split('\\n\\n').filter(line => line.startsWith('data: '));
-      for (const line of lines) {
-        const jsonString = line.substring('data: '.length);
-        if (!jsonString) continue;
-
-        try {
-          const chunk: StreamData = JSON.parse(jsonString);
-          const nodeId = Object.keys(chunk)[0];
-          const nodeState = chunk[nodeId];
-
-          if (nodeState) {
-            Object.assign(finalState, nodeState);
-            updateLogs(chunk);
-          }
-        } catch (e) {
-          console.error("Error parsing stream chunk", e);
+      if (done) {
+        if (buffer) {
+          processMessage(buffer);
         }
+        break;
+      }
+      buffer += decoder.decode(value, { stream: true });
+      console.log('buffer', buffer)
+      let messages = buffer.split('\\n\\n');
+
+      if (messages.length > 1 && buffer.includes('final_answer')) {
+        messages = messages.reduce((acc, part) => {
+          if (part.startsWith('data:')) {
+            acc.push(part);
+          } else if (acc.length > 0) {
+            // Re-add the separator and append the fragment
+            acc[acc.length - 1] += '\\n\\n' + part;
+          }
+          return acc;
+        }, [] as string[]);
+      }
+
+      buffer = messages.pop() || ''; // Last item is incomplete message
+
+      console.log('messages', messages)
+      for (const message of messages) {
+        processMessage(message);
       }
     }
     return finalState;
@@ -68,9 +96,14 @@ export const useResumeOptimizer = () => {
       if (staticLogIndex !== -1) {
         updatedLogs[staticLogIndex].status = 'completed';
         if (nodeId === 'combiner' || nodeId === 'jd_analyzer' || nodeId === 'final_answer') {
+          if(nodeId === 'final_answer') console.log('final_answer', nodeState)
+          if(nodeId === 'combiner') console.log('combiner', nodeState)
+          if(nodeId === 'jd_analyzer') console.log('jd_analyzer', nodeState)
           updatedLogs[staticLogIndex].content = nodeState.webSearchResults ?? nodeState.analysisReport ?? nodeState.jdAnalysis;
         }
         if (nodeId === 'query_writer' || nodeId === 'reflection') {
+          if(nodeId === 'query_writer') console.log('query_writer', nodeState)
+          if(nodeId === 'reflection') console.log('reflection', nodeState)
           updatedLogs[staticLogIndex].content = nodeState;
         }
         if (staticLogIndex + 1 < updatedLogs.length) {

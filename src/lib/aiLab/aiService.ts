@@ -41,7 +41,6 @@ export const getModel = ({
     maxTokens,
     streaming,
     apiKey,
-    verbose: false,
     callbacks: [],
   };
 

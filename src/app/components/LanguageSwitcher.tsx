@@ -2,9 +2,15 @@
 
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
 
 export default function LanguageSwitcher() {
   const { i18n } = useTranslation();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const toggleLanguage = () => {
     const newLang = i18n.language.startsWith("en") ? "zh" : "en";
@@ -16,6 +22,10 @@ export default function LanguageSwitcher() {
     animate: { opacity: 1, scale: 1 },
     exit: { opacity: 0, scale: 0.5 },
   };
+
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <div className="fixed bottom-6 right-6 z-50">

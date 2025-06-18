@@ -52,16 +52,16 @@ Research Topic: "{research_topic}"
 Summaries:
 {summaries}`;
 
-const answerPrompt = `Generate a high-quality answer to the user's question based on the provided summaries.
+const answerPrompt = `You are the final step of a multi-step research process. Your task is to synthesize the provided summaries into a comprehensive, high-quality answer to the user's research topic.
 
-Instructions:
-- You are the final step of a multi-step research process, don't mention that you are the final step. 
-- You have access to all the information gathered from the previous steps.
-- You have access to the user's question.
-- Generate a high-quality answer to the user's question based on the provided summaries and the user's question.
-- you MUST include all the citations from the summaries in the answer correctly.
+**IMPORTANT:** Your output MUST be a valid JSON object.
 
-User Context:
+Here is the structure you MUST follow:
+{{
+  "webSearchResults": "Your comprehensive, well-structured, and markdown-formatted answer goes here. You MUST include all the citations from the summaries in the answer correctly."
+}}
+
+User Context (Research Topic):
 - {research_topic}
 
 Summaries:
@@ -105,6 +105,7 @@ export interface GraphState {
   optimizedResume?: Resume;
   error?: string;
   taskCompleted?: string;
+  is_graph_complete?: boolean;
 }
 
 const analysisCategories = Object.keys(ANALYSIS_CATEGORIES);
@@ -221,14 +222,14 @@ const finalAnswerNode = async (state: GraphState, config: CreateChatChainOptions
   if (!config.apiKey) throw new Error("API key is required.");
   const llm = getModel({ ...config, apiKey: config.apiKey });
   const prompt = new PromptTemplate({ template: answerPrompt, inputVariables: ["research_topic", "summaries"] });
-  const answerChain = prompt.pipe(llm).pipe(new StringOutputParser());
+  const answerChain = prompt.pipe(llm).pipe(new JsonOutputParser<{webSearchResults: string}>());
   const finalAnswer = await answerChain.invoke({ research_topic, summaries: JSON.stringify(summaries) });
-  console.log("--- Final Answer Generated ---",finalAnswer);
-  return { webSearchResults: finalAnswer };
+  console.log("--- Final Answer Generated ---", finalAnswer);
+  return { webSearchResults: finalAnswer.webSearchResults };
 }
 
-const prepareAnalysisTasksNode = (state: GraphState): Partial<GraphState> => {
-  console.log("--- Preparing Analysis Tasks ---",state);
+const prepareAnalysisTasksNode = (): Partial<GraphState> => {
+  console.log("--- Preparing Analysis Tasks ---");
   return { analysisTasks: analysisCategories, parallelAnalysisResults: {} };
 }
 
@@ -423,9 +424,15 @@ const getChannels = () => ({
   optimizedResume: { value: (x: any, y: any) => y, default: () => ({} as Resume) },
   error: { value: (x: any, y: any) => y, default: () => undefined },
   taskCompleted: { value: (x: any, y: any) => y, default: () => undefined },
+  is_graph_complete: { value: (x: any, y: any) => y, default: () => undefined },
 });
 
 // --- GRAPHS ---
+
+const graphCompleteNode = (state: GraphState) => {
+  console.log("--- End of Graph ---");
+  return { is_graph_complete: true, webSearchResults: state.webSearchResults };
+}
 
 export const createResearchGraph = (config: CreateChatChainOptions) => {
   const workflow = new StateGraph<GraphState>({ channels: getChannels() })
@@ -435,7 +442,8 @@ export const createResearchGraph = (config: CreateChatChainOptions) => {
     .addNode("query_writer", (state) => queryWriterNode(state, config))
     .addNode("web_searcher", webSearchNode)
     .addNode("reflection", (state) => reflectionNode(state, config))
-    .addNode("final_answer", (state) => finalAnswerNode(state, config));
+    .addNode("final_answer", (state) => finalAnswerNode(state, config))
+    .addNode("graph_complete", graphCompleteNode);
 
   workflow
     .addEdge(START, "preparer")
@@ -448,7 +456,8 @@ export const createResearchGraph = (config: CreateChatChainOptions) => {
       continue: "web_searcher",
       end: "final_answer",
     })
-    .addEdge("final_answer", END);
+    .addEdge("final_answer", "graph_complete")
+    .addEdge("graph_complete", END);
 
   return workflow.compile();
 };
@@ -491,4 +500,4 @@ export const createRewriteGraph = (config: CreateChatChainOptions) => {
     .addEdge("combine_sections", END);
   
   return workflow.compile();
-}; 
+};
