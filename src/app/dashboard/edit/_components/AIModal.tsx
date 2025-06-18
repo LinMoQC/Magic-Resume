@@ -76,7 +76,6 @@ export default function AIModal({ isOpen, onClose, resumeData, onApplyChanges, t
                 {activeTabKey === 'create' && (
                   <CreateTab 
                     onApplyChanges={() => {}}
-                    templateId={templateId}
                   />
                 )}
                 {activeTabKey === 'optimize' && (

@@ -35,13 +35,6 @@ export const getModel = ({
   }
   const effectiveBaseUrl = rawBaseUrl.trim();
 
-  const isAnthropic = effectiveBaseUrl.includes("anthropic");
-  const isGoogle = effectiveBaseUrl.includes("google");
-  const isOpenAI = effectiveBaseUrl.includes("openai");
-
-  // For other custom models compatible with OpenAI API
-  const isCustomOpenAI = !isAnthropic && !isGoogle && !isOpenAI;
-
   const commonProps = {
     modelName: modelName,
     temperature,
