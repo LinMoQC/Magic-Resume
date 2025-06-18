@@ -14,6 +14,8 @@ type AIModalProps = {
   resumeData: Resume;
   onApplyChanges: (newSections: Section) => void;
   templateId: string;
+  isAiJobRunning: boolean;
+  setIsAiJobRunning: (isRunning: boolean) => void;
 };
 
 const TABS_CONFIG = [
@@ -23,7 +25,7 @@ const TABS_CONFIG = [
 ];
 
 
-export default function AIModal({ isOpen, onClose, resumeData, onApplyChanges, templateId }: AIModalProps) {
+export default function AIModal({ isOpen, onClose, resumeData, onApplyChanges, templateId, isAiJobRunning, setIsAiJobRunning }: AIModalProps) {
   const { t } = useTranslation();
   const [activeTabKey, setActiveTabKey] = useState(TABS_CONFIG[0].key);
 
@@ -50,12 +52,13 @@ export default function AIModal({ isOpen, onClose, resumeData, onApplyChanges, t
             {TABS_CONFIG.map(tab => (
               <button
                 key={tab.key}
-                onClick={() => setActiveTabKey(tab.key)}
+                onClick={() => !isAiJobRunning && setActiveTabKey(tab.key)}
+                disabled={isAiJobRunning}
                 className={`flex items-center gap-2 px-1 pb-3 pt-2 text-sm font-medium transition-colors relative -bottom-px ${
                   activeTabKey === tab.key
                     ? 'border-b-2 border-sky-500 text-white'
                     : 'text-neutral-400 hover:text-white'
-                }`}
+                } ${isAiJobRunning ? 'cursor-not-allowed opacity-60' : ''}`}
               >
                 {tab.icon}
                 {t(tab.name)}
@@ -76,6 +79,8 @@ export default function AIModal({ isOpen, onClose, resumeData, onApplyChanges, t
                 {activeTabKey === 'create' && (
                   <CreateTab 
                     onApplyChanges={() => {}}
+                    isAiJobRunning={isAiJobRunning}
+                    setIsAiJobRunning={setIsAiJobRunning}
                   />
                 )}
                 {activeTabKey === 'optimize' && (
@@ -83,10 +88,16 @@ export default function AIModal({ isOpen, onClose, resumeData, onApplyChanges, t
                     resumeData={resumeData}
                     onApplyChanges={handleApplyAndClose}
                     templateId={templateId}
+                    isAiJobRunning={isAiJobRunning}
+                    setIsAiJobRunning={setIsAiJobRunning}
                   />
                 )}
                 {activeTabKey === 'analyze' && (
-                  <AnalyzeTab resumeData={resumeData} />
+                  <AnalyzeTab 
+                    resumeData={resumeData}
+                    isAiJobRunning={isAiJobRunning}
+                    setIsAiJobRunning={setIsAiJobRunning}
+                  />
                 )}
               </motion.div>
             </AnimatePresence>

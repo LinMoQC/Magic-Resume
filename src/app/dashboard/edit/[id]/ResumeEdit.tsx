@@ -84,6 +84,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
   const closeJsonModal = () => setIsJsonModalOpen(false);
 
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+  const [isAiJobRunning, setIsAiJobRunning] = useState(false);
   const openAIModal = () => setIsAIModalOpen(true);
   const closeAIModal = () => setIsAIModalOpen(false);
   const { t } = useTranslation();
@@ -246,6 +247,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
           setPreviewScale={setPreviewScale}
           onShowAI={openAIModal}
           templateId={currentTemplateId}
+          isAiJobRunning={isAiJobRunning}
         />
       </div>
       <TemplatePanel
@@ -272,7 +274,15 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
           </pre>
         </div>
       </Modal>
-      <AIModal isOpen={isAIModalOpen} onClose={closeAIModal} resumeData={activeResume} onApplyChanges={updateSections} templateId={currentTemplateId}/>
+      <AIModal 
+        isOpen={isAIModalOpen} 
+        onClose={closeAIModal} 
+        resumeData={activeResume} 
+        onApplyChanges={updateSections} 
+        templateId={currentTemplateId}
+        isAiJobRunning={isAiJobRunning}
+        setIsAiJobRunning={setIsAiJobRunning}
+      />
     </main>
   );
 } 

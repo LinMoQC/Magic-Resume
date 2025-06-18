@@ -92,7 +92,7 @@ export default function DashboardSidebar() {
               <Button
                 key={item.key}
                 variant="ghost"
-                className='h-12 w-12 hover:bg-neutral-800 bg-transparent'
+                className='h-12 w-12 hover:bg-neutral-800 bg-transparent z-[999]'
                 onClick={() => setActiveSection(item.key)}
                 title={t(item.label)}
               >

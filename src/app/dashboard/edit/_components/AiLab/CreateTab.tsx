@@ -13,6 +13,8 @@ import Image from 'next/image';
 
 type CreateTabProps = {
     onApplyChanges?: (resume: Resume) => void;
+    isAiJobRunning: boolean;
+    setIsAiJobRunning: (isRunning: boolean) => void;
 };
 
 const ChatMessage: React.FC<{ message: Message; userAvatarUrl?: string }> = ({ message, userAvatarUrl }) => {
@@ -44,7 +46,7 @@ const ChatMessage: React.FC<{ message: Message; userAvatarUrl?: string }> = ({ m
     );
 };
 
-export default function CreateTab({  }: CreateTabProps) {
+export default function CreateTab({ isAiJobRunning, setIsAiJobRunning }: CreateTabProps) {
     const { t } = useTranslation();
     const { messages, isLoading, sendMessage } = useResumeCreator();
     const [input, setInput] = useState('');
@@ -53,6 +55,10 @@ export default function CreateTab({  }: CreateTabProps) {
     const { messages: messageStoreMessages } = useMessageStore();
 
     const { user } = useUser();
+
+    useEffect(() => {
+        setIsAiJobRunning(isLoading);
+    }, [isLoading, setIsAiJobRunning]);
 
     // 新增状态和副作用用于动态加载点
     const [loadingDots, setLoadingDots] = useState('.');
@@ -122,12 +128,12 @@ export default function CreateTab({  }: CreateTabProps) {
                             placeholder={t('modals.aiModal.createTab.inputPlaceholder')}
                             className="bg-neutral-800 border-neutral-700 rounded-lg focus:ring-sky-500 focus:border-sky-500 resize-none pr-12 py-3"
                             rows={1}
-                            disabled={isLoading}
+                            disabled={isAiJobRunning}
                         />
                         {input.trim() && (
                             <Button 
                                 type="submit" 
-                                disabled={isLoading} 
+                                disabled={isAiJobRunning} 
                                 className="absolute right-2.5 bottom-2.5 bg-sky-500 hover:bg-sky-600 text-white rounded-md h-7 w-7 p-1"
                                 size="icon"
                             >
