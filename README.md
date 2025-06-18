@@ -1,10 +1,8 @@
-# Magic Resume
+<p align="left"><img width="455" alt="Magic Resume Logo" src="./public/magic-resume-logo.png"></p>
 
 [![License](https://img.shields.io/github/license/LinMoQC/Magic-Resume?style=flat-square)](https://github.com/LinMoQC/Magic-Resume/blob/master/LICENSE) [![Stars](https://img.shields.io/github/stars/LinMoQC/Magic-Resume?style=flat-square)](https://github.com/LinMoQC/Magic-Resume/stargazers) [![Forks](https://img.shields.io/github/forks/LinMoQC/Magic-Resume?style=flat-square)](https://github.com/LinMoQC/Magic-Resume/network/members) [![Issues](https://img.shields.io/github/issues/LinMoQC/Magic-Resume?style=flat-square)](https://github.com/LinMoQC/Magic-Resume/issues)
 
 <br/>
-
-<p align="center"><img width="455" alt="Magic Resume Logo" src="./public/magic-resume-logo.png"></p>
 
 ## :scroll: 简介
 

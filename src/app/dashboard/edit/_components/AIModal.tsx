@@ -18,6 +18,7 @@ type AIModalProps = {
 
 const TABS_CONFIG = [
   { key: 'create', name: 'modals.aiModal.tabs.create', icon: <BotMessageSquare size={18} /> }, 
+  { key: 'create', name: 'modals.aiModal.tabs.create', icon: <BotMessageSquare size={18} /> }, 
   { key: 'optimize', name: 'modals.aiModal.tabs.optimize', icon: <Wand2 size={18} /> },
   { key: 'analyze', name: 'modals.aiModal.tabs.analyze', icon: <BarChart3 size={18} /> },
 ];
