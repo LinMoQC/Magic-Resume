@@ -1,4 +1,4 @@
-import { createResumeOptimizationGraph } from "@/lib/aiLab/graphs";
+import { createAnalysisGraph } from "@/lib/aiLab/graphs";
 
 function streamResponse(iterator: AsyncGenerator<Record<string, unknown>>) {
   const encoder = new TextEncoder();
@@ -24,27 +24,21 @@ function streamResponse(iterator: AsyncGenerator<Record<string, unknown>>) {
 
 export async function POST(request: Request) {
   try {
-    const { resumeData, jd, config } = await request.json();
+    const { state, config } = await request.json();
 
-    if (!resumeData || !jd || !config) {
-      return new Response(JSON.stringify({ error: "Missing resumeData, jd, or config" }), { status: 400 });
+    if (!state || !config) {
+      return new Response(JSON.stringify({ error: "Missing state or config" }), { status: 400 });
     }
 
-    const graph = createResumeOptimizationGraph(config);
-    const stream = await graph.stream(
-      {
-        jd,
-        resume: resumeData,
-      },
-      { recursionLimit: 50 }
-    );
+    const graph = createAnalysisGraph(config);
+    const stream = await graph.stream(state, { recursionLimit: 25 });
 
     return streamResponse(stream);
 
   } catch (error: unknown) {
-    console.error("[GRAPH_OPTIMIZE_API_ERROR]", error);
+    console.error("[ANALYZE_GRAPH_API_ERROR]", error);
     const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
     const errorResponse = { error: errorMessage };
     return new Response(JSON.stringify(errorResponse), { status: 500 });
   }
-} 
+}

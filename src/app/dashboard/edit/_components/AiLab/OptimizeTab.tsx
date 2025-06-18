@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Resume, Section } from '@/store/useResumeStore';
 import { useTranslation } from 'react-i18next';
 import { Textarea } from '@/app/components/ui/textarea';
@@ -15,11 +15,12 @@ type OptimizeTabProps = {
   resumeData: Resume;
   onApplyChanges: (newSections: Section) => void;
   templateId: string;
+  isAiJobRunning: boolean;
+  setIsAiJobRunning: (isRunning: boolean) => void;
 };
 
-export default function OptimizeTab({ resumeData, onApplyChanges, templateId }: OptimizeTabProps) {
+export default function OptimizeTab({ resumeData, onApplyChanges, templateId, isAiJobRunning, setIsAiJobRunning }: OptimizeTabProps) {
   const { t } = useTranslation();
-  // const [jd, setJd] = useState('');
   const [isPreview, setIsPreview] = useState(false);
   
   const {
@@ -33,6 +34,10 @@ export default function OptimizeTab({ resumeData, onApplyChanges, templateId }: 
     setJd,
     jd
   } = useResumeOptimizer();
+
+  useEffect(() => {
+    setIsAiJobRunning(isLoading);
+  }, [isLoading, setIsAiJobRunning]);
 
   const handleOptimize = () => {
     setIsPreview(false);
@@ -52,14 +57,14 @@ export default function OptimizeTab({ resumeData, onApplyChanges, templateId }: 
           <label htmlFor="jd" className="font-semibold text-neutral-300 flex items-center mb-2"><Paperclip size={16} className="mr-2"/>{t('modals.aiModal.optimizeTab.jdLabel')}</label>
           <Textarea
             id="jd"
-            disabled={isLoading}
+            disabled={isAiJobRunning}
             value={jd}
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setJd(e.target.value)}
             placeholder={t('modals.aiModal.optimizeTab.jdPlaceholder')}
-            className="h-96 bg-neutral-900 border-neutral-800 rounded-lg focus:ring-sky-500 focus:border-sky-500"
+            className="h-96 bg-neutral-900 border-neutral-800 rounded-lg focus:ring-sky-500 focus:border-sky-500 resize-none"
           />
         </div>
-        <Button onClick={handleOptimize} disabled={isLoading} className="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold mt-auto">
+        <Button onClick={handleOptimize} disabled={isAiJobRunning} className="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold mt-auto">
           {isLoading ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : <Wand2 className="mr-2 h-4 w-4" />}

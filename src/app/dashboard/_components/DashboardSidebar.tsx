@@ -48,7 +48,7 @@ export default function DashboardSidebar() {
             href={href}
             className={`flex items-center px-4 mt-2 py-3 text-lg rounded-lg transition-colors ${pathname === href ? 'bg-neutral-700 text-white' : 'text-neutral-400 hover:bg-neutral-800 hover:text-white'}`}
           >
-            <Icon className="w-5 h-5 mr-4" />
+            <Icon className="w-5 h-5 mr-4 z-1" />
             {label}
           </Link>
         ))}
@@ -92,7 +92,7 @@ export default function DashboardSidebar() {
               <Button
                 key={item.key}
                 variant="ghost"
-                className='h-12 w-12 hover:bg-neutral-800 bg-transparent'
+                className='h-12 w-12 hover:bg-neutral-800 bg-transparent z-[1]'
                 onClick={() => setActiveSection(item.key)}
                 title={t(item.label)}
               >

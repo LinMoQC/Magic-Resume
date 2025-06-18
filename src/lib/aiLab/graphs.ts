@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { END, StateGraph, START } from "@langchain/langgraph";
 import {
   CreateChatChainOptions,
@@ -76,7 +77,7 @@ type SubAnalysisResult = {
  * Defines the state for the resume optimization graph.
  * It holds all the data that flows through the graph's nodes.
  */
-interface GraphState {
+export interface GraphState {
   jd: string;
   resume: Resume;
   resumeText: string;
@@ -90,6 +91,7 @@ interface GraphState {
   queries?: string[];
   summaries?: string[];
   knowledge_gap?: string;
+  reflection_count?: number;
 
   // State for iterative analysis
   analysisTasks?: string[];
@@ -122,326 +124,318 @@ const reflectionParser = StructuredOutputParser.fromZodSchema(
   })
 );
 
-export const createResumeOptimizationGraph = (
-  config: CreateChatChainOptions
-) => {
-  const prepareInputsNode = (state: GraphState): Partial<GraphState> => {
-    const resumeText = extractTextFromResume(state.resume);
-    return { resumeText };
+// --- NODES ---
+// These nodes are shared across different graphs.
+
+const prepareInputsNode = (state: GraphState): Partial<GraphState> => {
+  const resumeText = extractTextFromResume(state.resume);
+  return { resumeText };
+}
+
+const jdAnalysisNode = async (state: GraphState, config: CreateChatChainOptions): Promise<Partial<GraphState>> => {
+  try {
+    console.log("--- Analyzing Job Description ---");
+    const { jd } = state;
+    const jdChain = createJdAnalysisChain(config);
+    const jdAnalysis = await jdChain.invoke({ jd });
+    console.log("--- JD Analysis Complete ---");
+    return { jdAnalysis };
+  } catch (e) {
+    console.error("Error in jdAnalysisNode:", e);
+    return { error: "Failed to analyze job description." };
   }
+}
 
-  const jdAnalysisNode = async (state: GraphState): Promise<Partial<GraphState>> => {
-    try {
-      console.log("--- Analyzing Job Description ---");
-      const { jd } = state;
-      const jdChain = createJdAnalysisChain(config);
-      const jdAnalysis = await jdChain.invoke({ jd });
-      console.log("--- JD Analysis Complete ---");
-      return { jdAnalysis };
-    } catch (e) {
-      console.error("Error in jdAnalysisNode:", e);
-      return { error: "Failed to analyze job description." };
-    }
+const prepareResearchNode = (state: GraphState): Partial<GraphState> => {
+  console.log("--- Preparing Research ---");
+  const { jdAnalysis } = state;
+  if (!jdAnalysis || !jdAnalysis.jobTitle) {
+    return { error: "Cannot prepare research without job title." };
   }
+  const skillsPart = jdAnalysis.keySkills?.join(", ");
+  const research_topic = `Key responsibilities, qualifications, and technologies for a ${jdAnalysis.jobTitle}${skillsPart ? ` with skills in ${skillsPart}` : ''}.`;
+  return { research_topic, summaries: [], reflection_count: 0 };
+};
 
-  const prepareResearchNode = (state: GraphState): Partial<GraphState> => {
-    console.log("--- Preparing Research ---");
-    const { jdAnalysis } = state;
-    if (!jdAnalysis || !jdAnalysis.jobTitle) {
-      return { error: "Cannot prepare research without job title." };
-    }
-    const skillsPart = jdAnalysis.keySkills?.join(", ");
-    const research_topic = `Key responsibilities, qualifications, and technologies for a ${jdAnalysis.jobTitle}${skillsPart ? ` with skills in ${skillsPart}` : ''}.`;
-    return { research_topic, summaries: [] };
-  };
+const queryWriterNode = async (state: GraphState, config: CreateChatChainOptions): Promise<Partial<GraphState>> => {
+  console.log("--- Writing Search Queries ---");
+  const { research_topic } = state;
+  if (!config.apiKey) throw new Error("API key is required.");
+  const llm = getModel({ ...config, apiKey: config.apiKey });
+  const prompt = new PromptTemplate({
+    template: queryWriterPrompt,
+    inputVariables: ["research_topic"],
+    partialVariables: { format_instructions: queryWriterParser.getFormatInstructions() },
+  });
+  const queryChain = prompt.pipe(llm).pipe(queryWriterParser);
+  const result = await queryChain.invoke({ research_topic });
+  return { queries: result.query };
+}
 
-  const queryWriterNode = async (state: GraphState): Promise<Partial<GraphState>> => {
-    console.log("--- Writing Search Queries ---");
-    const { research_topic } = state;
-    if (!config.apiKey) throw new Error("API key is required.");
-    const llm = getModel({ ...config, apiKey: config.apiKey });
-    const prompt = new PromptTemplate({
-      template: queryWriterPrompt,
-      inputVariables: ["research_topic"],
-      partialVariables: { format_instructions: queryWriterParser.getFormatInstructions() },
+const webSearchNode = async (state: GraphState): Promise<Partial<GraphState>> => {
+  console.log("--- Performing Web Search ---");
+  const { queries, summaries } = state;
+  if (!queries || queries.length === 0) {
+    return { summaries: summaries };
+  }
+  const searchTool = new TavilySearch({ maxResults: 3 });
+  const searchResults = await Promise.all(queries.map(q => searchTool.invoke({ query: q })));
+  const newSummaries = searchResults.flat();
+  const allSummaries = (summaries || []).concat(newSummaries);
+  return { summaries: allSummaries, queries: [] }; 
+}
+
+const reflectionNode = async (state: GraphState, config: CreateChatChainOptions): Promise<Partial<GraphState>> => {
+  console.log("--- Reflecting on Search Results ---");
+  const { research_topic, summaries } = state;
+  if (!config.apiKey) throw new Error("API key is required.");
+  const llm = getModel({ ...config, apiKey: config.apiKey });
+  const prompt = new PromptTemplate({
+    template: reflectionPrompt,
+    inputVariables: ["research_topic", "summaries"],
+    partialVariables: { format_instructions: reflectionParser.getFormatInstructions() },
+  });
+  const reflectionChain = prompt.pipe(llm).pipe(reflectionParser);
+  const result = await reflectionChain.invoke({ research_topic, summaries: JSON.stringify(summaries) });
+  const reflection_count = (state.reflection_count || 0) + 1;
+
+  if (result.is_sufficient) {
+    return { knowledge_gap: "sufficient", reflection_count };
+  } else {
+    return { knowledge_gap: result.knowledge_gap, queries: result.follow_up_queries, reflection_count };
+  }
+};
+
+const shouldContinueResearch = (state: GraphState): "continue" | "end" => {
+  const MAX_REFLECTIONS = 2;
+  if ((state.reflection_count || 0) >= MAX_REFLECTIONS) {
+    console.log(`--- Reached max reflections (${MAX_REFLECTIONS}), ending research loop. ---`);
+    return "end";
+  }
+  return state.knowledge_gap === "sufficient" || !state.queries || state.queries.length === 0 ? "end" : "continue";
+}
+
+const finalAnswerNode = async (state: GraphState, config: CreateChatChainOptions): Promise<Partial<GraphState>> => {
+  console.log("--- Generating Final Answer ---");
+  const { research_topic, summaries } = state;
+  if (!config.apiKey) throw new Error("API key is required.");
+  const llm = getModel({ ...config, apiKey: config.apiKey });
+  const prompt = new PromptTemplate({ template: answerPrompt, inputVariables: ["research_topic", "summaries"] });
+  const answerChain = prompt.pipe(llm).pipe(new StringOutputParser());
+  const finalAnswer = await answerChain.invoke({ research_topic, summaries: JSON.stringify(summaries) });
+  console.log("--- Final Answer Generated ---",finalAnswer);
+  return { webSearchResults: finalAnswer };
+}
+
+const prepareAnalysisTasksNode = (state: GraphState): Partial<GraphState> => {
+  console.log("--- Preparing Analysis Tasks ---",state);
+  return { analysisTasks: analysisCategories, parallelAnalysisResults: {} };
+}
+
+const analyzeSingleCategoryNode = async (state: GraphState, config: CreateChatChainOptions): Promise<Partial<GraphState>> => {
+  const { resume, jdAnalysis, currentAnalysisTask, webSearchResults } = state;
+  if (!currentAnalysisTask) throw new Error("Current analysis task is missing.");
+
+  console.log(`--- Analyzing Category: ${currentAnalysisTask} ---`);
+  const subChain = createSubAnalysisChain(config, currentAnalysisTask);
+  try {
+    await new Promise(resolve => setTimeout(resolve, 200));
+    const result = await subChain.invoke({
+      resume: JSON.stringify(resume),
+      jd_analysis: JSON.stringify(jdAnalysis),
+      web_search_results: JSON.stringify(webSearchResults),
     });
-    const queryChain = prompt.pipe(llm).pipe(queryWriterParser);
-    const result = await queryChain.invoke({ research_topic });
-    return { queries: result.query };
-  }
-
-  const webSearchNode = async (state: GraphState): Promise<Partial<GraphState>> => {
-    console.log("--- Performing Web Search ---");
-    const { queries, summaries } = state;
-    if (!queries || queries.length === 0) {
-      return { summaries: summaries };
-    }
-    const searchTool = new TavilySearch({ maxResults: 3 });
-    const searchResults = await Promise.all(queries.map(q => searchTool.invoke({ query: q })));
-    const newSummaries = searchResults.flat();
-    const allSummaries = (summaries || []).concat(newSummaries);
-    return { summaries: allSummaries, queries: [] }; 
-  }
-  
-  const reflectionNode = async (state: GraphState): Promise<Partial<GraphState>> => {
-    console.log("--- Reflecting on Search Results ---");
-    const { research_topic, summaries } = state;
-    if (!config.apiKey) throw new Error("API key is required.");
-    const llm = getModel({ ...config, apiKey: config.apiKey });
-    const prompt = new PromptTemplate({
-      template: reflectionPrompt,
-      inputVariables: ["research_topic", "summaries"],
-      partialVariables: { format_instructions: reflectionParser.getFormatInstructions() },
-    });
-    const reflectionChain = prompt.pipe(llm).pipe(reflectionParser);
-    const result = await reflectionChain.invoke({ research_topic, summaries: JSON.stringify(summaries) });
-
-    console.log(result.is_sufficient)
-
-    if (result.is_sufficient) {
-      return { knowledge_gap: "sufficient" };
-    } else {
-      return { knowledge_gap: result.knowledge_gap, queries: result.follow_up_queries };
-    }
-  };
-
-  const shouldContinueResearch = (state: GraphState): "continue" | "end" => {
-    return state.knowledge_gap === "sufficient" || !state.queries || state.queries.length === 0 ? "end" : "continue";
-  }
-
-  const finalAnswerNode = async (state: GraphState): Promise<Partial<GraphState>> => {
-    console.log("--- Generating Final Answer ---");
-    const { research_topic, summaries } = state;
-    if (!config.apiKey) throw new Error("API key is required.");
-    const llm = getModel({ ...config, apiKey: config.apiKey });
-    const prompt = new PromptTemplate({ template: answerPrompt, inputVariables: ["research_topic", "summaries"] });
-    const answerChain = prompt.pipe(llm).pipe(new StringOutputParser());
-    const finalAnswer = await answerChain.invoke({ research_topic, summaries: JSON.stringify(summaries) });
-    return { analysisReport: { ...state.analysisReport, webSearchResults: finalAnswer }};
-  }
-
-  const prepareAnalysisTasksNode = (state: GraphState): Partial<GraphState> => {
-    console.log("--- Preparing Analysis Tasks ---");
-    console.log(state)
-    return { analysisTasks: analysisCategories, parallelAnalysisResults: {} };
-  }
-  
-  const analyzeSingleCategoryNode = async (state: GraphState): Promise<Partial<GraphState>> => {
-    const { resume, jdAnalysis, currentAnalysisTask, webSearchResults } = state;
-    if (!currentAnalysisTask) throw new Error("Current analysis task is missing.");
-
-    console.log(`--- Analyzing Category: ${currentAnalysisTask} ---`);
-    const subChain = createSubAnalysisChain(config, currentAnalysisTask);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 200));
-      const result = await subChain.invoke({
-        resume: JSON.stringify(resume),
-        jd_analysis: JSON.stringify(jdAnalysis),
-        web_search_results: JSON.stringify(webSearchResults),
-      });
-      return {
-        parallelAnalysisResults: {
-          ...state.parallelAnalysisResults,
-          [currentAnalysisTask]: result as SubAnalysisResult,
-        },
-      };
-    } catch (e) {
-      console.error(`Error analyzing category ${currentAnalysisTask}:`, e);
-      return {
-        parallelAnalysisResults: {
-          ...state.parallelAnalysisResults,
-          [currentAnalysisTask]: { score: 0, justification: "Analysis failed.", suggestions: [] },
-        },
-      };
-    }
-  };
-
-  const route_next_analysis = (state: GraphState): Partial<GraphState> => {
-    const tasks = state.analysisTasks || [];
-    if (tasks.length === 0) {
-      return { currentAnalysisTask: undefined };
-    }
-    const nextTask = tasks[0];
-    const remainingTasks = tasks.slice(1);
-    return { currentAnalysisTask: nextTask, analysisTasks: remainingTasks };
-  }
-
-  const should_continue_analysis = (state: GraphState): "continue" | "end" => {
-    return state.currentAnalysisTask ? "continue" : "end";
-  };
-
-  const combineAnalysisNode = (state: GraphState): Partial<GraphState> => {
-    console.log("--- Combining Analysis Results ---");
-    if (!state.parallelAnalysisResults) {
-      return { error: "Cannot combine results, parallel analysis results are missing." };
-    }
-    const analysisReport = {
-      detailedAnalysis: state.parallelAnalysisResults,
+    return {
+      parallelAnalysisResults: {
+        ...state.parallelAnalysisResults,
+        [currentAnalysisTask]: result as SubAnalysisResult,
+      },
     };
-    return { analysisReport };
+  } catch (e) {
+    console.error(`Error analyzing category ${currentAnalysisTask}:`, e);
+    return {
+      parallelAnalysisResults: {
+        ...state.parallelAnalysisResults,
+        [currentAnalysisTask]: { score: 0, justification: "Analysis failed.", suggestions: [] },
+      },
+    };
   }
+};
 
-  // --- NEW NODES FOR ITERATIVE REWRITE ---
-
-  const prepareRewriteTasksNode = (state: GraphState): Partial<GraphState> => {
-    console.log("--- Preparing Rewrite Tasks ---");
-    const { resume } = state;
-    const rewriteTasks = resume.sectionOrder
-      .map(s => s.key)
-      .filter(key => {
-        if (key === 'basics') return false;
-        const sectionData = resume.sections[key as keyof typeof resume.sections];
-        if (Array.isArray(sectionData) && sectionData.length === 0) {
-          return false;
-        }
-        return true;
-      });
-    return { rewriteTasks, optimizedSections: {} };
+const route_next_analysis = (state: GraphState): Partial<GraphState> => {
+  const tasks = state.analysisTasks || [];
+  if (tasks.length === 0) {
+    return { currentAnalysisTask: undefined };
   }
+  const nextTask = tasks[0];
+  const remainingTasks = tasks.slice(1);
+  return { currentAnalysisTask: nextTask, analysisTasks: remainingTasks };
+}
 
-  const rewriteSectionNode = async (state: GraphState): Promise<Partial<GraphState>> => {
-    let attempts = 0;
-    const MAX_RETRIES = 2;
+const should_continue_analysis = (state: GraphState): "continue" | "end" => {
+  return state.currentAnalysisTask ? "continue" : "end";
+};
 
-    const { analysisReport, resume, currentTask } = state;
-    if (!analysisReport || !currentTask || !config.apiKey) {
-      throw new Error("Missing required data for section rewrite.");
-    }
+const combineAnalysisNode = (state: GraphState): Partial<GraphState> => {
+  console.log("--- Combining Analysis Results ---");
+  if (!state.parallelAnalysisResults) {
+    return { error: "Cannot combine results, parallel analysis results are missing." };
+  }
+  const analysisReport = {
+    ...state.analysisReport,
+    detailedAnalysis: state.parallelAnalysisResults,
+  };
+  return { analysisReport };
+}
 
-    console.log(`--- Rewriting Section: ${currentTask} ---`);
-
-    const llm = getModel({ ...config, apiKey: config.apiKey });
-    const sectionData = resume.sections[currentTask as keyof typeof resume.sections];
-    const analysisData = analysisReport;
-
-    while (attempts < MAX_RETRIES) {
-      try {
-        const sectionRewritePrompt = `
-          You are an expert resume editor. Rewrite the following section of a resume based on the analysis report and web search results.
-          
-          **Crucial Instruction: You MUST preserve the original language of the text.** If the original section is in Chinese, the rewritten section must also be in Chinese. If it's in English, it must remain in English. Do not translate the content to a different language.
-
-          - Section to rewrite: {section}
-          - Relevant analysis: {analysis}
-          - Relevant web search results about the role: {web_search_results}
-          - Output ONLY the rewritten section JSON. Your output must be a single, valid JSON object. Do not include any markdown, comments, code block fences (\`\`\`json), or trailing commas.
-
-          Original Section JSON:
-          \`\`\`json
-          {section}
-          \`\`\`
-
-          Analysis:
-          \`\`\`json
-          {analysis}
-          \`\`\`
-
-          Web Search Results:
-          \`\`\`
-          {web_search_results}
-          \`\`\`
-
-          Rewritten Section JSON:
-        `;
-        const prompt = new PromptTemplate({
-          template: sectionRewritePrompt,
-          inputVariables: ["section", "analysis", "web_search_results"],
-        });
-        const rewriteChain = prompt.pipe(llm).pipe(new JsonOutputParser());
-
-        const rewrittenSection = await rewriteChain.invoke({
-          section: JSON.stringify(sectionData),
-          analysis: JSON.stringify(analysisData),
-          web_search_results: JSON.stringify(analysisReport.webSearchResults),
-        });
-
-        return {
-          optimizedSections: {
-            ...state.optimizedSections,
-            [currentTask]: rewrittenSection,
-          },
-          taskCompleted: currentTask,
-        };
-      } catch (e: unknown) {
-        attempts++;
-        if (attempts >= MAX_RETRIES) {
-          console.error(`Failed to rewrite section ${currentTask} after ${MAX_RETRIES} attempts.`, e);
-          return { error: `Failed to rewrite section ${currentTask}.` };
-        }
-        await new Promise(resolve => setTimeout(resolve, 500));
+const prepareRewriteTasksNode = (state: GraphState): Partial<GraphState> => {
+  console.log("--- Preparing Rewrite Tasks ---");
+  const { resume } = state;
+  const rewriteTasks = resume.sectionOrder
+    .map(s => s.key)
+    .filter(key => {
+      if (key === 'basics') return false;
+      const sectionData = resume.sections[key as keyof typeof resume.sections];
+      if (Array.isArray(sectionData) && sectionData.length === 0) {
+        return false;
       }
-    }
-    return { error: `Failed to rewrite section ${currentTask} after all retries.` };
-  };
+      return true;
+    });
+  return { rewriteTasks, optimizedSections: {} };
+}
 
-  const combineSectionsNode = (state: GraphState): Partial<GraphState> => {
-    console.log("--- Combining Rewritten Sections ---");
-    const optimizedResume = JSON.parse(JSON.stringify(state.resume)); // Deep copy
-    for (const sectionKey in state.optimizedSections) {
-      optimizedResume.sections[sectionKey] = state.optimizedSections[sectionKey];
-    }
-    return { optimizedResume };
+const rewriteSectionNode = async (state: GraphState, config: CreateChatChainOptions): Promise<Partial<GraphState>> => {
+  let attempts = 0;
+  const MAX_RETRIES = 2;
+
+  const { analysisReport, resume, currentTask } = state;
+  if (!analysisReport || !currentTask || !config.apiKey) {
+    throw new Error("Missing required data for section rewrite.");
   }
 
-  const routeNextSectionNode = (state: GraphState): Partial<GraphState> => {
-    const tasks = state.rewriteTasks;
-    if (tasks.length === 0) {
-      return { currentTask: undefined, rewriteTasks: [] };
+  console.log(`--- Rewriting Section: ${currentTask} ---`);
+
+  const llm = getModel({ ...config, apiKey: config.apiKey });
+  const sectionData = resume.sections[currentTask as keyof typeof resume.sections];
+  const analysisData = analysisReport;
+
+  while (attempts < MAX_RETRIES) {
+    try {
+      const sectionRewritePrompt = `
+        You are an expert resume editor. Rewrite the following section of a resume based on the analysis report and web search results.
+        
+        **Crucial Instruction: You MUST preserve the original language of the text.** If the original section is in Chinese, the rewritten section must also be in Chinese. If it's in English, it must remain in English. Do not translate the content to a different language.
+
+        - Section to rewrite: {section}
+        - Relevant analysis: {analysis}
+        - Relevant web search results about the role: {web_search_results}
+        - Output ONLY the rewritten section JSON. Your output must be a single, valid JSON object. Do not include any markdown, comments, code block fences (\`\`\`json), or trailing commas.
+
+        Original Section JSON:
+        \`\`\`json
+        {section}
+        \`\`\`
+
+        Analysis:
+        \`\`\`json
+        {analysis}
+        \`\`\`
+
+        Web Search Results:
+        \`\`\`
+        {web_search_results}
+        \`\`\`
+
+        Rewritten Section JSON:
+      `;
+      const prompt = new PromptTemplate({
+        template: sectionRewritePrompt,
+        inputVariables: ["section", "analysis", "web_search_results"],
+      });
+      const rewriteChain = prompt.pipe(llm).pipe(new JsonOutputParser());
+
+      const rewrittenSection = await rewriteChain.invoke({
+        section: JSON.stringify(sectionData),
+        analysis: JSON.stringify(analysisData),
+        web_search_results: JSON.stringify(state.webSearchResults),
+      });
+
+      return {
+        optimizedSections: {
+          ...state.optimizedSections,
+          [currentTask]: rewrittenSection,
+        },
+        taskCompleted: currentTask,
+      };
+    } catch (e: unknown) {
+      attempts++;
+      if (attempts >= MAX_RETRIES) {
+        console.error(`Failed to rewrite section ${currentTask} after ${MAX_RETRIES} attempts.`, e);
+        return { error: `Failed to rewrite section ${currentTask}.` };
+      }
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
-    const nextTask = tasks[0];
-    const remainingTasks = tasks.slice(1);
-    return { currentTask: nextTask, rewriteTasks: remainingTasks };
   }
+  return { error: `Failed to rewrite section ${currentTask} after all retries.` };
+};
 
-  const shouldContinue = (state: GraphState): "continue" | "end" => {
-    return state.currentTask ? "continue" : "end";
-  };
+const combineSectionsNode = (state: GraphState): Partial<GraphState> => {
+  console.log("--- Combining Rewritten Sections ---");
+  const optimizedResume = JSON.parse(JSON.stringify(state.resume)); // Deep copy
+  for (const sectionKey in state.optimizedSections) {
+    optimizedResume.sections[sectionKey] = state.optimizedSections[sectionKey];
+  }
+  return { optimizedResume };
+}
 
-  // --- GRAPH ---
-  const workflow = new StateGraph<GraphState>({
-    channels: {
-      jd: { value: (x, y) => y, default: () => "" },
-      resume: { value: (x, y) => y, default: () => ({} as Resume) },
-      resumeText: { value: (x, y) => y, default: () => "" },
-      jdAnalysis: { value: (x, y) => y, default: () => undefined },
-      analysisReport: { value: (x, y) => y, default: () => ({}) },
-      parallelAnalysisResults: { value: (x, y) => y, default: () => ({}) },
-      webSearchResults: { value: (x, y) => y, default: () => undefined },
-      
-      // Multi-step research state
-      research_topic: { value: (x, y) => y, default: () => undefined },
-      queries: { value: (x, y) => y, default: () => [] },
-      summaries: { value: (x, y) => y, default: () => [] },
-      knowledge_gap: { value: (x, y) => y, default: () => undefined },
+const routeNextSectionNode = (state: GraphState): Partial<GraphState> => {
+  const tasks = state.rewriteTasks;
+  if (tasks.length === 0) {
+    return { currentTask: undefined, rewriteTasks: [] };
+  }
+  const nextTask = tasks[0];
+  const remainingTasks = tasks.slice(1);
+  return { currentTask: nextTask, rewriteTasks: remainingTasks };
+}
 
-      // New channels
-      analysisTasks: { value: (x, y) => y, default: () => [] },
-      currentAnalysisTask: { value: (x, y) => y, default: () => undefined },
+const shouldContinueRewrite = (state: GraphState): "continue" | "end" => {
+  return state.currentTask ? "continue" : "end";
+};
 
-      rewriteTasks: { value: (x, y) => y, default: () => [] },
-      currentTask: { value: (x, y) => y, default: () => undefined },
-      optimizedSections: { value: (x, y) => y, default: () => ({}) },
+const getChannels = () => ({
+  jd: { value: (x: any, y: any) => y, default: () => "" },
+  resume: { value: (x: any, y: any) => y, default: () => ({} as Resume) },
+  resumeText: { value: (x: any, y: any) => y, default: () => "" },
+  jdAnalysis: { value: (x: any, y: any) => y, default: () => undefined },
+  analysisReport: { value: (x: any, y: any) => y, default: () => ({}) },
+  parallelAnalysisResults: { value: (x: any, y: any) => y, default: () => ({}) },
+  webSearchResults: { value: (x: any, y: any) => y, default: () => undefined },
+  research_topic: { value: (x: any, y: any) => y, default: () => undefined },
+  queries: { value: (x: any, y: any) => y, default: () => [] },
+  summaries: { value: (x: any, y: any) => y, default: () => [] },
+  knowledge_gap: { value: (x: any, y: any) => y, default: () => undefined },
+  reflection_count: { value: (x: any, y: any) => y, default: () => 0 },
+  analysisTasks: { value: (x: any, y: any) => y, default: () => [] },
+  currentAnalysisTask: { value: (x: any, y: any) => y, default: () => undefined },
+  rewriteTasks: { value: (x: any, y: any) => y, default: () => [] },
+  currentTask: { value: (x: any, y: any) => y, default: () => undefined },
+  optimizedSections: { value: (x: any, y: any) => y, default: () => ({}) },
+  optimizedResume: { value: (x: any, y: any) => y, default: () => ({} as Resume) },
+  error: { value: (x: any, y: any) => y, default: () => undefined },
+  taskCompleted: { value: (x: any, y: any) => y, default: () => undefined },
+});
 
-      optimizedResume: { value: (x, y) => y, default: () => ({} as Resume) },
-      error: { value: (x, y) => y, default: () => undefined },
-      taskCompleted: { value: (x, y) => y, default: () => undefined },
-    }
-  })
+// --- GRAPHS ---
+
+export const createResearchGraph = (config: CreateChatChainOptions) => {
+  const workflow = new StateGraph<GraphState>({ channels: getChannels() })
     .addNode("preparer", prepareInputsNode)
-    .addNode("jd_analyzer", jdAnalysisNode)
+    .addNode("jd_analyzer", (state) => jdAnalysisNode(state, config))
     .addNode("prepare_research", prepareResearchNode)
-    .addNode("query_writer", queryWriterNode)
+    .addNode("query_writer", (state) => queryWriterNode(state, config))
     .addNode("web_searcher", webSearchNode)
-    .addNode("reflection", reflectionNode)
-    .addNode("final_answer", finalAnswerNode)
-    .addNode("prepare_analyzer", prepareAnalysisTasksNode)
-    .addNode("analyze_category", analyzeSingleCategoryNode)
-    .addNode("combiner", combineAnalysisNode)
-    .addNode("prepare_rewriter", prepareRewriteTasksNode)
-    .addNode("rewrite_section", rewriteSectionNode)
-    .addNode("combine_sections", combineSectionsNode)
-    .addNode("route_next_section", routeNextSectionNode)
-    .addNode("route_next_analysis", route_next_analysis)
+    .addNode("reflection", (state) => reflectionNode(state, config))
+    .addNode("final_answer", (state) => finalAnswerNode(state, config));
 
   workflow
     .addEdge(START, "preparer")
@@ -454,16 +448,42 @@ export const createResumeOptimizationGraph = (
       continue: "web_searcher",
       end: "final_answer",
     })
-    .addEdge("final_answer", "prepare_analyzer")
+    .addEdge("final_answer", END);
+
+  return workflow.compile();
+};
+
+export const createAnalysisGraph = (config: CreateChatChainOptions) => {
+  const workflow = new StateGraph<GraphState>({ channels: getChannels() })
+    .addNode("prepare_analyzer", prepareAnalysisTasksNode)
+    .addNode("analyze_category", (state) => analyzeSingleCategoryNode(state, config))
+    .addNode("route_next_analysis", route_next_analysis)
+    .addNode("combiner", combineAnalysisNode);
+
+  workflow
+    .addEdge(START, "prepare_analyzer")
     .addEdge("prepare_analyzer", "route_next_analysis")
     .addConditionalEdges("route_next_analysis", should_continue_analysis, {
       continue: "analyze_category",
       end: "combiner",
     })
     .addEdge("analyze_category", "route_next_analysis")
-    .addEdge("combiner", "prepare_rewriter")
+    .addEdge("combiner", END);
+
+  return workflow.compile();
+};
+
+export const createRewriteGraph = (config: CreateChatChainOptions) => {
+  const workflow = new StateGraph<GraphState>({ channels: getChannels() })
+    .addNode("prepare_rewriter", prepareRewriteTasksNode)
+    .addNode("rewrite_section", (state) => rewriteSectionNode(state, config))
+    .addNode("combine_sections", combineSectionsNode)
+    .addNode("route_next_section", routeNextSectionNode);
+
+  workflow
+    .addEdge(START, "prepare_rewriter")
     .addEdge("prepare_rewriter", "route_next_section")
-    .addConditionalEdges("route_next_section", shouldContinue, {
+    .addConditionalEdges("route_next_section", shouldContinueRewrite, {
       "continue": "rewrite_section",
       "end": "combine_sections",
     })

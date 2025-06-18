@@ -314,7 +314,11 @@
       "basics": "基本信息"
     },
     "notifications": {
-      "jsonDownloadStarted": "JSON 文件下载已开始！"
+      "jsonDownloadStarted": "JSON 文件下载已开始！",
+      "generatingSuggestion": "正在为您生成专属优化建议..."
+    },
+    "ai": {
+      "generatingSuggestion": "正在为您生成专属优化建议..."
     }
   },
   "templatePanel": {
