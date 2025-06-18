@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { Textarea } from '@/app/components/ui/textarea';
 import { Button } from '@/app/components/ui/button';
 import { Send, Loader2, Bot, User, BotMessageSquare } from 'lucide-react';
-import ResumePreview from '../ResumePreview';
 import { useResumeCreator } from '@/app/hooks/useResumeCreator';
 import { Message } from '@/store/useMessageStore';
 import { useMessageStore } from '@/store/useMessageStore';
@@ -13,7 +12,7 @@ import ReactMarkdown from 'react-markdown';
 import Image from 'next/image';
 
 type CreateTabProps = {
-    onApplyChanges: (resume: Resume) => void;
+    onApplyChanges?: (resume: Resume) => void;
 };
 
 const ChatMessage: React.FC<{ message: Message; userAvatarUrl?: string }> = ({ message, userAvatarUrl }) => {
@@ -45,9 +44,9 @@ const ChatMessage: React.FC<{ message: Message; userAvatarUrl?: string }> = ({ m
     );
 };
 
-export default function CreateTab({ onApplyChanges }: CreateTabProps) {
+export default function CreateTab({  }: CreateTabProps) {
     const { t } = useTranslation();
-    const { messages, isLoading, resumeDraft, sendMessage } = useResumeCreator();
+    const { messages, isLoading, sendMessage } = useResumeCreator();
     const [input, setInput] = useState('');
     const chatContainerRef = useRef<HTMLDivElement>(null);
 

@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useSettingStore } from '@/store/useSettingStore';
 import { Resume } from '@/store/useResumeStore';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { useResumeOptimizerStore, LogEntry } from '@/store/useResumeOptimizerStore';
+import { useResumeOptimizerStore, LogEntry, StreamData } from '@/store/useResumeOptimizerStore';
 
 export const useResumeOptimizer = () => {
   const { t } = useTranslation();
@@ -76,11 +77,11 @@ export const useResumeOptimizer = () => {
         const lines = value.split('\\n\\n').filter(line => line.startsWith('data: '));
         for (const line of lines) {
           const jsonString = line.substring('data: '.length);
-          let chunk: Record<string, any>;
+          let chunk: StreamData;
           try{
             const parsed = JSON.parse(jsonString);
             if(typeof parsed === 'object' && parsed !== null) {
-              chunk = parsed;
+              chunk = parsed as StreamData;
             } else {
               console.log('Parsed JSON is not an object:', parsed);
               continue;
@@ -99,7 +100,10 @@ export const useResumeOptimizer = () => {
               if (staticLogIndex !== -1) {
                 updatedLogs[staticLogIndex].status = 'completed';
                 if (nodeId === 'combiner' || nodeId === 'jd_analyzer' || nodeId === 'final_answer') {
-                  updatedLogs[staticLogIndex].content = nodeState.analysisReport?.webSearchResults ?? nodeState.analysisReport ?? nodeState.jdAnalysis;
+                  updatedLogs[staticLogIndex].content =
+  (nodeState.analysisReport as unknown as any)?.webSearchResults ??
+  nodeState.analysisReport ??
+  nodeState.jdAnalysis;
                 }
                 if (nodeId === 'query_writer' || nodeId === 'reflection') {
                   updatedLogs[staticLogIndex].content = nodeState;
@@ -123,15 +127,16 @@ export const useResumeOptimizer = () => {
                   parentLog.children = [...(parentLog.children || []), ...newQueryLogs];
                 }
 
-                if (parentLog && nodeState.summaries) {
+                if (parentLog && nodeState.summaries && nodeState.summaries.length > 0) {
+                  const summaries = nodeState.summaries;
                   // Mark completed queries and update content
                   parentLog.children?.forEach(child => {
                     if (child.status === 'in_progress') {
                       child.status = 'completed';
                       // This is a simplification. A more robust solution might map summaries to queries.
-                      child.content = nodeState.summaries.slice(-1)[0];
+                      child.content = summaries.slice(-1)[0];
                     }
-                  })
+                  });
                 }
               }
 
@@ -219,7 +224,7 @@ export const useResumeOptimizer = () => {
               if (nodeId === 'rewrite_section') {
                 const completedTask = nodeState.taskCompleted;
                 const parentLog = updatedLogs.find(l => l.id === 'rewrite_sections_parent');
-                if (parentLog?.children && completedTask) {
+                if (parentLog?.children && completedTask && nodeState.optimizedSections) {
                   const taskLog = parentLog.children.find(log => log.id === `rewrite_${completedTask}`);
                   if (taskLog) {
                     taskLog.status = 'completed';
