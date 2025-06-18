@@ -34,10 +34,10 @@
       "browseTemplates": "浏览模板",
       "tag": "✨ 智能简历创建"
     },
-      "morphingTexts": {
+    "morphingTexts": {
       "simpleAndSmart": "简单 & 智能",
-        "aiPowered": "AI 驱动",
-        "beautifulTemplates": "精美模板",
+      "aiPowered": "AI 驱动",
+      "beautifulTemplates": "精美模板",
       "freeAndSecure": "免费 & 安全"
     },
     "features": {
@@ -49,7 +49,7 @@
         "tag": {
           "name": "AI",
           "description": "智能润色"
-      },
+        },
         "title": "智能检测，专业建议",
         "description": "内置智能语法检查，自动识别不当表述，提供专业修改建议，让您的简历更出色。",
         "benefit1": "智能增强",
@@ -90,11 +90,12 @@
     },
     "aiModal": {
       "tabs": {
+        "create": "引导创建",
         "optimize": "智能优化",
         "analyze": "简历分析"
       },
       "title": "AI 实验室",
-      "description": "分析和优化您的简历以匹配目标工作要求，或获取专业的灯塔式分析报告。",
+      "description": "分析和优化您的简历以匹配目标工作要求，或获取专业的Lighthouse式分析报告。",
       "optimizeTab": {
         "jdLabel": "目标职位描述 (JD)",
         "jdPlaceholder": "在此处粘贴目标职位的 JD，AI 将据此优化您的简历...",
@@ -106,11 +107,99 @@
         "revertChangesButton": "还原更改",
         "outputTitle": "优化建议",
         "jsonButton": "JSON",
+        "steps": {
+          "preparer": {
+            "title": "准备输入数据",
+            "in_progress": "正在准备您的简历和职位描述...",
+            "completed": "输入数据已就绪。"
+          },
+          "parallel_analyzer": {
+            "title": "并行分析",
+            "in_progress": "正在从多个维度分析您的简历...",
+            "completed": "所有分析已完成！"
+          },
+          "analysis_parent": {
+            "in_progress": "正在从多个维度分析您的简历...",
+            "completed": "所有分析已完成！"
+          },
+          "combiner": {
+            "title": "合并分析报告",
+            "in_progress": "正在生成综合分析报告...",
+            "completed": "分析报告已生成。"
+          },
+          "jd_analyzer": {
+            "title": "分析职位描述",
+            "in_progress": "正在分析职位描述...",
+            "completed": "职位描述分析完成。"
+          },
+          "prepare_research": {
+            "title": "准备研究",
+            "in_progress": "正在根据职位描述准备网络研究...",
+            "completed": "研究计划已就绪。"
+          },
+          "query_writer": {
+            "title": "生成搜索查询",
+            "in_progress": "正在生成智能搜索查询...",
+            "completed": "搜索查询已生成。"
+          },
+          "web_searcher": {
+            "title": "执行网络研究",
+            "in_progress": "正在网络上搜索关键信息...",
+            "completed": "网络研究完成。"
+          },
+          "reflection": {
+            "title": "反思搜索结果",
+            "in_progress": "正在分析搜索结果并识别信息差距...",
+            "completed": "反思完成，规划下一步。"
+          },
+          "final_answer": {
+            "title": "综合研究发现",
+            "in_progress": "正在将研究发现整合成摘要...",
+            "completed": "研究摘要完成。"
+          },
+          "rewriter": {
+            "title": "简历改写与增强",
+            "in_progress": "正在根据分析报告重写简历...",
+            "completed": "简历已成功优化！"
+          },
+          "prepare_rewriter": {
+            "title": "准备重写任务",
+            "in_progress": "正在准备按章节重写...",
+            "completed": "已切换到分步优化模式。"
+          },
+          "rewrite_section": {
+            "title": "分步优化",
+            "in_progress": "正在优化中...",
+            "completed": "所有章节均已优化！"
+          },
+          "rewriting_section": {
+            "in_progress": "正在优化 {{section}}...",
+            "completed": "{{section}} 已优化完毕。"
+          },
+          "analyzing_category": {
+            "in_progress": "正在分析 {{category}}...",
+            "completed": "{{category}} 分析完毕。",
+            "pending": "等待分析 {{category}}..."
+          },
+          "combine_sections": {
+            "title": "合并优化结果",
+            "in_progress": "正在合并所有优化后的章节...",
+            "completed": "所有章节已成功合并到简历中。",
+            "pending": "等待合并..."
+          },
+          "route_next_section": {
+            "title": "准备下一章节",
+            "in_progress": "正在准备优化下一章节...",
+            "completed": "已准备就绪。",
+            "pending": "等待中..."
+          }
+        },
         "optimizationProgress": {
           "analyzingJD": "正在分析职位描述...",
-          "preparing": "准备优化 {{count}} 个项目...",
-          "optimizingItem": "已优化 {{sectionKey}} 项目 {{completed}} / {{total}}...",
-          "done": "完成！"
+          "optimizing": "正在为您优化简历，请稍候...",
+          "done": "优化完成！",
+          "analyzingResume": "正在分析简历与职位描述的匹配度...",
+          "rewritingResume": "分析完成！正在根据报告优化简历内容..."
         }
       },
       "analysisTab": {
@@ -134,6 +223,17 @@
           "description": "我们的 AI 将对您的简历进行详细分析，提供关于影响力、清晰度和关键词优化等方面的分数和可操作反馈。"
         }
       },
+      "createTab": {
+        "chatTitle": "AI 助手",
+        "previewTitle": "简历实时预览",
+        "inputPlaceholder": "请描述您的技能或经历...",
+        "initialMessage": "你好！我是 ResuMate，你的个人简历构建助手。首先，你想申请什么样的工作或行业？",
+        "applyButton": "应用并保存简历",
+        "defaultReply": "抱歉，我现在遇到一点麻烦。你能换个说法吗？",
+        "errorReply": "我似乎遇到了一个问题。请尝试重新发送您的消息。",
+        "retryNotification": "请求出错，正在重新生成...",
+        "retryFailed": "多次重试后请求失败，请稍后再试。"
+      },
       "notifications": {
         "apiKeyMissing": "未找到 API 密钥。请在设置页面中设置。",
         "jdMissing": "请提供职位描述。",
@@ -141,13 +241,28 @@
         "optimizationFailed": "优化失败：{{error}}",
         "analysisComplete": "分析报告已生成！",
         "analysisFailed": "分析失败：{{error}}",
-        "unknownError": "发生未知错误。"
+        "unknownError": "发生未知错误。",
+        "creationFailed": "简历创建失败：{{error}}"
       },
       "optimizePlaceholder": {
         "title": "准备好提升您的简历了吗？",
         "description": "粘贴职位描述并点击\"开始优化\"，让 AI 为您的梦想工作量身定制简历。"
       },
       "progressText": "AI 正在努力进行分析和创作..."
+    }
+  },
+  "report": {
+    "title": "简历分析报告",
+    "subtitle": "由 AI 驱动，灵感源自 Lighthouse",
+    "overallScore": "综合得分",
+    "detailedAnalysis": "详细分析",
+    "suggestions": "改进建议:",
+    "categories": {
+      "KeySkillsMatch": "核心技能匹配度",
+      "ImpactAndActionability": "影响力与行动性",
+      "QuantifiableAchievements": "可量化成就",
+      "ClarityAndReadability": "清晰度与可读性",
+      "ProfessionalSummary": "专业摘要"
     }
   },
   "resumePreview": {
@@ -349,38 +464,16 @@
       "resumeSaved": "简历已保存！"
     }
   },
-  "report": {
-    "title": "简历分析报告",
-    "subtitle": "由 AI 驱动，灵感源自 Lighthouse",
-    "overallScore": "综合得分",
-    "detailedAnalysis": "详细分析",
-    "suggestions": "改进建议:",
-    "categories": {
-      "impactAndActionability": "影响与行动力",
-      "quantifiableAchievements": "量化成就",
-      "clarityAndReadability": "清晰与可读性",
-      "completenessAndStructure": "完整性与结构",
-      "educationProfile": "教育背景"
-    }
-  },
   "builder": {
     "sections": {
-      "title": "板块",
-      "add": "添加板块",
-      "remove": "移除板块",
-      "reorder": "重新排序板块"
-    },
-    "templates": {
-      "title": "模板",
-      "change": "更换模板"
-    },
-    "layout": {
-      "title": "布局",
-      "change": "调整布局"
+      "title": "内容",
+      "description": "在这里添加、编辑和重新排列简历部分。",
+      "addSection": "添加部分",
+      "reorderSection": "重新排序部分"
     },
     "settings": {
       "title": "设置",
-      "change": "打开设置"
+      "description": "配置页面布局、颜色等。"
     }
   },
   "rightSidebar": {

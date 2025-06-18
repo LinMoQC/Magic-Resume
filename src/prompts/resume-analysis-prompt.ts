@@ -1,3 +1,11 @@
+export const ANALYSIS_CATEGORIES = {
+  "KeySkillsMatch": "Matching of key skills between resume and Job Description.",
+  "ImpactAndActionability": "The use of impactful, action-oriented language (e.g., using the STAR method).",
+  "QuantifiableAchievements": "The presence and quality of quantifiable achievements (e.g., 'increased sales by 20%').",
+  "ClarityAndReadability": "The overall clarity, readability, and formatting of the resume.",
+  "ProfessionalSummary": "The quality and relevance of the professional summary section."
+};
+
 export const resumeAnalysisPrompt = `You are an elite career coach and resume analyst, functioning like "Google Lighthouse" but for resumes. Your task is to conduct a comprehensive audit of the provided resume JSON data and output a structured analysis.
 
 **Analysis Dimensions & Scoring Criteria:**
@@ -56,4 +64,27 @@ The \`justification\` and \`suggestions\` fields MUST be in Simplified Chinese. 
 \`\`\`json
 {resume}
 \`\`\`
+`;
+
+export const createSubAnalysisPrompt = (category: string) => `
+You are a highly specialized resume analyst. Your SOLE task is to analyze a resume based ONLY on the following category: "${ANALYSIS_CATEGORIES[category as keyof typeof ANALYSIS_CATEGORIES]}".
+
+You will be provided with the full resume text and the target job description (JD).
+
+**Analysis Category:** ${category} - ${ANALYSIS_CATEGORIES[category as keyof typeof ANALYSIS_CATEGORIES]}
+**Instructions:**
+1.  Focus exclusively on the category defined above. Ignore all other aspects of the resume.
+2.  Provide a numeric score from 0 to 100 for this category.
+3.  Write a brief justification for your score.
+4.  Offer 2-3 specific, actionable suggestions for improvement related ONLY to this category.
+
+{format_instructions}
+
+**Resume Text:**
+{resume}
+
+**Job Description Analysis:**
+{jd_analysis}
+
+Now, provide your focused analysis for the "${category}" category.
 `; 

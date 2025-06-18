@@ -103,6 +103,7 @@
     },
     "aiModal": {
       "tabs": {
+        "create": " Guided Create",
         "optimize": "Smart Optimize",
         "analyze": "Resume Analysis"
       },
@@ -114,13 +115,88 @@
         "optimizeButton": "Start Optimization",
         "optimizingButton": "Optimizing...",
         "previewButton": "Preview",
-        "rawJsonButton": "View Raw JSON",
+        "rawJsonButton": "Raw JSON",
         "applyChangesButton": "Apply Changes",
         "revertChangesButton": "Revert Changes",
         "outputTitle": "Optimization Result",
         "jsonButton": "JSON",
+        "steps": {
+          "preparer": {
+            "title": "Preparing Inputs",
+            "in_progress": "Preparing your resume and job description...",
+            "completed": "Input data is ready."
+          },
+          "parallel_analyzer": {
+            "title": "Parallel Analysis",
+            "in_progress": "Analyzing your resume from multiple dimensions...",
+            "completed": "All analyses complete!"
+          },
+          "analysis_parent": {
+            "in_progress": "Analyzing your resume from multiple dimensions...",
+            "completed": "All analyses complete!"
+          },
+          "combiner": {
+            "title": "Combine Analysis Report",
+            "in_progress": "Generating a comprehensive analysis report...",
+            "completed": "Analysis report generated."
+          },
+          "jd_analyzer": {
+            "title": "Analyzing Job Description",
+            "in_progress": "Analyzing the job description...",
+            "completed": "Job description analysis complete."
+          },
+          "prepare_research": {
+            "title": "Preparing Research",
+            "in_progress": "Preparing for web research based on JD...",
+            "completed": "Research plan is ready."
+          },
+          "query_writer": {
+            "title": "Generating Search Queries",
+            "in_progress": "Generating intelligent search queries...",
+            "completed": "Search queries generated."
+          },
+          "web_searcher": {
+            "title": "Performing Web Research",
+            "in_progress": "Searching the web for key information...",
+            "completed": "Web research complete."
+          },
+          "reflection": {
+            "title": "Reflecting on Search Results",
+            "in_progress": "Analyzing search results and identifying gaps...",
+            "completed": "Reflection complete, planning next steps."
+          },
+          "final_answer": {
+            "title": "Synthesizing Research Findings",
+            "in_progress": "Synthesizing research findings into a summary...",
+            "completed": "Research summary complete."
+          },
+          "rewriter": {
+            "title": "Resume Rewrite & Enhancement",
+            "in_progress": "Rewriting the resume based on the analysis report...",
+            "completed": "Resume successfully optimized!"
+          },
+          "prepare_rewriter": {
+            "title": "Preparing Rewrite Tasks",
+            "in_progress": "Preparing for section-by-section rewriting...",
+            "completed": "Switched to step-by-step optimization mode."
+          },
+          "rewrite_section": {
+            "title": "Step-by-Step Optimization",
+            "in_progress": "Optimizing in progress...",
+            "completed": "All sections have been optimized!"
+          },
+          "rewriting_section": {
+            "in_progress": "Optimizing {{section}}...",
+            "completed": "{{section}} optimized."
+          },
+          "analyzing_category": {
+            "in_progress": "Analyzing {{category}}...",
+            "completed": "{{category}} analysis complete."
+          }
+        },
         "optimizationProgress": {
           "analyzingJD": "Analyzing Job Description...",
+          "optimizing": "Optimizing your resume, please wait...",
           "preparing": "Preparing to optimize {{count}} items...",
           "optimizingItem": "Optimized {{sectionKey}} item {{completed}} of {{total}}...",
           "done": "Done!"
@@ -143,21 +219,33 @@
           "done": "Analysis complete!"
         },
         "placeholder": {
-          "title": "Get a Professional Analysis",
-          "description": "Our AI will perform a detailed analysis of your resume, providing scores and actionable feedback on aspects like impact, clarity, and keyword optimization."
+          "title": "Get Professional Analysis",
+          "description": "Our AI will perform a detailed analysis of your resume, providing scores and actionable feedback on impact, clarity, and keyword optimization."
         }
       },
+      "createTab": {
+        "chatTitle": "AI Assistant",
+        "previewTitle": "Live Resume Preview",
+        "inputPlaceholder": "Describe your skills or experience...",
+        "initialMessage": "Hello! I'm ResuMate, your personal resume crafting assistant. To start, what kind of job or industry are you targeting?",
+        "applyButton": "Apply and Save Resume",
+        "defaultReply": "Sorry, I'm having a little trouble right now. Could you please rephrase that?",
+        "errorReply": "I seem to have encountered an issue. Please try sending your message again.",
+        "retryNotification": "Request failed, retrying...",
+        "retryFailed": "Request failed after multiple retries. Please try again later."
+      },
       "notifications": {
-        "apiKeyMissing": "API Key not found. Please set it in the settings page.",
-        "jdMissing": "Please provide the Job Description.",
+        "apiKeyMissing": "API key not found. Please set it up in the settings page.",
+        "jdMissing": "Please provide a job description.",
         "optimizationComplete": "AI optimization complete!",
         "optimizationFailed": "Optimization failed: {{error}}",
-        "analysisComplete": "Analysis report generated!",
+        "analysisComplete": "Analysis report has been generated!",
         "analysisFailed": "Analysis failed: {{error}}",
-        "unknownError": "An unknown error occurred."
+        "unknownError": "An unknown error has occurred.",
+        "creationFailed": "Resume creation failed: {{error}}"
       },
       "optimizePlaceholder": {
-        "title": "Ready to Elevate Your Resume?",
+        "title": "Ready to elevate your resume?",
         "description": "Paste a job description and click \"Start Optimization\" to let the AI tailor your resume for your dream job."
       },
       "progressText": "AI is working hard on analysis and creation..."
@@ -363,16 +451,16 @@
   },
   "report": {
     "title": "Resume Analysis Report",
-    "subtitle": "Powered by AI, inspired by Lighthouse",
+    "subtitle": "Powered by AI, Inspired by Lighthouse",
     "overallScore": "Overall Score",
     "detailedAnalysis": "Detailed Analysis",
     "suggestions": "Suggestions for Improvement:",
     "categories": {
-      "impactAndActionability": "Impact & Actionability",
-      "quantifiableAchievements": "Quantifiable Achievements",
-      "clarityAndReadability": "Clarity & Readability",
-      "completenessAndStructure": "Completeness & Structure",
-      "professionalSummary": "Professional Summary"
+      "KeySkillsMatch": "Key Skills Match",
+      "ImpactAndActionability": "Impact and Actionability",
+      "QuantifiableAchievements": "Quantifiable Achievements",
+      "ClarityAndReadability": "Clarity and Readability",
+      "ProfessionalSummary": "Professional Summary"
     }
   }
 }

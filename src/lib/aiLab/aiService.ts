@@ -29,12 +29,21 @@ export const getModel = ({
     throw new Error("API key is required to initialize the model.");
   }
 
-  const effectiveBaseUrl = baseUrl || MODEL_API_URL_MAP[modelName as keyof typeof MODEL_API_URL_MAP];
+  const rawBaseUrl = baseUrl || MODEL_API_URL_MAP[modelName as keyof typeof MODEL_API_URL_MAP];
+  if (!rawBaseUrl) {
+    throw new Error(`Could not determine base URL for model ${modelName}. Please provide a baseUrl.`);
+  }
+  const effectiveBaseUrl = rawBaseUrl.trim();
 
-  console.log("effectiveBaseUrl", effectiveBaseUrl);
+  const isAnthropic = effectiveBaseUrl.includes("anthropic");
+  const isGoogle = effectiveBaseUrl.includes("google");
+  const isOpenAI = effectiveBaseUrl.includes("openai");
+
+  // For other custom models compatible with OpenAI API
+  const isCustomOpenAI = !isAnthropic && !isGoogle && !isOpenAI;
 
   const commonProps = {
-    modelName,
+    modelName: modelName,
     temperature,
     maxTokens,
     streaming,
@@ -50,11 +59,13 @@ export const getModel = ({
     return new ChatGoogleGenerativeAI({ ...rest, model: modelName });
   }
 
-  return new ChatOpenAI({
+  const llm = new ChatOpenAI({
     ...commonProps,
     configuration: {
       apiKey,
       baseURL: effectiveBaseUrl,
     },
   });
+
+  return llm;
 }; 
