@@ -14,7 +14,7 @@
     "*.{json,md,yml,yaml}": "prettier --write"
   },
   "dependencies": {
-    "@clerk/nextjs": "^6.21.0",
+    "@clerk/nextjs": "^6.22.0",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
@@ -71,6 +71,7 @@
     "lucide-react": "^0.513.0",
     "nanoid": "^5.1.5",
     "next": "15.3.3",
+    "next-auth": "^4.24.11",
     "react": "^19.0.0",
     "react-circular-progressbar": "^2.2.0",
     "react-dom": "^19.0.0",
