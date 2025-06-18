@@ -221,8 +221,6 @@ export const useResumeOptimizer = () => {
       { id: 'web_searcher', title: t('modals.aiModal.optimizeTab.steps.web_searcher.title'), status: 'pending', isExpanded: true, children: [] },
       { id: 'reflection', title: t('modals.aiModal.optimizeTab.steps.reflection.title'), status: 'pending' },
       { id: 'final_answer', title: t('modals.aiModal.optimizeTab.steps.final_answer.title'), status: 'pending' },
-      // Placeholder for Analysis stage
-      // Placeholder for Rewrite stage
       { id: 'combiner', title: t('modals.aiModal.optimizeTab.steps.combiner.title'), status: 'pending' },
       { id: 'prepare_rewriter', title: t('modals.aiModal.optimizeTab.steps.prepare_rewriter.title'), status: 'pending' },
     ];

@@ -12,7 +12,8 @@ type AIModalProps = {
   isOpen: boolean;
   onClose: () => void;
   resumeData: Resume;
-  onApplyChanges: (newSections: Section) => void;
+  onApplySectionChanges: (newSections: Section) => void;
+  onApplyFullResume: (newResume: Resume) => void;
   templateId: string;
   isAiJobRunning: boolean;
   setIsAiJobRunning: (isRunning: boolean) => void;
@@ -25,12 +26,26 @@ const TABS_CONFIG = [
 ];
 
 
-export default function AIModal({ isOpen, onClose, resumeData, onApplyChanges, templateId, isAiJobRunning, setIsAiJobRunning }: AIModalProps) {
+export default function AIModal({ 
+    isOpen, 
+    onClose, 
+    resumeData, 
+    onApplySectionChanges,
+    onApplyFullResume, 
+    templateId, 
+    isAiJobRunning, 
+    setIsAiJobRunning 
+}: AIModalProps) {
   const { t } = useTranslation();
   const [activeTabKey, setActiveTabKey] = useState(TABS_CONFIG[0].key);
 
-  const handleApplyAndClose = (newSections: Section) => {
-    onApplyChanges(newSections);
+  const handleApplySectionAndClose = (newSections: Section) => {
+    onApplySectionChanges(newSections);
+    onClose();
+  };
+
+  const handleApplyFullResumeAndClose = (newResume: Resume) => {
+    onApplyFullResume(newResume);
     onClose();
   };
 
@@ -78,7 +93,7 @@ export default function AIModal({ isOpen, onClose, resumeData, onApplyChanges, t
               >
                 {activeTabKey === 'create' && (
                   <CreateTab 
-                    onApplyChanges={() => {}}
+                    onApplyChanges={handleApplyFullResumeAndClose}
                     isAiJobRunning={isAiJobRunning}
                     setIsAiJobRunning={setIsAiJobRunning}
                   />
@@ -86,7 +101,7 @@ export default function AIModal({ isOpen, onClose, resumeData, onApplyChanges, t
                 {activeTabKey === 'optimize' && (
                   <OptimizeTab 
                     resumeData={resumeData}
-                    onApplyChanges={handleApplyAndClose}
+                    onApplyChanges={handleApplySectionAndClose}
                     templateId={templateId}
                     isAiJobRunning={isAiJobRunning}
                     setIsAiJobRunning={setIsAiJobRunning}
