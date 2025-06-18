@@ -7,6 +7,34 @@ import {
 import { z } from "zod";
 import { DynamicStructuredTool } from "@langchain/core/tools";;
 import { createResumeAnalysisChain } from "./chains";
+import { Operation, applyPatch } from 'fast-json-patch';
+import { Resume, initialResume } from "@/store/useResumeStore";
+
+export function createJsonUpdateTool() {
+  const jsonUpdaterSchema = z.object({
+    patch: z.array(z.object({
+      op: z.enum(['add', 'remove', 'replace']),
+      path: z.string().describe("RFC6902 path to the value to be operated on. E.g., '/sections/experience/0/description'"),
+      value: z.any().describe("The value to apply. For 'remove' op, this can be omitted."),
+    })).describe("A JSON patch object according to RFC 6902."),
+    resume: z.object({}).passthrough().describe("The current, complete resume JSON object to be patched."),
+  });
+
+  return new DynamicStructuredTool({
+    name: "update_resume_draft",
+    description: "Applies a JSON patch to the resume draft to add, remove, or replace fields. Use this to incrementally build the resume.",
+    schema: jsonUpdaterSchema,
+    func: async ({ patch, resume }) => {
+      try {
+        const { newDocument } = applyPatch(resume, patch as Operation[]);
+        return JSON.stringify(newDocument);
+      } catch (error) {
+        console.error("Error applying JSON patch:", error);
+        return "Error: The provided patch could not be applied. Please ensure the path is correct.";
+      }
+    },
+  });
+}
 
 abstract class ResumeTool extends Tool {
   protected options: CreateChatChainOptions;

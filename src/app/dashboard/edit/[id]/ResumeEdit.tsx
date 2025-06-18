@@ -225,6 +225,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
         renderSections={renderSections}
         handleSave={handleSave}
         onShowAI={openAIModal}
+        isAiJobRunning={isAiJobRunning}
       />
     );
   }
