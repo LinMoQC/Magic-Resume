@@ -35,7 +35,7 @@ export default function NewResumeDialog({ open, onOpenChange, newName, setNewNam
           autoFocus
         />
         <DialogFooter>
-          <Button onClick={() => onOpenChange(false)} variant="outline" className='text-black'>{t('newResumeDialog.cancel')}</Button>
+          <Button onClick={() => onOpenChange(false)}>{t('newResumeDialog.cancel')}</Button>
           <Button onClick={handleCreate} disabled={!newName.trim()}>{t('newResumeDialog.create')}</Button>
         </DialogFooter>
       </DialogContent>
