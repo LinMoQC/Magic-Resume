@@ -94,13 +94,13 @@ export default function DashboardSidebar() {
             const Icon = iconItem.icon;
 
             return (
-            <Button
-              key={section.key}
-              variant="ghost"
-              className="h-12 w-12 hover:bg-neutral-800 bg-transparent"
-              onClick={() => setActiveSection(section.key)}
-              title={section.label}
-            >
+              <Button
+                key={section.key}
+                variant="ghost"
+                className='h-12 w-12 hover:bg-neutral-800 bg-transparent z-[1]'
+                onClick={() => setActiveSection(section.key)}
+                title={t(section.label)}
+              >
                 <span className="h-5 w-5">
                   <Icon />
                 </span>

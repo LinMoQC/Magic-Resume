@@ -4,12 +4,25 @@ function streamResponse(iterator: AsyncGenerator<Record<string, unknown>>) {
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async pull(controller) {
-      const { value, done } = await iterator.next();
-      if (done) {
-        controller.close();
-      } else {
-        const chunk = typeof value === 'string' ? value : JSON.stringify(value);
-        controller.enqueue(encoder.encode(`data: ${chunk}\\n\\n`));
+      try {
+        const { value, done } = await iterator.next();
+        
+        if (done) {
+          controller.close();
+          return;
+        }
+
+        if (value) {
+          const chunk = typeof value === 'string' ? value : JSON.stringify(value);
+          controller.enqueue(encoder.encode(`data: ${chunk}\\n\\n`));
+          
+          if (value['is_graph_complete']) {
+            controller.close();
+          }
+        }
+      } catch (error) {
+        console.error("Error during stream generation:", error);
+        controller.error(error);
       }
     },
   });
