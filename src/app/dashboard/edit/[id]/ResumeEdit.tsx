@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useMemo } from 'react';
-import { useResumeStore } from '@/store/useResumeStore';
+import { Resume, useResumeStore } from '@/store/useResumeStore';
 import { FaUser, FaDownload } from 'react-icons/fa';
 import BasicForm from '../_components/BasicForm';
 import sidebarMenu from '@/constant/sidebarMenu';
@@ -84,9 +84,19 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
   const closeJsonModal = () => setIsJsonModalOpen(false);
 
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+  const [isAiJobRunning, setIsAiJobRunning] = useState(false);
   const openAIModal = () => setIsAIModalOpen(true);
   const closeAIModal = () => setIsAIModalOpen(false);
   const { t } = useTranslation();
+
+  const handleApplyFullResume = (newResume: Resume) => {
+    updateInfo(newResume.info);
+    updateSections(newResume.sections);
+    // Optionally, update section order if it can also be changed by the AI
+    if (newResume.sectionOrder) {
+      updateSectionOrder(newResume.sectionOrder);
+    }
+  };
 
   const handleDownloadJson = () => {
     if (!activeResume) return;
@@ -224,6 +234,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
         renderSections={renderSections}
         handleSave={handleSave}
         onShowAI={openAIModal}
+        isAiJobRunning={isAiJobRunning}
       />
     );
   }
@@ -246,6 +257,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
           setPreviewScale={setPreviewScale}
           onShowAI={openAIModal}
           templateId={currentTemplateId}
+          isAiJobRunning={isAiJobRunning}
         />
       </div>
       <TemplatePanel
@@ -272,7 +284,16 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
           </pre>
         </div>
       </Modal>
-      <AIModal isOpen={isAIModalOpen} onClose={closeAIModal} resumeData={activeResume} onApplyChanges={updateSections} templateId={currentTemplateId}/>
+      <AIModal 
+        isOpen={isAIModalOpen}
+        onClose={closeAIModal}
+        resumeData={activeResume}
+        onApplySectionChanges={updateSections}
+        onApplyFullResume={handleApplyFullResume}
+        templateId={currentTemplateId}
+        isAiJobRunning={isAiJobRunning}
+        setIsAiJobRunning={setIsAiJobRunning}
+      />
     </main>
   );
 } 

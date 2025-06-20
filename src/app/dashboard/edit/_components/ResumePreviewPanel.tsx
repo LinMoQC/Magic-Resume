@@ -6,6 +6,8 @@ import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import { InfoType, Section } from '@/store/useResumeStore';
 import useMobile from '@/app/hooks/useMobile';
 import { Tools } from './Tools';
+import { Wand2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface ResumePreviewPanelProps {
   info: InfoType;
@@ -15,6 +17,7 @@ interface ResumePreviewPanelProps {
   setPreviewScale: (scale: number) => void;
   onShowAI: () => void;
   templateId: string;
+  isAiJobRunning: boolean;
 }
 
 const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
@@ -24,8 +27,10 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
   setPreviewScale,
   onShowAI,
   templateId,
+  isAiJobRunning
 }) => {
   const { isMobile } = useMobile();
+  const { t } = useTranslation();
 
   return (
     <section
@@ -45,12 +50,20 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
               wrapperStyle={{ width: '100%', height: '100%',maxHeight: '100vh' }}
               contentStyle={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', width: '100%', height: '100%', paddingTop: '5rem', paddingBottom: '5rem' }}
             >
-              <ResumePreview 
-                info={info} 
-                sections={sections} 
-                sectionOrder={sectionOrder} 
-                templateId={templateId} 
-              />
+              <div className="relative">
+                <ResumePreview 
+                  info={info} 
+                  sections={sections} 
+                  sectionOrder={sectionOrder} 
+                  templateId={templateId} 
+                />
+                {isAiJobRunning && (
+                  <div className="absolute inset-0 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center z-50">
+                    <Wand2 size={48} className="text-sky-400 animate-pulse" />
+                    <p className="text-white text-lg mt-4 animate-pulse">{t('editPage.ai.generatingSuggestion')}</p>
+                  </div>
+                )}
+              </div>
             </TransformComponent>
 
             <Tools isMobile={isMobile} zoomIn={zoomIn} zoomOut={zoomOut} resetTransform={resetTransform} info={info} onShowAI={onShowAI} />

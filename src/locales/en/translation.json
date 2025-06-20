@@ -319,6 +319,9 @@
     },
     "notifications": {
       "jsonDownloadStarted": "JSON file download started!"
+    },
+    "ai": {
+      "generatingSuggestion": "Generating personalized optimization suggestions for you..."
     }
   },
   "templatePanel": {

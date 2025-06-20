@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Resume } from '@/store/useResumeStore';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/app/components/ui/button';
@@ -8,11 +8,17 @@ import { useResumeAnalyzer } from '@/app/hooks/useResumeAnalyzer';
 
 type AnalyzeTabProps = {
   resumeData: Resume;   
+  isAiJobRunning: boolean;
+  setIsAiJobRunning: (isRunning: boolean) => void;
 };
 
-export default function AnalyzeTab({ resumeData }: AnalyzeTabProps) {
+export default function AnalyzeTab({ resumeData, isAiJobRunning, setIsAiJobRunning }: AnalyzeTabProps) {
   const { t } = useTranslation();
   const { isAnalyzing, analysisResult, analysisProgress, runAnalysis, resetAnalysis } = useResumeAnalyzer();
+
+  useEffect(() => {
+    setIsAiJobRunning(isAnalyzing);
+  }, [isAnalyzing, setIsAiJobRunning]);
 
   const handleAnalyze = () => {
     runAnalysis({ resumeData });
@@ -31,7 +37,7 @@ export default function AnalyzeTab({ resumeData }: AnalyzeTabProps) {
       ) : analysisResult ? (
         <div className='relative py-4'>
           <div className="flex justify-end mb-4 absolute top-6 right-4">
-            <Button onClick={resetAnalysis} variant="ghost" className="text-neutral-300 hover:bg-neutral-800 hover:text-white">
+            <Button onClick={() => !isAiJobRunning && resetAnalysis()} disabled={isAiJobRunning} variant="ghost" className="text-neutral-300 hover:bg-neutral-800 hover:text-white">
               <RotateCw size={16} className="mr-2" />
               {t('modals.aiModal.analysisTab.reAnalyzeButton')}
             </Button>
@@ -47,7 +53,7 @@ export default function AnalyzeTab({ resumeData }: AnalyzeTabProps) {
           <p className="text-neutral-400 max-w-md mb-8">
             {t('modals.aiModal.analysisTab.placeholder.description')}
           </p>
-          <Button onClick={handleAnalyze} disabled={isAnalyzing} className="bg-purple-600 hover:bg-purple-700 text-white font-bold text-lg px-8 py-6">
+          <Button onClick={handleAnalyze} disabled={isAiJobRunning} className="bg-purple-600 hover:bg-purple-700 text-white font-bold text-lg px-8 py-6">
             {isAnalyzing ? (
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
             ) : <Sparkles className="mr-2 h-5 w-5" />}

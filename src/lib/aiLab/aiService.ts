@@ -41,6 +41,7 @@ export const getModel = ({
     maxTokens,
     streaming,
     apiKey,
+    callbacks: [],
   };
 
   if (effectiveBaseUrl.includes("anthropic")) {
