@@ -5,7 +5,9 @@ import Modal from '@/app/components/ui/Modal';
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
 import { Label } from '@/app/components/ui/label';
-import TiptapEditor from '@/app/components/TiptapEditor';
+import { EditorComponents } from '@/lib/componentOptimization';
+
+const TiptapEditor = EditorComponents.TiptapEditor;
 import { UniqueIdentifier } from '@dnd-kit/core';
 import { Textarea } from '@/app/components/ui/textarea';
 import { useTranslation } from 'react-i18next';

@@ -9,9 +9,10 @@ import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
 import { useUser } from '@clerk/nextjs';
 import Image from 'next/image';
-import dynamic from 'next/dynamic';
+import { EditorComponents } from '@/lib/componentOptimization';
+import { useTranslation } from 'react-i18next';
 
-const ReactJsonView = dynamic(() => import('@microlink/react-json-view'), { ssr: false });
+const ReactJsonView = EditorComponents.JsonViewer;
 
 interface MessageItemProps {
   message: Message;
@@ -26,14 +27,15 @@ export const MessageItem: React.FC<MessageItemProps> = ({
   const isUser = message.role === 'user';
   const hasJsonData = message.jsonData && typeof message.jsonData === 'object';
   const { user } = useUser();
+  const { t } = useTranslation();
 
   const copyJsonToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(JSON.stringify(message.jsonData, null, 2));
-      toast.success('JSON数据已复制到剪贴板');
+      toast.success(t('common.notifications.copySuccess'));
     } catch (err) {
       console.error('复制失败:', err);
-      toast.error('复制失败，请重试');
+      toast.error(t('common.notifications.copyFailed'));
     }
   };
 
@@ -93,7 +95,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
               className="flex items-center gap-2 text-xs text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700/50 p-2 rounded-md transition-colors"
             >
               <FileText className="w-3 h-3" />
-              <span>{showJson ? '隐藏' : '查看'}解析的简历数据</span>
+              <span>{showJson ? t('common.ui.hide') : t('common.ui.view')}{t('common.ui.parseResumeData')}</span>
               {showJson ? (
                 <ChevronUp className="w-3 h-3" />
               ) : (
@@ -105,7 +107,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
               <Card className="mt-2 p-3 bg-neutral-800 border border-neutral-700 rounded-xl">
                 <div className="flex items-center justify-between mb-2">
                   <div className="text-xs text-neutral-400 font-medium">
-                    解析的简历数据 (JSON格式)
+                    {t('common.ui.parseResumeData')} (JSON)
                   </div>
                   <Button
                     variant="ghost"
@@ -114,7 +116,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
                     className="h-6 px-2 text-xs text-neutral-400 hover:text-neutral-200"
                   >
                     <Copy className="w-3 h-3 mr-1" />
-                    复制
+                    {t('sections.shared.copy')}
                   </Button>
                 </div>
                 <div className="max-h-96 overflow-auto">

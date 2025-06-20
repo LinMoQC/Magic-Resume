@@ -7,6 +7,7 @@ import { Toaster } from "sonner";
 import metaConfig from "@/constant/metaConfig";
 import I18nProvider from "@/app/dashboard/_components/I18nProvider";
 import LanguageSwitcher from "@/app/components/LanguageSwitcher";
+import PreloadOptimizer from "@/app/components/PreloadOptimizer";
 import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -37,6 +38,8 @@ export default function RootLayout({
             <Theme appearance="dark">
               {children}
               <Toaster />
+              {/* 性能优化和预加载 */}
+              <PreloadOptimizer />
             </Theme>
             {/* 语言切换 */}
             <LanguageSwitcher />

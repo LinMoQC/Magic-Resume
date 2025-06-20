@@ -241,3 +241,42 @@ function oklchToRgb(l: number, c: number, h: number){
 
   return [r * 255, g * 255, bl * 255];
 }
+
+export function formatRelativeTime(date: string) {
+  const now = new Date();
+  const targetDate = new Date(date);
+  const diffInSeconds = Math.floor((now.getTime() - targetDate.getTime()) / 1000);
+  
+  const minutes = Math.floor(diffInSeconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+  
+  if (diffInSeconds < 60) return `${diffInSeconds}s ago`;
+  if (minutes < 60) return `${minutes}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  if (days < 7) return `${days}d ago`;
+  
+  return targetDate.toLocaleDateString();
+}
+
+/**
+ * 客户端安全的时间生成函数
+ * 在服务器端返回null，在客户端返回实际时间
+ * 避免hydration错误
+ */
+export function getClientSafeTimestamp(): string | null {
+  if (typeof window === 'undefined') {
+    return null; // 服务器端返回null
+  }
+  return new Date().toISOString(); // 客户端返回实际时间
+}
+
+/**
+ * 获取当前年份，客户端安全
+ */
+export function getClientSafeYear(): number {
+  if (typeof window === 'undefined') {
+    return 2025; // 服务器端返回默认年份
+  }
+  return new Date().getFullYear(); // 客户端返回实际年份
+}

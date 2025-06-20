@@ -5,11 +5,12 @@ import { Textarea } from '@/app/components/ui/textarea';
 import { Button } from '@/app/components/ui/button';
 import { Paperclip, Wand2, Loader2, CheckCircle, Eye, Code } from 'lucide-react';
 import { LogItem } from './LogItem';
-import dynamic from 'next/dynamic';
 import { useResumeOptimizer } from '@/app/hooks/useResumeOptimizer';
 import ResumePreview from '../ResumePreview';
 
-const ReactJsonView = dynamic(() => import('@microlink/react-json-view'), { ssr: false });
+import { EditorComponents } from '@/lib/componentOptimization';
+
+const ReactJsonView = EditorComponents.JsonViewer;
 
 type OptimizeTabProps = {
   resumeData: Resume;
