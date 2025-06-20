@@ -222,10 +222,33 @@ const finalAnswerNode = async (state: GraphState, config: CreateChatChainOptions
   if (!config.apiKey) throw new Error("API key is required.");
   const llm = getModel({ ...config, apiKey: config.apiKey });
   const prompt = new PromptTemplate({ template: answerPrompt, inputVariables: ["research_topic", "summaries"] });
-  const answerChain = prompt.pipe(llm).pipe(new JsonOutputParser<{webSearchResults: string}>());
-  const finalAnswer = await answerChain.invoke({ research_topic, summaries: JSON.stringify(summaries) });
-  console.log("--- Final Answer Generated ---", finalAnswer);
-  return { webSearchResults: finalAnswer.webSearchResults };
+  
+  try {
+    const answerChain = prompt.pipe(llm).pipe(new JsonOutputParser<{webSearchResults: string}>());
+    const finalAnswer = await answerChain.invoke({ research_topic, summaries: JSON.stringify(summaries) });
+    console.log("--- Final Answer Generated ---", finalAnswer);
+    return { webSearchResults: finalAnswer.webSearchResults };
+  } catch (error) {
+    // 如果 JSON 解析失败，尝试直接使用 LLM 输出
+    console.warn("JSON parsing failed, using raw LLM output:", error);
+    const answerChain = prompt.pipe(llm);
+    const rawAnswer = await answerChain.invoke({ research_topic, summaries: JSON.stringify(summaries) });
+    
+         // 尝试从原始输出中提取 JSON
+     const rawText = typeof rawAnswer === 'string' ? rawAnswer : String(rawAnswer);
+     try {
+       const jsonMatch = rawText.match(/\{[\s\S]*"webSearchResults"[\s\S]*\}/);
+       if (jsonMatch) {
+         const parsedJson = JSON.parse(jsonMatch[0]);
+         return { webSearchResults: parsedJson.webSearchResults };
+       }
+     } catch (extractError) {
+       console.warn("Failed to extract JSON from raw output:", extractError);
+     }
+     
+     // 如果都失败了，直接使用原始输出
+     return { webSearchResults: rawText };
+  }
 }
 
 const prepareAnalysisTasksNode = (): Partial<GraphState> => {

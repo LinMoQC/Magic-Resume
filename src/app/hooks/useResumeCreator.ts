@@ -7,6 +7,8 @@ import { useResumeDraftStore } from '@/store/useResumeDraftStore';
 import { useMessageStore, Message } from '@/store/useMessageStore';
 import { Resume } from '@/store/useResumeStore';
 
+const nextUrl = process.env.NEXT_PUBLIC_IF_USE_BACKEND === 'true' ? '/api' : '/api/node';
+
 export const useResumeCreator = () => {
   const { t } = useTranslation();
   const { apiKey, baseUrl, model } = useSettingStore();
@@ -32,7 +34,7 @@ export const useResumeCreator = () => {
     addMessage({ id: nanoid(), role: 'ai', content: "好的，我将根据我们的对话为您生成一份简历草稿..." });
     try {
         const config = { apiKey, baseUrl, modelName: model, maxTokens: 4096 };
-        const response = await fetch('/api/chat-agent', {
+        const response = await fetch(`${nextUrl}/chat-agent`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -93,7 +95,7 @@ export const useResumeCreator = () => {
         config
       };
       
-      const response = await fetch('/api/chat-agent', {
+      const response = await fetch(`${nextUrl}/chat-agent`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),

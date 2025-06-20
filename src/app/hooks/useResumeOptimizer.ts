@@ -6,6 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { useResumeOptimizerStore, LogEntry, StreamData } from '@/store/useResumeOptimizerStore';
 import { GraphState } from '@/lib/aiLab/graphs';
 
+const nextUrl = process.env.NEXT_PUBLIC_IF_USE_BACKEND === 'true' ? '/api' : '/api/node';
+
 export const useResumeOptimizer = () => {
   const { t } = useTranslation();
   const { apiKey, baseUrl, model, maxTokens } = useSettingStore();
@@ -62,8 +64,7 @@ export const useResumeOptimizer = () => {
       console.log('buffer', buffer)
       const messages = buffer.split('\n\n');
 
-      buffer = messages.pop() || ''; // Last item is incomplete message
-
+      buffer = messages.pop() || '';
       console.log('messages', messages)
       for (const message of messages) {
         processMessage(message);
@@ -250,8 +251,7 @@ export const useResumeOptimizer = () => {
     try {
       const config = { apiKey, baseUrl, modelName: model, maxTokens };
 
-      // Stage 1: Research
-      const researchResponse = await fetch('/api/optimizer-agent/research', {
+      const researchResponse = await fetch(`${nextUrl}/optimizer-agent/research`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ jd, resumeData, config }),
@@ -259,8 +259,7 @@ export const useResumeOptimizer = () => {
       if (!researchResponse.ok || !researchResponse.body) throw new Error("Research stage failed.");
       const researchState = await processStream(researchResponse.body.getReader(), { jd, resume: resumeData });
 
-      // Stage 2: Analysis
-      const analysisResponse = await fetch('/api/optimizer-agent/analyze', {
+      const analysisResponse = await fetch(`${nextUrl}/optimizer-agent/analyze`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ state: researchState, config }),
@@ -268,8 +267,7 @@ export const useResumeOptimizer = () => {
       if (!analysisResponse.ok || !analysisResponse.body) throw new Error("Analysis stage failed.");
       const analysisState = await processStream(analysisResponse.body.getReader(), researchState);
 
-      // Stage 3: Rewrite
-      const rewriteResponse = await fetch('/api/optimizer-agent/rewrite', {
+      const rewriteResponse = await fetch(`${nextUrl}/optimizer-agent/rewrite`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ state: analysisState, config }),

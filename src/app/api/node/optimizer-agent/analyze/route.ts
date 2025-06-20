@@ -9,7 +9,7 @@ function streamResponse(iterator: AsyncGenerator<Record<string, unknown>>) {
         controller.close();
       } else {
         const chunk = typeof value === 'string' ? value : JSON.stringify(value);
-        controller.enqueue(encoder.encode(`data: ${chunk}\\n\\n`));
+        controller.enqueue(encoder.encode(`data: ${chunk}\n\n`));
       }
     },
   });
