@@ -319,6 +319,11 @@
     },
     "ai": {
       "generatingSuggestion": "正在为您生成专属优化建议..."
+    },
+    "errors": {
+      "resumeNotFound": "简历未找到",
+      "resumeNotFoundDescription": "ID为 {{id}} 的简历不存在，可能已被删除或ID错误。",
+      "goBack": "返回"
     }
   },
   "templatePanel": {

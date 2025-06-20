@@ -322,6 +322,11 @@
     },
     "ai": {
       "generatingSuggestion": "Generating personalized optimization suggestions for you..."
+    },
+    "errors": {
+      "resumeNotFound": "Resume Not Found",
+      "resumeNotFoundDescription": "The resume with ID {{id}} does not exist. It may have been deleted or the ID is incorrect.",
+      "goBack": "Go Back"
     }
   },
   "templatePanel": {

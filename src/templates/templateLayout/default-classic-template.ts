@@ -25,8 +25,8 @@ export const defaultClassicTemplate: TemplateDSL = {
   thumbnailUrl: "/thumbnails/default-classic.png",
   tags: ["classic", "serif", "professional", "ats-friendly"],
   status: 'PUBLISHED',
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
+  createdAt: "2025-01-20T12:00:00.000Z",
+  updatedAt: "2025-01-20T12:00:00.000Z",
   globalStyles: {
     fontFamily: '"IBM Plex Serif", serif',
   },

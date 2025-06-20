@@ -152,7 +152,36 @@ const useResumeStore = create<ResumeState>((set, get) => ({
   },
 
   loadResumeForEdit: (id) => {
-    const resume = get().resumes.find(r => r.id === id);
+    const { resumes, isStoreLoading, loadResumes } = get();
+    
+    // 如果还在加载中，等待加载完成后再尝试
+    if (isStoreLoading) {
+      loadResumes().then(() => {
+        const updatedResumes = get().resumes;
+        const resume = updatedResumes.find(r => r.id === id);
+        if (resume) {
+          // Data migration on the fly: Ensure 'basics' section exists
+          if (!resume.sectionOrder.find(s => s.key === 'basics')) {
+            const migratedResume = {
+              ...resume,
+              sectionOrder: [
+                { key: 'basics', label: 'Basics' },
+                ...resume.sectionOrder,
+              ],
+            };
+            set({ activeResume: migratedResume });
+          } else {
+            set({ activeResume: { ...resume } });
+          }
+        } else {
+          MagicDebugger.warn(`Resume with id ${id} not found.`);
+        }
+      });
+      return;
+    }
+
+    // 如果数据已经加载完成，直接查找
+    const resume = resumes.find(r => r.id === id);
     if (resume) {
       // Data migration on the fly: Ensure 'basics' section exists
       if (!resume.sectionOrder.find(s => s.key === 'basics')) {
