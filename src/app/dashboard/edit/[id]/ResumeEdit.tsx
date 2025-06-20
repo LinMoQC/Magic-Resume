@@ -258,6 +258,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
           onShowAI={openAIModal}
           templateId={currentTemplateId}
           isAiJobRunning={isAiJobRunning}
+          themeColor={activeResume.themeColor}
         />
       </div>
       <TemplatePanel

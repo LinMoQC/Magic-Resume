@@ -5,11 +5,11 @@ import StarterKit from '@tiptap/starter-kit'
 import { Color } from '@tiptap/extension-color'
 import ListItem from '@tiptap/extension-list-item'
 import TextStyle from '@tiptap/extension-text-style'
-import { FaBold, FaItalic, FaStrikethrough, FaListUl, FaListOl, FaCode, FaUndo, FaRedo, FaLink, FaAlignLeft, FaAlignCenter, FaAlignRight, FaAlignJustify, FaUnderline, FaHistory } from 'react-icons/fa';
+import { FaBold, FaItalic, FaStrikethrough, FaListUl, FaListOl, FaCode, FaUndo, FaRedo, FaLink, FaAlignLeft, FaAlignCenter, FaAlignRight, FaAlignJustify, FaUnderline, FaHistory, FaCheck, FaTimes } from 'react-icons/fa';
 import Underline from '@tiptap/extension-underline'
 import Link from '@tiptap/extension-link'
 import TextAlign from '@tiptap/extension-text-align'
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { Wand2 } from 'lucide-react';
 import { LoadingMark } from './LoadingMark';
 import { useSettingStore } from '@/store/useSettingStore';
@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 
 type LastPolishedState = {
   from: number;
+  to: number;
   originalText: string;
   polishedText: string;
 };
@@ -82,12 +83,93 @@ interface TiptapEditorProps {
   placeholder?: string;
   isPolishing: boolean;
   setIsPolishing: (isPolishing: boolean) => void;
+  themeColor?: string;
 }
 
-const TiptapEditor = ({ content, onChange, placeholder, isPolishing, setIsPolishing }: TiptapEditorProps) => {
+const TiptapEditor = ({ content, onChange, placeholder, isPolishing, setIsPolishing, themeColor = '#38bdf8' }: TiptapEditorProps) => {
   const { apiKey, baseUrl, model, maxTokens } = useSettingStore();
   const [lastPolished, setLastPolished] = useState<LastPolishedState | null>(null);
+  const [autoHideTimer, setAutoHideTimer] = useState<NodeJS.Timeout | null>(null);
+  const [countdown, setCountdown] = useState<number>(15);
   const { t } = useTranslation();
+
+  // 从主题色提取RGB值
+  const hexToRgb = (hex: string) => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : { r: 56, g: 189, b: 248 }; // 默认sky-400
+  };
+
+  const themeRgb = hexToRgb(themeColor);
+  const primaryColorRgb = `${themeRgb.r}, ${themeRgb.g}, ${themeRgb.b}`;
+
+  // 接受润色结果
+  const handleAcceptPolish = useCallback(() => {
+    if (!lastPolished) return;
+    
+    // 清除倒计时定时器
+    if (autoHideTimer) {
+      clearInterval(autoHideTimer);
+      setAutoHideTimer(null);
+    }
+    
+    // 用户接受了优化结果，清除状态
+    setLastPolished(null);
+    toast.success(t('tiptap.notifications.changesAccepted', 'AI优化已应用'));
+  }, [lastPolished, autoHideTimer, t]);
+
+  // 回退润色结果
+  const createRejectPolishHandler = (editorInstance: Editor | null) => () => {
+    if (!editorInstance || !lastPolished) return;
+    
+    // 清除倒计时定时器
+    if (autoHideTimer) {
+      clearInterval(autoHideTimer);
+      setAutoHideTimer(null);
+    }
+    
+    const { from, to, originalText } = lastPolished;
+    
+    editorInstance.chain().focus().setTextSelection({ from, to }).insertContent(originalText).run();
+    setLastPolished(null);
+    toast.info(t('tiptap.notifications.changesReverted', '已回退到原始文本'));
+  };
+
+  // 处理自动隐藏逻辑和倒计时
+  useEffect(() => {
+    if (lastPolished) {
+      setCountdown(15);
+      
+      // 倒计时定时器
+      const countdownInterval = setInterval(() => {
+        setCountdown(prev => {
+          if (prev <= 1) {
+            // 自动接受
+            setLastPolished(null);
+            toast.success(t('tiptap.notifications.changesAccepted', 'AI优化已应用'));
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      
+      setAutoHideTimer(countdownInterval);
+      
+      return () => {
+        if (countdownInterval) clearInterval(countdownInterval);
+      };
+    } else {
+      // 清理定时器
+      if (autoHideTimer) {
+        clearInterval(autoHideTimer);
+        setAutoHideTimer(null);
+      }
+      setCountdown(15);
+    }
+  }, [lastPolished, autoHideTimer, t]);
   
   const editor = useEditor({
     extensions: [
@@ -134,8 +216,9 @@ const TiptapEditor = ({ content, onChange, placeholder, isPolishing, setIsPolish
           setTimeout(type, 30);
         } else {
           // Typing finished
-          editor.chain().focus().setTextSelection({ from, to: from + polishedText.length }).run();
-          setLastPolished({ from, originalText, polishedText });
+          const newTo = from + polishedText.length;
+          editor.chain().focus().setTextSelection({ from, to: newTo }).run();
+          setLastPolished({ from, to: newTo, originalText, polishedText });
           resolve();
         }
       };
@@ -181,20 +264,17 @@ const TiptapEditor = ({ content, onChange, placeholder, isPolishing, setIsPolish
     }
   };
 
-  const handleResetPolish = () => {
-    if (!editor || !lastPolished) return;
-    const { from, originalText, polishedText } = lastPolished;
-    const to = from + polishedText.length;
-    
-    editor.chain().focus().setTextSelection({ from, to }).insertContent(originalText).run();
-    setLastPolished(null);
-  };
+
 
   const buttonClass = (active: boolean) => `p-2 rounded text-sm flex items-center justify-center ${active ? 'bg-neutral-600' : 'hover:bg-neutral-700'}`;
   const disabledButtonClass = 'p-2 rounded text-sm flex items-center justify-center text-neutral-500 cursor-not-allowed';
 
   return (
-    <div>
+    <div 
+      style={{
+        '--ai-color': primaryColorRgb
+      } as React.CSSProperties}
+    >
       <TiptapToolbar editor={editor} />
       
       {editor && <BubbleMenu
@@ -216,7 +296,7 @@ const TiptapEditor = ({ content, onChange, placeholder, isPolishing, setIsPolish
           className={isPolishing ? disabledButtonClass : buttonClass(false)}
           aria-label="AI Polish"
         ><Wand2 size={16} /></button>}
-        {lastPolished && <button onClick={handleResetPolish} className={buttonClass(false)} aria-label="Reset Polish"><FaHistory size={16} /></button>}
+        {lastPolished && <button onClick={createRejectPolishHandler(editor)} className={buttonClass(false)} aria-label="Reject Polish"><FaHistory size={16} /></button>}
       </BubbleMenu>}
 
       {editor && <FloatingMenu
@@ -236,7 +316,35 @@ const TiptapEditor = ({ content, onChange, placeholder, isPolishing, setIsPolish
         <button onClick={() => editor.chain().focus().toggleBulletList().run()} className={buttonClass(editor.isActive('bulletList'))} aria-label="Bullet List"><FaListUl /></button>
       </FloatingMenu>}
 
-      <EditorContent editor={editor} placeholder={placeholder} />
+      <div className="relative editor-container">
+        <EditorContent editor={editor} placeholder={placeholder} />
+        
+        {lastPolished && !isPolishing && (
+          <div className="ai-polish-panel absolute top-2 right-2 flex items-center gap-1 p-1.5 bg-neutral-900/95 backdrop-blur-sm rounded border border-neutral-600 shadow-lg z-50 ">
+            <span className="text-xs text-neutral-400 px-1">{countdown}s</span>
+            <button
+              onClick={handleAcceptPolish}
+              className="ai-polish-button w-6 h-6 text-white text-xs rounded transition-all duration-200 flex items-center justify-center"
+              style={{
+                backgroundColor: `rgba(${primaryColorRgb}, 0.9)`,
+                border: `1px solid rgba(${primaryColorRgb}, 1)`
+              }}
+              aria-label={t('tiptap.acceptChanges', '接受更改')}
+              title={t('tiptap.accept', '接受')}
+            >
+              <FaCheck size={10} />
+            </button>
+            <button
+              onClick={createRejectPolishHandler(editor)}
+              className="ai-polish-button w-6 h-6 bg-neutral-600 hover:bg-neutral-500 text-white text-xs rounded transition-all duration-200 flex items-center justify-center border border-neutral-500"
+              aria-label={t('tiptap.rejectChanges', '回退更改')}
+              title={t('tiptap.reject', '回退')}
+            >
+              <FaTimes size={10} />
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

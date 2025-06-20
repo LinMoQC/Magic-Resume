@@ -22,6 +22,10 @@ export const LoadingMark = Mark.create<LoadingOptions>({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['span', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, { class: 'ai-loading-effect' }), 0];
+    return ['span', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, { 
+      class: 'ai-loading-effect',
+      'data-loading': 'true',
+      'aria-label': 'AI正在优化此文本...'
+    }), 0];
   },
 }); 

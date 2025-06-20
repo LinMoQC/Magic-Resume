@@ -1,10 +1,12 @@
 import { create } from 'zustand';
 import { nanoid } from 'nanoid';
+import { Resume } from './useResumeStore';
 
 export interface Message {
   id: string;
   role: 'user' | 'ai';
   content: string;
+  jsonData?: Resume | Record<string, unknown>; // 用于存储解析的JSON数据
 }
 
 interface MessageState {
@@ -15,6 +17,7 @@ interface MessageState {
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;
   updateLastAIMessage: (content: string) => void;
+  updateLastAIMessageWithJSON: (content: string, jsonData: Resume | Record<string, unknown>) => void;
 }
 
 export const useMessageStore = create<MessageState>((set) => ({
@@ -30,5 +33,12 @@ export const useMessageStore = create<MessageState>((set) => ({
       return { messages: [...state.messages.slice(0, -1), { ...lastMessage, content }] };
     }
     return { messages: [...state.messages, { id: nanoid(), role: 'ai', content }] };
+  }),
+  updateLastAIMessageWithJSON: (content: string, jsonData: Resume | Record<string, unknown>) => set((state) => {
+    const lastMessage = state.messages[state.messages.length - 1];
+    if (lastMessage && lastMessage.role === 'ai') {
+      return { messages: [...state.messages.slice(0, -1), { ...lastMessage, content, jsonData }] };
+    }
+    return { messages: [...state.messages, { id: nanoid(), role: 'ai', content, jsonData }] };
   }),
 })); 
