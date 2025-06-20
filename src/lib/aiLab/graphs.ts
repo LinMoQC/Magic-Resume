@@ -8,7 +8,7 @@ import {
 } from "./chains";
 import { getModel } from "./aiService";
 import { PromptTemplate } from "@langchain/core/prompts";
-import { JsonOutputParser, StringOutputParser } from "@langchain/core/output_parsers";
+import { JsonOutputParser } from "@langchain/core/output_parsers";
 import { Resume } from "@/store/useResumeStore";
 import { extractTextFromResume } from "./utils";
 import { ANALYSIS_CATEGORIES } from "@/prompts/resume-analysis-prompt";

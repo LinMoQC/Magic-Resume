@@ -6,8 +6,7 @@ import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import { InfoType, Section } from '@/store/useResumeStore';
 import useMobile from '@/app/hooks/useMobile';
 import { Tools } from './Tools';
-import { Wand2 } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import AiThinkingOverlay from './AiThinkingOverlay';
 
 interface ResumePreviewPanelProps {
   info: InfoType;
@@ -18,6 +17,7 @@ interface ResumePreviewPanelProps {
   onShowAI: () => void;
   templateId: string;
   isAiJobRunning: boolean;
+  themeColor?: string;
 }
 
 const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
@@ -27,10 +27,10 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
   setPreviewScale,
   onShowAI,
   templateId,
-  isAiJobRunning
+  isAiJobRunning,
+  themeColor = '#38bdf8'
 }) => {
   const { isMobile } = useMobile();
-  const { t } = useTranslation();
 
   return (
     <section
@@ -57,12 +57,10 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
                   sectionOrder={sectionOrder} 
                   templateId={templateId} 
                 />
-                {isAiJobRunning && (
-                  <div className="absolute inset-0 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center z-50">
-                    <Wand2 size={48} className="text-sky-400 animate-pulse" />
-                    <p className="text-white text-lg mt-4 animate-pulse">{t('editPage.ai.generatingSuggestion')}</p>
-                  </div>
-                )}
+                <AiThinkingOverlay 
+                  isVisible={isAiJobRunning} 
+                  themeColor={themeColor}
+                />
               </div>
             </TransformComponent>
 

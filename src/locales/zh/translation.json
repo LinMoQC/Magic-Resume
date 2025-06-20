@@ -227,7 +227,7 @@
         "chatTitle": "AI 助手",
         "previewTitle": "简历实时预览",
         "inputPlaceholder": "请描述您的技能或经历...",
-        "initialMessage": "你好！我是 ResuMate，你的个人简历构建助手。首先，你想申请什么样的工作或行业？",
+        "initialMessage": "你好！我是 ResuMate，你的个人简历构建助手。请告诉我你的目标行业/岗位?",
         "applyButton": "应用并保存简历",
         "defaultReply": "抱歉，我现在遇到一点麻烦。你能换个说法吗？",
         "errorReply": "我似乎遇到了一个问题。请尝试重新发送您的消息。",

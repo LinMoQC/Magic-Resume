@@ -9,6 +9,7 @@ import TiptapEditor from '@/app/components/TiptapEditor';
 import { UniqueIdentifier } from '@dnd-kit/core';
 import { Textarea } from '@/app/components/ui/textarea';
 import { useTranslation } from 'react-i18next';
+import { useResumeStore } from '@/store/useResumeStore';
 
 type Field = {
   name: string;
@@ -44,6 +45,7 @@ export default function DynamicFormModal<T extends Item>({
   const [formData, setFormData] = useState<Partial<T>>({});
   const [isPolishing, setIsPolishing] = useState(false);
   const { t } = useTranslation();
+  const { activeResume } = useResumeStore();
 
   useEffect(() => {
     if (currentItem) {
@@ -118,6 +120,7 @@ export default function DynamicFormModal<T extends Item>({
               placeholder={richtextPlaceholder}
               isPolishing={isPolishing}
               setIsPolishing={setIsPolishing}
+              themeColor={activeResume?.themeColor}
             />
           </div>
         )}

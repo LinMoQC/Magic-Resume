@@ -23,10 +23,10 @@ const experienceFields: FieldConfig[] = [
     { key: 'website', labelKey: 'dynamicForm.fields.experience.website.label', type: 'input', placeholderKey: 'dynamicForm.fields.experience.website.placeholder' },
 ];
 
-const profilesFields: FieldConfig[] = [
-    { key: 'platform', labelKey: 'dynamicForm.fields.profiles.platform.label', type: 'input', placeholderKey: 'dynamicForm.fields.profiles.platform.placeholder', required: true },
-    { key: 'url', labelKey: 'dynamicForm.fields.profiles.url.label', type: 'input', placeholderKey: 'dynamicForm.fields.profiles.url.placeholder', required: true },
-];
+// const profilesFields: FieldConfig[] = [
+//     { key: 'platform', labelKey: 'dynamicForm.fields.profiles.platform.label', type: 'input', placeholderKey: 'dynamicForm.fields.profiles.platform.placeholder', required: true },
+//     { key: 'url', labelKey: 'dynamicForm.fields.profiles.url.label', type: 'input', placeholderKey: 'dynamicForm.fields.profiles.url.placeholder', required: true },
+// ];
 
 const skillsFields: FieldConfig[] = [
     { key: 'name', labelKey: 'dynamicForm.fields.skills.name.label', type: 'input', placeholderKey: 'dynamicForm.fields.skills.name.placeholder', required: true },
@@ -54,7 +54,7 @@ const certificatesFields: FieldConfig[] = [
 export const dynamicFormFields: Record<string, FieldConfig[]> = {
     education: educationFields,
     experience: experienceFields,
-    profiles: profilesFields,
+    // profiles: profilesFields,
     skills: skillsFields,
     projects: projectsFields,
     languages: languagesFields,

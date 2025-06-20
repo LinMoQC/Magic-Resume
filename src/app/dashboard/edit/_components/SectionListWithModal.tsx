@@ -35,6 +35,7 @@ import TiptapEditor from '@/app/components/TiptapEditor';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import { Label } from '@/app/components/ui/label';
+import { useResumeStore } from '@/store/useResumeStore';
 
 interface BaseItem {
   id: UniqueIdentifier;
@@ -149,6 +150,7 @@ export default function SectionListWithModal<T extends BaseItem>({
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
   const [isPolishing, setIsPolishing] = useState(false);
   const { t } = useTranslation();
+  const { activeResume } = useResumeStore();
 
   const translatedLabel = t(label);
 
@@ -313,6 +315,7 @@ export default function SectionListWithModal<T extends BaseItem>({
             placeholder={richtextPlaceholder}
             isPolishing={isPolishing}
             setIsPolishing={setIsPolishing}
+            themeColor={activeResume?.themeColor}
           />
         </div>
         <div className="mt-6 flex justify-end gap-2">

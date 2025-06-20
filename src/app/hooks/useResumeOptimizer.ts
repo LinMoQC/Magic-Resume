@@ -60,19 +60,7 @@ export const useResumeOptimizer = () => {
       }
       buffer += decoder.decode(value, { stream: true });
       console.log('buffer', buffer)
-      let messages = buffer.split('\\n\\n');
-
-      if (messages.length > 1 && buffer.includes('final_answer')) {
-        messages = messages.reduce((acc, part) => {
-          if (part.startsWith('data:')) {
-            acc.push(part);
-          } else if (acc.length > 0) {
-            // Re-add the separator and append the fragment
-            acc[acc.length - 1] += '\\n\\n' + part;
-          }
-          return acc;
-        }, [] as string[]);
-      }
+      const messages = buffer.split('\n\n');
 
       buffer = messages.pop() || ''; // Last item is incomplete message
 
@@ -263,7 +251,7 @@ export const useResumeOptimizer = () => {
       const config = { apiKey, baseUrl, modelName: model, maxTokens };
 
       // Stage 1: Research
-      const researchResponse = await fetch('/api/graph/research', {
+      const researchResponse = await fetch('/api/optimizer-agent/research', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ jd, resumeData, config }),
@@ -272,7 +260,7 @@ export const useResumeOptimizer = () => {
       const researchState = await processStream(researchResponse.body.getReader(), { jd, resume: resumeData });
 
       // Stage 2: Analysis
-      const analysisResponse = await fetch('/api/graph/analyze', {
+      const analysisResponse = await fetch('/api/optimizer-agent/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ state: researchState, config }),
@@ -281,7 +269,7 @@ export const useResumeOptimizer = () => {
       const analysisState = await processStream(analysisResponse.body.getReader(), researchState);
 
       // Stage 3: Rewrite
-      const rewriteResponse = await fetch('/api/graph/rewrite', {
+      const rewriteResponse = await fetch('/api/optimizer-agent/rewrite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ state: analysisState, config }),

@@ -1,4 +1,4 @@
-import { FaBook, FaBriefcase, FaCertificate,FaGraduationCap, FaLanguage, FaLayerGroup, FaUser } from "react-icons/fa";
+import { FaBook, FaBriefcase, FaCertificate,FaGraduationCap, FaLanguage, FaLayerGroup } from "react-icons/fa";
 import { ComponentType } from 'react';
 import { SectionItem } from "@/store/useResumeStore";
 import { dynamicFormFields, FieldConfig } from "./dynamicFormFields";
@@ -66,18 +66,18 @@ const sidebarMenu: SidebarMenuItem[] = [
       </div>
     )
   },
-  {
-    key: 'profiles',
-    icon: FaUser,
-    label: 'sections.profiles',
-    formFields: dynamicFormFields.profiles,
-    itemRender: (item) => (
-      <div className="flex flex-col gap-2 max-w-[155px] ">
-        <div className="font-bold text-sm">{item.platform}</div>
-        <div className="text-xs text-neutral-400">{item.url}</div>
-      </div>
-    )
-  }
+  // {
+  //   key: 'profiles',
+  //   icon: FaUser,
+  //   label: 'sections.profiles',
+  //   formFields: dynamicFormFields.profiles,
+  //   itemRender: (item) => (
+  //     <div className="flex flex-col gap-2 max-w-[155px] ">
+  //       <div className="font-bold text-sm">{item.platform}</div>
+  //       <div className="text-xs text-neutral-400">{item.url}</div>
+  //     </div>
+  //   )
+  // }
 ];
 
 export default sidebarMenu;
