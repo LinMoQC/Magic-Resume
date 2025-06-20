@@ -14,7 +14,7 @@ function streamResponse(iterator: AsyncGenerator<Record<string, unknown>>) {
 
         if (value) {
           const chunk = typeof value === 'string' ? value : JSON.stringify(value);
-          controller.enqueue(encoder.encode(`data: ${chunk}\\n\\n`));
+          controller.enqueue(encoder.encode(`data: ${chunk}\n\n`));
           
           if (value['is_graph_complete']) {
             controller.close();
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
     );
 
     return streamResponse(stream);
-
+    
   } catch (error: unknown) {
     console.error("[RESEARCH_GRAPH_API_ERROR]", error);
     const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
