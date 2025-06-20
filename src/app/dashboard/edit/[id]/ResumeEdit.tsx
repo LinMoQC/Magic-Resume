@@ -33,12 +33,17 @@ import MobileResumEdit from '../_components/mobile/MobileResumEdit';
 import { generateSnapshot } from '@/lib/utils';
 import AIModal from '../_components/AIModal';
 import { useTranslation } from 'react-i18next';
+import { Loader2 } from 'lucide-react';
 
 import { EditorComponents } from '@/lib/componentOptimization';
 
 const ResumePreviewPanel = dynamic(() => import('../_components/ResumePreviewPanel'), { 
   ssr: false,
-  loading: () => <div className="w-full h-full bg-black flex items-center justify-center text-white">Loading Preview...</div>
+  loading: () => (
+    <div className="w-full h-full bg-black flex items-center justify-center text-white">
+      <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+    </div>
+  )
 });
 const ReactJsonView = EditorComponents.JsonViewer;
 

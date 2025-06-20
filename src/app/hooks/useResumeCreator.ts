@@ -31,7 +31,7 @@ export const useResumeCreator = () => {
   
   const generateResume = useCallback(async () => {
     setIsGenerating(true);
-    addMessage({ id: nanoid(), role: 'ai', content: "好的，我将根据我们的对话为您生成一份简历草稿..." });
+    addMessage({ id: nanoid(), role: 'ai', content: t('common.notifications.generatingDraft') });
     try {
         const config = { apiKey, baseUrl, modelName: model, maxTokens: 4096 };
         const response = await fetch(`${nextUrl}/chat-agent`, {
@@ -73,7 +73,7 @@ export const useResumeCreator = () => {
     } finally {
         setIsGenerating(false);
     }
-  }, [apiKey, baseUrl, model, messages, addMessage, setResumeDraft]);
+  }, [apiKey, baseUrl, model, messages, addMessage, setResumeDraft,t]);
 
   const sendMessage = useCallback(async (userMessage: string) => {
     if (!apiKey) {

@@ -438,8 +438,14 @@
     },
     "notifications": {
       "polishingInProgress": "AI is already polishing. Please wait for it to finish.",
-      "polishFailed": "Failed to polish text: {{message}}"
-    }
+      "polishFailed": "Failed to polish text: {{message}}",
+      "changesAccepted": "AI optimization applied",
+      "changesReverted": "Reverted to original text"
+    },
+    "acceptChanges": "Accept Changes",
+    "accept": "Accept",
+    "rejectChanges": "Reject Changes",
+    "reject": "Reject"
   },
   "export": {
     "notifications": {
@@ -455,6 +461,25 @@
       "resumeDuplicated": "Resume \"{{name}}\" duplicated.",
       "resumeDeleted": "Resume \"{{name}}\" deleted.",
       "resumeSaved": "Resume saved!"
+    }
+  },
+  "common": {
+    "notifications": {
+      "copySuccess": "JSON data copied to clipboard",
+      "copyFailed": "Copy failed, please try again",
+      "draftGenerated": "Resume draft generated! You can now click the preview button in the top right to view.",
+      "dataApplied": "Resume data has been applied to preview!",
+      "resumeApplied": "Resume applied!",
+      "generatingDraft": "Alright, I'll generate a resume draft based on our conversation...",
+      "generationError": "Sorry, encountered an issue while generating the resume. Please try again later.",
+      "generatingResume": "Generating resume..."
+    },
+    "ui": {
+      "hide": "Hide",
+      "view": "View",
+      "parseResumeData": "Parsed Resume Data",
+      "closePreview": "Close Preview",
+      "previewResume": "Preview Resume"
     }
   },
   "report": {

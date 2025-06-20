@@ -47,7 +47,7 @@ export default function CreateTab({ onApplyChanges, isAiJobRunning, setIsAiJobRu
     const handleApply = () => {
         if (resumeDraft) {
             onApplyChanges(resumeDraft);
-            toast.success("简历已应用！");
+            toast.success(t('common.notifications.resumeApplied'));
         }
     };
 
@@ -62,7 +62,7 @@ export default function CreateTab({ onApplyChanges, isAiJobRunning, setIsAiJobRu
                     {resumeDraft && (
                         <Button variant="ghost" size="sm" onClick={() => setShowPreview(!showPreview)} className="text-neutral-400 hover:text-white">
                             <Eye size={16} className="mr-2" />
-                            {showPreview ? '关闭预览' : '预览简历'}
+                            {showPreview ? t('common.ui.closePreview') : t('common.ui.previewResume')}
                         </Button>
                     )}
                 </div>
