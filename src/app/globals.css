@@ -266,32 +266,177 @@ button {
 }
 
 .ai-loading-effect {
-  background-color: rgba(56, 189, 248, 0.3);
-  border-radius: 3px;
-  padding: 1px 2px;
-  margin: -1px -2px;
+  --ai-color: 56, 189, 248; /* 默认sky-400颜色的RGB值 */
+  background: linear-gradient(90deg, 
+    rgba(var(--ai-color), 0.1), 
+    rgba(var(--ai-color), 0.25), 
+    rgba(var(--ai-color), 0.1)
+  );
+  background-size: 200% 100%;
+  border-radius: 6px;
+  padding: 2px 4px;
+  margin: -2px -4px;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
+  animation: ai-text-shimmer 2s ease-in-out infinite, ai-pulse-glow 3s ease-in-out infinite;
+  border: 1px solid rgba(var(--ai-color), 0.3);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 8px rgba(var(--ai-color), 0.2);
+}
+
+.ai-loading-effect::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.6), 
+    rgba(var(--ai-color), 0.3),
+    rgba(255, 255, 255, 0.6),
+    transparent
+  );
+  animation: ai-sweep 1.8s ease-in-out infinite;
+  mix-blend-mode: overlay;
 }
 
 .ai-loading-effect::after {
-  content: '';
+  content: '🤖';
   display: inline-block;
-  width: 14px;
-  height: 14px;
-  border: 2px solid #a78bfa;
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  transform-origin: center;
-  vertical-align: middle;
-  margin-left: 6px;
+  font-size: 12px;
+  margin-left: 4px;
+  vertical-align: baseline;
+  filter: hue-rotate(0deg);
+  animation: ai-sparkle 1s ease-in-out infinite, ai-hue-cycle 3s linear infinite;
+  transition: all 0.3s ease;
+}
+
+.ai-loading-effect:hover {
+  background-size: 150% 100%;
+  animation-duration: 1s, 2s;
+  transform: scale(1.02);
+}
+
+.ai-loading-effect:hover::after {
+  transform: scale(1.3) rotate(360deg);
+  animation-duration: 0.5s, 1.5s;
 }
 
 @keyframes spin {
   to {
     transform: rotate(360deg);
   }
+}
+
+@keyframes progressBar {
+  0% {
+    width: 0%;
+    opacity: 1;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    width: 100%;
+    opacity: 0.7;
+  }
+}
+
+/* AI文本加载效果动画 */
+@keyframes ai-text-shimmer {
+  0%, 100% {
+    background-position: 200% 0;
+  }
+  50% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes ai-sweep {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+@keyframes ai-sparkle {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(0.8) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2) rotate(180deg);
+  }
+}
+
+@keyframes ai-hue-cycle {
+  0% { filter: hue-rotate(0deg) brightness(1); }
+  25% { filter: hue-rotate(90deg) brightness(1.2); }
+  50% { filter: hue-rotate(180deg) brightness(1); }
+  75% { filter: hue-rotate(270deg) brightness(1.2); }
+  100% { filter: hue-rotate(360deg) brightness(1); }
+}
+
+@keyframes ai-pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(var(--ai-color), 0.2);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(var(--ai-color), 0.4), 0 0 24px rgba(var(--ai-color), 0.2);
+  }
+}
+
+/* 数据处理复杂度指示器 */
+.ai-loading-effect[data-loading="true"] {
+  cursor: wait;
+}
+
+/* 根据文本长度调整动画强度 */
+.ai-loading-effect[data-complexity="high"] {
+  animation-duration: 1.2s, 2s;
+  border-width: 2px;
+  box-shadow: 0 0 12px rgba(var(--ai-color), 0.3);
+}
+
+.ai-loading-effect[data-complexity="high"]::after {
+  content: '🧠';
+  animation-duration: 0.8s, 2s;
+}
+
+/* AI润色小按钮动画 */
+@keyframes fadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.editor-container {
+  position: relative;
+  min-height: 150px;
+}
+
+.ai-polish-panel {
+  animation: fadeInScale 0.2s ease-out;
+  pointer-events: auto;
+}
+
+.ai-polish-button {
+  transition: all 0.2s ease;
+}
+
+.ai-polish-button:hover {
+  transform: scale(1.1);
 }
 
 .hide-scrollbar::-webkit-scrollbar {
@@ -301,4 +446,373 @@ button {
 .hide-scrollbar {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
+}
+
+/* AI思考效果动画 */
+@keyframes breathe {
+  0%, 100% { 
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% { 
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+@keyframes neural-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 20px rgba(34, 211, 238, 0);
+  }
+}
+
+@keyframes data-flow {
+  0% {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100px);
+    opacity: 0;
+  }
+}
+
+@keyframes thinking-glow {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* 动画延迟类 */
+.animation-delay-200 {
+  animation-delay: 200ms;
+}
+
+.animation-delay-300 {
+  animation-delay: 300ms;
+}
+
+.animation-delay-400 {
+  animation-delay: 400ms;
+}
+
+.animation-delay-500 {
+  animation-delay: 500ms;
+}
+
+.animation-delay-600 {
+  animation-delay: 600ms;
+}
+
+/* 反向动画 */
+.animation-reverse {
+  animation-direction: reverse;
+}
+
+/* 自定义动画类 */
+.animate-breathe {
+  animation: breathe 3s ease-in-out infinite;
+}
+
+.animate-ripple {
+  animation: ripple 2s ease-out infinite;
+}
+
+.animate-neural-pulse {
+  animation: neural-pulse 2s ease-in-out infinite;
+}
+
+.animate-data-flow {
+  animation: data-flow 3s ease-in-out infinite;
+}
+
+.animate-thinking-glow {
+  background: linear-gradient(-45deg, #06b6d4, #8b5cf6, #3b82f6, #06b6d4);
+  background-size: 400% 400%;
+  animation: thinking-glow 3s ease infinite;
+}
+
+/* 磨砂玻璃效果优化 */
+.ai-overlay-backdrop {
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+}
+
+/* 动态主题色呼吸效果 */
+.ai-theme-pulse {
+  animation: ai-theme-breathe 4s ease-in-out infinite;
+}
+
+@keyframes ai-theme-breathe {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+/* 简历优化页面增强样式 */
+.optimize-container {
+  background: linear-gradient(135deg, 
+    rgba(23, 23, 23, 0.95) 0%, 
+    rgba(38, 38, 38, 0.95) 50%, 
+    rgba(23, 23, 23, 0.95) 100%);
+}
+
+.glass-card {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.05) 0%, 
+    rgba(255, 255, 255, 0.02) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-card:hover {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.08) 0%, 
+    rgba(255, 255, 255, 0.04) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+/* 流光效果 */
+.shimmer-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-effect::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.1), 
+    transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* 优化按钮悬停效果 */
+.optimize-button {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(45deg, #0ea5e9, #3b82f6);
+}
+
+.optimize-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.2), 
+    transparent);
+  transition: left 0.5s ease;
+}
+
+.optimize-button:hover::before {
+  left: 100%;
+}
+
+/* 状态指示器动画 */
+.status-indicator {
+  position: relative;
+}
+
+.status-indicator.processing::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: inherit;
+  background: linear-gradient(45deg, #0ea5e9, #3b82f6, #0ea5e9);
+  background-size: 200% 200%;
+  animation: gradient-spin 2s linear infinite;
+  z-index: -1;
+}
+
+@keyframes gradient-spin {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* JSON视图增强样式 */
+.json-viewer-enhanced {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Cascadia Code', monospace;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.json-viewer-enhanced .react-json-view {
+  background: transparent !important;
+  border-radius: 8px;
+  font-size: 13px !important;
+  line-height: 1.6 !important;
+  max-width: 100%;
+}
+
+/* 确保JSON中的长字符串能够换行 */
+.json-viewer-enhanced .string-value {
+  word-break: break-all !important;
+  overflow-wrap: anywhere !important;
+  white-space: pre-wrap !important;
+  max-width: 100% !important;
+}
+
+/* 处理JSON视图中的长内容 */
+.json-viewer-enhanced .object-key-val,
+.json-viewer-enhanced .array-key-val {
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+
+.json-viewer-enhanced .pushed-content {
+  max-width: 100% !important;
+  overflow-x: auto !important;
+}
+
+/* 确保JSON容器本身不会溢出 */
+.json-viewer-enhanced * {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* 自定义JSON视图中的颜色 */
+.json-viewer-enhanced .object-key-val {
+  padding: 4px 8px !important;
+  margin: 2px 0 !important;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.json-viewer-enhanced .object-key-val:hover {
+  background-color: rgba(56, 189, 248, 0.1) !important;
+}
+
+.json-viewer-enhanced .pushed-content {
+  margin-left: 20px !important;
+}
+
+.json-viewer-enhanced .array-key {
+  font-weight: 600 !important;
+  color: #22d3ee !important;
+}
+
+.json-viewer-enhanced .object-key {
+  font-weight: 600 !important;
+  color: #34d399 !important;
+}
+
+.json-viewer-enhanced .string-value {
+  color: #fbbf24 !important;
+  font-weight: 500 !important;
+}
+
+.json-viewer-enhanced .number-value {
+  color: #f472b6 !important;
+  font-weight: 600 !important;
+}
+
+.json-viewer-enhanced .boolean-value {
+  color: #a78bfa !important;
+  font-weight: 600 !important;
+}
+
+/* 展开/折叠按钮样式 */
+.json-viewer-enhanced .click-to-expand,
+.json-viewer-enhanced .click-to-expand-collapsed {
+  font-size: 14px !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  background-color: rgba(56, 189, 248, 0.15) !important;
+  color: #38bdf8 !important;
+  border: 1px solid rgba(56, 189, 248, 0.3) !important;
+  transition: all 0.2s ease !important;
+}
+
+.json-viewer-enhanced .click-to-expand:hover,
+.json-viewer-enhanced .click-to-expand-collapsed:hover {
+  background-color: rgba(56, 189, 248, 0.25) !important;
+  border-color: rgba(56, 189, 248, 0.5) !important;
+  transform: scale(1.05);
+}
+
+/* 数组和对象的大小指示器 */
+.json-viewer-enhanced .object-size,
+.json-viewer-enhanced .array-group-meta-data {
+  color: #94a3b8 !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  margin-left: 8px !important;
+}
+
+/* 应用更改按钮特效 */
+.apply-changes-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.3), 
+    transparent);
+  transition: left 0.6s ease;
+}
+
+.apply-changes-button:hover::before {
+  left: 100%;
+}
+
+.apply-changes-button:active {
+  transform: scale(0.98) !important;
 }

@@ -3,14 +3,12 @@ import { Resume, useResumeStore } from '@/store/useResumeStore';
 import { useTranslation } from 'react-i18next';
 import { Textarea } from '@/app/components/ui/textarea';
 import { Button } from '@/app/components/ui/button';
-import { Send, Loader2, Bot, User, BotMessageSquare, Eye, FileText } from 'lucide-react';
+import { Send, Loader2, BotMessageSquare, Eye, FileText } from 'lucide-react';
 import { useResumeCreator } from '@/app/hooks/useResumeCreator';
-import { Message } from '@/store/useMessageStore';
-import { useUser } from '@clerk/nextjs';
-import ReactMarkdown from 'react-markdown';
-import Image from 'next/image';
 import ResumePreview from '../ResumePreview';
 import { toast } from 'sonner';
+import { MessageItem } from '@/app/components/ui/MessageItem';
+import { LoadingAnimation } from '@/app/components/ui/LoadingAnimation';
 
 type CreateTabProps = {
     onApplyChanges: (resume: Resume) => void;
@@ -18,47 +16,14 @@ type CreateTabProps = {
     setIsAiJobRunning: (isRunning: boolean) => void;
 };
 
-const TypingIndicator = () => (
-    <div className="flex items-center space-x-1 p-2">
-        <span className="w-1 h-1 bg-neutral-400 rounded-full animate-pulse [animation-delay:-0.3s]"></span>
-        <span className="w-1 h-1 bg-neutral-400 rounded-full animate-pulse [animation-delay:-0.15s]"></span>
-        <span className="w-1 h-1 bg-neutral-400 rounded-full animate-pulse"></span>
-    </div>
-);
 
-const ChatMessage: React.FC<{ message: Message; userAvatarUrl?: string }> = ({ message, userAvatarUrl }) => {
-    const isUser = message.role === 'user';
-    const isLoadingMessage = message.id === 'loading';
-
-    return (
-        <div className={`flex items-start gap-3 my-4 ${isUser ? 'justify-end' : ''} min-w-5`}>
-            {!isUser && (
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-sky-500 flex items-center justify-center text-white">
-                    <Bot size={20} />
-                </div>
-            )}
-            <div className={`p-3 rounded-lg max-w-lg ${isUser ? 'bg-sky-700 text-white' : 'bg-neutral-800 text-neutral-200'}`}>
-                {isLoadingMessage ? <TypingIndicator /> : <ReactMarkdown>{message.content}</ReactMarkdown>}
-            </div>
-            {isUser && (
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-neutral-600 flex items-center justify-center text-white overflow-hidden">
-                    {userAvatarUrl ? (
-                        <Image src={userAvatarUrl} alt="User Avatar" width={32} height={32} className="w-full h-full object-cover" />
-                    ) : (
-                        <User size={20} />
-                    )}
-                </div>
-            )}
-        </div>
-    );
-};
 
 export default function CreateTab({ onApplyChanges, isAiJobRunning, setIsAiJobRunning }: CreateTabProps) {
     const { t } = useTranslation();
     const { messages, isLoading, sendMessage, resumeDraft } = useResumeCreator();
     const [input, setInput] = useState('');
     const chatContainerRef = useRef<HTMLDivElement>(null);
-    const { user } = useUser();
+
     const [showPreview, setShowPreview] = useState(false);
     const templateId = useResumeStore(state => state.activeResume?.template) || 'onyx';
 
@@ -103,14 +68,16 @@ export default function CreateTab({ onApplyChanges, isAiJobRunning, setIsAiJobRu
                 </div>
                 <div ref={chatContainerRef} className="flex-1 p-4 overflow-y-auto">
                     {messages.map((msg) => (
-                        <ChatMessage 
+                        <MessageItem 
                             key={msg.id} 
                             message={msg} 
-                            userAvatarUrl={msg.role === 'user' ? user?.imageUrl : undefined}
+                            themeColor="#0ea5e9"
                         />
                     ))}
-                    {isLoading && (
-                         <ChatMessage key="loading" message={{ id: 'loading', role: 'ai', content: "思考中..." }} />
+                                        {isLoading && (
+                         <LoadingAnimation 
+                            themeColor="#0ea5e9"
+                         />
                     )}
                 </div>
                 <div className="p-4 border-t border-neutral-800">

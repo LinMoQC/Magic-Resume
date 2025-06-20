@@ -53,17 +53,49 @@ export async function POST(req: NextRequest) {
                             const meaningfulContent = buffer.substring(startIndex);
                             if (meaningfulContent) {
                                 const data = { type: 'message_chunk', content: meaningfulContent };
-                                controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\\n\\n`));
+                                controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
                             }
                         }
                     } else {
                         // Once started, just stream the content directly
                         const data = { type: 'message_chunk', content };
-                        controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\\n\\n`));
+                        controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
                     }
                 }
-                // NOTE: The [RESUME] block logic is removed for simplification
-                // as the primary issue is getting the chat stream to work reliably.
+
+                // Handle [RESUME] block if present in buffer
+                if (buffer.includes('[RESUME]')) {
+                    try {
+                        const resumeStartIndex = buffer.indexOf('[RESUME]');
+                        const resumeJsonStart = buffer.indexOf('{', resumeStartIndex);
+                        
+                        if (resumeJsonStart !== -1) {
+                            let braceCount = 0;
+                            let resumeJsonEnd = -1;
+                            
+                            for (let i = resumeJsonStart; i < buffer.length; i++) {
+                                if (buffer[i] === '{') braceCount++;
+                                if (buffer[i] === '}') {
+                                    braceCount--;
+                                    if (braceCount === 0) {
+                                        resumeJsonEnd = i + 1;
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            if (resumeJsonEnd !== -1) {
+                                const resumeJson = buffer.substring(resumeJsonStart, resumeJsonEnd);
+                                const resumeData = JSON.parse(resumeJson);
+                                const data = { type: 'resume_update', data: resumeData };
+                                controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
+                            }
+                        }
+                    } catch (parseError) {
+                        console.error('Failed to parse resume JSON:', parseError);
+                    }
+                }
+
                 controller.close();
             },
         });

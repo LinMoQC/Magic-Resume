@@ -68,6 +68,7 @@ export default function MobileResumEdit({
                 onShowAI={onShowAI}
                 templateId={currentTemplateId}
                 isAiJobRunning={isAiJobRunning}
+                themeColor={activeResume?.themeColor}
             />
         </div>
 

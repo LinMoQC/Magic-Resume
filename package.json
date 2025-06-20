@@ -53,6 +53,7 @@
     "@tiptap/starter-kit": "^2.14.0",
     "@types/dompurify": "^3.0.5",
     "@types/lodash.get": "^4.4.9",
+    "@uiw/react-json-view": "^2.0.0-alpha.32",
     "ai": "^4.3.16",
     "class-variance-authority": "^0.7.1",
     "dompurify": "^3.2.6",
