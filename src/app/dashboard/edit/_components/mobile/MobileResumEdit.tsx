@@ -10,10 +10,11 @@ import Modal from "@/app/components/ui/Modal";
 import Image from "next/image";
 import { InfoType, Section, Resume } from "@/store/useResumeStore";
 import React from "react";
-import dynamic from 'next/dynamic';
 import { useTranslation } from "react-i18next";
 
-const ReactJsonView = dynamic(() => import('@microlink/react-json-view'), { ssr: false });
+import { EditorComponents } from '@/lib/componentOptimization';
+
+const ReactJsonView = EditorComponents.JsonViewer;
 
 interface MobileResumEditProps {
     info: InfoType;

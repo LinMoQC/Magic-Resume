@@ -7,7 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "prepare": "husky"
+    "prepare": "husky",
+    "analyze": "cross-env ANALYZE=true next build",
+    "build:analyze": "npm run build && npm run analyze:bundle",
+    "analyze:bundle": "npx @next/bundle-analyzer",
+    "build:prod": "NODE_ENV=production next build",
+    "build:standalone": "next build && next export"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": "eslint --fix",
@@ -94,11 +99,14 @@
     "@types/react": "^19.1.6",
     "@types/react-dom": "^19",
     "@types/three": "^0.177.0",
+    "@next/bundle-analyzer": "^15.3.3",
+    "cross-env": "^7.0.3",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
     "husky": "^9.1.7",
     "sass": "^1.89.2",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "webpack-bundle-analyzer": "^4.10.2"
   }
 }

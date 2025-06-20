@@ -9,9 +9,9 @@ import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
 import { useUser } from '@clerk/nextjs';
 import Image from 'next/image';
-import dynamic from 'next/dynamic';
+import { EditorComponents } from '@/lib/componentOptimization';
 
-const ReactJsonView = dynamic(() => import('@microlink/react-json-view'), { ssr: false });
+const ReactJsonView = EditorComponents.JsonViewer;
 
 interface MessageItemProps {
   message: Message;

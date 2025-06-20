@@ -34,10 +34,13 @@ import { generateSnapshot } from '@/lib/utils';
 import AIModal from '../_components/AIModal';
 import { useTranslation } from 'react-i18next';
 
-const ResumePreviewPanel = dynamic(() => import('../_components/ResumePreviewPanel'), { ssr: false });
-const ReactJsonView = dynamic(() => import('@microlink/react-json-view'), {
+import { EditorComponents } from '@/lib/componentOptimization';
+
+const ResumePreviewPanel = dynamic(() => import('../_components/ResumePreviewPanel'), { 
   ssr: false,
+  loading: () => <div className="w-full h-full bg-black flex items-center justify-center text-white">Loading Preview...</div>
 });
+const ReactJsonView = EditorComponents.JsonViewer;
 
 type ResumeEditProps = {
   id: string;
