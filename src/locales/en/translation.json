@@ -90,7 +90,24 @@
       "button": "Contact Us"
     },
     "footer": {
-      "copyright": "© {{year}} Magic Resume. All rights reserved."
+      "copyright": "© {{year}} Magic Resume. All rights reserved.",
+      "online": "Online",
+      "madeWith": "Made with ❤️ for job seekers",
+      "poweredBy": "Powered by AI & Modern Tech",
+      "openSource": "Open Source & Free Forever"
+    },
+    "buttons": {
+      "learnMore": "Learn More",
+      "experienceAI": "Experience AI Features",
+      "experienceNow": "Experience Now",
+      "starOnGithub": "Star on GitHub"
+    },
+    "tags": {
+      "aiSmart": "AI Smart",
+      "freeForever": "Completely Free",
+      "dataSecurity": "Data Security",
+      "aiEnhancement": "AI Enhancement",
+      "dataSecurityGuarantee": "Data Security Guarantee"
     }
   },
   "modals": {

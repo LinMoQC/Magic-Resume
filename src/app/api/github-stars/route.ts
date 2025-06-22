@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 
-export const revalidate = 3600; // revalidate every hour
+export const revalidate = 3600;
 
 export async function GET() {
   try {
     const response = await fetch('https://api.github.com/repos/LinMoQC/Magic-Resume', {
       headers: {
         Accept: 'application/vnd.github.v3+json',
-        Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+        'User-Agent': 'Magic-Resume-App', 
       },
     });
 

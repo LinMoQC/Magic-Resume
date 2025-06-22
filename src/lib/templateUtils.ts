@@ -1,22 +1,7 @@
 import { MagicTemplateDSL } from '@/templates/types/magic-dsl';
 import { CustomTemplateConfig } from '@/store/useResumeStore';
 
-/**
- * 深度合并两个对象
- */
-function deepMerge<T>(target: T, source: Partial<T>): T {
-  const result = { ...target };
-  
-  for (const key in source) {
-    if (source[key] !== null && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-      result[key] = deepMerge(result[key], source[key] as Partial<T[Extract<keyof T, string>]>);
-    } else if (source[key] !== undefined) {
-      result[key] = source[key] as T[Extract<keyof T, string>];
-    }
-  }
-  
-  return result;
-}
+
 
 /**
  * 合并基础模板和用户自定义配置
