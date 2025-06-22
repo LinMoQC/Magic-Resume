@@ -25,6 +25,11 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Classic template primary color */
+.text-primary {
+  color: #3b82f6;
+}
+
 /* @layer components {
   .add-btn {
     @apply text-white inline-flex w-full scale-100 items-center justify-center rounded-sm text-sm font-medium ring-offset-background border border-secondary bg-transparent h-9 px-5 gap-x-2 border-dashed py-6 leading-relaxed;
@@ -46,13 +51,14 @@ body {
 }
 
 .wysiwyg blockquote {
-  border-left: 3px solid #ccc;
+  border-left: 3px solid currentColor;
   margin: 0.5em 0;
   padding-left: 1em;
-  color: #888;
+  color: inherit;
   font-style: italic;
-  background: #f8f8f8;
+  background: rgba(0, 0, 0, 0.05);
   border-radius: 0.25em;
+  opacity: 0.8;
 }
 
 .wysiwyg h1,
@@ -134,12 +140,12 @@ body {
 .wysiwyg strong,
 .wysiwyg b {
   font-weight: 900;
-  color: #222;
+  color: inherit;
 }
 
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -149,6 +155,8 @@ body {
 ::-webkit-scrollbar-thumb {
   background: #525252; 
   border-radius: 9999px;
+  border: 1px solid #262626;
+  background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {

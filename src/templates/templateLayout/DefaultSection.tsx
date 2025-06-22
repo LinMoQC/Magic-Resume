@@ -11,6 +11,9 @@ interface Props {
   items: Item[];
   fieldMap: Record<string, string | string[]>;
   className?: string;
+  style?: React.CSSProperties;
+  titleClassName?: string;
+  containerClassName?: string;
 }
 
 const getFieldValue = (item: Item, field: string | string[] | undefined) => {
@@ -23,13 +26,13 @@ const getFieldValue = (item: Item, field: string | string[] | undefined) => {
   return null;
 };
 
-export function DefaultSection({ title, items, fieldMap, className }: Props) {
+export function DefaultSection({ title, items, fieldMap, className, style, titleClassName, containerClassName }: Props) {
   if (!items || items.length === 0) return null;
 
   return (
-    <section className={`grid text-[12px] ${className || ''}`}>
-      <h4 className="font-bold text-primary text-[1.2em] text-blue-500">{title}</h4>
-      <div className="grid gap-x-6 gap-y-3">
+    <section className={`grid text-[12px] ${className || ''}`} style={style}>
+      <h4 className={titleClassName || "font-bold text-primary text-[1.2em] text-blue-500"}>{title}</h4>
+      <div className={containerClassName || "grid gap-x-6 gap-y-3"}>
         {items.map((item, idx) => (
           <div className="space-y-2" key={idx}>
             <div>

@@ -75,6 +75,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     setSectionOrder: updateSectionOrder,
     updateSectionItems,
     updateSections,
+    updateTemplate,
     rightCollapsed,
     setRightCollapsed,
     activeSection,
@@ -86,7 +87,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
   const [leftPanelOpen, setLeftPanelOpen] = useState(false);
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
   const [isAnyModalOpen, setIsAnyModalOpen] = useState(false);
-  const [currentTemplateId, setCurrentTemplateId] = useState('default-classic');
+  const [currentTemplateId, setCurrentTemplateId] = useState(activeResume?.template || 'classic');
   const [resumeNotFound, setResumeNotFound] = useState(false);
 
   const [previewScale, setPreviewScale] = useState(1);
@@ -103,7 +104,6 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
   const handleApplyFullResume = (newResume: Resume) => {
     updateInfo(newResume.info);
     updateSections(newResume.sections);
-    // Optionally, update section order if it can also be changed by the AI
     if (newResume.sectionOrder) {
       updateSectionOrder(newResume.sectionOrder);
     }
@@ -169,9 +169,21 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     loadResumeForEdit(id);
   }, [id, loadResumeForEdit, isStoreLoading, resumes]);
 
+  // 同步activeResume的template到currentTemplateId
+  useEffect(() => {
+    if (activeResume?.template && activeResume.template !== currentTemplateId) {
+      setCurrentTemplateId(activeResume.template);
+    }
+  }, [activeResume?.template, currentTemplateId]);
+
   const handleSave = async () => {
     const snapshot = await generateSnapshot();
     saveActiveResumeToResumes(snapshot ?? undefined);
+  };
+
+  const handleSelectTemplate = (templateId: string) => {
+    setCurrentTemplateId(templateId);
+    updateTemplate(templateId);
   };
 
   function handleDragEnd(event: DragEndEvent) {
@@ -309,7 +321,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
       <TemplatePanel
         rightCollapsed={rightCollapsed}
         setRightCollapsed={setRightCollapsed}
-        onSelectTemplate={setCurrentTemplateId}
+        onSelectTemplate={handleSelectTemplate}
         currentTemplateId={currentTemplateId}
       />
       <Modal

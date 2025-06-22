@@ -81,8 +81,8 @@ export const initialResume: Omit<Resume, 'id' | 'updatedAt' | 'name'> = {
     { key: 'basics', label: 'Basics' },
     ...sidebarMenu.map(item => ({ key: item.key, label: item.label }))
   ],
-  template: 'onyx',
-  themeColor: '#38bdf8',
+  template: 'classic',
+  themeColor: '#f97316',
   typography: 'inter',
 };
 
