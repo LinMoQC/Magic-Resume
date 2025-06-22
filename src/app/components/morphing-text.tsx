@@ -69,6 +69,16 @@ const useMorphingText = (texts: string[]) => {
   useEffect(() => {
     let animationFrameId: number;
 
+    // 初始化第一个文字
+    const [current1, current2] = [text1Ref.current, text2Ref.current];
+    if (current1 && current2 && texts.length > 0) {
+      current1.textContent = texts[0];
+      current1.style.opacity = "1";
+      current1.style.filter = "none";
+      current2.style.opacity = "0";
+      current2.style.filter = "none";
+    }
+
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
 
@@ -86,7 +96,7 @@ const useMorphingText = (texts: string[]) => {
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [doMorph, doCooldown]);
+  }, [doMorph, doCooldown, texts]);
 
   return { text1Ref, text2Ref };
 };
@@ -98,6 +108,10 @@ interface MorphingTextProps {
 
 const Texts: React.FC<Pick<MorphingTextProps, "texts">> = ({ texts }) => {
   const { text1Ref, text2Ref } = useMorphingText(texts);
+  
+  // 添加调试信息
+  console.log('MorphingText received texts:', texts);
+  
   return (
     <>
       <span
@@ -139,7 +153,7 @@ export const MorphingText: React.FC<MorphingTextProps> = ({
 }) => (
   <div
     className={cn(
-      "relative mx-auto h-16 w-full max-w-screen-md text-center font-sans text-[40pt] font-bold leading-none [filter:url(#threshold)_blur(0.6px)] md:h-24 lg:text-[6rem]",
+      "relative mx-auto h-16 w-full max-w-screen-md text-center font-sans text-[40pt] font-bold leading-none text-white md:h-24 lg:text-[6rem]",
       className,
     )}
   >

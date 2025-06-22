@@ -90,7 +90,24 @@
       "button": "联系我们"
     },
     "footer": {
-      "copyright": "© {{year}} Magic Resume. 保留所有权利。"
+      "copyright": "© {{year}} Magic Resume. 保留所有权利。",
+      "online": "在线",
+      "madeWith": "用 ❤️ 为求职者而造",
+      "poweredBy": "AI 与现代技术驱动",
+      "openSource": "开源且永久免费"
+    },
+    "buttons": {
+      "learnMore": "了解更多",
+      "experienceAI": "体验 AI 功能",
+      "experienceNow": "立即体验",
+      "starOnGithub": "在 GitHub 上点赞"
+    },
+    "tags": {
+      "aiSmart": "AI 智能",
+      "freeForever": "完全免费",
+      "dataSecurity": "数据安全",
+      "aiEnhancement": "AI 智能加持",
+      "dataSecurityGuarantee": "数据安全保障"
     }
   },
   "modals": {
