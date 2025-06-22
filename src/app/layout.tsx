@@ -1,22 +1,5 @@
 import type { Metadata } from "next";
-import { 
-  Inter, 
-  Nunito, 
-  Quicksand, 
-  Comfortaa, 
-  Raleway, 
-  Righteous,
-  Pacifico,
-  Caveat,
-  Dancing_Script,
-  Lobster,
-  Orbitron,
-  Space_Mono,
-  PT_Serif,
-  Playfair_Display,
-  JetBrains_Mono,
-  Source_Code_Pro
-} from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from '@clerk/nextjs';
 import { Theme } from "@radix-ui/themes";
@@ -29,21 +12,6 @@ import Script from "next/script";
 
 // 字体配置
 const inter = Inter({ subsets: ["latin"] });
-const nunito = Nunito({ subsets: ["latin"] });
-const quicksand = Quicksand({ subsets: ["latin"] });
-const comfortaa = Comfortaa({ subsets: ["latin"] });
-const raleway = Raleway({ subsets: ["latin"] });
-const righteous = Righteous({ weight: "400", subsets: ["latin"] });
-const pacifico = Pacifico({ weight: "400", subsets: ["latin"] });
-const caveat = Caveat({ subsets: ["latin"] });
-const dancingScript = Dancing_Script({ subsets: ["latin"] });
-const lobster = Lobster({ weight: "400", subsets: ["latin"] });
-const orbitron = Orbitron({ subsets: ["latin"] });
-const spaceMono = Space_Mono({ weight: ["400", "700"], subsets: ["latin"] });
-const ptSerif = PT_Serif({ weight: ["400", "700"], subsets: ["latin"] });
-const playfairDisplay = Playfair_Display({ subsets: ["latin"] });
-const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"] });
-const sourceCodePro = Source_Code_Pro({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   ...metaConfig.Landing,

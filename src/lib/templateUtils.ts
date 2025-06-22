@@ -9,9 +9,9 @@ function deepMerge<T>(target: T, source: Partial<T>): T {
   
   for (const key in source) {
     if (source[key] !== null && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-      result[key] = deepMerge(result[key], source[key] as any);
+      result[key] = deepMerge(result[key], source[key] as Partial<T[Extract<keyof T, string>]>);
     } else if (source[key] !== undefined) {
-      result[key] = source[key] as any;
+      result[key] = source[key] as T[Extract<keyof T, string>];
     }
   }
   
@@ -177,8 +177,8 @@ export function extractCustomConfig(
 }
 
 // 辅助函数：提取颜色差异
-function extractColorDiffs(base: any, custom: any): any {
-  const diffs: any = {};
+function extractColorDiffs(base: Record<string, string>, custom: Record<string, string>) {
+  const diffs: Record<string, string> = {};
   let hasDiffs = false;
 
   for (const key in custom) {
@@ -192,13 +192,13 @@ function extractColorDiffs(base: any, custom: any): any {
 }
 
 // 辅助函数：提取字体差异
-function extractTypographyDiffs(base: any, custom: any): any {
-  const diffs: any = {};
+function extractTypographyDiffs(base: Record<string, unknown>, custom: Record<string, unknown>) {
+  const diffs: Record<string, unknown> = {};
   let hasDiffs = false;
 
   // 检查 fontFamily
-  if (custom.fontFamily) {
-    const fontFamilyDiffs = extractObjectDiffs(base.fontFamily, custom.fontFamily);
+  if (custom.fontFamily && typeof custom.fontFamily === 'object' && custom.fontFamily !== null) {
+    const fontFamilyDiffs = extractObjectDiffs(base.fontFamily as Record<string, unknown> || {}, custom.fontFamily as Record<string, unknown>);
     if (fontFamilyDiffs) {
       diffs.fontFamily = fontFamilyDiffs;
       hasDiffs = true;
@@ -206,8 +206,8 @@ function extractTypographyDiffs(base: any, custom: any): any {
   }
 
   // 检查 fontSize
-  if (custom.fontSize) {
-    const fontSizeDiffs = extractObjectDiffs(base.fontSize, custom.fontSize);
+  if (custom.fontSize && typeof custom.fontSize === 'object' && custom.fontSize !== null) {
+    const fontSizeDiffs = extractObjectDiffs(base.fontSize as Record<string, unknown> || {}, custom.fontSize as Record<string, unknown>);
     if (fontSizeDiffs) {
       diffs.fontSize = fontSizeDiffs;
       hasDiffs = true;
@@ -215,8 +215,8 @@ function extractTypographyDiffs(base: any, custom: any): any {
   }
 
   // 检查 fontWeight
-  if (custom.fontWeight) {
-    const fontWeightDiffs = extractObjectDiffs(base.fontWeight, custom.fontWeight);
+  if (custom.fontWeight && typeof custom.fontWeight === 'object' && custom.fontWeight !== null) {
+    const fontWeightDiffs = extractObjectDiffs(base.fontWeight as Record<string, unknown> || {}, custom.fontWeight as Record<string, unknown>);
     if (fontWeightDiffs) {
       diffs.fontWeight = fontWeightDiffs;
       hasDiffs = true;
@@ -227,8 +227,8 @@ function extractTypographyDiffs(base: any, custom: any): any {
 }
 
 // 辅助函数：提取对象差异
-function extractObjectDiffs(base: any, custom: any): any {
-  const diffs: any = {};
+function extractObjectDiffs(base: Record<string, unknown>, custom: Record<string, unknown>) {
+  const diffs: Record<string, unknown> = {};
   let hasDiffs = false;
 
   for (const key in custom) {
@@ -242,13 +242,13 @@ function extractObjectDiffs(base: any, custom: any): any {
 }
 
 // 辅助函数：提取布局差异
-function extractLayoutDiffs(base: any, custom: any): any {
-  const diffs: any = {};
+function extractLayoutDiffs(base: Record<string, unknown>, custom: Record<string, unknown>) {
+  const diffs: Record<string, unknown> = {};
   let hasDiffs = false;
 
   for (const key in custom) {
     if (typeof custom[key] === 'object' && custom[key] !== null) {
-      const subDiffs = extractObjectDiffs(base[key] || {}, custom[key]);
+      const subDiffs = extractObjectDiffs((base[key] as Record<string, unknown>) || {}, custom[key] as Record<string, unknown>);
       if (subDiffs) {
         diffs[key] = subDiffs;
         hasDiffs = true;

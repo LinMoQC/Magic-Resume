@@ -65,8 +65,8 @@ function generateCSSVariables(designTokens: MagicTemplateDSL['designTokens'], la
     '--spacing-md': designTokens.spacing.md,
     '--spacing-lg': designTokens.spacing.lg,
     '--spacing-xl': designTokens.spacing.xl,
-    '--line-height': (designTokens.typography as any).lineHeight || '1.5',
-    '--letter-spacing': (designTokens.typography as any).letterSpacing || '0px',
+    '--line-height': (designTokens.typography as { lineHeight?: number }).lineHeight?.toString() || '1.5',
+    '--letter-spacing': (designTokens.typography as { letterSpacing?: string }).letterSpacing || '0px',
     '--container-width': layout.containerWidth,
     '--container-padding': layout.padding,
     '--container-gap': layout.gap,
@@ -201,6 +201,7 @@ export function MagicResumeRenderer({ template, data }: Props) {
               position={component.position}
               style={component.style}
             >
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               <Component key={component.id} {...(props as any)} />
             </ComponentWrapper>

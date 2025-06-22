@@ -39,6 +39,7 @@ export const classicTemplate: MagicTemplateDSL = {
       },
       lineHeight: 1.6,
       letterSpacing: "0px"
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any,
     spacing: {
       xs: "0.25rem",

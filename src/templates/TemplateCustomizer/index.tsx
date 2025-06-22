@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { X, Palette, Type, Layout } from 'lucide-react';
+import { Palette, Type, Layout } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { MagicTemplateDSL } from '../types/magic-dsl';
 import ColorPicker from './ColorPicker';
@@ -342,7 +342,7 @@ export default function TemplateCustomizer({
                 <div className="flex items-center justify-between">
                   <label className="text-sm text-neutral-400 font-medium">{t('templateCustomizer.layout.lineHeight')}</label>
                   <span className="text-sm text-neutral-300 font-mono bg-neutral-800 px-2 py-1 rounded">
-                    {(template.designTokens.typography as any).lineHeight || 1.5}
+                    {(template.designTokens.typography as { lineHeight?: number }).lineHeight || 1.5}
                   </span>
                 </div>
                 <input
@@ -350,11 +350,11 @@ export default function TemplateCustomizer({
                   min="1.0"
                   max="2.0"
                   step="0.1"
-                  value={(template.designTokens.typography as any).lineHeight || 1.5}
+                  value={(template.designTokens.typography as { lineHeight?: number }).lineHeight || 1.5}
                   onChange={(e) => updateTypography({
                     ...template.designTokens.typography,
                     lineHeight: parseFloat(e.target.value)
-                  } as any)}
+                  } as typeof template.designTokens.typography & { lineHeight: number })}
                   className="w-full h-2 bg-neutral-700 rounded-lg appearance-none cursor-pointer slider"
                 />
               </div>
@@ -364,7 +364,7 @@ export default function TemplateCustomizer({
                 <div className="flex items-center justify-between">
                   <label className="text-sm text-neutral-400 font-medium">{t('templateCustomizer.layout.letterSpacing')}</label>
                   <span className="text-sm text-neutral-300 font-mono bg-neutral-800 px-2 py-1 rounded">
-                    {(template.designTokens.typography as any).letterSpacing || '0px'}
+                    {(template.designTokens.typography as { letterSpacing?: string }).letterSpacing || '0px'}
                   </span>
                 </div>
                 <input
@@ -372,11 +372,11 @@ export default function TemplateCustomizer({
                   min="-1"
                   max="3"
                   step="0.5"
-                  value={parseFloat((template.designTokens.typography as any).letterSpacing || '0')}
+                  value={parseFloat((template.designTokens.typography as { letterSpacing?: string }).letterSpacing || '0')}
                   onChange={(e) => updateTypography({
                     ...template.designTokens.typography,
                     letterSpacing: `${e.target.value}px`
-                  } as any)}
+                  } as typeof template.designTokens.typography & { letterSpacing: string })}
                   className="w-full h-2 bg-neutral-700 rounded-lg appearance-none cursor-pointer slider"
                 />
               </div>

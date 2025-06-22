@@ -10,7 +10,7 @@ import { MagicTemplateDSL } from '@/templates/types/magic-dsl';
 import { motion } from 'framer-motion';
 import TemplatePreviewCard from './TemplatePreviewCard';
 import TemplateCustomizer from '../../../../templates/TemplateCustomizer';
-import { useResumeStore, CustomTemplateConfig } from '@/store/useResumeStore';
+import { useResumeStore } from '@/store/useResumeStore';
 import { extractCustomConfig, mergeTemplateConfig } from '@/lib/templateUtils';
 
 type TemplatePanelProps = {
