@@ -10,7 +10,7 @@ import { useEffect } from 'react';
 
 // 简化的浮动图标组件
 const SimpleFloatingIcon = ({ icon: Icon, delay = 0 }: { 
-  icon: any; 
+  icon: React.ComponentType<{ size?: number }>; 
   delay?: number; 
 }) => (
   <motion.div

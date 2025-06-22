@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FiCheckCircle, FiArrowRight, FiZap, FiShield, FiDownload, FiUpload } from 'react-icons/fi';
 import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
@@ -156,7 +156,7 @@ export function FeatureSections() {
               </p>
 
               <ul className="space-y-4">
-                {[t("landing.features.ai.benefit1"), t("landing.features.ai.benefit2")].map((benefit, index) => (
+                {[t("landing.features.ai.benefit1"), t("landing.features.ai.benefit2")].map((benefit) => (
                   <li
                     key={benefit}
                     className="flex items-start gap-4 group"
@@ -342,7 +342,7 @@ export function FeatureSections() {
                 {[
                   t("landing.features.privacy.benefit1"),
                   t("landing.features.privacy.benefit2")
-                ].map((benefit, index) => (
+                ].map((benefit) => (
                   <li
                     key={benefit}
                     className="flex items-start gap-4 group"

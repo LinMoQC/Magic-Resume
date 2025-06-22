@@ -1,9 +1,9 @@
 "use client";
 
 import * as THREE from 'three';
-import { useRef, useMemo, useCallback } from 'react';
+import { useRef, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Points, PointMaterial, Sphere } from '@react-three/drei';
+import { Points, Sphere } from '@react-three/drei';
 
 // 性能检测
 const getDevicePerformance = () => {
@@ -14,7 +14,6 @@ const getDevicePerformance = () => {
   try {
     const webglContext = gl as WebGLRenderingContext;
     const renderer = webglContext.getParameter(webglContext.RENDERER);
-    const vendor = webglContext.getParameter(webglContext.VENDOR);
     
     // 简单的GPU检测
     if (renderer && (renderer.includes('Intel') || renderer.includes('Mali'))) {
@@ -32,31 +31,17 @@ function OptimizedStars(props: { count?: number }) {
   const performance = useMemo(() => getDevicePerformance(), []);
   const { count = performance === 'high' ? 3000 : 1500 } = props;
 
-  const [positions, colors] = useMemo(() => {
-    const positions = [];
-    const colors = [];
+  const positions = useMemo(() => {
+    const posArray = [];
     
     for (let i = 0; i < count; i++) {
       // 位置
-      positions.push((Math.random() - 0.5) * 12);
-      positions.push((Math.random() - 0.5) * 12);
-      positions.push((Math.random() - 0.5) * 12);
-      
-      // 简化颜色变化
-      const colorVariant = Math.random();
-      if (colorVariant < 0.4) {
-        colors.push(0.4, 0.9, 1); // 青色
-      } else if (colorVariant < 0.7) {
-        colors.push(0.7, 0.5, 1); // 紫色
-      } else {
-        colors.push(1, 1, 1); // 白色
-      }
+      posArray.push((Math.random() - 0.5) * 12);
+      posArray.push((Math.random() - 0.5) * 12);
+      posArray.push((Math.random() - 0.5) * 12);
     }
     
-    return [
-      new Float32Array(positions),
-      new Float32Array(colors)
-    ];
+    return new Float32Array(posArray);
   }, [count]);
 
   useFrame((state, delta) => {
@@ -76,7 +61,7 @@ function OptimizedStars(props: { count?: number }) {
       <Points ref={ref} positions={positions} stride={3} frustumCulled={false} {...props}>
         <pointsMaterial
           transparent
-          vertexColors
+          color="#a855f7"
           size={0.015}
           sizeAttenuation={true}
           depthWrite={false}
