@@ -11,17 +11,25 @@ export type ToolsProps = {
   resetTransform: (step?: number) => void;
   info: InfoType;
   onShowAI: () => void;
+  rightCollapsed?: boolean; // 新增：模板栏是否收起
 };
 
-export function Tools({ isMobile, zoomIn, zoomOut, resetTransform, info, onShowAI }: ToolsProps){
+export function Tools({ isMobile, zoomIn, zoomOut, resetTransform, info, onShowAI, rightCollapsed = false }: ToolsProps){
   const { t } = useTranslation();
+  
+  // 计算桌面端工具栏的right位置，避免被模板栏遮挡
+  const desktopRightPosition = rightCollapsed ? '76px' : '300px'; // 56px模板栏 + 20px间距 或 280px模板栏 + 20px间距
+  
   return (
-    <div className={cn(
-      "z-20 flex gap-2 overflow-hidden",
-      isMobile
-        ? "fixed bottom-6 left-1/2 -translate-x-1/2 flex-row p-2 rounded-full bg-neutral-900/70 border border-neutral-700 backdrop-blur-sm"
-        : "absolute bottom-10 right-4 flex-col"
-    )}>
+    <div 
+      className={cn(
+        "z-20 flex gap-2 overflow-hidden",
+        isMobile
+          ? "fixed bottom-6 left-1/2 -translate-x-1/2 flex-row p-2 rounded-full bg-neutral-900/70 border border-neutral-700 backdrop-blur-sm"
+          : "fixed bottom-10 flex-col transition-all duration-300"
+      )}
+      style={!isMobile ? { right: desktopRightPosition } : undefined}
+    >
 
       {!isMobile &&         <button
         className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"

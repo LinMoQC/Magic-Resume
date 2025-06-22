@@ -10,6 +10,7 @@ import LanguageSwitcher from "@/app/components/LanguageSwitcher";
 import PreloadOptimizer from "@/app/components/PreloadOptimizer";
 import Script from "next/script";
 
+// 字体配置
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {

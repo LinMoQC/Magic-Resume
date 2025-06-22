@@ -333,6 +333,46 @@
     "title": "Template",
     "placeholder": "Template {{index}}"
   },
+  "templateCustomizer": {
+    "title": "Custom Template",
+    "tabs": {
+      "colors": "Colors",
+      "typography": "Font", 
+      "layout": "Layout"
+    },
+    "colors": {
+      "quickThemes": "Quick Themes",
+      "customColors": "Custom Colors",
+      "primary": "Primary Color",
+      "secondary": "Secondary Color", 
+      "text": "Text Color",
+      "textSecondary": "Secondary Text Color",
+      "background": "Background Color",
+      "sidebar": "Sidebar Color"
+    },
+    "typography": {
+      "fontSettings": "Font Settings",
+      "primaryFont": "Primary Font",
+      "secondaryFont": "Secondary Font",
+      "fontSize": "Font Size"
+    },
+    "layout": {
+      "layoutSettings": "Layout Settings",
+      "containerSettings": "Container Settings",
+      "containerWidth": "Container Width",
+      "padding": "Padding",
+      "gap": "Gap",
+      "textSettings": "Text Settings",
+      "lineHeight": "Line Height",
+      "letterSpacing": "Letter Spacing",
+      "spacingSettings": "Spacing Settings",
+      "paragraphSpacing": "Paragraph Spacing",
+      "sectionSpacing": "Section Spacing"
+    },
+    "buttons": {
+      "backToTemplates": "Back to Templates"
+    }
+  },
   "resumeContent": {
     "viewJson": "View JSON",
     "save": "Save"

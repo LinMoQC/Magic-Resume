@@ -4,6 +4,75 @@ import { dbClient, RESUMES_KEY } from '@/lib/IndexDBClient';
 import { MagicDebugger } from '@/lib/debuggger';
 import { toast } from "sonner";
 
+// 自定义模板配置类型 - 只保存用户修改的部分
+export type CustomTemplateConfig = {
+  // 设计令牌的部分自定义
+  designTokens?: {
+    colors?: Partial<{
+      primary: string;
+      secondary: string;
+      text: string;
+      textSecondary: string;
+      background: string;
+      border: string;
+      accent?: string;
+      sidebar?: string;
+    }>;
+    typography?: {
+      fontFamily?: {
+        primary?: string;
+        secondary?: string;
+        mono?: string;
+      };
+      fontSize?: Partial<{
+        xs: string;
+        sm: string;
+        md: string;
+        lg: string;
+        xl: string;
+        xxl: string;
+      }>;
+      fontWeight?: Partial<{
+        normal: number;
+        medium: number;
+        bold: number;
+      }>;
+    };
+    spacing?: Partial<{
+      xs: string;
+      sm: string;
+      md: string;
+      lg: string;
+      xl: string;
+    }>;
+    borderRadius?: Partial<{
+      none: string;
+      sm: string;
+      md: string;
+      lg: string;
+    }>;
+  };
+  
+  // 布局的部分自定义
+  layout?: {
+    type?: 'single-column' | 'two-column' | 'sidebar' | 'grid';
+    containerWidth?: string;
+    containerHeight?: string;
+    padding?: string;
+    gap?: string;
+    twoColumn?: {
+      leftWidth?: string;
+      rightWidth?: string;
+      gap?: string;
+    };
+    sidebar?: {
+      position?: 'left' | 'right';
+      width?: string;
+      gap?: string;
+    };
+  };
+};
+
 export type InfoType = {
   fullName: string;
   headline: string;
@@ -36,7 +105,8 @@ export type Resume = {
   info: InfoType;
   sections: Section;
   sectionOrder: SectionOrder[];
-  template: string;
+  template: string; // 基础模板ID
+  customTemplate?: CustomTemplateConfig; // 用户自定义的配置差异
   themeColor: string;
   typography: string;
   snapshot?: Blob;
@@ -60,6 +130,7 @@ type ResumeState = {
   updateSectionItems: (key: string, items: SectionItem[]) => void;
   updateSections: (sections: Section) => void;
   updateTemplate: (template: string) => void;
+  updateCustomTemplate: (customTemplate: CustomTemplateConfig) => void;
   updateThemeColor: (themeColor: string) => void;
   updateTypography: (typography: string) => void;
   setRightCollapsed: (collapsed: boolean) => void;
@@ -81,8 +152,8 @@ export const initialResume: Omit<Resume, 'id' | 'updatedAt' | 'name'> = {
     { key: 'basics', label: 'Basics' },
     ...sidebarMenu.map(item => ({ key: item.key, label: item.label }))
   ],
-  template: 'onyx',
-  themeColor: '#38bdf8',
+  template: 'classic',
+  themeColor: '#f97316',
   typography: 'inter',
 };
 
@@ -262,6 +333,15 @@ const useResumeStore = create<ResumeState>((set, get) => ({
       if (!state.activeResume) return state;
       return {
         activeResume: { ...state.activeResume, template }
+      };
+    });
+  },
+
+  updateCustomTemplate: (customTemplate) => {
+    set(state => {
+      if (!state.activeResume) return state;
+      return {
+        activeResume: { ...state.activeResume, customTemplate }
       };
     });
   },
