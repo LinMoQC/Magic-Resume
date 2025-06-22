@@ -20,7 +20,9 @@
     "buttons": {
       "reset": "重置",
       "save": "保存"
-    }
+    },
+    "goToApp": "进入应用",
+    "starOnGithub": "在 GitHub 上点赞"
   },
   "landing": {
     "nav": {
@@ -28,7 +30,7 @@
       "starOnGithub": "在 GitHub 上点赞"
     },
     "hero": {
-      "title": "现代化的 AI 简历构建器",
+      "title": "现代化的 AI 驱动<1/>简历构建器",
       "subtitle": "用 AI 的力量打造完美的简历。简单、智能、安全。",
       "getStarted": "开始使用",
       "browseTemplates": "浏览模板",
@@ -38,7 +40,10 @@
       "simpleAndSmart": "简单 & 智能",
       "aiPowered": "AI 驱动",
       "beautifulTemplates": "精美模板",
-      "freeAndSecure": "免费 & 安全"
+      "freeAndSecure": "免费 & 安全",
+      "modernResume": "现代简历",
+      "getStarted": "立即开始",
+      "standOut": "脱颖而出"
     },
     "features": {
       "main": {
@@ -69,6 +74,14 @@
         "description": "所有简历数据完全本地存储，无需担心隐私泄露。支持数据导出备份，确保您的简历数据永远可用。",
         "benefit1": "本地文件存储",
         "benefit2": "多种导出格式"
+      },
+      "preview": {
+        "title": "实时预览",
+        "description": "在您输入时实时查看更改效果。不再需要猜测最终简历的外观。"
+      },
+      "dnd": {
+        "title": "拖拽界面",
+        "description": "通过直观的拖拽界面轻松重新排序章节，突出您的优势。"
       }
     },
     "contact": {
@@ -105,7 +118,7 @@
         "rawJsonButton": "查看原始 JSON",
         "applyChangesButton": "应用更改",
         "revertChangesButton": "还原更改",
-        "outputTitle": "优化建议",
+        "outputTitle": "优化结果",
         "jsonButton": "JSON",
         "steps": {
           "preparer": {
@@ -178,28 +191,15 @@
           },
           "analyzing_category": {
             "in_progress": "正在分析 {{category}}...",
-            "completed": "{{category}} 分析完毕。",
-            "pending": "等待分析 {{category}}..."
-          },
-          "combine_sections": {
-            "title": "合并优化结果",
-            "in_progress": "正在合并所有优化后的章节...",
-            "completed": "所有章节已成功合并到简历中。",
-            "pending": "等待合并..."
-          },
-          "route_next_section": {
-            "title": "准备下一章节",
-            "in_progress": "正在准备优化下一章节...",
-            "completed": "已准备就绪。",
-            "pending": "等待中..."
+            "completed": "{{category}} 分析完毕。"
           }
         },
         "optimizationProgress": {
           "analyzingJD": "正在分析职位描述...",
           "optimizing": "正在为您优化简历，请稍候...",
-          "done": "优化完成！",
-          "analyzingResume": "正在分析简历与职位描述的匹配度...",
-          "rewritingResume": "分析完成！正在根据报告优化简历内容..."
+          "preparing": "正在准备优化 {{count}} 个项目...",
+          "optimizingItem": "已优化 {{sectionKey}} 第 {{completed}} 项，共 {{total}} 项...",
+          "done": "完成！"
         }
       },
       "analysisTab": {
@@ -227,11 +227,11 @@
         "chatTitle": "AI 助手",
         "previewTitle": "简历实时预览",
         "inputPlaceholder": "请描述您的技能或经历...",
-        "initialMessage": "你好！我是 ResuMate，你的个人简历构建助手。请告诉我你的目标行业/岗位?",
+        "initialMessage": "你好！我是 ResuMate，你的个人简历构建助手。首先，请告诉我你的目标工作或行业是什么？",
         "applyButton": "应用并保存简历",
         "defaultReply": "抱歉，我现在遇到一点麻烦。你能换个说法吗？",
         "errorReply": "我似乎遇到了一个问题。请尝试重新发送您的消息。",
-        "retryNotification": "请求出错，正在重新生成...",
+        "retryNotification": "请求失败，正在重试...",
         "retryFailed": "多次重试后请求失败，请稍后再试。"
       },
       "notifications": {
@@ -249,20 +249,6 @@
         "description": "粘贴职位描述并点击\"开始优化\"，让 AI 为您的梦想工作量身定制简历。"
       },
       "progressText": "AI 正在努力进行分析和创作..."
-    }
-  },
-  "report": {
-    "title": "简历分析报告",
-    "subtitle": "由 AI 驱动，灵感源自 Lighthouse",
-    "overallScore": "综合得分",
-    "detailedAnalysis": "详细分析",
-    "suggestions": "改进建议:",
-    "categories": {
-      "KeySkillsMatch": "核心技能匹配度",
-      "ImpactAndActionability": "影响力与行动性",
-      "QuantifiableAchievements": "可量化成就",
-      "ClarityAndReadability": "清晰度与可读性",
-      "ProfessionalSummary": "专业摘要"
     }
   },
   "resumePreview": {
@@ -304,7 +290,25 @@
       "visibilityToggled": "项目可见性 {{status}}。"
     }
   },
-  "avatarAlt": "头像",
+  "basicForm": {
+    "fields": {
+      "avatar": "头像",
+      "fullName": "全名",
+      "headline": "标题",
+      "email": "电子邮件",
+      "website": "网站",
+      "phoneNumber": "电话",
+      "address": "地点",
+      "link": "链接"
+    },
+    "customFields": {
+      "title": "自定义字段",
+      "namePlaceholder": "字段名称（例如，LinkedIn）",
+      "valuePlaceholder": "值（例如，your-linkedin-url）",
+      "addButton": "添加自定义字段"
+    },
+    "avatarAlt": "头像"
+  },
   "mobileEdit": {
     "jsonData": "简历 JSON 数据",
     "copyJson": "将 JSON 复制到剪贴板"
@@ -314,11 +318,15 @@
       "basics": "基本信息"
     },
     "notifications": {
-      "jsonDownloadStarted": "JSON 文件下载已开始！",
-      "generatingSuggestion": "正在为您生成专属优化建议..."
+      "jsonDownloadStarted": "JSON 文件下载已开始！"
     },
     "ai": {
       "generatingSuggestion": "正在为您生成专属优化建议..."
+    },
+    "errors": {
+      "resumeNotFound": "简历未找到",
+      "resumeNotFoundDescription": "ID为 {{id}} 的简历不存在，可能已被删除或ID错误。",
+      "goBack": "返回"
     }
   },
   "templatePanel": {
@@ -343,7 +351,7 @@
     "create": "创建"
   },
   "dashboard": {
-    "title": "我的简历",
+    "title": "简历",
     "newResumeCard": {
       "title": "创建新简历",
       "description": "从头开始构建"
@@ -360,7 +368,7 @@
     }
   },
   "sidebar": {
-    "resumes": "我的简历",
+    "resumes": "简历",
     "settings": "设置",
     "open": "打开侧边栏",
     "close": "关闭侧边栏"
@@ -382,25 +390,6 @@
     "success": "简历导入成功！",
     "importedName": "{{name}}（已导入）",
     "cancel": "取消"
-  },
-  "basicForm": {
-    "fields": {
-      "avatar": "头像",
-      "fullName": "全名",
-      "headline": "标题",
-      "email": "电子邮件",
-      "website": "网站",
-      "phoneNumber": "电话",
-      "address": "地点",
-      "link": "链接"
-    },
-    "customFields": {
-      "title": "自定义字段",
-      "namePlaceholder": "字段名称（例如，LinkedIn）",
-      "valuePlaceholder": "值（例如，your-linkedin-url）",
-      "addButton": "添加自定义字段"
-    },
-    "avatarAlt": "头像"
   },
   "dynamicForm": {
     "fields": {
@@ -449,8 +438,14 @@
     },
     "notifications": {
       "polishingInProgress": "AI 已经在润色中，请等待完成。",
-      "polishFailed": "润色文本失败: {{message}}"
-    }
+      "polishFailed": "润色文本失败: {{message}}",
+      "changesAccepted": "AI优化已应用",
+      "changesReverted": "已回退到原始文本"
+    },
+    "acceptChanges": "接受更改",
+    "accept": "接受",
+    "rejectChanges": "回退更改",
+    "reject": "回退"
   },
   "export": {
     "notifications": {
@@ -468,32 +463,37 @@
       "resumeSaved": "简历已保存！"
     }
   },
-  "builder": {
-    "sections": {
-      "title": "内容",
-      "description": "在这里添加、编辑和重新排列简历部分。",
-      "addSection": "添加部分",
-      "reorderSection": "重新排序部分"
+  "common": {
+    "notifications": {
+      "copySuccess": "JSON数据已复制到剪贴板",
+      "copyFailed": "复制失败，请重试",
+      "draftGenerated": "简历草稿已生成！现在您可以点击右上角的预览按钮查看。",
+      "dataApplied": "简历数据已应用到预览中！",
+      "resumeApplied": "简历已应用！",
+      "generatingDraft": "好的，我将根据我们的对话为您生成一份简历草稿...",
+      "generationError": "抱歉，生成简历时遇到问题，请稍后再试。",
+      "generatingResume": "正在生成简历中..."
     },
-    "settings": {
-      "title": "设置",
-      "description": "配置页面布局、颜色等。"
+    "ui": {
+      "hide": "隐藏",
+      "view": "查看",
+      "parseResumeData": "解析的简历数据",
+      "closePreview": "关闭预览",
+      "previewResume": "预览简历"
     }
   },
-  "rightSidebar": {
-    "import": {
-      "title": "导入",
-      "linkedin": "从 LinkedIn 导入",
-      "json": "从 JSON 文件导入"
-    },
-    "export": {
-      "title": "导出",
-      "pdf": "导出为 PDF",
-      "json": "导出为 JSON"
-    },
-    "share": {
-      "title": "分享",
-      "link": "分享公共链接"
+  "report": {
+    "title": "简历分析报告",
+    "subtitle": "由 AI 驱动，灵感源自 Lighthouse",
+    "overallScore": "综合得分",
+    "detailedAnalysis": "详细分析",
+    "suggestions": "改进建议:",
+    "categories": {
+      "KeySkillsMatch": "核心技能匹配度",
+      "ImpactAndActionability": "影响力与行动性",
+      "QuantifiableAchievements": "可量化成就",
+      "ClarityAndReadability": "清晰度与可读性",
+      "ProfessionalSummary": "专业摘要"
     }
   }
 } 

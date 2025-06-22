@@ -33,11 +33,19 @@ import MobileResumEdit from '../_components/mobile/MobileResumEdit';
 import { generateSnapshot } from '@/lib/utils';
 import AIModal from '../_components/AIModal';
 import { useTranslation } from 'react-i18next';
+import { Loader2 } from 'lucide-react';
 
-const ResumePreviewPanel = dynamic(() => import('../_components/ResumePreviewPanel'), { ssr: false });
-const ReactJsonView = dynamic(() => import('@microlink/react-json-view'), {
+import { EditorComponents } from '@/lib/componentOptimization';
+
+const ResumePreviewPanel = dynamic(() => import('../_components/ResumePreviewPanel'), { 
   ssr: false,
+  loading: () => (
+    <div className="w-full h-full bg-black flex items-center justify-center text-white">
+      <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+    </div>
+  )
 });
+const ReactJsonView = EditorComponents.JsonViewer;
 
 type ResumeEditProps = {
   id: string;
@@ -70,6 +78,8 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     rightCollapsed,
     setRightCollapsed,
     activeSection,
+    isStoreLoading,
+    resumes,
   } = useResumeStore();
 
   const { isMobile } = useMobile();
@@ -77,6 +87,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
   const [isAnyModalOpen, setIsAnyModalOpen] = useState(false);
   const [currentTemplateId, setCurrentTemplateId] = useState('default-classic');
+  const [resumeNotFound, setResumeNotFound] = useState(false);
 
   const [previewScale, setPreviewScale] = useState(1);
   const [isJsonModalOpen, setIsJsonModalOpen] = useState(false);
@@ -141,9 +152,22 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     }
   }, [activeSection, sectionRefs]);
 
+  // 监听store loading状态和resumes变化，确保数据加载完成后能正确加载简历
   useEffect(() => {
+    if (!isStoreLoading) {
+      // 数据加载完成，检查简历是否存在
+      const resume = resumes.find(r => r.id === id);
+      if (!resume && resumes.length > 0) {
+        // 如果有其他简历但找不到目标简历，说明确实不存在
+        setResumeNotFound(true);
+        return;
+      } else if (resume) {
+        // 找到了简历，重置错误状态
+        setResumeNotFound(false);
+      }
+    }
     loadResumeForEdit(id);
-  }, [id, loadResumeForEdit]);
+  }, [id, loadResumeForEdit, isStoreLoading, resumes]);
 
   const handleSave = async () => {
     const snapshot = await generateSnapshot();
@@ -162,7 +186,28 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     }
   }
 
-  if (!activeResume || !info || !sectionItems || !sectionOrder) {
+  // 如果简历未找到，显示错误信息
+  if (resumeNotFound) {
+    return (
+      <div className="flex h-screen bg-black text-white items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">{t('editPage.errors.resumeNotFound')}</h1>
+          <p className="text-neutral-400 mb-8">
+            {t('editPage.errors.resumeNotFoundDescription', { id })}
+          </p>
+          <button
+            onClick={() => window.history.back()}
+            className="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg transition-colors"
+          >
+            {t('editPage.errors.goBack')}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // 显示loading状态或当简历数据不存在时
+  if (isStoreLoading || !activeResume || !info || !sectionItems || !sectionOrder) {
     return <ResumeEditSkeleton />;
   }
 

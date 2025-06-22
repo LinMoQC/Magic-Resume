@@ -8,7 +8,9 @@ import { LogEntry } from '@/store/useResumeOptimizerStore';
 
 const ReactMarkdown = dynamic(() => import('react-markdown'), { ssr: false });
 
-const ReactJsonView = dynamic(() => import('@microlink/react-json-view'), { ssr: false });
+import { EditorComponents } from '@/lib/componentOptimization';
+
+const ReactJsonView = EditorComponents.JsonViewer;
 
 type LogItemProps = {
   log: LogEntry;
