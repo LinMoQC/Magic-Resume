@@ -152,13 +152,58 @@ export function handleExport(info: InfoType){
           }
 
           clonedEl.style.setProperty(prop, finalValue, priority);
+        }
 
-          if (originalEl.tagName.toLowerCase() === 'svg') {
-            const parent = originalEl.parentElement;
-            if (parent && window.getComputedStyle(parent).display === 'flex' && window.getComputedStyle(parent).alignItems === 'center') {
-              clonedEl.style.setProperty('overflow', 'visible', 'important');
-            }
+        // 修复图标对齐问题
+        const tagName = originalEl.tagName.toLowerCase();
+        const classNames = originalEl.className ? originalEl.className.toString() : '';
+        
+        // 处理SVG图标
+        if (tagName === 'svg') {
+          clonedEl.style.setProperty('vertical-align', 'middle', 'important');
+          clonedEl.style.setProperty('margin-top', '2px', 'important');
+        }
+        
+        // 处理React图标 (通过类名识别)
+        if (originalEl.getAttribute && originalEl.getAttribute('data-icon')) {
+          clonedEl.style.setProperty('vertical-align', 'middle', 'important');
+          clonedEl.style.setProperty('margin-top', '2px', 'important');
+        }
+        
+        // 处理FontAwesome图标
+        if (classNames.includes('fa-') || classNames.includes('FaIcon')) {
+          clonedEl.style.setProperty('vertical-align', 'middle', 'important');
+          clonedEl.style.setProperty('margin-top', '2px', 'important');
+        }
+        
+        // 处理Emoji图标 - 通过内容检测emoji字符
+        if (tagName === 'span' && originalEl.textContent) {
+          const emojiRegex = /[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F900}-\u{1F9FF}]|[\u{1F020}-\u{1F02F}]/u;
+          if (emojiRegex.test(originalEl.textContent)) {
+            clonedEl.style.setProperty('vertical-align', 'middle', 'important');
+            clonedEl.style.setProperty('line-height', '1', 'important');
+            clonedEl.style.setProperty('display', 'inline-block', 'important');
           }
+        }
+        
+        // 处理包含图标的分隔符容器 - 确保flex容器中的items-center正确工作
+        if (tagName === 'div' && classNames.includes('flex') && classNames.includes('items-center')) {
+          clonedEl.style.setProperty('align-items', 'center', 'important');
+          clonedEl.style.setProperty('display', 'flex', 'important');
+          
+          // 处理gap样式
+          if (classNames.includes('gap-x-2')) {
+            clonedEl.style.setProperty('column-gap', '0.5rem', 'important');
+          }
+          if (classNames.includes('gap-x-1.5')) {
+            clonedEl.style.setProperty('column-gap', '0.375rem', 'important');
+          }
+        }
+        
+        // 处理分隔符边框样式
+        if (classNames.includes('border-r') && classNames.includes('pr-2')) {
+          clonedEl.style.setProperty('border-right', '1px solid currentColor', 'important');
+          clonedEl.style.setProperty('padding-right', '0.5rem', 'important');
         }
       }
 

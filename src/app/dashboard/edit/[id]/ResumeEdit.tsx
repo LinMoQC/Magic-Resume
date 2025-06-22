@@ -75,6 +75,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     setSectionOrder: updateSectionOrder,
     updateSectionItems,
     updateSections,
+    updateTemplate,
     rightCollapsed,
     setRightCollapsed,
     activeSection,
@@ -86,7 +87,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
   const [leftPanelOpen, setLeftPanelOpen] = useState(false);
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
   const [isAnyModalOpen, setIsAnyModalOpen] = useState(false);
-  const [currentTemplateId, setCurrentTemplateId] = useState('default-classic');
+  const [currentTemplateId, setCurrentTemplateId] = useState(activeResume?.template || 'classic');
   const [resumeNotFound, setResumeNotFound] = useState(false);
 
   const [previewScale, setPreviewScale] = useState(1);
@@ -103,7 +104,6 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
   const handleApplyFullResume = (newResume: Resume) => {
     updateInfo(newResume.info);
     updateSections(newResume.sections);
-    // Optionally, update section order if it can also be changed by the AI
     if (newResume.sectionOrder) {
       updateSectionOrder(newResume.sectionOrder);
     }
@@ -169,9 +169,21 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     loadResumeForEdit(id);
   }, [id, loadResumeForEdit, isStoreLoading, resumes]);
 
+  // 同步activeResume的template到currentTemplateId
+  useEffect(() => {
+    if (activeResume?.template && activeResume.template !== currentTemplateId) {
+      setCurrentTemplateId(activeResume.template);
+    }
+  }, [activeResume?.template, currentTemplateId]);
+
   const handleSave = async () => {
     const snapshot = await generateSnapshot();
     saveActiveResumeToResumes(snapshot ?? undefined);
+  };
+
+  const handleSelectTemplate = (templateId: string) => {
+    setCurrentTemplateId(templateId);
+    updateTemplate(templateId);
   };
 
   function handleDragEnd(event: DragEndEvent) {
@@ -285,16 +297,22 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
   }
 
   return (
-    <main className="flex h-screen bg-black text-white flex-1">
-      <div className="w-[300px] transition-all duration-300 bg-transparent h-full">
-        <ResumeContent
-          renderSections={renderSections}
-          handleSave={handleSave}
-          onShowJson={openJsonModal}
-        />
-      </div>
-      <div className='flex-1 flex items-center justify-center bg-black relative'>
-        <ResumePreviewPanel
+    <>
+      <main className="flex h-screen bg-black text-white flex-1">
+        <div className="w-[300px] transition-all duration-300 bg-transparent h-full">
+          <ResumeContent
+            renderSections={renderSections}
+            handleSave={handleSave}
+            onShowJson={openJsonModal}
+          />
+        </div>
+        <div 
+          className='flex-1 flex items-center justify-center bg-black relative transition-all duration-300' 
+          style={{ 
+            marginRight: rightCollapsed ? '56px' : '280px' 
+          }}
+        >
+                  <ResumePreviewPanel
           info={info}
           sections={sectionItems}
           sectionOrder={sectionOrder.map(s => s.key)}
@@ -302,16 +320,22 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
           setPreviewScale={setPreviewScale}
           onShowAI={openAIModal}
           templateId={currentTemplateId}
+          customTemplate={activeResume.customTemplate}
           isAiJobRunning={isAiJobRunning}
           themeColor={activeResume.themeColor}
+          rightCollapsed={rightCollapsed}
         />
-      </div>
+        </div>
+      </main>
+
+      {/* 固定定位的模板面板 */}
       <TemplatePanel
         rightCollapsed={rightCollapsed}
         setRightCollapsed={setRightCollapsed}
-        onSelectTemplate={setCurrentTemplateId}
+        onSelectTemplate={handleSelectTemplate}
         currentTemplateId={currentTemplateId}
       />
+
       <Modal
         isOpen={isJsonModalOpen}
         onClose={closeJsonModal}
@@ -330,6 +354,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
           </pre>
         </div>
       </Modal>
+
       <AIModal 
         isOpen={isAIModalOpen}
         onClose={closeAIModal}
@@ -340,6 +365,6 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
         isAiJobRunning={isAiJobRunning}
         setIsAiJobRunning={setIsAiJobRunning}
       />
-    </main>
+    </>
   );
 } 

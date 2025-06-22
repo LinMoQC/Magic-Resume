@@ -15,6 +15,7 @@ export function WysiwygContent({ dirtyHtml, className }: Props) {
     <div
       className={`wysiwyg ${className || ''}`}
       dangerouslySetInnerHTML={{ __html: cleanHtml }}
+      style={{ color: 'inherit' }}
     />
   );
 } 

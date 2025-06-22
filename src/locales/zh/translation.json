@@ -333,6 +333,46 @@
     "title": "模板",
     "placeholder": "模板 {{index}}"
   },
+  "templateCustomizer": {
+    "title": "自定义模板",
+    "tabs": {
+      "colors": "颜色",
+      "typography": "字体", 
+      "layout": "布局"
+    },
+    "colors": {
+      "quickThemes": "快速主题",
+      "customColors": "自定义颜色",
+      "primary": "主色调",
+      "secondary": "次色调", 
+      "text": "文本颜色",
+      "textSecondary": "次要文本颜色",
+      "background": "背景颜色",
+      "sidebar": "侧边栏颜色"
+    },
+    "typography": {
+      "fontSettings": "字体设置",
+      "primaryFont": "主字体",
+      "secondaryFont": "次要字体",
+      "fontSize": "字体大小"
+    },
+    "layout": {
+      "layoutSettings": "布局设置",
+      "containerSettings": "容器设置",
+      "containerWidth": "容器宽度",
+      "padding": "内边距",
+      "gap": "组件间距",
+      "textSettings": "文本设置",
+      "lineHeight": "行高倍数",
+      "letterSpacing": "字符间距",
+      "spacingSettings": "边距设置",
+      "paragraphSpacing": "段落间距",
+      "sectionSpacing": "大段落间距"
+    },
+    "buttons": {
+      "backToTemplates": "返回模板列表"
+    }
+  },
   "resumeContent": {
     "viewJson": "查看 JSON",
     "save": "保存"

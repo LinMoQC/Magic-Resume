@@ -117,7 +117,7 @@ export default function CreateTab({ onApplyChanges, isAiJobRunning, setIsAiJobRu
                         </h3>
                     </div>
                     <div className="flex-1 overflow-y-auto p-2 bg-white flex justify-center">
-                        <div style={{ transform: 'scale(0.55)', transformOrigin: 'top center' }}>
+                        <div style={{ transform: 'scale(0.45)', transformOrigin: 'top center' }}>
                             <ResumePreview
                                 info={resumeDraft.info}
                                 sections={resumeDraft.sections}

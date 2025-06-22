@@ -68,6 +68,7 @@ export default function MobileResumEdit({
                 setPreviewScale={setPreviewScale}
                 onShowAI={onShowAI}
                 templateId={currentTemplateId}
+                customTemplate={activeResume?.customTemplate}
                 isAiJobRunning={isAiJobRunning}
                 themeColor={activeResume?.themeColor}
             />
