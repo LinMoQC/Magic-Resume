@@ -36,8 +36,10 @@ export const classicTemplate: MagicTemplateDSL = {
         normal: 400,
         medium: 500,
         bold: 700
-      }
-    },
+      },
+      lineHeight: 1.6,
+      letterSpacing: "0px"
+    } as any,
     spacing: {
       xs: "0.25rem",
       sm: "0.5rem", 

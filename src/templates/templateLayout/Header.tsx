@@ -30,17 +30,25 @@ export function Header({ data: info, iconType = 'svg', style, className }: Props
       }
     } else {
       switch (type) {
-        case 'location': return <FaMapMarkerAlt className="text-primary w-2.5 h-2.5" style={{ verticalAlign: 'top', display: 'block' }} />;
-        case 'phone': return <FaPhone className="text-primary w-2.5 h-2.5" style={{ verticalAlign: 'top', display: 'block' }} />;
-        case 'email': return <FaEnvelope className="text-primary w-2.5 h-2.5" style={{ verticalAlign: 'top', display: 'block' }} />;
-        case 'website': return <FaGlobe className="text-primary w-2.5 h-2.5" style={{ verticalAlign: 'top', display: 'block' }} />;
+        case 'location': return <FaMapMarkerAlt className="w-2.5 h-2.5" style={{ verticalAlign: 'top', display: 'block', color: 'var(--color-primary)' }} />;
+        case 'phone': return <FaPhone className="w-2.5 h-2.5" style={{ verticalAlign: 'top', display: 'block', color: 'var(--color-primary)' }} />;
+        case 'email': return <FaEnvelope className="w-2.5 h-2.5" style={{ verticalAlign: 'top', display: 'block', color: 'var(--color-primary)' }} />;
+        case 'website': return <FaGlobe className="w-2.5 h-2.5" style={{ verticalAlign: 'top', display: 'block', color: 'var(--color-primary)' }} />;
         default: return null;
       }
     }
   };
 
   return (
-    <div className={`flex items-center space-x-4 ${className || ''}`} style={style}>
+    <div 
+      className={`flex items-center space-x-4 ${className || ''}`} 
+      style={{
+        ...style,
+        lineHeight: 'var(--line-height)',
+        letterSpacing: 'var(--letter-spacing)',
+        fontFamily: 'var(--font-family-primary)',
+      }}
+    >
       {info.avatar && (
         <Image
           src={info.avatar}
@@ -53,9 +61,21 @@ export function Header({ data: info, iconType = 'svg', style, className }: Props
         />
       )}
       <div className="space-y-0.5">
-        <div className="text-sm font-bold">{info.fullName || 'Your Name'}</div>
-        {info.headline && <div className="text-xs">{info.headline}</div>}
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px]" style={{ lineHeight: 1.2 }}>
+        <div className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
+          {info.fullName || 'Your Name'}
+        </div>
+        {info.headline && (
+          <div className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+            {info.headline}
+          </div>
+        )}
+        <div 
+          className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px]" 
+          style={{ 
+            lineHeight: 'var(--line-height)',
+            color: 'var(--color-text-secondary)'
+          }}
+        >
           {info.address && (
             <div className="flex items-center gap-x-1.5 border-r pr-2 last:border-r-0 last:pr-0">
               <div className="flex items-center" style={{ marginTop: iconType === 'svg' ? '0' : '-2px' }}>

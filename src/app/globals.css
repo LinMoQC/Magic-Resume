@@ -3,7 +3,44 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-nunito: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-quicksand: 'Quicksand', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-comfortaa: 'Comfortaa', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-raleway: 'Raleway', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-righteous: 'Righteous', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-pacifico: 'Pacifico', cursive;
+  --font-caveat: 'Caveat', cursive;
+  --font-dancing-script: 'Dancing Script', cursive;
+  --font-lobster: 'Lobster', cursive;
+  --font-orbitron: 'Orbitron', monospace;
+  --font-space-mono: 'Space Mono', monospace;
+  --font-pt-serif: 'PT Serif', serif;
+  --font-playfair-display: 'Playfair Display', serif;
+  --font-jetbrains-mono: 'JetBrains Mono', monospace;
+  --font-source-code-pro: 'Source Code Pro', monospace;
+  
+  --background: #ffffff;
+  --foreground: #171717;
 }
+
+/* 字体class */
+.font-inter { font-family: var(--font-inter); }
+.font-nunito { font-family: var(--font-nunito); }
+.font-quicksand { font-family: var(--font-quicksand); }
+.font-comfortaa { font-family: var(--font-comfortaa); }
+.font-raleway { font-family: var(--font-raleway); }
+.font-righteous { font-family: var(--font-righteous); }
+.font-pacifico { font-family: var(--font-pacifico); }
+.font-caveat { font-family: var(--font-caveat); }
+.font-dancing-script { font-family: var(--font-dancing-script); }
+.font-lobster { font-family: var(--font-lobster); }
+.font-orbitron { font-family: var(--font-orbitron); }
+.font-space-mono { font-family: var(--font-space-mono); }
+.font-pt-serif { font-family: var(--font-pt-serif); }
+.font-playfair-display { font-family: var(--font-playfair-display); }
+.font-jetbrains-mono { font-family: var(--font-jetbrains-mono); }
+.font-source-code-pro { font-family: var(--font-source-code-pro); }
 
 @theme inline {
   --color-background: var(--background);
@@ -823,4 +860,14 @@ button {
 
 .apply-changes-button:active {
   transform: scale(0.98) !important;
+}
+
+/* 隐藏滚动条 */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
 }

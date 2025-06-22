@@ -26,18 +26,33 @@ const getFieldValue = (item: Item, field: string | string[] | undefined) => {
 export function Timeline({ title, items, fieldMap = {}, style }: Props) {
   if (!items || items.length === 0) return null;
 
-  // 从style中提取颜色，如果没有则使用默认值
-  const textColor = style?.color || '#1f2937';
-  const primaryColor = '#3b82f6'; // 保持蓝色作为强调色
-  const secondaryColor = style?.color ? `${style.color}80` : '#6b7280'; // 半透明版本
+  // 从style中提取颜色，如果没有则使用CSS变量
+  const textColor = style?.color || 'var(--color-text)';
+  const primaryColor = 'var(--color-primary)'; // 使用主色调
+  const secondaryColor = style?.color ? `${style.color}80` : 'var(--color-text-secondary)'; // 半透明版本
 
   return (
-    <section className="space-y-6" style={style}>
-      <h2 className="text-lg font-bold border-b-2 border-blue-500 pb-2" style={{ color: textColor }}>
+    <section 
+      className="space-y-6" 
+      style={{
+        ...style,
+        lineHeight: 'var(--line-height)',
+        letterSpacing: 'var(--letter-spacing)',
+        marginBottom: 'var(--section-spacing)',
+      }}
+    >
+      <h2 
+        className="text-lg font-bold pb-2" 
+        style={{ 
+          color: textColor, 
+          borderBottom: `2px solid ${primaryColor}`,
+          marginBottom: 'var(--paragraph-spacing)',
+        }}
+      >
         {title}
       </h2>
       
-      <div className="space-y-6">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--paragraph-spacing)' }}>
         {items.map((item, idx) => {
           const company = getFieldValue(item, fieldMap.title || ['company', 'school', 'name']);
           const position = getFieldValue(item, fieldMap.subtitle || ['position', 'degree', 'role']);

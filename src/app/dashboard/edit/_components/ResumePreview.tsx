@@ -7,6 +7,8 @@ import { InfoType, Resume, Section } from '@/store/useResumeStore';
 import { MagicResumeRenderer } from '@/templates/renderer/MagicResumeRenderer';
 import { getMagicTemplateById, getDefaultMagicTemplate } from '@/templates/config/magic-templates';
 import { MagicTemplateDSL } from '@/templates/types/magic-dsl';
+import { CustomTemplateConfig } from '@/store/useResumeStore';
+import { mergeTemplateConfig } from '@/lib/templateUtils';
 
 interface Props {
   info: InfoType;
@@ -14,9 +16,10 @@ interface Props {
   sectionOrder: string[];
   customStyle?: React.CSSProperties;
   templateId: string;
+  customTemplate?: CustomTemplateConfig; // 新增：自定义模板配置差异
 }
 
-export default function ResumePreview({ info, sections, sectionOrder, customStyle, templateId }: Props) {
+export default function ResumePreview({ info, sections, sectionOrder, customStyle, templateId, customTemplate }: Props) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _unusedCustomStyle = customStyle;
   const [template, setTemplate] = useState<MagicTemplateDSL | null>(null);
@@ -26,20 +29,24 @@ export default function ResumePreview({ info, sections, sectionOrder, customStyl
     const loadTemplate = async () => {
       try {
         setLoading(true);
-        let selectedTemplate: MagicTemplateDSL;
+        
+        // 从模板库加载基础模板
+        let baseTemplate: MagicTemplateDSL;
         
         if (templateId) {
           try {
-            selectedTemplate = await getMagicTemplateById(templateId);
+            baseTemplate = await getMagicTemplateById(templateId);
           } catch {
             console.warn(`Template ${templateId} not found, using default`);
-            selectedTemplate = await getDefaultMagicTemplate();
+            baseTemplate = await getDefaultMagicTemplate();
           }
         } else {
-          selectedTemplate = await getDefaultMagicTemplate();
+          baseTemplate = await getDefaultMagicTemplate();
         }
         
-        setTemplate(selectedTemplate);
+        // 如果有自定义配置，合并到基础模板中
+        const finalTemplate = mergeTemplateConfig(baseTemplate, customTemplate);
+        setTemplate(finalTemplate);
       } catch (error) {
         console.error('Failed to load template:', error);
       } finally {
@@ -48,7 +55,7 @@ export default function ResumePreview({ info, sections, sectionOrder, customStyl
     };
 
     loadTemplate();
-  }, [templateId]);
+  }, [templateId, customTemplate]);
 
   const resumeData: Resume = {
     id: 'preview',

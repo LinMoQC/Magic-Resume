@@ -23,8 +23,15 @@ export function ProfileCard({ data: info, style, position }: Props) {
     // 侧边栏布局 - 紧凑的垂直设计
     return (
       <div 
-        className="text-center space-y-4"
-        style={style}
+        className="text-center"
+        style={{
+          ...style,
+          lineHeight: 'var(--line-height)',
+          letterSpacing: 'var(--letter-spacing)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 'var(--paragraph-spacing)',
+        }}
       >
         {info.avatar && (
           <div className="flex justify-center">
@@ -58,8 +65,15 @@ export function ProfileCard({ data: info, style, position }: Props) {
   // 主区域布局 - 更适合单栏的设计
   return (
     <div 
-      className="text-center space-y-6 py-8"
-      style={style}
+      className="text-center py-8"
+      style={{
+        ...style,
+        lineHeight: 'var(--line-height)',
+        letterSpacing: 'var(--letter-spacing)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 'var(--section-spacing)',
+      }}
     >
       {info.avatar && (
         <div className="flex justify-center">

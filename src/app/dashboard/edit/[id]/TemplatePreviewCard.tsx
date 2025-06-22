@@ -1,10 +1,12 @@
 import React from 'react';
 import { MagicTemplateDSL } from '@/templates/types/magic-dsl';
+import { Settings } from 'lucide-react';
 
 interface TemplatePreviewCardProps {
   template: MagicTemplateDSL;
   isSelected: boolean;
   onSelect: () => void;
+  onCustomize?: () => void;
 }
 
 // 简历布局预览组件
@@ -71,7 +73,7 @@ const ResumePreview = ({ template }: { template: MagicTemplateDSL }) => {
   );
 };
 
-export default function TemplatePreviewCard({ template, isSelected, onSelect }: TemplatePreviewCardProps) {
+export default function TemplatePreviewCard({ template, isSelected, onSelect, onCustomize }: TemplatePreviewCardProps) {
   const primaryColor = template.designTokens.colors.primary;
   
   return (
@@ -150,12 +152,26 @@ export default function TemplatePreviewCard({ template, isSelected, onSelect }: 
           </div>
         </div>
         
-        {/* 选中指示器 */}
+        {/* 选中指示器和自定义按钮 */}
         {isSelected && (
           <>
             <div className="absolute top-3 right-3 w-3 h-3 bg-blue-500 rounded-full shadow-lg"></div>
             <div className="absolute inset-0 bg-blue-500/5 pointer-events-none"></div>
           </>
+        )}
+        
+        {/* 自定义按钮 */}
+        {onCustomize && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onCustomize();
+            }}
+            className="absolute top-2 left-2 w-6 h-6 bg-neutral-700/80 hover:bg-neutral-600 border border-neutral-600 rounded-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            title="自定义模板"
+          >
+            <Settings size={12} className="text-neutral-300" />
+          </button>
         )}
       </div>
     </div>

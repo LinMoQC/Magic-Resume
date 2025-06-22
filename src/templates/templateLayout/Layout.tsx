@@ -1,18 +1,39 @@
 import React from 'react';
+import { MagicTemplateDSL } from '../types/magic-dsl';
 
 interface Props {
   children: React.ReactNode;
+  layout: MagicTemplateDSL['layout'];
+  designTokens: MagicTemplateDSL['designTokens'];
   style?: React.CSSProperties;
 }
 
-export function Layout({ children, style }: Props) {
+export function Layout({ children, layout, designTokens, style }: Props) {
+  const containerStyle: React.CSSProperties = {
+    width: layout.containerWidth,
+    maxWidth: layout.containerWidth,
+    backgroundColor: designTokens.colors.background,
+    color: designTokens.colors.text,
+    fontFamily: designTokens.typography.fontFamily.primary,
+    lineHeight: (designTokens.typography as any).lineHeight || '1.5',
+    letterSpacing: (designTokens.typography as any).letterSpacing || '0px',
+    ...style,
+  };
+
+  const innerStyle: React.CSSProperties = {
+    padding: layout.padding,
+    gap: layout.gap,
+    lineHeight: 'var(--line-height)',
+    letterSpacing: 'var(--letter-spacing)',
+  };
+
   return (
     <div
       id="resume-to-export"
-      className="mx-auto max-w-[794px] w-[794px] bg-white text-black rounded-md shadow-2xl relative font-serif min-h-[1100px]"
-      style={{ fontFamily: '"IBM Plex Serif", serif', ...style }}
+      className="mx-auto bg-white text-black rounded-md shadow-2xl relative min-h-[1100px]"
+      style={containerStyle}
     >
-      <div className="p-3 space-y-4">
+      <div className="flex flex-col" style={innerStyle}>
         {children}
       </div>
     </div>

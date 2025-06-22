@@ -37,8 +37,10 @@ export const orangeModernTemplate: MagicTemplateDSL = {
         normal: 400,
         medium: 500,
         bold: 700
-      }
-    },
+      },
+      lineHeight: 1.5,
+      letterSpacing: "0px"
+    } as any,
     spacing: {
       xs: "0.25rem",
       sm: "0.5rem", 

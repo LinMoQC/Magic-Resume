@@ -1,23 +1,10 @@
 import React from 'react';
+import { MagicTemplateDSL } from '../types/magic-dsl';
 
 interface Props {
   children: React.ReactNode;
-  layout: {
-    containerWidth: string;
-    padding: string;
-    twoColumn?: {
-      leftWidth: string;
-      rightWidth: string;
-      gap: string;
-    };
-  };
-  designTokens?: {
-    colors?: {
-      background?: string;
-      sidebar?: string;
-      text?: string;
-    };
-  };
+  layout: MagicTemplateDSL['layout'];
+  designTokens: MagicTemplateDSL['designTokens'];
 }
 
 export function TwoColumnLayout({ children, layout, designTokens }: Props) {
@@ -43,15 +30,38 @@ export function TwoColumnLayout({ children, layout, designTokens }: Props) {
     }
   });
 
+  const containerStyle: React.CSSProperties = {
+    width: layout.containerWidth,
+    maxWidth: layout.containerWidth,
+    backgroundColor: designTokens.colors.background,
+    fontFamily: designTokens.typography.fontFamily.primary,
+    lineHeight: (designTokens.typography as any).lineHeight || '1.5',
+    letterSpacing: (designTokens.typography as any).letterSpacing || '0px',
+  };
+
+  const sidebarStyle: React.CSSProperties = {
+    width: twoColumn.leftWidth,
+    backgroundColor: designTokens.colors.sidebar || designTokens.colors.primary,
+    padding: layout.padding,
+    gap: layout.gap,
+    lineHeight: (designTokens.typography as any).lineHeight || '1.5',
+    letterSpacing: (designTokens.typography as any).letterSpacing || '0px',
+  };
+
+  const mainStyle: React.CSSProperties = {
+    width: twoColumn.rightWidth,
+    color: designTokens.colors.text,
+    padding: layout.padding,
+    gap: layout.gap,
+    lineHeight: (designTokens.typography as any).lineHeight || '1.5',
+    letterSpacing: (designTokens.typography as any).letterSpacing || '0px',
+  };
+
   return (
     <div
       id="resume-to-export"
       className="mx-auto bg-white text-black shadow-2xl relative"
-      style={{
-        width: layout.containerWidth,
-        maxWidth: layout.containerWidth,
-        backgroundColor: designTokens?.colors?.background || '#ffffff'
-      }}
+      style={containerStyle}
     >
       <div 
         className="flex min-h-[1100px]"
@@ -59,22 +69,16 @@ export function TwoColumnLayout({ children, layout, designTokens }: Props) {
       >
         {/* 左侧边栏 */}
         <div
-          className="flex-shrink-0 p-6 space-y-6"
-          style={{
-            width: twoColumn.leftWidth,
-            backgroundColor: designTokens?.colors?.sidebar || '#1e40af'
-          }}
+          className="flex-shrink-0 flex flex-col"
+          style={sidebarStyle}
         >
           {sidebarComponents}
         </div>
         
         {/* 右侧主要内容 */}
         <div
-          className="flex-1 p-6 space-y-6"
-          style={{
-            width: twoColumn.rightWidth,
-            color: designTokens?.colors?.text || '#000000'
-          }}
+          className="flex-1 flex flex-col"
+          style={mainStyle}
         >
           {mainComponents}
         </div>

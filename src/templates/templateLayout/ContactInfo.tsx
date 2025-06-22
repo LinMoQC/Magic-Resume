@@ -38,8 +38,23 @@ export function ContactInfo({ data: info, style }: Props) {
   const iconColor = style?.color ? `${style.color}cc` : '#dbeafe';
 
   return (
-    <div className="space-y-3" style={style}>
-      <h3 className="text-sm font-bold mb-4 uppercase tracking-wide" style={{ color: textColor }}>
+    <div 
+      style={{
+        ...style,
+        lineHeight: 'var(--line-height)',
+        letterSpacing: 'var(--letter-spacing)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 'var(--paragraph-spacing)',
+      }}
+    >
+      <h3 
+        className="text-sm font-bold uppercase tracking-wide" 
+        style={{ 
+          color: textColor,
+          marginBottom: 'var(--paragraph-spacing)',
+        }}
+      >
         Contact
       </h3>
       

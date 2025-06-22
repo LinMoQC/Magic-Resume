@@ -36,12 +36,34 @@ export function CompactList({ title, items, fieldMap = {}, style, position }: Pr
   const secondaryColor = style?.color ? `${style.color}cc` : (isInSidebar ? '#dbeafe' : '#6b7280');
 
   return (
-    <div className="space-y-3" style={style}>
-      <h3 className="text-sm font-bold mb-4 uppercase tracking-wide" style={{ color: textColor }}>
+    <div 
+      style={{
+        ...style,
+        lineHeight: 'var(--line-height)',
+        letterSpacing: 'var(--letter-spacing)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 'var(--paragraph-spacing)',
+      }}
+    >
+      <h3 
+        className="text-sm font-bold uppercase tracking-wide" 
+        style={{ 
+          color: textColor,
+          marginBottom: 'var(--paragraph-spacing)',
+        }}
+      >
         {title}
       </h3>
       
-      <ul className="space-y-2 list-none">
+      <ul 
+        className="list-none"
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 'var(--paragraph-spacing)',
+        }}
+      >
         {items.map((item, idx) => {
           const name = getFieldValue(item, fieldMap.title || ['name', 'skill', 'language', 'certificate']);
           const level = getFieldValue(item, fieldMap.level || 'level');

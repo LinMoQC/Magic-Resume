@@ -46,15 +46,14 @@ function getSectionData(data: Resume, dataBinding: string) {
   return get(data, dataBinding);
 }
 
-function generateCSSVariables(designTokens: MagicTemplateDSL['designTokens']) {
-  return {
+function generateCSSVariables(designTokens: MagicTemplateDSL['designTokens'], layout: MagicTemplateDSL['layout']) {
+  const cssVars: Record<string, string> = {
     '--color-primary': designTokens.colors.primary,
     '--color-secondary': designTokens.colors.secondary,
     '--color-text': designTokens.colors.text,
     '--color-text-secondary': designTokens.colors.textSecondary,
     '--color-background': designTokens.colors.background,
     '--color-border': designTokens.colors.border,
-    '--color-sidebar': designTokens.colors.sidebar,
     '--font-family-primary': designTokens.typography.fontFamily.primary,
     '--font-size-xs': designTokens.typography.fontSize.xs,
     '--font-size-sm': designTokens.typography.fontSize.sm,
@@ -66,7 +65,30 @@ function generateCSSVariables(designTokens: MagicTemplateDSL['designTokens']) {
     '--spacing-md': designTokens.spacing.md,
     '--spacing-lg': designTokens.spacing.lg,
     '--spacing-xl': designTokens.spacing.xl,
-  } as React.CSSProperties;
+    '--line-height': (designTokens.typography as any).lineHeight || '1.5',
+    '--letter-spacing': (designTokens.typography as any).letterSpacing || '0px',
+    '--container-width': layout.containerWidth,
+    '--container-padding': layout.padding,
+    '--container-gap': layout.gap,
+    '--paragraph-spacing': designTokens.spacing.md,
+    '--section-spacing': designTokens.spacing.lg,
+  };
+
+  // 只有在有值时才设置可选的CSS变量
+  if (designTokens.colors.sidebar) {
+    cssVars['--color-sidebar'] = designTokens.colors.sidebar;
+  }
+  if (designTokens.colors.accent) {
+    cssVars['--color-accent'] = designTokens.colors.accent;
+  }
+  if (designTokens.typography.fontFamily.secondary) {
+    cssVars['--font-family-secondary'] = designTokens.typography.fontFamily.secondary;
+  }
+  if (designTokens.typography.fontFamily.mono) {
+    cssVars['--font-family-mono'] = designTokens.typography.fontFamily.mono;
+  }
+
+  return cssVars as React.CSSProperties;
 }
 
 function getLayoutComponent(layoutType: string) {
@@ -97,7 +119,7 @@ export function MagicResumeRenderer({ template, data }: Props) {
   const { layout, designTokens, components } = template;
   
   // 生成CSS变量
-  const cssVariables = generateCSSVariables(designTokens);
+  const cssVariables = generateCSSVariables(designTokens, layout);
   
   // 获取布局组件
   const LayoutContainer = getLayoutComponent(layout.type);

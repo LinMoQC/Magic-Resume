@@ -52,7 +52,7 @@ export default function OptimizeTab({ resumeData, onApplyChanges, templateId, is
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 h-full mt-4">
+    <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 h-full mt-3">
       {/* 左侧输入区域 */}
       <div className="lg:col-span-2 space-y-4 flex flex-col">
         <div className="bg-gradient-to-br from-neutral-900/50 to-neutral-800/30 p-4 rounded-lg border border-neutral-700/50 backdrop-blur-sm">
@@ -68,7 +68,7 @@ export default function OptimizeTab({ resumeData, onApplyChanges, templateId, is
             value={jd}
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setJd(e.target.value)}
             placeholder={t('modals.aiModal.optimizeTab.jdPlaceholder')}
-            className="h-96 bg-neutral-900/70 border-neutral-700/50 rounded-lg focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500/50 resize-none text-sm leading-relaxed shadow-inner backdrop-blur-sm transition-all duration-200 hover:border-neutral-600/50"
+            className="h-88 bg-neutral-900/70 border-neutral-700/50 rounded-lg focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500/50 resize-none text-sm leading-relaxed shadow-inner backdrop-blur-sm transition-all duration-200 hover:border-neutral-600/50"
           />
         </div>
         

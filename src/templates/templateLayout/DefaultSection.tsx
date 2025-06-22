@@ -30,9 +30,28 @@ export function DefaultSection({ title, items, fieldMap, className, style, title
   if (!items || items.length === 0) return null;
 
   return (
-    <section className={`grid text-[12px] ${className || ''}`} style={style}>
-      <h4 className={titleClassName || "font-bold text-primary text-[1.2em] text-blue-500"}>{title}</h4>
-      <div className={containerClassName || "grid gap-x-6 gap-y-3"}>
+    <section 
+      className={`grid text-[12px] ${className || ''}`} 
+      style={{
+        ...style,
+        lineHeight: 'var(--line-height)',
+        letterSpacing: 'var(--letter-spacing)',
+        marginBottom: 'var(--section-spacing)',
+      }}
+    >
+      <h4 
+        className={titleClassName || "font-bold text-[1.2em]"}
+        style={{ 
+          color: 'var(--color-primary)',
+          marginBottom: 'var(--paragraph-spacing)',
+        }}
+      >
+        {title}
+      </h4>
+      <div 
+        className={containerClassName || "grid gap-x-6 gap-y-3"}
+        style={{ gap: 'var(--paragraph-spacing)' }}
+      >
         {items.map((item, idx) => (
           <div className="space-y-2" key={idx}>
             <div>

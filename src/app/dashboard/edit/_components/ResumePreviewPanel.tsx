@@ -7,6 +7,7 @@ import { InfoType, Section } from '@/store/useResumeStore';
 import useMobile from '@/app/hooks/useMobile';
 import { Tools } from './Tools';
 import AiThinkingOverlay from './AiThinkingOverlay';
+import { CustomTemplateConfig } from '@/store/useResumeStore';
 
 interface ResumePreviewPanelProps {
   info: InfoType;
@@ -16,8 +17,10 @@ interface ResumePreviewPanelProps {
   setPreviewScale: (scale: number) => void;
   onShowAI: () => void;
   templateId: string;
+  customTemplate?: CustomTemplateConfig; // 新增：自定义模板配置差异
   isAiJobRunning: boolean;
   themeColor?: string;
+  rightCollapsed?: boolean; // 新增：模板栏是否收起
 }
 
 const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
@@ -27,8 +30,10 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
   setPreviewScale,
   onShowAI,
   templateId,
+  customTemplate,
   isAiJobRunning,
-  themeColor = '#38bdf8'
+  themeColor = '#38bdf8',
+  rightCollapsed = false
 }) => {
   const { isMobile } = useMobile();
 
@@ -55,7 +60,8 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
                   info={info} 
                   sections={sections} 
                   sectionOrder={sectionOrder} 
-                  templateId={templateId} 
+                  templateId={templateId}
+                  customTemplate={customTemplate}
                 />
                 <AiThinkingOverlay 
                   isVisible={isAiJobRunning} 
@@ -64,7 +70,7 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
               </div>
             </TransformComponent>
 
-            <Tools isMobile={isMobile} zoomIn={zoomIn} zoomOut={zoomOut} resetTransform={resetTransform} info={info} onShowAI={onShowAI} />
+            <Tools isMobile={isMobile} zoomIn={zoomIn} zoomOut={zoomOut} resetTransform={resetTransform} info={info} onShowAI={onShowAI} rightCollapsed={rightCollapsed} />
           </>
         )}
       </TransformWrapper>
