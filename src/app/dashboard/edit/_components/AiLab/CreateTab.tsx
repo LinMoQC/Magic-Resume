@@ -25,7 +25,7 @@ export default function CreateTab({ onApplyChanges, isAiJobRunning, setIsAiJobRu
     const chatContainerRef = useRef<HTMLDivElement>(null);
 
     const [showPreview, setShowPreview] = useState(false);
-    const templateId = useResumeStore(state => state.activeResume?.template) || 'onyx';
+    const templateId = useResumeStore(state => state.activeResume?.template) || 'classic';
 
     useEffect(() => {
         setIsAiJobRunning(isLoading);
@@ -68,16 +68,16 @@ export default function CreateTab({ onApplyChanges, isAiJobRunning, setIsAiJobRu
                 </div>
                 <div ref={chatContainerRef} className="flex-1 p-4 overflow-y-auto">
                     {messages.map((msg) => (
-                        <MessageItem 
-                            key={msg.id} 
-                            message={msg} 
+                        <MessageItem
+                            key={msg.id}
+                            message={msg}
                             themeColor="#0ea5e9"
                         />
                     ))}
-                                        {isLoading && (
-                         <LoadingAnimation 
+                    {isLoading && (
+                        <LoadingAnimation
                             themeColor="#0ea5e9"
-                         />
+                        />
                     )}
                 </div>
                 <div className="p-4 border-t border-neutral-800">
@@ -96,9 +96,9 @@ export default function CreateTab({ onApplyChanges, isAiJobRunning, setIsAiJobRu
                             rows={1}
                             disabled={isAiJobRunning}
                         />
-                        <Button 
-                            type="submit" 
-                            disabled={isAiJobRunning || !input.trim()} 
+                        <Button
+                            type="submit"
+                            disabled={isAiJobRunning || !input.trim()}
                             className="absolute right-2.5 bottom-2.5 bg-sky-500 hover:bg-sky-600 text-white rounded-md h-7 w-7 p-1"
                             size="icon"
                         >
