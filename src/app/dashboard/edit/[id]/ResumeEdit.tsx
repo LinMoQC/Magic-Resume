@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useMemo } from 'react';
 import { Resume, useResumeStore } from '@/store/useResumeStore';
-import { FaUser, FaDownload } from 'react-icons/fa';
+import { FaUser } from 'react-icons/fa';
 import BasicForm from '../_components/BasicForm';
 import sidebarMenu from '@/constant/sidebarMenu';
 import dynamic from 'next/dynamic';
@@ -23,7 +23,6 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { toast } from 'sonner';
-import Modal from '@/app/components/ui/Modal';
 import ResumeEditSkeleton from './ResumeEditSkeleton';
 import TemplatePanel from './TemplatePanel';
 import ResumeContent from './ResumeContent';
@@ -34,8 +33,7 @@ import { generateSnapshot } from '@/lib/utils';
 import AIModal from '../_components/AIModal';
 import { useTranslation } from 'react-i18next';
 import { Loader2 } from 'lucide-react';
-
-import { EditorComponents } from '@/lib/componentOptimization';
+import JsonModal from '../_components/JsonModal';
 
 const ResumePreviewPanel = dynamic(() => import('../_components/ResumePreviewPanel'), { 
   ssr: false,
@@ -45,7 +43,6 @@ const ResumePreviewPanel = dynamic(() => import('../_components/ResumePreviewPan
     </div>
   )
 });
-const ReactJsonView = EditorComponents.JsonViewer;
 
 type ResumeEditProps = {
   id: string;
@@ -109,6 +106,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     }
   };
 
+  // 下载简历json
   const handleDownloadJson = () => {
     if (!activeResume) return;
     const jsonString = JSON.stringify(activeResume, null, 2);
@@ -128,6 +126,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
   const sectionItems = activeResume?.sections;
   const sectionOrder = activeResume?.sectionOrder;
 
+  // 简历模块的refs
   const sectionRefs = useMemo(() => {
     const refs: Record<string, React.RefObject<HTMLDivElement | null>> = {
       basics: React.createRef<HTMLDivElement>(),
@@ -143,9 +142,12 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     return refs;
   }, []);
 
+  // 拖拽排序的传感器
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
+
+  // 监听activeSection变化，滚动到对应的简历模块
   useEffect(() => {
     if (activeSection && sectionRefs[activeSection]?.current) {
       sectionRefs[activeSection].current.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -176,16 +178,19 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     }
   }, [activeResume?.template, currentTemplateId]);
 
+  // 保存简历
   const handleSave = async () => {
     const snapshot = await generateSnapshot();
     saveActiveResumeToResumes(snapshot ?? undefined);
   };
 
+  // 选择模板
   const handleSelectTemplate = (templateId: string) => {
     setCurrentTemplateId(templateId);
     updateTemplate(templateId);
   };
 
+  // 拖拽排序
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (over && active.id !== over.id && sectionOrder) {
@@ -223,6 +228,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     return <ResumeEditSkeleton />;
   }
 
+  // 简历模块
   function renderSections() {
     return (
       <DndContext
@@ -299,6 +305,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
   return (
     <>
       <main className="flex h-screen bg-black text-white flex-1">
+        {/* 左侧简历内容 */}
         <div className="w-[300px] transition-all duration-300 bg-transparent h-full">
           <ResumeContent
             renderSections={renderSections}
@@ -312,7 +319,8 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
             marginRight: rightCollapsed ? '56px' : '280px' 
           }}
         >
-                  <ResumePreviewPanel
+          {/* 简历预览面板 */}
+        <ResumePreviewPanel
           info={info}
           sections={sectionItems}
           sectionOrder={sectionOrder.map(s => s.key)}
@@ -328,7 +336,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
         </div>
       </main>
 
-      {/* 固定定位的模板面板 */}
+      {/* 模板面板 */}
       <TemplatePanel
         rightCollapsed={rightCollapsed}
         setRightCollapsed={setRightCollapsed}
@@ -336,25 +344,16 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
         currentTemplateId={currentTemplateId}
       />
 
-      <Modal
-        isOpen={isJsonModalOpen}
-        onClose={closeJsonModal}
-        title={t('mobileEdit.jsonData')}
-      >
-        <div className="relative">
-          <button
-            onClick={handleDownloadJson}
-            className="absolute top-3 right-3 p-2 text-gray-400 rounded-md hover:bg-neutral-700 hover:text-white transition-colors"
-            aria-label="Download JSON file"
-          >
-            <FaDownload />
-          </button>
-          <pre className="text-sm bg-white p-4 rounded-md overflow-x-auto h-[80vh]">
-            {activeResume && <ReactJsonView src={activeResume} displayDataTypes={false}/>}
-          </pre>
-        </div>
-      </Modal>
+      {/* Json Modal */}
+      <JsonModal
+        isJsonModalOpen={isJsonModalOpen}
+        closeJsonModal={closeJsonModal}
+        handleDownloadJson={handleDownloadJson}
+        activeResume={activeResume}
+        t={t}
+      />
 
+      {/* AI Modal */}
       <AIModal 
         isOpen={isAIModalOpen}
         onClose={closeAIModal}
