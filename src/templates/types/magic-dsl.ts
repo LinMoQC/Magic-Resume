@@ -41,6 +41,8 @@ export interface MagicTemplateDSL {
         medium: number;
         bold: number;
       };
+      lineHeight?: number;
+      letterSpacing?: string;
     };
     spacing: {
       xs: string;
@@ -89,8 +91,7 @@ export interface ComponentDefinition {
   type: ComponentType;
   dataBinding: string;
   position: ComponentPosition;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  props?: Record<string, any>;
+  props?: Record<string, unknown>;
   style?: ComponentStyle;
   fieldMap?: FieldMapping;
 }

@@ -201,6 +201,7 @@ export function MagicResumeRenderer({ template, data }: Props) {
               position={component.position}
               style={component.style}
             >
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               <Component key={component.id} {...(props as any)} />
             </ComponentWrapper>
           );

@@ -259,9 +259,9 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
                       fields={(dynamicFormFields[key as keyof typeof dynamicFormFields] || []).map(f => ({ name: f.key, label: t(f.labelKey), placeholder: f.placeholderKey ? t(f.placeholderKey) : '', required: f.required }))}
                       richtextKey="summary"
                       richtextPlaceholder="..."
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      /* eslint-disable @typescript-eslint/no-explicit-any */
                       itemRender={sidebarMenu.find(s => s.key === key)?.itemRender as any}
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      /* eslint-disable @typescript-eslint/no-explicit-any */
                       items={(sectionItems?.[key as keyof Section] ?? []).map(item => ({...item, id: String(item.id)})) as any}
                       setItems={(items) => updateSectionItems(key, items as SectionItem[])}
                       className={isLast ? 'mb-0' : ''}

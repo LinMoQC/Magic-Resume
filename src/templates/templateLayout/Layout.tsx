@@ -8,14 +8,8 @@ interface Props {
   style?: React.CSSProperties;
 }
 
-// 使用交叉类型定义扩展的 typography 类型
-type ExtendedTypography = MagicTemplateDSL['designTokens']['typography'] & {
-  lineHeight?: string;
-  letterSpacing?: string;
-};
-
 export function Layout({ children, layout, designTokens, style }: Props) {
-  const extendedTypography = designTokens.typography as ExtendedTypography;
+  const { typography } = designTokens;
 
   const containerStyle: React.CSSProperties = {
     width: layout.containerWidth,
@@ -23,8 +17,8 @@ export function Layout({ children, layout, designTokens, style }: Props) {
     backgroundColor: designTokens.colors.background,
     color: designTokens.colors.text,
     fontFamily: designTokens.typography.fontFamily.primary,
-    lineHeight: extendedTypography.lineHeight || '1.5',
-    letterSpacing: extendedTypography.letterSpacing || '0px',
+    lineHeight: typography.lineHeight?.toString() || '1.5',
+    letterSpacing: typography.letterSpacing || '0px',
     ...style,
   };
 

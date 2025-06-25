@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useSettingStore } from '@/store/useSettingStore';
 import { Resume } from '@/store/useResumeStore';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { useResumeOptimizerStore, LogEntry, StreamData } from '@/store/useResumeOptimizerStore';
+import { useResumeOptimizerStore, LogEntry, StreamData, NodeState } from '@/store/useResumeOptimizerStore';
 import { GraphState } from '@/lib/aiLab/graphs';
 
 const nextUrl = process.env.NEXT_PUBLIC_IF_USE_BACKEND === 'true' ? '/api' : '/api/node';
@@ -39,7 +38,7 @@ export const useResumeOptimizer = () => {
         if (jsonString) {
           try {
             const chunk: StreamData = JSON.parse(jsonString);
-            const nodeState = Object.values(chunk)[0];
+            const nodeState = Object.values(chunk)[0] as NodeState;
 
             if (nodeState) {
               Object.assign(finalState, nodeState);
@@ -79,7 +78,7 @@ export const useResumeOptimizer = () => {
 
     setLogs(prev => {
       const updatedLogs = [...prev];
-      const nodeState = chunk[nodeId] as any;
+      const nodeState = chunk[nodeId] as NodeState;
 
       const staticLogIndex = updatedLogs.findIndex(log => log.id === nodeId);
       if (staticLogIndex !== -1) {

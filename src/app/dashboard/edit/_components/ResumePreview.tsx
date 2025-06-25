@@ -19,9 +19,7 @@ interface Props {
   customTemplate?: CustomTemplateConfig; // 新增：自定义模板配置差异
 }
 
-export default function ResumePreview({ info, sections, sectionOrder, customStyle, templateId, customTemplate }: Props) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _unusedCustomStyle = customStyle;
+export default function ResumePreview({ info, sections, sectionOrder, templateId, customTemplate }: Props) {
   const [template, setTemplate] = useState<MagicTemplateDSL | null>(null);
   const [loading, setLoading] = useState(true);
 

@@ -7,12 +7,6 @@ interface Props {
   designTokens: MagicTemplateDSL['designTokens'];
 }
 
-// 使用交叉类型定义扩展的 typography 类型
-type ExtendedTypography = MagicTemplateDSL['designTokens']['typography'] & {
-  lineHeight?: string;
-  letterSpacing?: string;
-};
-
 // 定义子组件 props 的类型
 interface ChildProps {
   position?: ComponentPosition;
@@ -41,15 +35,15 @@ export function TwoColumnLayout({ children, layout, designTokens }: Props) {
     }
   });
 
-  const extendedTypography = designTokens.typography as ExtendedTypography;
+  const { typography } = designTokens;
 
   const containerStyle: React.CSSProperties = {
     width: layout.containerWidth,
     maxWidth: layout.containerWidth,
     backgroundColor: designTokens.colors.background,
     fontFamily: designTokens.typography.fontFamily.primary,
-    lineHeight: extendedTypography.lineHeight || '1.5',
-    letterSpacing: extendedTypography.letterSpacing || '0px',
+    lineHeight: typography.lineHeight?.toString() || '1.5',
+    letterSpacing: typography.letterSpacing || '0px',
   };
 
   const sidebarStyle: React.CSSProperties = {
@@ -57,8 +51,8 @@ export function TwoColumnLayout({ children, layout, designTokens }: Props) {
     backgroundColor: designTokens.colors.sidebar || designTokens.colors.primary,
     padding: layout.padding,
     gap: layout.gap,
-    lineHeight: extendedTypography.lineHeight || '1.5',
-    letterSpacing: extendedTypography.letterSpacing || '0px',
+    lineHeight: typography.lineHeight?.toString() || '1.5',
+    letterSpacing: typography.letterSpacing || '0px',
   };
 
   const mainStyle: React.CSSProperties = {
@@ -66,8 +60,8 @@ export function TwoColumnLayout({ children, layout, designTokens }: Props) {
     color: designTokens.colors.text,
     padding: layout.padding,
     gap: layout.gap,
-    lineHeight: extendedTypography.lineHeight || '1.5',
-    letterSpacing: extendedTypography.letterSpacing || '0px',
+    lineHeight: typography.lineHeight?.toString() || '1.5',
+    letterSpacing: typography.letterSpacing || '0px',
   };
 
   return (
