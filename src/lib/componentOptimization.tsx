@@ -1,6 +1,7 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
 import { ComponentType } from 'react';
+import { Loader2 } from 'lucide-react';
 
 /**
  * 创建优化的动态导入组件
@@ -52,7 +53,9 @@ export const EditorComponents = {
     () => import('@microlink/react-json-view'),
     {
       ssr: false,
-      loading: () => <div className="animate-pulse bg-gray-50 h-64 rounded" />,
+      loading: () => <div className="w-full h-full flex items-center justify-center text-white">
+      <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+    </div>,
     }
   ),
 };
