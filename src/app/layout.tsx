@@ -8,6 +8,7 @@ import metaConfig from "@/constant/metaConfig";
 import I18nProvider from "@/app/dashboard/_components/I18nProvider";
 import LanguageSwitcher from "@/app/components/LanguageSwitcher";
 import PreloadOptimizer from "@/app/components/PreloadOptimizer";
+import StructuredData from "@/app/components/StructuredData";
 import Script from "next/script";
 
 // 字体配置
@@ -46,6 +47,11 @@ export default function RootLayout({
             <LanguageSwitcher />
           </I18nProvider>
 
+          {/* 结构化数据 */}
+          <StructuredData type="website" />
+          <StructuredData type="organization" />
+          <StructuredData type="product" />
+          
           {/* Umami Analytics */}
           <Script async src="https://cloud.umami.is/script.js" data-website-id="566da2ef-02bf-4b3f-9374-14ec66075e32" />
         </body>

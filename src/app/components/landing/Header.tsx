@@ -69,22 +69,6 @@ export function Header() {
             >
               <StarOnGitHub />
             </motion.div>
-
-            {/* 移动端菜单按钮 */}
-            <motion.button
-              className="md:hidden p-2 rounded-lg bg-neutral-800/50 border border-neutral-700 hover:border-purple-400 transition-colors"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.98 }}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4, duration: 0.6 }}
-            >
-              <div className="flex flex-col gap-1">
-                <div className="w-4 h-0.5 bg-white rounded-full" />
-                <div className="w-4 h-0.5 bg-white rounded-full" />
-                <div className="w-4 h-0.5 bg-white rounded-full" />
-              </div>
-            </motion.button>
           </nav>
         </div>
       </div>
