@@ -535,8 +535,8 @@
       "hide": "隐藏",
       "view": "查看",
       "parseResumeData": "解析的简历数据",
-      "closePreview": "关闭预览",
-      "previewResume": "预览简历"
+      "closePreview": "关闭",
+      "previewResume": "预览"
     }
   },
   "report": {

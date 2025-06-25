@@ -9,14 +9,16 @@ interface Props {
 }
 
 export function Layout({ children, layout, designTokens, style }: Props) {
+  const { typography } = designTokens;
+
   const containerStyle: React.CSSProperties = {
     width: layout.containerWidth,
     maxWidth: layout.containerWidth,
     backgroundColor: designTokens.colors.background,
     color: designTokens.colors.text,
     fontFamily: designTokens.typography.fontFamily.primary,
-    lineHeight: (designTokens.typography as any).lineHeight || '1.5',
-    letterSpacing: (designTokens.typography as any).letterSpacing || '0px',
+    lineHeight: typography.lineHeight?.toString() || '1.5',
+    letterSpacing: typography.letterSpacing || '0px',
     ...style,
   };
 

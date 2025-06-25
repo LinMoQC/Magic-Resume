@@ -67,6 +67,7 @@ const nextConfig: NextConfig = {
       '@langchain/core',
       '@langchain/community',
     ],
+    viewTransition: true,
   },
 
   // Webpack优化暂时禁用，避免构建错误

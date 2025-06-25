@@ -535,8 +535,8 @@
       "hide": "Hide",
       "view": "View",
       "parseResumeData": "Parsed Resume Data",
-      "closePreview": "Close Preview",
-      "previewResume": "Preview Resume"
+      "closePreview": "Close",
+      "previewResume": "Preview"
     }
   },
   "report": {

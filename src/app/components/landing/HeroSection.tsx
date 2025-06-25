@@ -183,12 +183,12 @@ export function HeroSection() {
           >
             <Link href="/dashboard">
               <motion.div
-                className="group relative overflow-hidden"
+                className="group relative overflow-hidden rounded-lg"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-cyan-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="relative bg-gradient-to-r from-purple-600 to-purple-700 text-white px-8 py-4 rounded-lg font-semibold transition-all duration-300 flex items-center gap-3 shadow-lg group-hover:shadow-purple-500/25 group-hover:shadow-xl">
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-cyan-600 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-lg" />
+                <div className="relative z-10 bg-gradient-to-r from-purple-600 to-purple-700 text-white px-8 py-4 rounded-lg font-semibold transition-all duration-300 flex items-center gap-3 shadow-lg group-hover:shadow-purple-500/25 group-hover:shadow-xl">
                   {t("landing.hero.getStarted")} 
                   <motion.div
                     animate={{ x: [0, 4, 0] }}

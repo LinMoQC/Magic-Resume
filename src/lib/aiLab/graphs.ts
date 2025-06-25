@@ -426,6 +426,7 @@ const shouldContinueRewrite = (state: GraphState): "continue" | "end" => {
   return state.currentTask ? "continue" : "end";
 };
 
+// LangGraph 框架要求通道定义使用 any 类型
 const getChannels = () => ({
   jd: { value: (x: any, y: any) => y, default: () => "" },
   resume: { value: (x: any, y: any) => y, default: () => ({} as Resume) },
