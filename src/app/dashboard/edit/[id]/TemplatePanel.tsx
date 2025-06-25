@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, ArrowRight, Settings } from 'lucide-react';
+import { ArrowLeft, Settings } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
 import { FaRegClone } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
@@ -315,7 +315,7 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
         initial="hidden"
         animate="show"
       >
-        {templates.map((template: MagicTemplateDSL, index) => (
+        {templates.map((template: MagicTemplateDSL) => (
           <motion.div
             key={template.id}
             variants={{
