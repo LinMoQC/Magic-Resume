@@ -1,8 +1,18 @@
 import Script from 'next/script'
 
+// 定义结构化数据的类型
+interface ArticleData {
+  title?: string;
+  description?: string;
+  image?: string;
+  publishDate?: string;
+  modifyDate?: string;
+  url?: string;
+}
+
 interface StructuredDataProps {
   type: 'website' | 'article' | 'product' | 'organization' | 'faq' | 'howto'
-  data?: Record<string, any>
+  data?: ArticleData
 }
 
 export default function StructuredData({ type, data = {} }: StructuredDataProps) {

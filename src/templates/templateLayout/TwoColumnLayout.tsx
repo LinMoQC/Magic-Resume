@@ -1,10 +1,21 @@
 import React from 'react';
-import { MagicTemplateDSL } from '../types/magic-dsl';
+import { MagicTemplateDSL, ComponentPosition } from '../types/magic-dsl';
 
 interface Props {
   children: React.ReactNode;
   layout: MagicTemplateDSL['layout'];
   designTokens: MagicTemplateDSL['designTokens'];
+}
+
+// 使用交叉类型定义扩展的 typography 类型
+type ExtendedTypography = MagicTemplateDSL['designTokens']['typography'] & {
+  lineHeight?: string;
+  letterSpacing?: string;
+};
+
+// 定义子组件 props 的类型
+interface ChildProps {
+  position?: ComponentPosition;
 }
 
 export function TwoColumnLayout({ children, layout, designTokens }: Props) {
@@ -20,8 +31,8 @@ export function TwoColumnLayout({ children, layout, designTokens }: Props) {
 
   React.Children.forEach(children, (child) => {
     if (React.isValidElement(child)) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const position = (child.props as any)?.position;
+      const childProps = child.props as ChildProps;
+      const position = childProps?.position;
       if (position?.area === 'sidebar') {
         sidebarComponents.push(child);
       } else {
@@ -30,13 +41,15 @@ export function TwoColumnLayout({ children, layout, designTokens }: Props) {
     }
   });
 
+  const extendedTypography = designTokens.typography as ExtendedTypography;
+
   const containerStyle: React.CSSProperties = {
     width: layout.containerWidth,
     maxWidth: layout.containerWidth,
     backgroundColor: designTokens.colors.background,
     fontFamily: designTokens.typography.fontFamily.primary,
-    lineHeight: (designTokens.typography as any).lineHeight || '1.5',
-    letterSpacing: (designTokens.typography as any).letterSpacing || '0px',
+    lineHeight: extendedTypography.lineHeight || '1.5',
+    letterSpacing: extendedTypography.letterSpacing || '0px',
   };
 
   const sidebarStyle: React.CSSProperties = {
@@ -44,8 +57,8 @@ export function TwoColumnLayout({ children, layout, designTokens }: Props) {
     backgroundColor: designTokens.colors.sidebar || designTokens.colors.primary,
     padding: layout.padding,
     gap: layout.gap,
-    lineHeight: (designTokens.typography as any).lineHeight || '1.5',
-    letterSpacing: (designTokens.typography as any).letterSpacing || '0px',
+    lineHeight: extendedTypography.lineHeight || '1.5',
+    letterSpacing: extendedTypography.letterSpacing || '0px',
   };
 
   const mainStyle: React.CSSProperties = {
@@ -53,8 +66,8 @@ export function TwoColumnLayout({ children, layout, designTokens }: Props) {
     color: designTokens.colors.text,
     padding: layout.padding,
     gap: layout.gap,
-    lineHeight: (designTokens.typography as any).lineHeight || '1.5',
-    letterSpacing: (designTokens.typography as any).letterSpacing || '0px',
+    lineHeight: extendedTypography.lineHeight || '1.5',
+    letterSpacing: extendedTypography.letterSpacing || '0px',
   };
 
   return (
