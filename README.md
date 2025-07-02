@@ -80,14 +80,15 @@ cp .env.local.example .env.local
 
 ### 🔑 环境变量配置
 
-项目根目录已包含 `.env.local.example` 示范文件，包含详细的配置说明：
+创建 `.env.local` 文件进行配置：
 
 ```bash
-# 复制示范文件
-cp .env.local.example .env.local
+# 必需配置
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxx
+CLERK_SECRET_KEY=sk_test_xxx
 
-# 编辑配置文件，填入您的密钥
-vim .env.local  # 或使用您喜欢的编辑器
+# 可选配置 - Google Analytics
+NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
 ```
 
 **核心配置项：**
@@ -95,6 +96,7 @@ vim .env.local  # 或使用您喜欢的编辑器
 | 配置类别 | 必需性 | 说明 |
 |---------|-------|------|
 | **Clerk 认证** | ✅ 必需 | 用户登录注册系统 |
+| **Google Analytics** | ⚙️ 可选 | 网站流量分析 |
 | **后端服务** | ⚙️ 可选 | 完整后端支持 |
 
 ### 🏃‍♂️ 运行项目
@@ -162,6 +164,23 @@ npm run lint
 2. 配置后端地址：`BACKEND_URL=http://127.0.0.1:8000`
 3. 启用后端：`NEXT_PUBLIC_IF_USE_BACKEND=true`
 4. 详见后端项目的部署文档
+
+</details>
+
+<details>
+<summary><strong>📊 Google Analytics 配置 (可选)</strong></summary>
+
+**网站流量分析** - 了解用户行为和网站性能
+1. 访问 [Google Analytics](https://analytics.google.com/)
+2. 创建账户和媒体资源
+3. 获取测量ID：`NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX`
+
+**隐私保护特性**：
+- 仅在生产环境启用
+- 其他用户部署时不会影响您的数据
+- 支持自定义事件追踪
+
+详细配置请参考：[ANALYTICS_SETUP.md](./ANALYTICS_SETUP.md)
 
 </details>
 

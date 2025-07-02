@@ -66,15 +66,21 @@ export const EditorComponents = {
  */
 export const preloadComponents = () => {
   if (typeof window !== 'undefined') {
-    // 预加载编辑器（编辑页面的核心功能）
-    setTimeout(() => {
-      import('@/app/components/TiptapEditor');
-    }, 1000);
+    // 只在dashboard或edit路由才预加载编辑器组件
+    const currentPath = window.location.pathname;
+    const isDashboardRoute = currentPath.startsWith('/dashboard') || currentPath.startsWith('/edit');
+    
+    if (isDashboardRoute) {
+      // 预加载编辑器（编辑页面的核心功能）
+      setTimeout(() => {
+        import('@/app/components/TiptapEditor');
+      }, 1000);
 
-    // 预加载Monaco编辑器
-    setTimeout(() => {
-      import('@monaco-editor/react');
-    }, 2000);
+      // 预加载Monaco编辑器
+      setTimeout(() => {
+        import('@monaco-editor/react');
+      }, 2000);
+    }
   }
 };
 
