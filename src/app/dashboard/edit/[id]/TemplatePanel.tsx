@@ -491,7 +491,7 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
       </motion.aside>
 
       <motion.div
-        className="fixed top-1/2 -translate-y-1/2 z-50"
+        className="fixed top-1/2 -translate-y-1/2 z-41"
         variants={buttonVariants}
         animate={rightCollapsed ? 'collapsed' : 'expanded'}
         initial={rightCollapsed ? 'collapsed' : 'expanded'}
