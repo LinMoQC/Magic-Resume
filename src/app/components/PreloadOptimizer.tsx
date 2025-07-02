@@ -2,15 +2,23 @@
 
 import { useEffect } from 'react';
 import { preloadComponents, measureComponentPerformance } from '@/lib/componentOptimization';
+import { usePathname } from 'next/navigation';
 
 export default function PreloadOptimizer() {
-  useEffect(() => {
-    // 应用启动时预加载关键组件
-    preloadComponents();
+  const pathname = usePathname();
 
+  useEffect(() => {
     // 性能监控
     const perf = measureComponentPerformance('App-Initialization');
     perf.start();
+
+    // 根据路由决定是否预加载
+    const isDashboardRoute = pathname?.startsWith('/dashboard') || pathname?.startsWith('/edit');
+    
+    if (isDashboardRoute) {
+      // 只在dashboard相关页面预加载编辑器组件
+      preloadComponents();
+    }
 
     // 在DOM完全加载后结束监控
     const handleLoad = () => {
@@ -33,7 +41,7 @@ export default function PreloadOptimizer() {
     return () => {
       window.removeEventListener('load', handleLoad);
     };
-  }, []);
+  }, [pathname]);
 
   // 这个组件不渲染任何内容，只负责后台优化
   return null;

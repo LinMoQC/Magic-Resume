@@ -369,6 +369,7 @@ const useResumeStore = create<ResumeState>((set, get) => ({
   setActiveSection: (section) => set({ activeSection: section }),
 }));
 
-useResumeStore.getState().loadResumes();
+// 移除立即加载，改为按需加载
+// useResumeStore.getState().loadResumes();
 
 export { useResumeStore };

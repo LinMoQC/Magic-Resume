@@ -1,9 +1,18 @@
 import { create } from 'zustand';
 import { dbClient } from '@/lib/IndexDBClient';
 
-if (typeof window !== 'undefined') {
-  dbClient.init().catch(err => console.error('Failed to init db for settings', err));
-}
+// 移除立即初始化，改为懒加载
+let dbInitialized = false;
+const ensureDbInitialized = async () => {
+  if (!dbInitialized && typeof window !== 'undefined') {
+    try {
+      await dbClient.init();
+      dbInitialized = true;
+    } catch (err) {
+      console.error('Failed to init db for settings', err);
+    }
+  }
+};
 
 interface SettingsData {
   apiKey: string;
@@ -58,6 +67,7 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
   },
   
   saveSettings: async () => {
+    await ensureDbInitialized();
     const { apiKey, baseUrl, model, maxTokens } = get();
     const newSettings = { apiKey, baseUrl, model, maxTokens };
     await dbClient.setItem('settings', newSettings);
@@ -72,6 +82,7 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
   },
 
   loadSettings: async () => {
+    await ensureDbInitialized();
     const savedSettings = await dbClient.getItem('settings') as SettingsData | null;
     if (savedSettings) {
       set({ ...savedSettings, initialSettings: { ...savedSettings }, isDirty: false });
@@ -79,6 +90,5 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
   },
 }));
 
-if (typeof window !== 'undefined') {
-  useSettingStore.getState().loadSettings();
-} 
+// 移除立即加载，改为按需加载
+// useSettingStore.getState().loadSettings(); 

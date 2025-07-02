@@ -7,6 +7,7 @@ import { Paperclip, Wand2, Loader2, CheckCircle, Eye, Code } from 'lucide-react'
 import { LogItem } from './LogItem';
 import { useResumeOptimizer } from '@/app/hooks/useResumeOptimizer';
 import ResumePreview from '../ResumePreview';
+import { trackEvent } from '@/app/components/Analytics';
 
 import { EditorComponents } from '@/lib/componentOptimization';
 
@@ -42,11 +43,24 @@ export default function OptimizeTab({ resumeData, onApplyChanges, templateId, is
 
   const handleOptimize = () => {
     setIsPreview(false);
+    
+    // 追踪AI优化使用
+    trackEvent('ai_optimization_started', {
+      feature: 'resume_optimize',
+      user_action: 'optimize_button_click'
+    });
+    
     runOptimization({ jd, resumeData });
   };
   
   const handleApply = () => {
     if (optimizedResume) {
+      // 追踪优化结果应用
+      trackEvent('ai_optimization_applied', {
+        feature: 'resume_optimize',
+        sections_optimized: Object.keys(optimizedResume.sections || {}).length
+      });
+      
       onApplyChanges(optimizedResume.sections);
     }
   };
