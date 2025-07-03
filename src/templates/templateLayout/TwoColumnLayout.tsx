@@ -71,7 +71,7 @@ export function TwoColumnLayout({ children, layout, designTokens }: Props) {
       style={containerStyle}
     >
       <div 
-        className="flex min-h-[1100px]"
+        className="flex"
         style={{ gap: twoColumn.gap }}
       >
         {/* 左侧边栏 */}

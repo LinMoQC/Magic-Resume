@@ -1,4 +1,5 @@
-import { cn, handleExport } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { exportOriginalStyle } from "@/lib/puppeteer-export";
 import { InfoType } from "@/store/useResumeStore";
 import { DownloadIcon } from "@radix-ui/react-icons";
 import { Bot } from "lucide-react";
@@ -11,7 +12,7 @@ export type ToolsProps = {
   resetTransform: (step?: number) => void;
   info: InfoType;
   onShowAI: () => void;
-  rightCollapsed?: boolean; // 新增：模板栏是否收起
+  rightCollapsed?: boolean; 
 };
 
 export function Tools({ isMobile, zoomIn, zoomOut, resetTransform, info, onShowAI, rightCollapsed = false }: ToolsProps){
@@ -31,18 +32,22 @@ export function Tools({ isMobile, zoomIn, zoomOut, resetTransform, info, onShowA
       style={!isMobile ? { right: desktopRightPosition } : undefined}
     >
 
-      {!isMobile &&         <button
-        className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"
-        title={t('tools.aiAssistant')}
-        type="button"
-        onClick={onShowAI}
-      >
-        <Bot size={18}/>
-      </button>}
+      {!isMobile && (
+        <>
+          <button
+            className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"
+            title={t('tools.aiAssistant')}
+            type="button"
+            onClick={onShowAI}
+          >
+            <Bot size={18}/>
+          </button>
+        </>
+      )}
       
       <button
         className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"
-        onClick={() => handleExport(info)}
+        onClick={() => exportOriginalStyle(info)}
         title={t('tools.exportPDF')}
         type="button"
       >

@@ -1,39 +1,39 @@
 import React from 'react';
 import { InfoType } from '@/store/useResumeStore';
-import { FaEnvelope, FaPhone, FaGlobe, FaMapMarkerAlt } from 'react-icons/fa';
+import { MapPin, Phone, Mail, Globe } from 'lucide-react';
 import Image from 'next/image';
 
 interface Props {
   data: InfoType;
-  iconType?: 'react' | 'svg';
+  iconType?: 'react' | 'svg'; // 'react': React Icons, 'svg': Lucide Icons  
   style?: React.CSSProperties;
   className?: string;
 }
 
-// Emoji图标组件
-const EmojiIcons = {
-  location: <span className="text-xs flex items-center justify-center w-2.5 h-2.5">📍</span>,
-  phone: <span className="text-xs flex items-center justify-center w-2.5 h-2.5">📞</span>,
-  email: <span className="text-xs flex items-center justify-center w-2.5 h-2.5">📧</span>,
-  website: <span className="text-xs flex items-center justify-center w-2.5 h-2.5">🌐</span>
+// Lucide图标组件
+const LucideIcons = {
+  location: <MapPin className="w-2.5 h-2.5" style={{ color: 'var(--color-primary)', strokeWidth: 2.5 }} />,
+  phone: <Phone className="w-2.5 h-2.5" style={{ color: 'var(--color-primary)', strokeWidth: 2.5 }} />,
+  email: <Mail className="w-2.5 h-2.5" style={{ color: 'var(--color-primary)', strokeWidth: 2.5 }} />,
+  website: <Globe className="w-2.5 h-2.5" style={{ color: 'var(--color-primary)', strokeWidth: 2.5 }} />
 };
 
 export function Header({ data: info, iconType = 'svg', style, className }: Props) {
   const getIcon = (type: string) => {
     if (iconType === 'svg') {
       switch (type) {
-        case 'location': return EmojiIcons.location;
-        case 'phone': return EmojiIcons.phone;
-        case 'email': return EmojiIcons.email;
-        case 'website': return EmojiIcons.website;
+        case 'location': return LucideIcons.location;
+        case 'phone': return LucideIcons.phone;
+        case 'email': return LucideIcons.email;
+        case 'website': return LucideIcons.website;
         default: return null;
       }
     } else {
       switch (type) {
-        case 'location': return <FaMapMarkerAlt className="w-2.5 h-2.5" style={{ verticalAlign: 'top', display: 'block', color: 'var(--color-primary)' }} />;
-        case 'phone': return <FaPhone className="w-2.5 h-2.5" style={{ verticalAlign: 'top', display: 'block', color: 'var(--color-primary)' }} />;
-        case 'email': return <FaEnvelope className="w-2.5 h-2.5" style={{ verticalAlign: 'top', display: 'block', color: 'var(--color-primary)' }} />;
-        case 'website': return <FaGlobe className="w-2.5 h-2.5" style={{ verticalAlign: 'top', display: 'block', color: 'var(--color-primary)' }} />;
+        case 'location': return LucideIcons.location;
+        case 'phone': return LucideIcons.phone;
+        case 'email': return LucideIcons.email;
+        case 'website': return LucideIcons.website;
         default: return null;
       }
     }

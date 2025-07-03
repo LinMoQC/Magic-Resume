@@ -3,39 +3,36 @@
 import React from 'react';
 import ResumePreview from './ResumePreview';
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
-import { InfoType, Section } from '@/store/useResumeStore';
+import { Resume } from '@/store/useResumeStore';
 import useMobile from '@/app/hooks/useMobile';
 import { Tools } from './Tools';
 import AiThinkingOverlay from './AiThinkingOverlay';
-import { CustomTemplateConfig } from '@/store/useResumeStore';
 
 interface ResumePreviewPanelProps {
-  info: InfoType;
-  sections: Section;
-  sectionOrder: string[];
+  activeResume: Resume | null;
   previewScale: number;
   setPreviewScale: (scale: number) => void;
   onShowAI: () => void;
-  templateId: string;
-  customTemplate?: CustomTemplateConfig; // 新增：自定义模板配置差异
   isAiJobRunning: boolean;
-  themeColor?: string;
   rightCollapsed?: boolean; // 新增：模板栏是否收起
 }
 
 const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
-  info,
-  sections,
-  sectionOrder,
+  activeResume,
   setPreviewScale,
   onShowAI,
-  templateId,
-  customTemplate,
   isAiJobRunning,
-  themeColor = '#38bdf8',
   rightCollapsed = false
 }) => {
   const { isMobile } = useMobile();
+
+  if (!activeResume) {
+    return (
+      <section className="flex-1 flex items-center justify-center bg-black relative overflow-hidden max-h-screen">
+        <div className="text-white">Loading...</div>
+      </section>
+    );
+  }
 
   return (
     <section
@@ -57,20 +54,20 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
             >
               <div className="relative">
                 <ResumePreview 
-                  info={info} 
-                  sections={sections} 
-                  sectionOrder={sectionOrder} 
-                  templateId={templateId}
-                  customTemplate={customTemplate}
+                  info={activeResume.info} 
+                  sections={activeResume.sections} 
+                  sectionOrder={activeResume.sectionOrder.map(s => s.key)} 
+                  templateId={activeResume.template}
+                  customTemplate={activeResume.customTemplate}
                 />
                 <AiThinkingOverlay 
                   isVisible={isAiJobRunning} 
-                  themeColor={themeColor}
+                  themeColor={activeResume.themeColor || '#38bdf8'}
                 />
               </div>
             </TransformComponent>
 
-            <Tools isMobile={isMobile} zoomIn={zoomIn} zoomOut={zoomOut} resetTransform={resetTransform} info={info} onShowAI={onShowAI} rightCollapsed={rightCollapsed} />
+            <Tools isMobile={isMobile} zoomIn={zoomIn} zoomOut={zoomOut} resetTransform={resetTransform} info={activeResume.info} onShowAI={onShowAI} rightCollapsed={rightCollapsed} />
           </>
         )}
       </TransformWrapper>

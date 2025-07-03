@@ -281,9 +281,6 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
   if (isMobile) {
     return (
       <MobileResumEdit
-        info={info}
-        sectionItems={sectionItems}
-        sectionOrder={sectionOrder}
         activeResume={activeResume}
         setPreviewScale={setPreviewScale}
         leftPanelOpen={leftPanelOpen}
@@ -321,16 +318,11 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
         >
           {/* 简历预览面板 */}
         <ResumePreviewPanel
-          info={info}
-          sections={sectionItems}
-          sectionOrder={sectionOrder.map(s => s.key)}
+          activeResume={activeResume}
           previewScale={previewScale}
           setPreviewScale={setPreviewScale}
           onShowAI={openAIModal}
-          templateId={currentTemplateId}
-          customTemplate={activeResume.customTemplate}
           isAiJobRunning={isAiJobRunning}
-          themeColor={activeResume.themeColor}
           rightCollapsed={rightCollapsed}
         />
         </div>
