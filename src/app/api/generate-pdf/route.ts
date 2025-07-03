@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import puppeteer from 'puppeteer';
+import chromium from '@sparticuz/chromium';
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,21 +10,40 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'HTML content is required' }, { status: 400 });
     }
 
-    // 启动浏览器（使用系统Chrome或下载的Chrome）
+    // 根据环境选择Chrome执行路径和参数
+    const isDev = process.env.NODE_ENV === 'development';
+    const isVercel = process.env.VERCEL === '1';
+    
+    let executablePath: string | undefined;
+    const baseArgs = [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--no-first-run',
+      '--no-zygote',
+      '--single-process',
+      '--disable-gpu'
+    ];
+
+    let args: string[];
+    if (isVercel || process.env.NODE_ENV === 'production') {
+      // Vercel或生产环境：使用@sparticuz/chromium
+      executablePath = await chromium.executablePath();
+      args = [...baseArgs, ...chromium.args];
+    } else if (isDev) {
+      // 开发环境：尝试使用本地Chrome
+      executablePath = process.env.CHROME_BIN || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+      args = baseArgs;
+    } else {
+      args = baseArgs;
+    }
+
+    // 启动浏览器
     const browser = await puppeteer.launch({
       headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
-        '--no-zygote',
-        '--single-process', // 这个在某些环境下需要
-        '--disable-gpu'
-      ],
-      // 尝试使用系统Chrome
-      executablePath: process.env.CHROME_BIN || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+      args,
+      executablePath,
     });
 
     const page = await browser.newPage();

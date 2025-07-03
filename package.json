@@ -51,6 +51,7 @@
     "@react-pdf/renderer": "^4.3.0",
     "@react-three/drei": "^10.2.0",
     "@react-three/fiber": "^9.1.2",
+    "@sparticuz/chromium": "^137.0.1",
     "@tiptap/extension-color": "^2.14.0",
     "@tiptap/extension-link": "^2.14.0",
     "@tiptap/extension-text-align": "^2.14.0",
