@@ -9,8 +9,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'HTML content is required' }, { status: 400 });
     }
 
-    console.log('收到PDF生成请求，HTML长度:', html.length);
-
     // 启动浏览器（使用系统Chrome或下载的Chrome）
     const browser = await puppeteer.launch({
       headless: true,
@@ -29,11 +27,6 @@ export async function POST(request: NextRequest) {
     });
 
     const page = await browser.newPage();
-    
-    // 监听浏览器控制台输出
-    page.on('console', (msg) => {
-      console.log('浏览器输出:', msg.text());
-    });
 
     // 设置页面尺寸 - 先用较大的高度
     await page.setViewport({ 
@@ -53,26 +46,17 @@ export async function POST(request: NextRequest) {
 
     // 检测内容的实际高度
     const contentInfo = await page.evaluate(() => {
-      console.log('开始检测简历内容...');
       const resumeElement = document.getElementById('resume-to-export');
       if (resumeElement) {
         const rect = resumeElement.getBoundingClientRect();
         const scrollHeight = resumeElement.scrollHeight;
         const offsetHeight = resumeElement.offsetHeight;
-        console.log('找到简历元素');
-        console.log('scrollHeight:', scrollHeight);
-        console.log('offsetHeight:', offsetHeight);
-        console.log('getBoundingClientRect高度:', rect.height);
-        console.log('简历元素innerHTML长度:', resumeElement.innerHTML.length);
         return {
           height: Math.max(scrollHeight, offsetHeight, rect.height),
           width: rect.width
         };
       } else {
-        console.log('未找到简历元素，使用body高度');
         const bodyHeight = document.body.scrollHeight;
-        console.log('body内容:', document.body.innerHTML.substring(0, 200) + '...');
-        console.log('body scrollHeight:', bodyHeight);
         return {
           height: bodyHeight,
           width: 794
@@ -80,10 +64,9 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    console.log('Node.js: 检测到的内容信息:', contentInfo);
-
     // 计算PDF尺寸 - A4宽度，内容实际高度
     const a4WidthMm = 210; // A4宽度（毫米）
+    const a4HeightMm = 297; // A4高度（毫米）
     
     // 像素转毫米的转换比例 (96 DPI standard)
     // 1 inch = 25.4 mm, 1 inch = 96 pixels
@@ -92,12 +75,8 @@ export async function POST(request: NextRequest) {
     const contentHeightMm = contentInfo.height * pixelToMm;
     
     // 减少缓冲区，只添加必要的边距（上下各5mm）
-    const finalHeightMm = contentHeightMm + 10;
-    
-    console.log(`内容高度: ${contentInfo.height}px`);
-    console.log(`转换为毫米: ${contentHeightMm.toFixed(2)}mm`);
-    console.log(`最终PDF高度: ${finalHeightMm.toFixed(2)}mm`);
-    console.log(`PDF尺寸: ${a4WidthMm}mm x ${finalHeightMm.toFixed(2)}mm`);
+    // 确保最小高度不小于A4标准高度
+    const finalHeightMm = Math.max(contentHeightMm + 10, a4HeightMm);
 
     // 生成单页无限延长PDF
     const pdfBuffer = await page.pdf({
@@ -117,9 +96,6 @@ export async function POST(request: NextRequest) {
     });
 
     await browser.close();
-
-    console.log('PDF生成成功，大小:', pdfBuffer.length, 'bytes');
-    console.log('单页无限延长PDF已生成');
 
     // 返回PDF
     return new NextResponse(pdfBuffer, {
