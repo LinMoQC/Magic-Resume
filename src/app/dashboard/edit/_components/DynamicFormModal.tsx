@@ -128,7 +128,7 @@ export default function DynamicFormModal<T extends Item>({
         )}
       </div>
       <div className="mt-6 flex justify-end gap-2">
-        <Button variant="outline" onClick={onClose}>{t('modals.dynamicForm.cancelButton')}</Button>
+        <Button onClick={onClose}>{t('modals.dynamicForm.cancelButton')}</Button>
         <Button onClick={handleSave}>{t('modals.dynamicForm.saveButton')}</Button>
       </div>
     </Modal>

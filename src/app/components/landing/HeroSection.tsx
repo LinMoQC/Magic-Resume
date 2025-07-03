@@ -6,7 +6,7 @@ import { FiArrowRight, FiStar, FiZap, FiShield } from 'react-icons/fi';
 import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
 import { MorphingText } from '@/app/components/morphing-text';
-import { useEffect } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 
 // 简化的浮动图标组件
 const SimpleFloatingIcon = ({ icon: Icon, delay = 0 }: { 
@@ -31,35 +31,74 @@ const SimpleFloatingIcon = ({ icon: Icon, delay = 0 }: {
   </motion.div>
 );
 
-// 增强的粒子效果组件
+// 确定性随机数生成器
+const seededRandom = (seed: number) => {
+  let state = seed;
+  return () => {
+    state = (state * 1664525 + 1013904223) % 2**32;
+    return state / 2**32;
+  };
+};
+
+// 修复水合错误的粒子效果组件
 const SimpleParticleField = () => {
-  const particles = Array.from({ length: 50 }, (_, i) => (
-    <motion.div
-      key={i}
-      className="absolute w-1 h-1 bg-purple-400/50 rounded-full"
-      initial={{ 
-        opacity: 0,
-        x: Math.random() * 1200,
-        y: Math.random() * 800,
-      }}
-      animate={{
-        opacity: [0, 1, 0],
-        y: [Math.random() * 800, Math.random() * 800 - 200],
-        x: [Math.random() * 1200, Math.random() * 1200 + 50],
-        scale: [0, 1, 0]
-      }}
-      transition={{
-        duration: Math.random() * 5 + 5,
-        delay: Math.random() * 4,
-        repeat: Infinity,
-        ease: "linear"
-      }}
-    />
-  ));
+  const [isClient, setIsClient] = useState(false);
+  
+  // 使用固定种子生成确定性随机数
+  const particleElements = useMemo(() => {
+    if (!isClient) return [];
+    
+    const random = seededRandom(12345); // 固定种子
+    
+    return Array.from({ length: 50 }, (_, i) => {
+      const initialX = random() * 1200;
+      const initialY = random() * 800;
+      const endY = random() * 800 - 200;
+      const endX = random() * 1200 + 50;
+      const duration = random() * 5 + 5;
+      const delay = random() * 4;
+      
+      return (
+        <motion.div
+          key={i}
+          className="absolute w-1 h-1 bg-purple-400/50 rounded-full"
+          initial={{ 
+            opacity: 0,
+            x: initialX,
+            y: initialY,
+          }}
+          animate={{
+            opacity: [0, 1, 0],
+            y: [initialY, endY],
+            x: [initialX, endX],
+            scale: [0, 1, 0]
+          }}
+          transition={{
+            duration,
+            delay,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+        />
+      );
+    });
+  }, [isClient]);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    return (
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* 服务端渲染时显示空容器 */}
+      </div>
+    );
+  }
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {particles}
+      {particleElements}
     </div>
   );
 };

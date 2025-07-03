@@ -9,7 +9,7 @@ import I18nProvider from "@/app/dashboard/_components/I18nProvider";
 import LanguageSwitcher from "@/app/components/LanguageSwitcher";
 import PreloadOptimizer from "@/app/components/PreloadOptimizer";
 import StructuredData from "@/app/components/StructuredData";
-import Script from "next/script";
+import Analytics from "@/app/components/Analytics";
 
 // 字体配置
 const inter = Inter({ subsets: ["latin"] });
@@ -52,8 +52,8 @@ export default function RootLayout({
           <StructuredData type="organization" />
           <StructuredData type="product" />
           
-          {/* Umami Analytics */}
-          <Script async src="https://cloud.umami.is/script.js" data-website-id="566da2ef-02bf-4b3f-9374-14ec66075e32" />
+          {/* 动态Analytics组件 */}
+          <Analytics />
         </body>
       </html>
     </ClerkProvider>
