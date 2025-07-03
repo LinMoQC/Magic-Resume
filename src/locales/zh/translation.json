@@ -508,7 +508,11 @@
     "notifications": {
       "success": "简历导出成功！",
       "error": "导出简历失败。",
-      "imageError": "加载用于导出的图片失败。"
+      "imageError": "加载用于导出的图片失败。",
+      "elementNotFound": "找不到简历元素",
+      "generating": "正在生成PDF...",
+      "unknownError": "未知错误",
+      "pdfGenerationFailed": "PDF生成失败"
     }
   },
   "store": {

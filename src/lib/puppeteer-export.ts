@@ -1,18 +1,16 @@
 import { toast } from "sonner";
 import { InfoType } from "@/store/useResumeStore";
+import i18n from '@/i18n';
 
 // 原样式导出（保持与预览一致，支持单页无限延长）
 export async function exportOriginalStyle(info: InfoType) {
   const resumeElement = document.getElementById('resume-to-export');
-  console.log('resume', info);
   if (!resumeElement) {
-    toast.error('找不到简历元素');
+    toast.error(i18n.t('export.notifications.elementNotFound'));
     return;
   }
 
   try {
-    toast.info('正在准备单页无限延长导出...');
-
     // 获取完整的HTML内容
     const clonedElement = resumeElement.cloneNode(true) as HTMLElement;
     
@@ -133,12 +131,7 @@ export async function exportOriginalStyle(info: InfoType) {
       </html>
     `;
 
-    console.log('前端调试 - 克隆元素内容长度:', clonedElement.innerHTML.length);
-    console.log('前端调试 - 构建的HTML长度:', fullHTML.length);
-    console.log('前端调试 - 简历信息:', info);
-    console.log('前端调试 - body内容预览:', clonedElement.outerHTML.substring(0, 300) + '...');
-
-    toast.info('正在生成单页无限延长PDF...');
+    toast.info(i18n.t('export.notifications.generating'));
 
     // 发送到后端API，启用单页无限延长模式
     const response = await fetch('/api/generate-pdf', {
@@ -157,7 +150,7 @@ export async function exportOriginalStyle(info: InfoType) {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.details || 'PDF生成失败');
+      throw new Error(errorData.details || i18n.t('export.notifications.pdfGenerationFailed'));
     }
 
     // 下载PDF
@@ -171,11 +164,11 @@ export async function exportOriginalStyle(info: InfoType) {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 
-    toast.success('单页无限延长PDF导出成功！');
+    toast.success(i18n.t('export.notifications.success'));
 
   } catch (error) {
     console.error('单页无限延长导出失败:', error);
-    toast.error(`导出失败: ${error instanceof Error ? error.message : '未知错误'}`);
+    toast.error(`${i18n.t('export.notifications.error')}: ${error instanceof Error ? error.message : i18n.t('export.notifications.unknownError')}`);
   }
 }
 

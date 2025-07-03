@@ -11,9 +11,12 @@ type Props = {
 export function Layout({ children, layout, designTokens, style }: Props) {
   const { typography } = designTokens;
 
+  const a4MinHeight = Math.round(parseInt(layout.containerWidth) * 297 / 210);
+  
   const containerStyle: React.CSSProperties = {
     width: layout.containerWidth,
     maxWidth: layout.containerWidth,
+    minHeight: `${a4MinHeight}px`,
     backgroundColor: designTokens.colors.background,
     color: designTokens.colors.text,
     fontFamily: designTokens.typography.fontFamily.primary,

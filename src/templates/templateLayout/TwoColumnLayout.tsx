@@ -7,7 +7,6 @@ interface Props {
   designTokens: MagicTemplateDSL['designTokens'];
 }
 
-// 定义子组件 props 的类型
 interface ChildProps {
   position?: ComponentPosition;
 }
@@ -37,22 +36,30 @@ export function TwoColumnLayout({ children, layout, designTokens }: Props) {
 
   const { typography } = designTokens;
 
+  // 计算A4纸张的最小高度：794px宽度对应的A4高度 (794 * 297/210 ≈ 1123px)
+  const a4MinHeight = Math.round(parseInt(layout.containerWidth) * 297 / 210);
+
   const containerStyle: React.CSSProperties = {
     width: layout.containerWidth,
     maxWidth: layout.containerWidth,
+    minHeight: `${a4MinHeight}px`, // 设置A4标准最小高度
     backgroundColor: designTokens.colors.background,
     fontFamily: designTokens.typography.fontFamily.primary,
     lineHeight: typography.lineHeight?.toString() || '1.5',
     letterSpacing: typography.letterSpacing || '0px',
+    borderRadius: '6px',
   };
 
   const sidebarStyle: React.CSSProperties = {
     width: twoColumn.leftWidth,
+    minHeight: `${a4MinHeight}px`,
     backgroundColor: designTokens.colors.sidebar || designTokens.colors.primary,
     padding: layout.padding,
     gap: layout.gap,
     lineHeight: typography.lineHeight?.toString() || '1.5',
     letterSpacing: typography.letterSpacing || '0px',
+    borderTopLeftRadius: '6px', 
+    borderBottomLeftRadius: '6px', 
   };
 
   const mainStyle: React.CSSProperties = {
@@ -62,6 +69,8 @@ export function TwoColumnLayout({ children, layout, designTokens }: Props) {
     gap: layout.gap,
     lineHeight: typography.lineHeight?.toString() || '1.5',
     letterSpacing: typography.letterSpacing || '0px',
+    borderTopRightRadius: '6px',
+    borderBottomRightRadius: '6px',
   };
 
   return (
@@ -71,7 +80,7 @@ export function TwoColumnLayout({ children, layout, designTokens }: Props) {
       style={containerStyle}
     >
       <div 
-        className="flex"
+        className="flex h-full"
         style={{ gap: twoColumn.gap }}
       >
         {/* 左侧边栏 */}

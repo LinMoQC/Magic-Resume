@@ -508,7 +508,11 @@
     "notifications": {
       "success": "Resume exported successfully!",
       "error": "Failed to export resume.",
-      "imageError": "Failed to load images for export."
+      "imageError": "Failed to load images for export.",
+      "elementNotFound": "Resume element not found",
+      "generating": "Generating PDF...",
+      "unknownError": "Unknown error",
+      "pdfGenerationFailed": "PDF generation failed"
     }
   },
   "store": {
