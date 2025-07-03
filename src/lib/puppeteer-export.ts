@@ -158,7 +158,7 @@ export async function exportOriginalStyle(info: InfoType) {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${info.fullName || 'resume'}-unlimited.pdf`;
+    link.download = `${info.fullName || 'resume'}.pdf`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
