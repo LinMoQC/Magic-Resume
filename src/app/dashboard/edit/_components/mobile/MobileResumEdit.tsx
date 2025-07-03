@@ -8,7 +8,7 @@ import ResumeContent from "../../[id]/ResumeContent";
 import TemplatePanel from "../../[id]/TemplatePanel";
 import Modal from "@/app/components/ui/Modal";
 import Image from "next/image";
-import { InfoType, Section, Resume } from "@/store/useResumeStore";
+import { Resume } from "@/store/useResumeStore";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -17,9 +17,6 @@ import { EditorComponents } from '@/lib/componentOptimization';
 const ReactJsonView = EditorComponents.JsonViewer;
 
 interface MobileResumEditProps {
-    info: InfoType;
-    sectionItems: Section;
-    sectionOrder: { key: string }[];
     activeResume: Resume | null;
     setPreviewScale: (scale: number) => void;
     leftPanelOpen: boolean;
@@ -37,9 +34,6 @@ interface MobileResumEditProps {
 }
 
 export default function MobileResumEdit({
-    info,
-    sectionItems,
-    sectionOrder,
     activeResume,
     setPreviewScale,
     leftPanelOpen,
@@ -61,16 +55,11 @@ export default function MobileResumEdit({
     return <main className="flex h-screen bg-black text-white flex-1">
         <div className='flex-1 flex items-center justify-center bg-black relative'>
             <ResumePreviewPanel
-                info={info}
-                sections={sectionItems}
-                sectionOrder={sectionOrder.map(s => s.key)}
+                activeResume={activeResume}
                 previewScale={0.8}
                 setPreviewScale={setPreviewScale}
                 onShowAI={onShowAI}
-                templateId={currentTemplateId}
-                customTemplate={activeResume?.customTemplate}
                 isAiJobRunning={isAiJobRunning}
-                themeColor={activeResume?.themeColor}
             />
         </div>
 

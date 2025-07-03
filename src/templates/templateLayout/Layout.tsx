@@ -1,12 +1,12 @@
 import React from 'react';
 import { MagicTemplateDSL } from '../types/magic-dsl';
 
-interface Props {
+type Props = {
   children: React.ReactNode;
   layout: MagicTemplateDSL['layout'];
   designTokens: MagicTemplateDSL['designTokens'];
   style?: React.CSSProperties;
-}
+};
 
 export function Layout({ children, layout, designTokens, style }: Props) {
   const { typography } = designTokens;
@@ -32,7 +32,7 @@ export function Layout({ children, layout, designTokens, style }: Props) {
   return (
     <div
       id="resume-to-export"
-      className="mx-auto bg-white text-black rounded-md shadow-2xl relative min-h-[1100px]"
+      className="mx-auto bg-white text-black rounded-md shadow-2xl relative"
       style={containerStyle}
     >
       <div className="flex flex-col" style={innerStyle}>

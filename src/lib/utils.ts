@@ -36,7 +36,17 @@ export function formatTime(ts: number) {
 } 
 
 // 简历快照
-export function generateSnapshot(): Promise<Blob | null> {
+export function generateSnapshot(options?: {
+  scale?: number;
+  quality?: number;
+  format?: 'png' | 'jpeg';
+}): Promise<Blob | null> {
+  const {
+    scale = 0.5,
+    quality = 0.7,
+    format = 'jpeg'
+  } = options || {};
+
   return new Promise(async (resolve) => {
     const element = document.getElementById('resume-to-export');
     if (!element) {
@@ -86,14 +96,16 @@ export function generateSnapshot(): Promise<Blob | null> {
       await Promise.all(imageLoadPromises);
 
       const canvas = await html2canvas(clonedResume, {
-        scale: 0.5,
+        scale: scale,
         useCORS: true,
         logging: false,
+        backgroundColor: '#ffffff',
       });
+      
       canvas.toBlob((blob) => {
         document.body.removeChild(clonedResume);
         resolve(blob);
-      }, 'image/jpeg', 0.7);
+      }, `image/${format}`, quality);
     } catch (error) {
       document.body.removeChild(clonedResume);
       MagicDebugger.error("Error generating snapshot:", error);
@@ -102,8 +114,92 @@ export function generateSnapshot(): Promise<Blob | null> {
   });
 };
 
+// 导出质量预设
+export const EXPORT_PRESETS = {
+  // 高质量 - 适合打印
+  high: {
+    scale: 2,
+    quality: 0.95,
+    format: 'png' as const,
+    compress: true,
+    description: '高质量 (适合打印, 文件较大)'
+  },
+  // 标准质量 - 平衡质量和文件大小
+  standard: {
+    scale: 1.5,
+    quality: 0.8,
+    format: 'jpeg' as const,
+    compress: true,
+    description: '标准质量 (推荐)'
+  },
+  // 压缩质量 - 文件最小
+  compressed: {
+    scale: 1,
+    quality: 0.6,
+    format: 'jpeg' as const,
+    compress: true,
+    description: '压缩质量 (文件最小)'
+  },
+  // 快速预览
+  preview: {
+    scale: 0.5,
+    quality: 0.5,
+    format: 'jpeg' as const,
+    compress: true,
+    description: '快速预览'
+  }
+} as const;
+
+// 便捷导出函数
+export function exportResumeWithPreset(info: InfoType, preset: keyof typeof EXPORT_PRESETS = 'standard') {
+  const options = EXPORT_PRESETS[preset];
+  return handleExport(info, options);
+}
+
+// 获取预计文件大小（估算）
+export function estimateFileSize(preset: keyof typeof EXPORT_PRESETS): string {
+  const { scale, quality, format } = EXPORT_PRESETS[preset];
+  
+  // 基础尺寸估算（A4纸张）
+  const baseWidth = 800; // 基础宽度
+  const baseHeight = 1130; // 基础高度（A4比例）
+  
+  const actualWidth = baseWidth * scale;
+  const actualHeight = baseHeight * scale;
+  const pixelCount = actualWidth * actualHeight;
+  
+  let bytesPerPixel: number;
+  if (format === 'png') {
+    bytesPerPixel = 4; // PNG RGBA
+  } else {
+    bytesPerPixel = 3 * quality; // JPEG with quality compression
+  }
+  
+  const estimatedBytes = pixelCount * bytesPerPixel;
+  const estimatedKB = Math.round(estimatedBytes / 1024);
+  const estimatedMB = Math.round(estimatedKB / 1024 * 10) / 10;
+  
+  if (estimatedMB >= 1) {
+    return `约 ${estimatedMB} MB`;
+  } else {
+    return `约 ${estimatedKB} KB`;
+  }
+}
+
 // 下载简历
-export function handleExport(info: InfoType){
+export function handleExport(info: InfoType, options?: {
+  scale?: number;
+  quality?: number;
+  format?: 'png' | 'jpeg';
+  compress?: boolean;
+}){
+  const {
+    scale = 1.5, // 降低默认scale从2到1.5
+    quality = 0.8, // 添加图片质量控制
+    format = 'jpeg', // 默认使用JPEG格式
+    compress = true // 启用压缩
+  } = options || {};
+
   const resumeElement = document.getElementById('resume-to-export');
   if (resumeElement) {
     const originalStyle = resumeElement.style.transform;
@@ -149,6 +245,7 @@ export function handleExport(info: InfoType){
               MagicDebugger.warn(`Could not convert oklch in property "${prop}": "${rawValue}". Skipping this property.`, e);
               continue;
             }
+
           }
 
           clonedEl.style.setProperty(prop, finalValue, priority);
@@ -218,11 +315,14 @@ export function handleExport(info: InfoType){
 
       Promise.all(imageLoadPromises).then(() => {
         html2canvas(clonedResume, {
-          scale: 2,
+          scale: scale, // 使用可配置的scale
           useCORS: true,
-          logging: true,
+          logging: false, // 关闭日志减少开销
+          backgroundColor: '#ffffff', // 设置背景色
         }).then(canvas => {
-          const imgData = canvas.toDataURL('image/png');
+          // 根据格式选择不同的处理方式
+          const imageFormat = format === 'jpeg' ? 'JPEG' : 'PNG';
+          const imgData = canvas.toDataURL(`image/${format}`, quality);
           
           const canvasWidth = canvas.width;
           const canvasHeight = canvas.height;
@@ -231,13 +331,14 @@ export function handleExport(info: InfoType){
           const pdfWidth = 210;
           const pdfHeight = pdfWidth / imgRatio;
           
+          // 创建PDF时的优化设置
           const pdf = new jsPDF({
             orientation: 'portrait',
             unit: 'mm',
             format: [pdfWidth, pdfHeight]
           });
           
-          pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+          pdf.addImage(imgData, imageFormat, 0, 0, pdfWidth, pdfHeight);
           
           pdf.save(`${info.fullName || 'resume'}.pdf`);
           toast.success(i18n.t('export.notifications.success'));
