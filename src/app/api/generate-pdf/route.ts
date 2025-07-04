@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
       browser = await puppeteer.launch({
         headless: true,
         args: baseArgs,
-        executablePath: process.env.CHROME_BIN || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+        executablePath: process.env.CHROME_BIN || 'C:/Program Files/Google/Chrome/Application/chrome.exe',
         timeout: 30000,
       });
     }

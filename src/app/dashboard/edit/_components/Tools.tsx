@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { exportOriginalStyle } from "@/lib/puppeteer-export";
-import { InfoType } from "@/store/useResumeStore";
+import { InfoType, CustomTemplateConfig } from "@/store/useResumeStore";
 import { DownloadIcon } from "@radix-ui/react-icons";
 import { Bot } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -12,10 +12,12 @@ export type ToolsProps = {
   resetTransform: (step?: number) => void;
   info: InfoType;
   onShowAI: () => void;
-  rightCollapsed?: boolean; 
+  rightCollapsed?: boolean;
+  templateId?: string;
+  customTemplate?: CustomTemplateConfig;
 };
 
-export function Tools({ isMobile, zoomIn, zoomOut, resetTransform, info, onShowAI, rightCollapsed = false }: ToolsProps){
+export function Tools({ isMobile, zoomIn, zoomOut, resetTransform, info, onShowAI, rightCollapsed = false, templateId, customTemplate }: ToolsProps){
   const { t } = useTranslation();
   
   // 计算桌面端工具栏的right位置，避免被模板栏遮挡
@@ -47,7 +49,7 @@ export function Tools({ isMobile, zoomIn, zoomOut, resetTransform, info, onShowA
       
       <button
         className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"
-        onClick={() => exportOriginalStyle(info)}
+        onClick={() => exportOriginalStyle(info, templateId, customTemplate)}
         title={t('tools.exportPDF')}
         type="button"
       >
