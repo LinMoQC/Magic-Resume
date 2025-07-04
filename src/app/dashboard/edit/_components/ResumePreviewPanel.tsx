@@ -67,7 +67,17 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
               </div>
             </TransformComponent>
 
-            <Tools isMobile={isMobile} zoomIn={zoomIn} zoomOut={zoomOut} resetTransform={resetTransform} info={activeResume.info} onShowAI={onShowAI} rightCollapsed={rightCollapsed} />
+            <Tools 
+              isMobile={isMobile} 
+              zoomIn={zoomIn} 
+              zoomOut={zoomOut} 
+              resetTransform={resetTransform} 
+              info={activeResume.info} 
+              onShowAI={onShowAI} 
+              rightCollapsed={rightCollapsed}
+              templateId={activeResume.template}
+              customTemplate={activeResume.customTemplate}
+            />
           </>
         )}
       </TransformWrapper>
