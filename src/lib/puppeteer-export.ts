@@ -72,9 +72,9 @@ export async function exportOriginalStyle(info: InfoType) {
               background: white;
               box-shadow: none !important;
               width: 100%;
-              max-width: 100%;
+              max-width: 100vw;
               margin: 0;
-              padding: 10px;
+              padding: 0; /* 移除内边距，避免影响尺寸计算 */
               box-sizing: border-box;
               min-height: auto !important;
               height: auto !important;
@@ -131,6 +131,19 @@ export async function exportOriginalStyle(info: InfoType) {
       </html>
     `;
 
+    // 获取简历元素的实际宽度和高度
+    const resumeRect = resumeElement.getBoundingClientRect();
+    const resumeWidth = Math.round(resumeRect.width) || 794; 
+    const resumeHeight = Math.max(resumeElement.scrollHeight, resumeElement.offsetHeight, resumeRect.height);
+    
+    console.log('前端简历尺寸:', {
+      宽度: resumeWidth,
+      高度: resumeHeight,
+      scrollHeight: resumeElement.scrollHeight,
+      offsetHeight: resumeElement.offsetHeight,
+      rectHeight: resumeRect.height
+    });
+
     toast.info(i18n.t('export.notifications.generating'));
 
     // 发送到后端API，启用单页无限延长模式
@@ -141,6 +154,8 @@ export async function exportOriginalStyle(info: InfoType) {
       },
       body: JSON.stringify({
         html: fullHTML,
+        width: resumeWidth, // 传入动态宽度
+        height: resumeHeight,
         options: {
           printBackground: true,
           // 移除format限制，让后端根据内容动态计算高度
