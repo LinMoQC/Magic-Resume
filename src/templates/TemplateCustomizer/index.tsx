@@ -347,10 +347,7 @@ export default function TemplateCustomizer({
                   max="2.0"
                   step="0.1"
                   value={(template.designTokens.typography as { lineHeight?: number }).lineHeight || 1.5}
-                  onChange={(e) => updateTypography({
-                    ...template.designTokens.typography,
-                    lineHeight: parseFloat(e.target.value)
-                  } as typeof template.designTokens.typography & { lineHeight: number })}
+                  onChange={(e) => updateTypography({ lineHeight: parseFloat(e.target.value) })}
                   className="w-full h-2 bg-neutral-700 rounded-lg appearance-none cursor-pointer slider"
                 />
               </div>
@@ -369,10 +366,7 @@ export default function TemplateCustomizer({
                   max="3"
                   step="0.5"
                   value={parseFloat((template.designTokens.typography as { letterSpacing?: string }).letterSpacing || '0')}
-                  onChange={(e) => updateTypography({
-                    ...template.designTokens.typography,
-                    letterSpacing: `${e.target.value}px`
-                  } as typeof template.designTokens.typography & { letterSpacing: string })}
+                  onChange={(e) => updateTypography({ letterSpacing: `${e.target.value}px` })}
                   className="w-full h-2 bg-neutral-700 rounded-lg appearance-none cursor-pointer slider"
                 />
               </div>
