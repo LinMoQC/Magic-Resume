@@ -206,8 +206,6 @@ export default function TemplateCustomizer({
 
         {activeTab === 'typography' && (
           <div className="space-y-6">
-            <h3 className="text-sm font-semibold text-neutral-200">{t('templateCustomizer.typography.fontSettings')}</h3>
-            
             <div className="space-y-4">
               <FontSelector
                 label={t('templateCustomizer.typography.primaryFont')}
@@ -269,8 +267,6 @@ export default function TemplateCustomizer({
 
         {activeTab === 'layout' && (
           <div className="space-y-6">
-            <h3 className="text-sm font-semibold text-neutral-200">{t('templateCustomizer.layout.layoutSettings')}</h3>
-            
             {/* 容器设置 */}
             <div className="space-y-4">
               <h4 className="text-sm font-medium text-neutral-300">{t('templateCustomizer.layout.containerSettings')}</h4>

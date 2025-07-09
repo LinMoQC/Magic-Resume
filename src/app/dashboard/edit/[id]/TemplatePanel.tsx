@@ -391,7 +391,7 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
                 >
                   <div className="p-4 border-b border-neutral-800">
                     <motion.h2 
-                      className="text-xl font-semibold text-left"
+                      className="text-xl font-semibold text-left flex items-center"
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ 

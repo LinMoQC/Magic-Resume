@@ -30,6 +30,7 @@ export function Timeline({ title, items, fieldMap = {}, style }: Props) {
   const textColor = style?.color || 'var(--color-text)';
   const primaryColor = 'var(--color-primary)'; // 使用主色调
   const secondaryColor = style?.color ? `${style.color}80` : 'var(--color-text-secondary)'; // 半透明版本
+  const timelineLineColor = '#e5e7eb'; // 统一的灰色线条
 
   return (
     <section 
@@ -63,11 +64,34 @@ export function Timeline({ title, items, fieldMap = {}, style }: Props) {
           return (
             <div key={idx} className="relative pl-6">
               {/* Timeline dot */}
-              <div className="absolute left-0 top-2 w-3 h-3 bg-blue-500 rounded-full border-2 border-white shadow-md"></div>
+              <div 
+                className="absolute left-0 top-2 w-3 h-3 bg-blue-500 rounded-full border-2 border-white shadow-md timeline-dot"
+                style={{
+                  position: 'absolute',
+                  left: '0px',
+                  top: '0.5rem',
+                  width: '0.75rem',
+                  height: '0.75rem',
+                  backgroundColor: primaryColor,
+                  borderRadius: '9999px',
+                  border: '2px solid #ffffff',
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                }}
+              ></div>
               
               {/* Timeline line */}
               {idx < items.length - 1 && (
-                <div className="absolute left-[5px] top-6 w-0.5 h-full bg-gray-200"></div>
+                <div 
+                  className="absolute left-[5px] top-6 w-0.5 h-full bg-gray-200 timeline-line"
+                  style={{
+                    position: 'absolute',
+                    left: '5px',
+                    top: '1.5rem',
+                    width: '0.125rem',
+                    height: '100%',
+                    backgroundColor: timelineLineColor
+                  }}
+                ></div>
               )}
               
               <div className="space-y-2">
