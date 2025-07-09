@@ -18,7 +18,7 @@ import {
   useSortable
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { FaPlus, FaTrash, FaPen, FaGripVertical, FaRegCopy, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { FaPlus, FaGripVertical } from 'react-icons/fa';
 import { Input } from '@/app/components/ui/input';
 import Modal from '@/app/components/ui/Modal';
 import { toast } from 'sonner';
@@ -27,9 +27,11 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuPortal
+  DropdownMenuPortal,
+  DropdownMenuCheckboxItem,
+  DropdownMenuSeparator
 } from '@/app/components/ui/dropdown-menu';
-import { DotsHorizontalIcon } from '@radix-ui/react-icons';
+import { DotsHorizontalIcon, Pencil2Icon, CopyIcon, TrashIcon } from '@radix-ui/react-icons';
 import { UniqueIdentifier } from '@dnd-kit/core';
 import { EditorComponents } from '@/lib/componentOptimization';
 
@@ -72,11 +74,10 @@ function SortableItem<T extends BaseItem>({ id, item, index, handleEdit, handleD
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
   };
 
   return (
-    <div ref={setNodeRef} style={style} className={cn("relative flex items-center gap-2 mb-2 p-3 bg-neutral-900 rounded-md")}>
+    <div ref={setNodeRef} style={style} className={cn("relative flex items-center gap-2 mb-2 p-3 bg-neutral-900 rounded-md border border-zinc-800",isDragging ? 'opacity-50' : 'opacity-100', item.visible === false && "opacity-50")}>
       <div {...attributes} {...listeners} className={cn("p-2", disabled ? "cursor-default" : "cursor-grab")}>
         <FaGripVertical />
       </div>
@@ -90,28 +91,32 @@ function SortableItem<T extends BaseItem>({ id, item, index, handleEdit, handleD
       </div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
+          <Button variant="ghost" className="h-8 w-8 p-0 outline-none focus:outline-none focus:ring-0">
             <span className="sr-only">{t('sections.shared.openMenu')}</span>
             <DotsHorizontalIcon className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuPortal>
           <DropdownMenuContent align="end" className="w-[160px] bg-neutral-900 border-neutral-700 text-white">
-            <DropdownMenuItem onSelect={() => toggleVisibility(index)} className="cursor-pointer">
-              {item.visible === false ? <FaEyeSlash className="mr-2 h-4 w-4" /> : <FaEye className="mr-2 h-4 w-4" />}
-              <span>{item.visible === false ? t('sections.shared.show') : t('sections.shared.hide')}</span>
-            </DropdownMenuItem>
+            <DropdownMenuCheckboxItem
+              checked={item.visible !== false}
+              onCheckedChange={() => toggleVisibility(index)}
+              className="cursor-pointer"
+            >
+              <span className='ml-2'>{t('sections.shared.visible')}</span>
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuSeparator className="bg-neutral-700" />
             <DropdownMenuItem onSelect={() => handleEdit(index)} className="cursor-pointer">
-              <FaPen className="mr-2 h-4 w-4" />
-              <span>{t('sections.shared.edit')}</span>
+              <Pencil2Icon className="mr-2 h-4 w-4" />
+              {t('sections.shared.edit')}
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => handleCopy(index)} className="cursor-pointer">
-              <FaRegCopy className="mr-2 h-4 w-4" />
-              <span>{t('sections.shared.copy')}</span>
+              <CopyIcon className="mr-2 h-4 w-4" />
+              {t('sections.shared.copy')}
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => handleDelete(index)} className="text-red-500 cursor-pointer focus:text-red-400 focus:bg-red-500/10">
-              <FaTrash className="mr-2 h-4 w-4" />
-              <span>{t('sections.shared.remove')}</span>
+              <TrashIcon className="mr-2 h-4 w-4" />
+              {t('sections.shared.remove')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenuPortal>
@@ -227,10 +232,10 @@ export default function SectionListWithModal<T extends BaseItem>({
 
   const toggleVisibility = (index: number) => {
     const newItems = [...items];
-    const currentVisibility = newItems[index].visible;
-    newItems[index] = { ...newItems[index], visible: currentVisibility === false ? true : false };
+    const item = newItems[index];
+    newItems[index] = { ...item, visible: item.visible === false ? true : false };
     setItems(newItems);
-    const status = newItems[index].visible ? t('sections.shared.show') : t('sections.shared.hide');
+    const status = newItems[index].visible !== false ? t('sections.shared.shown') : t('sections.shared.hidden');
     toast.success(t('sections.notifications.visibilityToggled', { status }));
   };
 
@@ -256,6 +261,8 @@ export default function SectionListWithModal<T extends BaseItem>({
       setCurrentItem({ ...currentItem, [richtextKey]: content });
     }
   };
+
+  const baseButtonClasses = "inline-flex items-center justify-center rounded-sm text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border bg-transparent hover:bg-accent hover:text-accent-foreground active:scale-95";
 
   return (
     <div className={cn("mb-8", className)}>
@@ -287,9 +294,27 @@ export default function SectionListWithModal<T extends BaseItem>({
         </DndContext>
       </div>
 
-      <Button variant="outline" onClick={() => handleOpenModal(null, null)} className="inline-flex w-full scale-100 items-center justify-center rounded-sm text-sm font-medium ring-offset-background transition-[transform,background-color] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-95 disabled:pointer-events-none disabled:opacity-50 border border-secondary bg-transparent hover:text-secondary-foreground h-9 px-5 gap-x-2 border-dashed py-6 leading-relaxed hover:bg-secondary-accent" style={{ borderColor: 'rgba(255,255,255,0.2)' }}>
-        <FaPlus className="mr-2" />  {t('sections.shared.addItem')}
-      </Button>
+      {items.length > 0 ? (
+        <div className="flex justify-end mt-4">
+          <Button
+            variant="outline"
+            onClick={() => handleOpenModal(null, null)}
+            className={cn(baseButtonClasses, "h-9 px-4 py-2 gap-x-2 border border-zinc-800")}
+          >
+            <FaPlus className="mr-2" />
+            {t('sections.shared.addItem')}
+          </Button>
+        </div>
+      ) : (
+        <Button
+          variant="outline"
+          onClick={() => handleOpenModal(null, null)}
+          className={cn(baseButtonClasses, "w-full mt-4 h-auto px-5 gap-x-2 border-dashed py-3 leading-relaxed border border-zinc-600")}
+        >
+          <FaPlus className="mr-2" />
+          {t('sections.shared.addItem')}
+        </Button>
+      )}
       <Modal
         isOpen={isOpen}
         onClose={handleCloseModal}

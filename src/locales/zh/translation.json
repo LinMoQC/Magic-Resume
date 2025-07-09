@@ -288,6 +288,7 @@
     "profiles": "个人资料",
     "shared": {
       "untitled": "无标题",
+      "visible": "可见",
       "show": "显示",
       "hide": "隐藏",
       "edit": "编辑",
@@ -310,7 +311,7 @@
   "basicForm": {
     "fields": {
       "avatar": "头像",
-      "fullName": "全名",
+      "fullName": "名称",
       "headline": "标题",
       "email": "电子邮件",
       "website": "网站",

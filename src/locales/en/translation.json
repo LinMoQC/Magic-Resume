@@ -288,6 +288,7 @@
     "profiles": "Profiles",
     "shared": {
       "untitled": "Untitled",
+      "visible": "Visible",
       "show": "Show",
       "hide": "Hide",
       "edit": "Edit",
