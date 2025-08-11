@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { Globe2 } from "lucide-react";
+import type { Easing } from "framer-motion";
 
 export default function LanguageSwitcher() {
   const { i18n } = useTranslation();
@@ -29,7 +30,7 @@ export default function LanguageSwitcher() {
     initial: { scale: 1 },
     hover: { 
       scale: 1.05,
-      transition: { duration: 0.2, ease: "easeOut" }
+      transition: { duration: 0.2, ease: "easeOut" as Easing }
     },
     tap: { 
       scale: 0.95,
@@ -75,7 +76,7 @@ export default function LanguageSwitcher() {
           {/* 地球图标 */}
           <motion.div
             animate={{ rotate: isHovered ? 360 : 0 }}
-            transition={{ duration: 0.6, ease: "easeInOut" }}
+            transition={{ duration: 0.6, ease: "easeInOut" as Easing }}
           >
             <Globe2 size={14} className="text-white/90" />
           </motion.div>
@@ -88,7 +89,7 @@ export default function LanguageSwitcher() {
               initial="initial"
               animate="animate"
               exit="exit"
-              transition={{ duration: 0.3, ease: "easeInOut" }}
+              transition={{ duration: 0.3, ease: "easeInOut" as Easing }}
               className="font-medium text-xs w-4 text-center"
             >
               {isEnglish ? "EN" : "中"}
@@ -101,4 +102,4 @@ export default function LanguageSwitcher() {
       </motion.button>
     </div>
   );
-} 
+}

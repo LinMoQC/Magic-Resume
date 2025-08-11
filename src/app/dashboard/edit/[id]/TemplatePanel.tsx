@@ -26,7 +26,7 @@ const panelVariants = {
   expanded: {
     width: 280,
     transition: {
-      type: "spring",
+      type: "spring" as const,
       damping: 20,
       stiffness: 300,
       duration: 0.6
@@ -35,7 +35,7 @@ const panelVariants = {
   collapsed: {
     width: 56,
     transition: {
-      type: "spring",
+      type: "spring" as const,
       damping: 20,
       stiffness: 300,
       duration: 0.6
@@ -48,7 +48,7 @@ const buttonVariants = {
   expanded: {
     right: 264,
     transition: {
-      type: "spring",
+      type: "spring" as const,
       damping: 25,
       stiffness: 400,
       duration: 0.5
@@ -57,7 +57,7 @@ const buttonVariants = {
   collapsed: {
     right: 40,
     transition: {
-      type: "spring",
+      type: "spring" as const,
       damping: 25,
       stiffness: 400,
       duration: 0.5
@@ -77,7 +77,7 @@ const contentVariants = {
     x: 0,
     scale: 1,
     transition: {
-      type: "spring",
+      type: "spring" as const,
       damping: 25,
       stiffness: 400,
       duration: 0.4,
@@ -100,7 +100,7 @@ const containerVariants = {
   show: {
     opacity: 1,
     transition: {
-      type: "spring",
+      type: "spring" as const,
       damping: 30,
       stiffness: 400,
       staggerChildren: 0.08,
