@@ -90,5 +90,7 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
   },
 }));
 
-// 移除立即加载，改为按需加载
-// useSettingStore.getState().loadSettings(); 
+// 恢复为了确保全局可用性的自动加载，但仅在客户端执行
+if (typeof window !== 'undefined') {
+  useSettingStore.getState().loadSettings();
+} 

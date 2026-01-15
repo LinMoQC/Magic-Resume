@@ -53,19 +53,13 @@ export default function CreateTab({ onApplyChanges, isAiJobRunning, setIsAiJobRu
 
     return (
         <div className="flex gap-6 mt-6 h-[61vh]">
-            <div className={`bg-neutral-900 rounded-lg border border-neutral-800 flex flex-col h-full ${showPreview ? 'w-1/2' : 'w-full'} transition-all duration-300`}>
-                <div className="p-4 border-b border-neutral-800 flex justify-between items-center">
-                    <h3 className="text-lg font-semibold text-neutral-300 flex items-center">
-                        <BotMessageSquare size={18} className="mr-2 text-sky-400" />
-                        {t('modals.aiModal.createTab.chatTitle')}
-                    </h3>
-                    {resumeDraft && (
-                        <Button variant="ghost" size="sm" onClick={() => setShowPreview(!showPreview)} className="text-neutral-400 hover:text-white">
-                            <Eye size={16} className="mr-2" />
-                            {showPreview ? t('common.ui.closePreview') : t('common.ui.previewResume')}
-                        </Button>
-                    )}
-                </div>
+            <div className={`bg-neutral-900 rounded-lg border border-neutral-800 flex flex-col h-full ${showPreview ? 'w-1/2' : 'w-full'} transition-all duration-300 relative`}>
+                {resumeDraft && (
+                    <Button variant="ghost" size="sm" onClick={() => setShowPreview(!showPreview)} className="text-neutral-400 hover:text-white absolute bottom-31 right-2">
+                        <Eye size={16} className="mr-2" />
+                        {showPreview ? t('common.ui.closePreview') : t('common.ui.previewResume')}
+                    </Button>
+                )}
                 <div ref={chatContainerRef} className="flex-1 p-4 overflow-y-auto">
                     {messages.map((msg) => (
                         <MessageItem

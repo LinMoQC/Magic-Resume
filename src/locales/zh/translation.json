@@ -122,7 +122,8 @@
       "tabs": {
         "create": "引导创建",
         "optimize": "智能优化",
-        "analyze": "简历分析"
+        "analyze": "简历分析",
+        "interview": "模拟面试"
       },
       "title": "AI 实验室",
       "description": "分析和优化您的简历以匹配目标工作要求，或获取专业的Lighthouse式分析报告。",
@@ -265,6 +266,36 @@
         "title": "准备好提升您的简历了吗？",
         "description": "粘贴职位描述并点击\"开始优化\"，让 AI 为您的梦想工作量身定制简历。"
       },
+      "interviewTab": {
+        "back": "返回",
+        "initialMessage": "你好！我是你的 AI 面试官。我已经阅读了你当前的简历。请问你申请的目标职位是什么？我们可以开始模拟面试了。",
+        "placeholder": "输入你的回答...",
+        "mockResponse": "面试结束后，记得向面试官询问关于团队文化和项目挑战的问题。",
+        "roles": {
+          "title": "选择你的面试官",
+          "frontend": {
+            "name": "前端专家",
+            "description": "专注于 React, Vue, CSS 和前端工程化"
+          },
+          "backend": {
+            "name": "后端架构师",
+            "description": "专注于系统设计, 数据库, API 和微服务"
+          },
+          "fullstack": {
+            "name": "全栈负责人",
+            "description": "关注端到端交付、系统集成和业务理解"
+          },
+          "hr": {
+            "name": "HRBP",
+            "description": "关注软技能、职业规划和文化匹配"
+          }
+        },
+        "digitalHuman": {
+          "status": "AI 面试官正在聆听...",
+          "speaking": "AI 正在回答..."
+        },
+        "exit": "退出面试"
+      },
       "progressText": "AI 正在努力进行分析和创作..."
     }
   },
@@ -294,7 +325,7 @@
       "edit": "编辑",
       "copy": "复制",
       "remove": "移除",
-      "addItem": "添加项目",
+      "addItem": "新增",
       "openMenu": "打开菜单",
       "editTitle": "编辑 {{label}}",
       "addTitle": "添加新的 {{label}}"
@@ -355,14 +386,14 @@
     "title": "自定义模板",
     "tabs": {
       "colors": "颜色",
-      "typography": "字体", 
+      "typography": "字体",
       "layout": "布局"
     },
     "colors": {
       "quickThemes": "快速主题",
       "customColors": "自定义颜色",
       "primary": "主色调",
-      "secondary": "次色调", 
+      "secondary": "次色调",
       "text": "文本颜色",
       "textSecondary": "次要文本颜色",
       "background": "背景颜色",
@@ -452,41 +483,110 @@
   "dynamicForm": {
     "fields": {
       "education": {
-        "school": { "label": "学校", "placeholder": "学校名称" },
-        "degree": { "label": "学位", "placeholder": "学位" },
-        "major": { "label": "专业", "placeholder": "专业" },
-        "date": { "label": "日期或日期范围", "placeholder": "2019-2023" },
-        "location": { "label": "地点", "placeholder": "城市" }
+        "school": {
+          "label": "学校",
+          "placeholder": "学校名称"
+        },
+        "degree": {
+          "label": "学位",
+          "placeholder": "学位"
+        },
+        "major": {
+          "label": "专业",
+          "placeholder": "专业"
+        },
+        "date": {
+          "label": "日期或日期范围",
+          "placeholder": "2019-2023"
+        },
+        "location": {
+          "label": "地点",
+          "placeholder": "城市"
+        }
       },
       "experience": {
-        "company": { "label": "公司", "placeholder": "公司名称" },
-        "position": { "label": "职位", "placeholder": "职位" },
-        "date": { "label": "日期或日期范围", "placeholder": "2023年3月至今" },
-        "location": { "label": "地点", "placeholder": "城市" },
-        "website": { "label": "网站", "placeholder": "公司网址" }
+        "company": {
+          "label": "公司",
+          "placeholder": "公司名称"
+        },
+        "position": {
+          "label": "职位",
+          "placeholder": "职位"
+        },
+        "date": {
+          "label": "日期或日期范围",
+          "placeholder": "2023年3月至今"
+        },
+        "location": {
+          "label": "地点",
+          "placeholder": "城市"
+        },
+        "website": {
+          "label": "网站",
+          "placeholder": "公司网址"
+        }
       },
       "profiles": {
-        "platform": { "label": "平台", "placeholder": "如 领英, GitHub" },
-        "url": { "label": "网址", "placeholder": "链接地址" }
+        "platform": {
+          "label": "平台",
+          "placeholder": "如 领英, GitHub"
+        },
+        "url": {
+          "label": "网址",
+          "placeholder": "链接地址"
+        }
       },
       "skills": {
-        "name": { "label": "技能名称", "placeholder": "技能名称" },
-        "level": { "label": "熟练度", "placeholder": "如 精通, 熟练, 初级" }
+        "name": {
+          "label": "技能名称",
+          "placeholder": "技能名称"
+        },
+        "level": {
+          "label": "熟练度",
+          "placeholder": "如 精通, 熟练, 初级"
+        }
       },
       "projects": {
-        "name": { "label": "项目名称", "placeholder": "项目名称" },
-        "role": { "label": "角色", "placeholder": "担任角色" },
-        "date": { "label": "日期或日期范围", "placeholder": "2022.01-2022.12" },
-        "link": { "label": "链接", "placeholder": "项目链接" }
+        "name": {
+          "label": "项目名称",
+          "placeholder": "项目名称"
+        },
+        "role": {
+          "label": "角色",
+          "placeholder": "担任角色"
+        },
+        "date": {
+          "label": "日期或日期范围",
+          "placeholder": "2022.01-2022.12"
+        },
+        "link": {
+          "label": "链接",
+          "placeholder": "项目链接"
+        }
       },
       "languages": {
-        "language": { "label": "语言", "placeholder": "语言" },
-        "level": { "label": "熟练度", "placeholder": "如 母语, 流利, 中级" }
+        "language": {
+          "label": "语言",
+          "placeholder": "语言"
+        },
+        "level": {
+          "label": "熟练度",
+          "placeholder": "如 母语, 流利, 中级"
+        }
       },
       "certificates": {
-        "name": { "label": "证书名称", "placeholder": "证书名称" },
-        "issuer": { "label": "颁发机构", "placeholder": "颁发机构" },
-        "date": { "label": "获得时间", "placeholder": "获得时间" }
+        "name": {
+          "label": "证书名称",
+          "placeholder": "证书名称"
+        },
+        "issuer": {
+          "label": "颁发机构",
+          "placeholder": "颁发机构"
+        },
+        "date": {
+          "label": "获得时间",
+          "placeholder": "获得时间"
+        }
       }
     }
   },
@@ -558,4 +658,4 @@
       "ProfessionalSummary": "专业摘要"
     }
   }
-} 
+}

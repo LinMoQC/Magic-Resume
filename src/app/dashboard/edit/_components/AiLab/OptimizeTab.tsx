@@ -24,7 +24,7 @@ type OptimizeTabProps = {
 export default function OptimizeTab({ resumeData, onApplyChanges, templateId, isAiJobRunning, setIsAiJobRunning }: OptimizeTabProps) {
   const { t } = useTranslation();
   const [isPreview, setIsPreview] = useState(false);
-  
+
   const {
     isLoading,
     logs,
@@ -43,16 +43,16 @@ export default function OptimizeTab({ resumeData, onApplyChanges, templateId, is
 
   const handleOptimize = () => {
     setIsPreview(false);
-    
+
     // 追踪AI优化使用
     trackEvent('ai_optimization_started', {
       feature: 'resume_optimize',
       user_action: 'optimize_button_click'
     });
-    
+
     runOptimization({ jd, resumeData });
   };
-  
+
   const handleApply = () => {
     if (optimizedResume) {
       // 追踪优化结果应用
@@ -60,7 +60,7 @@ export default function OptimizeTab({ resumeData, onApplyChanges, templateId, is
         feature: 'resume_optimize',
         sections_optimized: Object.keys(optimizedResume.sections || {}).length
       });
-      
+
       onApplyChanges(optimizedResume.sections);
     }
   };
@@ -68,11 +68,11 @@ export default function OptimizeTab({ resumeData, onApplyChanges, templateId, is
   return (
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 h-full mt-3">
       {/* 左侧输入区域 */}
-      <div className="lg:col-span-2 space-y-4 flex flex-col">
-        <div className="bg-gradient-to-br from-neutral-900/50 to-neutral-800/30 p-4 rounded-lg border border-neutral-700/50 backdrop-blur-sm">
+      <div className="lg:col-span-2 space-y-4 flex flex-col h-[62vh]">
+        <div className="flex-1 flex flex-col bg-gradient-to-br from-neutral-900/50 to-neutral-800/30 p-4 rounded-lg border border-neutral-700/50 backdrop-blur-sm">
           <label htmlFor="jd" className="font-bold text-neutral-200 flex items-center mb-3 text-base">
             <div className="w-6 h-6 bg-gradient-to-r from-sky-500 to-blue-600 rounded-md flex items-center justify-center mr-2">
-              <Paperclip size={14} className="text-white"/>
+              <Paperclip size={14} className="text-white" />
             </div>
             {t('modals.aiModal.optimizeTab.jdLabel')}
           </label>
@@ -82,13 +82,13 @@ export default function OptimizeTab({ resumeData, onApplyChanges, templateId, is
             value={jd}
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setJd(e.target.value)}
             placeholder={t('modals.aiModal.optimizeTab.jdPlaceholder')}
-            className="h-88 bg-neutral-900/70 border-neutral-700/50 rounded-lg focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500/50 resize-none text-sm leading-relaxed shadow-inner backdrop-blur-sm transition-all duration-200 hover:border-neutral-600/50"
+            className="flex-1 bg-neutral-900/70 border-neutral-700/50 rounded-lg focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500/50 resize-none text-sm leading-relaxed shadow-inner backdrop-blur-sm transition-all duration-200 hover:border-neutral-600/50"
           />
         </div>
-        
-        <Button 
-          onClick={handleOptimize} 
-          disabled={isAiJobRunning} 
+
+        <Button
+          onClick={handleOptimize}
+          disabled={isAiJobRunning}
           className="optimize-button w-full h-10 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-semibold mt-auto rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] disabled:transform-none disabled:hover:scale-100"
         >
           {isLoading ? (
@@ -107,49 +107,47 @@ export default function OptimizeTab({ resumeData, onApplyChanges, templateId, is
 
       {/* 右侧输出区域 */}
       <div className="lg:col-span-3 bg-gradient-to-br from-neutral-900/50 to-neutral-800/30 rounded-lg border border-neutral-700/50 backdrop-blur-sm flex flex-col h-[62vh] shadow-xl">
-         <div className="p-4 border-b border-neutral-700/50 flex items-center justify-between bg-gradient-to-r from-neutral-800/30 to-neutral-700/20 rounded-t-lg">
-            <div className="flex items-center">
-              <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center mr-3 shadow-lg shadow-green-500/25">
-                <CheckCircle size={16} className="text-white"/>
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-neutral-100">
-                  {t('modals.aiModal.optimizeTab.outputTitle')}
-                </h3>
-                {optimizedResume && (
-                  <p className="text-xs text-neutral-400 mt-0.5">
-                    优化完成，共处理 {Object.keys(optimizedResume.sections || {}).length} 个章节
-                  </p>
-                )}
-              </div>
+        <div className="p-4 border-b border-neutral-700/50 flex items-center justify-between bg-gradient-to-r from-neutral-800/30 to-neutral-700/20 rounded-t-lg">
+          <div className="flex items-center">
+            <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center mr-3 shadow-lg shadow-green-500/25">
+              <CheckCircle size={16} className="text-white" />
             </div>
-            {optimizedResume && (
-              <div className="flex items-center gap-1 bg-neutral-800/50 p-1 rounded-lg border border-neutral-600/30 backdrop-blur-sm shadow-lg">
-                <Button 
-                  size="sm" 
-                  onClick={() => setIsPreview(false)} 
-                  className={`px-3 py-2 h-auto text-xs font-medium rounded-md transition-all duration-200 ${
-                    !isPreview 
-                      ? 'bg-gradient-to-r from-sky-600 to-blue-700 text-white shadow-md shadow-sky-500/25' 
-                      : 'bg-transparent text-neutral-400 hover:bg-neutral-700/40 hover:text-neutral-300'
+            <div>
+              <h3 className="text-lg font-bold text-neutral-100">
+                {t('modals.aiModal.optimizeTab.outputTitle')}
+              </h3>
+              {optimizedResume && (
+                <p className="text-xs text-neutral-400 mt-0.5">
+                  优化完成，共处理 {Object.keys(optimizedResume.sections || {}).length} 个章节
+                </p>
+              )}
+            </div>
+          </div>
+          {optimizedResume && (
+            <div className="flex items-center gap-1 bg-neutral-800/50 p-1 rounded-lg border border-neutral-600/30 backdrop-blur-sm shadow-lg">
+              <Button
+                size="sm"
+                onClick={() => setIsPreview(false)}
+                className={`px-3 py-2 h-auto text-xs font-medium rounded-md transition-all duration-200 ${!isPreview
+                  ? 'bg-gradient-to-r from-sky-600 to-blue-700 text-white shadow-md shadow-sky-500/25'
+                  : 'bg-transparent text-neutral-400 hover:bg-neutral-700/40 hover:text-neutral-300'
                   }`}
-                >
-                  <Code size={14} className="mr-1"/>{t('modals.aiModal.optimizeTab.jsonButton')}
-                </Button>
-                <Button 
-                  size="sm" 
-                  onClick={() => setIsPreview(true)} 
-                  className={`px-3 py-2 h-auto text-xs font-medium rounded-md transition-all duration-200 ${
-                    isPreview 
-                      ? 'bg-gradient-to-r from-sky-600 to-blue-700 text-white shadow-md shadow-sky-500/25' 
-                      : 'bg-transparent text-neutral-400 hover:bg-neutral-700/40 hover:text-neutral-300'
+              >
+                <Code size={14} className="mr-1" />{t('modals.aiModal.optimizeTab.jsonButton')}
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => setIsPreview(true)}
+                className={`px-3 py-2 h-auto text-xs font-medium rounded-md transition-all duration-200 ${isPreview
+                  ? 'bg-gradient-to-r from-sky-600 to-blue-700 text-white shadow-md shadow-sky-500/25'
+                  : 'bg-transparent text-neutral-400 hover:bg-neutral-700/40 hover:text-neutral-300'
                   }`}
-                >
-                  <Eye size={14} className="mr-1"/>{t('modals.aiModal.optimizeTab.previewButton')}
-                </Button>
-              </div>
-            )}
-         </div>
+              >
+                <Eye size={14} className="mr-1" />{t('modals.aiModal.optimizeTab.previewButton')}
+              </Button>
+            </div>
+          )}
+        </div>
 
         <div className="flex-1 overflow-y-auto flex flex-col bg-neutral-900/30 backdrop-blur-sm">
           {isLoading ? (
@@ -179,18 +177,18 @@ export default function OptimizeTab({ resumeData, onApplyChanges, templateId, is
             </div>
           ) : (
             optimizedResume && (
-            isPreview ? (
-              <div className="p-3 bg-white/95 h-full w-full flex justify-center overflow-y-auto backdrop-blur-sm">
-                <div style={{ transform: 'scale(0.5)', transformOrigin: 'top center', minWidth: '600px' }}>
-                  <ResumePreview
-                    info={optimizedResume.info}
-                    sections={optimizedResume.sections}
-                    sectionOrder={optimizedResume.sectionOrder.map(s => s.key)}
-                    templateId={templateId}
-                  />
+              isPreview ? (
+                <div className="p-3 bg-white/95 h-full w-full flex justify-center overflow-y-auto backdrop-blur-sm">
+                  <div style={{ transform: 'scale(0.5)', transformOrigin: 'top center', minWidth: '600px' }}>
+                    <ResumePreview
+                      info={optimizedResume.info}
+                      sections={optimizedResume.sections}
+                      sectionOrder={optimizedResume.sectionOrder.map(s => s.key)}
+                      templateId={templateId}
+                    />
+                  </div>
                 </div>
-              </div>
-            ) : (
+              ) : (
                 <div className="p-3 bg-neutral-900/50 h-full overflow-y-auto backdrop-blur-sm">
                   <div className="bg-gradient-to-br from-black/90 to-neutral-900/90 rounded-lg p-4 border border-neutral-700/50 shadow-xl">
                     <div className="json-viewer-enhanced">
@@ -202,7 +200,7 @@ export default function OptimizeTab({ resumeData, onApplyChanges, templateId, is
                         collapsed={1}
                         displayObjectSize={true}
                         displayArrayKey={true}
-                        style={{ 
+                        style={{
                           background: 'transparent',
                           fontSize: '12px',
                           lineHeight: '1.5'
@@ -227,8 +225,8 @@ export default function OptimizeTab({ resumeData, onApplyChanges, templateId, is
                 点击应用将更新您的简历
               </div>
             </div>
-            <Button 
-              onClick={handleApply} 
+            <Button
+              onClick={handleApply}
               className="apply-changes-button w-full h-10 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] relative overflow-hidden"
             >
               <CheckCircle className="mr-2 h-4 w-4" />
