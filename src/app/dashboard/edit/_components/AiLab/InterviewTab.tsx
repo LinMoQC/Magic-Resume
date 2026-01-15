@@ -106,7 +106,7 @@ const CartoonAvatar = ({ isSpeaking }: { isSpeaking: boolean }) => {
     );
 }
 
-export default function InterviewTab({ resumeData, isAiJobRunning, setIsAiJobRunning }: InterviewTabProps) {
+export default function InterviewTab({ resumeData }: InterviewTabProps) {
     const { t } = useTranslation();
     const { apiKey, baseUrl, model } = useSettingStore();
 
@@ -120,7 +120,7 @@ export default function InterviewTab({ resumeData, isAiJobRunning, setIsAiJobRun
         voiceId: 'shimmer',
     });
 
-    const { status, connect, disconnect, sendText, isUserSpeaking, isAiSpeaking, transcript: realtimeTranscript, logs, streamingContent, muteAudio, unmuteAudio } = useRealtimeInterview();
+    const { status, connect, disconnect, isUserSpeaking, isAiSpeaking, transcript: realtimeTranscript, logs, streamingContent, muteAudio, unmuteAudio } = useRealtimeInterview();
     const [showLogs, setShowLogs] = useState(false);
 
     // Effect to auto-scroll subtitles or handle status changes
@@ -135,7 +135,7 @@ export default function InterviewTab({ resumeData, isAiJobRunning, setIsAiJobRun
         return () => {
             disconnect();
         };
-    }, []);
+    }, [disconnect]);
 
     const startRealInterview = async () => {
         try {
@@ -213,14 +213,6 @@ export default function InterviewTab({ resumeData, isAiJobRunning, setIsAiJobRun
     useEffect(() => {
         if (isUserSpeaking) setTimeLeft(null);
     }, [isUserSpeaking]);
-
-    // Manual Text Input Handler
-    const handleSend = (text: string) => {
-        if (!text.trim()) return;
-        sendText(text);
-        setTimeLeft(null);
-        unmuteAudio();
-    };
 
     // Toggle Listening
     const toggleListening = () => {
@@ -387,7 +379,7 @@ export default function InterviewTab({ resumeData, isAiJobRunning, setIsAiJobRun
                                         {AVATAR_OPTIONS.map((avatar) => (
                                             <div
                                                 key={avatar.id}
-                                                onClick={() => setConfig({ ...config, avatarId: avatar.id as any })}
+                                                onClick={() => setConfig({ ...config, avatarId: avatar.id as "anime" })}
                                                 className={`relative w-56 h-56 rounded-2xl overflow-hidden border-2 cursor-pointer transition-all group ${config.avatarId === avatar.id ? 'border-purple-500 ring-4 ring-purple-500/20' : 'border-neutral-700 hover:border-neutral-500'}`}
                                             >
                                                 <img src={avatar.src} alt={avatar.name} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
@@ -512,7 +504,7 @@ export default function InterviewTab({ resumeData, isAiJobRunning, setIsAiJobRun
                                 : 'bg-neutral-800/80 border-white/10 text-neutral-200'
                                 }`}>
                                 <div className="text-lg font-medium leading-relaxed text-center line-clamp-3">
-                                    "{displayItem.text}"
+                                    &quot;{displayItem.text}&quot;
                                     {displayItem.role === 'ai' && isAiSpeaking && (
                                         <span className="inline-block w-2 H-4 ml-1 bg-sky-400 animate-pulse">|</span>
                                     )}

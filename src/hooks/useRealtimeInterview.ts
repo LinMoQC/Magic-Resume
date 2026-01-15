@@ -22,26 +22,27 @@ export function useRealtimeInterview() {
     // Mute Control Ref (to be accessible inside AudioRecorder callback)
     const isMicMutedRef = useRef(false);
 
-    const addLog = (message: string) => {
+    const addLog = useCallback((message: string) => {
         const time = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
         setLogs(prev => [...prev, { time, message }].slice(-100));
-    };
+    }, []);
 
     const muteAudio = useCallback(() => {
         if (!isMicMutedRef.current) {
             isMicMutedRef.current = true;
             addLog("🔇 Mic Muted (Thinking Mode)");
         }
-    }, []);
+    }, [addLog]);
 
     const unmuteAudio = useCallback(() => {
         if (isMicMutedRef.current) {
             isMicMutedRef.current = false;
             addLog("🎤 Mic Unmuted (Listening)");
         }
-    }, []);
+    }, [addLog]);
 
     // Event Dispatcher
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleServerEvent = useCallback((event: any) => {
         switch (event.type) {
             case 'response.created':
@@ -212,13 +213,13 @@ export function useRealtimeInterview() {
             addLog(`❌ Connection Failed: ${error}`);
             setStatus('error');
         }
-    }, [status, cleanup, handleServerEvent]); // Added dependencies
+    }, [status, cleanup, handleServerEvent, addLog]);
 
     const disconnect = useCallback(() => {
         addLog("⏹️ Disconnecting...");
         cleanup();
         setStatus('idle');
-    }, [cleanup]);
+    }, [cleanup, addLog]);
 
     // Helper to send manual text if needed
     const sendText = (text: string) => {

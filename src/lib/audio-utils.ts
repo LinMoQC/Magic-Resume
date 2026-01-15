@@ -112,7 +112,7 @@ export class AudioPlayer {
     reset() {
         // Stop all scheduled sources to interrupt immediately
         this.scheduledSources.forEach(source => {
-            try { source.stop(); } catch(e) {}
+            try { source.stop(); } catch {}
         });
         this.scheduledSources = [];
         this.nextStartTime = this.audioContext.currentTime;

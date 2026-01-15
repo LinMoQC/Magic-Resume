@@ -232,7 +232,7 @@ export const useResumeCreator = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [apiKey, t, messages, addMessage, updateLastAIMessage, updateLastAIMessageWithJSON, baseUrl, model, setIsLoading, generateResume, setResumeDraft]);
+  }, [apiKey, t, messages, addMessage, updateLastAIMessage, updateLastAIMessageWithJSON, baseUrl, model, maxTokens, setIsLoading, generateResume, setResumeDraft]);
 
   return { messages, isLoading: isLoading || isGenerating, resumeDraft, sendMessage, generateResume };
 };

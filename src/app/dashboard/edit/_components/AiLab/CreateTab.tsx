@@ -3,7 +3,7 @@ import { Resume, useResumeStore } from '@/store/useResumeStore';
 import { useTranslation } from 'react-i18next';
 import { Textarea } from '@/app/components/ui/textarea';
 import { Button } from '@/app/components/ui/button';
-import { Send, Loader2, BotMessageSquare, Eye, FileText } from 'lucide-react';
+import { Send, Loader2, Eye, FileText } from 'lucide-react';
 import { useResumeCreator } from '@/app/hooks/useResumeCreator';
 import ResumePreview from '../ResumePreview';
 import { toast } from 'sonner';

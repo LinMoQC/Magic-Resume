@@ -9,7 +9,7 @@ export interface StartInterviewParams {
   resume_context: string;
   job_description?: string;
   role?: string;
-  config?: Record<string, any>;
+  config?: Record<string, unknown>;
 }
 
 export interface ChatParams {

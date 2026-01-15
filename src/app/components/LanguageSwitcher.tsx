@@ -27,11 +27,11 @@ export default function LanguageSwitcher() {
 
   const buttonVariants = {
     initial: { scale: 1 },
-    hover: { 
+    hover: {
       scale: 1.05,
-      transition: { duration: 0.2, ease: "easeOut" }
+      transition: { duration: 0.2, ease: "easeOut" as const }
     },
-    tap: { 
+    tap: {
       scale: 0.95,
       transition: { duration: 0.1 }
     }
@@ -58,15 +58,15 @@ export default function LanguageSwitcher() {
       >
         {/* 背景层 */}
         <div className="absolute inset-0 bg-gray-900/95 backdrop-blur-sm rounded-full border border-gray-700/50" />
-        
+
         {/* Hover 效果层 */}
-        <motion.div 
+        <motion.div
           className="absolute inset-0 bg-gray-800/90 rounded-full"
           initial={{ opacity: 0 }}
           animate={{ opacity: isHovered ? 1 : 0 }}
           transition={{ duration: 0.2 }}
         />
-        
+
         {/* 内容容器 */}
         <div className="relative flex items-center gap-2 px-3 py-2.5 text-white">
           {/* 地球图标 */}

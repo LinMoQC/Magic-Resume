@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import puppeteer from 'puppeteer-core';
+import fs from 'fs';
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,7 +34,6 @@ export async function POST(request: NextRequest) {
         'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe', // Windows 32-bit
       ];
 
-      const fs = require('fs');
       const foundPath = executablePaths.find(p => fs.existsSync(p));
 
       if (!foundPath) {

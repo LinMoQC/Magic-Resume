@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FlaskConical, Wand2, BarChart3, BotMessageSquare, Mic } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/app/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/app/components/ui/dialog";
 import { Resume, Section } from '@/store/useResumeStore';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence, motion } from 'framer-motion';
