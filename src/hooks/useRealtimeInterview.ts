@@ -38,6 +38,7 @@ export function useRealtimeInterview() {
         if (isMicMutedRef.current) {
             isMicMutedRef.current = false;
             addLog("🎤 Mic Unmuted (Listening)");
+            setIsUserSpeaking(true); // Manual mode: User is speaking when unmuted
         }
     }, [addLog]);
 
@@ -61,7 +62,7 @@ export function useRealtimeInterview() {
                          bytes[i] = binaryString.charCodeAt(i);
                      }
                      playerRef.current?.add16BitPCM(bytes.buffer);
-                     setIsAiSpeaking(true);
+                     // setIsAiSpeaking(true); // Handled by AudioPlayer callback
                 }
                 break;
 
@@ -69,7 +70,7 @@ export function useRealtimeInterview() {
                 // Streaming Text
                 if (event.delta) {
                     setStreamingContent(prev => prev + event.delta);
-                    setIsAiSpeaking(true);
+                    // setIsAiSpeaking(true); // Handled by AudioPlayer callback
                 }
                 break;
             
@@ -92,17 +93,29 @@ export function useRealtimeInterview() {
                  break;
 
             case 'response.audio_transcript.done':
-                 // Final transcript of what AI said
+                 // Final transcript of what AI said (Audio Mode)
                  if (event.transcript) {
                      addLog(`🤖 AI: "${event.transcript}"`);
                      setTranscript(prev => [...prev, { role: 'ai', text: event.transcript }]);
-                     setIsAiSpeaking(false);
-                     // We don't clear streamingContent here immediately if we want to show the last sentence
-                     // letting response.created clear it next time might be better for reading?
-                     // BUT user asked for "show one line then fade", so maybe we stick to streamingContent logic in UI.
-                     // For now, let's keep it sync.
+                     // setIsAiSpeaking(false); // Handled by AudioPlayer callback
                  }
                  break;
+
+            // --- Support for Text-Only Mode (Anime/Remote TTS) ---
+            case 'response.text.delta':
+                if (event.delta) {
+                    setStreamingContent(prev => prev + event.delta);
+                    // setIsAiSpeaking(true); // Handled by AudioPlayer callback
+                }
+                break;
+
+            case 'response.text.done':
+                if (event.text) {
+                    addLog(`🤖 AI (Text): "${event.text}"`);
+                    setTranscript(prev => [...prev, { role: 'ai', text: event.text }]);
+                    // setIsAiSpeaking(false); // Handled by AudioPlayer callback
+                }
+                break;
 
             case 'conversation.item.input_audio_transcription.completed':
                 // Transcript of what User said
@@ -131,7 +144,7 @@ export function useRealtimeInterview() {
         isMicMutedRef.current = false;
     }, []);
 
-    const connect = useCallback(async (customSessionId?: string, config?: { apiKey?: string, baseUrl?: string, model?: string }) => {
+    const connect = useCallback(async (customSessionId?: string, config?: { apiKey?: string, baseUrl?: string, model?: string, sampleRate?: number }) => {
         if (status === 'connected' || status === 'connecting') return;
         
         setStatus('connecting');
@@ -143,7 +156,11 @@ export function useRealtimeInterview() {
             addLog("🚀 Initializing Audio & WebSocket connection...");
             
             // Initialize Audio Logic first (requires user gesture usually)
-            playerRef.current = new AudioPlayer();
+            // Default to 24000 (OpenAI), unless overridden (e.g. 48000 for Remote/Anime)
+            const playbackRate = config?.sampleRate || 24000;
+            playerRef.current = new AudioPlayer(playbackRate, (isPlaying) => {
+                setIsAiSpeaking(isPlaying);
+            });
             
             recorderRef.current = new AudioRecorder((base64Audio) => {
                  if (socketRef.current?.readyState === WebSocket.OPEN && !isMicMutedRef.current) {
@@ -237,6 +254,17 @@ export function useRealtimeInterview() {
         }
     };
 
+    const stopSpeakingAndResponse = useCallback(() => {
+        muteAudio();
+        // Commit the buffer and request response manually
+        if (socketRef.current?.readyState === WebSocket.OPEN) {
+             addLog("🛑 User Finished Speaking (Manual)");
+             socketRef.current.send(JSON.stringify({ type: 'input_audio_buffer.commit' }));
+             socketRef.current.send(JSON.stringify({ type: 'response.create' }));
+        }
+        setIsUserSpeaking(false);
+    }, [addLog, muteAudio]);
+
     return {
         status,
         connect,
@@ -244,6 +272,7 @@ export function useRealtimeInterview() {
         sendText,
         muteAudio,
         unmuteAudio,
+        stopSpeakingAndResponse,
         isUserSpeaking,
         isAiSpeaking,
         transcript,

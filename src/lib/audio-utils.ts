@@ -104,9 +104,24 @@ export class AudioPlayer {
     private audioContext: AudioContext;
     private nextStartTime: number = 0;
     private scheduledSources: AudioBufferSourceNode[] = [];
+    private sampleRate: number;
+    private onPlayStateChange: ((isPlaying: boolean) => void) | null = null;
+    private isPlaying: boolean = false;
 
-    constructor() {
-        this.audioContext = new AudioContext({ sampleRate: SAMPLE_RATE });
+    constructor(sampleRate: number = SAMPLE_RATE, onPlayStateChange?: (isPlaying: boolean) => void) {
+        this.sampleRate = sampleRate;
+        this.audioContext = new AudioContext({ sampleRate: this.sampleRate });
+        this.onPlayStateChange = onPlayStateChange || null;
+    }
+
+    private updatePlayState() {
+        const nowPlaying = this.scheduledSources.length > 0;
+        if (this.isPlaying !== nowPlaying) {
+            this.isPlaying = nowPlaying;
+            if (this.onPlayStateChange) {
+                this.onPlayStateChange(nowPlaying);
+            }
+        }
     }
 
     reset() {
@@ -116,6 +131,7 @@ export class AudioPlayer {
         });
         this.scheduledSources = [];
         this.nextStartTime = this.audioContext.currentTime;
+        this.updatePlayState();
     }
 
     add16BitPCM(arrayBuffer: ArrayBuffer) {
@@ -130,7 +146,7 @@ export class AudioPlayer {
             float32Data[i] = intC < 0 ? intC / 0x8000 : intC / 0x7FFF;
         }
 
-        const audioBuffer = this.audioContext.createBuffer(1, float32Data.length, SAMPLE_RATE);
+        const audioBuffer = this.audioContext.createBuffer(1, float32Data.length, this.sampleRate);
         audioBuffer.getChannelData(0).set(float32Data);
 
         const source = this.audioContext.createBufferSource();
@@ -147,8 +163,10 @@ export class AudioPlayer {
 
         source.onended = () => {
              this.scheduledSources = this.scheduledSources.filter(s => s !== source);
+             this.updatePlayState();
         };
         
         this.scheduledSources.push(source);
+        this.updatePlayState();
     }
 }

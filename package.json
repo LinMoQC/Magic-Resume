@@ -83,6 +83,8 @@
     "nanoid": "^5.1.5",
     "next": "15.3.3",
     "next-auth": "^4.24.11",
+    "pixi-live2d-display": "^0.4.0",
+    "pixi.js": "^6.5.10",
     "puppeteer-core": "^24.11.2",
     "react": "^19.0.0",
     "react-circular-progressbar": "^2.2.0",

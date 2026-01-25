@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/app/components/ui/button';
 import { Mic, Square, ChevronLeft, Code2, Server, Globe, Users, Timer, Volume2, ArrowRight, Loader2 } from 'lucide-react';
@@ -34,96 +35,39 @@ const ROLES_CONFIG = [
 ] as const;
 
 const AVATAR_OPTIONS = [
-    { id: 'anime', name: '二次元 (Anime)', src: '/anime-interviewer.png' },
+    { id: 'anime', name: '桃瀬ひより (Hiyori Momose)', src: '/live2d/pre1.png' },
 ];
 
 const VOICE_OPTIONS = [
-    { id: 'alloy', name: 'Alloy (中性)' },
-    { id: 'echo', name: 'Echo (沉稳男声)' },
-    { id: 'shimmer', name: 'Shimmer (亲切女声)' },
+    { id: 'shimmer', name: '原生 (Native) - Shimmer (快)' },
+    { id: 'paimon', name: '派蒙 (Paimon - 原神)' },
+    { id: 'furina', name: '芙宁娜 (Furina - 原神)' },
+    { id: 'yaemiko', name: '八重神子 (Yae Miko - 原神)' },
+    { id: 'kokomi', name: '珊瑚宫心海 (Kokomi - 原神)' },
 ];
 
+const ANIME_VOICE_IDS = ['paimon', 'furina', 'yaemiko', 'kokomi'];
 
-// --- Cartoon Digital Human Component ---
-const CartoonAvatar = ({ isSpeaking }: { isSpeaking: boolean }) => {
-    return (
-        <div className="relative w-48 h-48 md:w-60 md:h-60 mx-auto mb-10">
-            {/* Background Glow */}
-            <div className={`absolute inset-0 bg-blue-500/20 rounded-full blur-3xl transition-all duration-500 ${isSpeaking ? 'scale-110 opacity-100' : 'scale-100 opacity-50'}`} />
 
-            {/* Avatar Container */}
-            <div className="relative w-full h-full bg-[#FFDFC4] rounded-[2.5rem] shadow-2xl overflow-hidden border-4 border-neutral-800 flex flex-col items-center justify-center transition-transform hover:scale-105 duration-300">
+import Live2DAvatar from './Live2DAvatar';
 
-                {/* Hair (Simple) */}
-                <div className="absolute top-0 w-full h-16 bg-neutral-800" />
-
-                {/* Face Elements */}
-                <div className="relative z-10 flex flex-col items-center gap-8 mt-4">
-                    {/* Eyes */}
-                    <div className="flex gap-8">
-                        {/* Left Eye */}
-                        <div className="relative w-3 h-8 md:w-4 md:h-10 bg-neutral-800 rounded-full overflow-hidden">
-                            <motion.div
-                                className="absolute w-full bg-[#FFDFC4]"
-                                initial={{ height: "0%" }}
-                                animate={{ height: ["0%", "100%", "0%"] }}
-                                transition={{ repeat: Infinity, duration: 4, repeatDelay: Math.random() * 3 }}
-                                style={{ top: 0 }}
-                            />
-                        </div>
-                        {/* Right Eye */}
-                        <div className="relative w-3 h-8 md:w-4 md:h-10 bg-neutral-800 rounded-full overflow-hidden">
-                            <motion.div
-                                className="absolute w-full bg-[#FFDFC4]"
-                                initial={{ height: "0%" }}
-                                animate={{ height: ["0%", "100%", "0%"] }}
-                                transition={{ repeat: Infinity, duration: 4, repeatDelay: Math.random() * 3 }}
-                                style={{ top: 0 }}
-                            />
-                        </div>
-                    </div>
-
-                    {/* Mouth */}
-                    <motion.div
-                        className="bg-red-400 rounded-full"
-                        animate={{
-                            width: isSpeaking ? [20, 30, 25, 35, 20] : 20,
-                            height: isSpeaking ? [10, 20, 15, 25, 10] : 6,
-                            borderRadius: isSpeaking ? "50%" : "20px"
-                        }}
-                        transition={{
-                            duration: 0.2,
-                            repeat: isSpeaking ? Infinity : 0
-                        }}
-                        style={{ width: 20, height: 6 }}
-                    />
-                </div>
-
-                {/* Body/Clothes hint */}
-                <div className="absolute bottom-0 w-32 h-12 bg-sky-600 rounded-t-3xl" />
-            </div>
-        </div>
-    );
-}
 
 export default function InterviewTab({ resumeData }: InterviewTabProps) {
     const { t } = useTranslation();
     const { apiKey, baseUrl, model } = useSettingStore();
 
-    // Workflow State
     const [step, setStep] = useState<InterviewStep>('selection');
     const [configStep, setConfigStep] = useState<'voice' | 'avatar'>('voice');
     const [selectedRole, setSelectedRole] = useState<InterviewRole | null>(null);
     const [config, setConfig] = useState<InterviewConfig>({
         thinkingTime: 10,
         avatarId: 'anime',
-        voiceId: 'shimmer',
+        voiceId: 'shimmer', // Default to Shimmer for speed
     });
 
-    const { status, connect, disconnect, isUserSpeaking, isAiSpeaking, transcript: realtimeTranscript, logs, streamingContent, muteAudio, unmuteAudio } = useRealtimeInterview();
+    const { status, connect, disconnect, isUserSpeaking, isAiSpeaking, transcript: realtimeTranscript, logs, streamingContent, muteAudio, unmuteAudio, stopSpeakingAndResponse } = useRealtimeInterview();
     const [showLogs, setShowLogs] = useState(false);
 
-    // Effect to auto-scroll subtitles or handle status changes
     useEffect(() => {
         if (status === 'error') {
             // Handle error state
@@ -166,7 +110,10 @@ export default function InterviewTab({ resumeData }: InterviewTabProps) {
                 apiKey,
                 baseUrl,
                 // Force the correct realtime model. Global 'model' setting is usually for Chat/Resume.
-                model: 'gpt-4o-realtime-preview-2024-10-01'
+                model: 'gpt-4o-realtime-preview-2024-10-01',
+                // Remote TTS (Anime) uses 48000Hz, OpenAI uses 24000Hz.
+                // Trigger 48k ONLY if the specific Voice ID is an Anime Voice.
+                sampleRate: ANIME_VOICE_IDS.includes(config.voiceId) ? 48000 : 24000
             });
 
         } catch (error) {
@@ -175,19 +122,15 @@ export default function InterviewTab({ resumeData }: InterviewTabProps) {
         }
     };
 
-    // Derived state for UI compatibility
     const isListening = isUserSpeaking;
     const isConnecting = status === 'connecting';
 
-    // Determine what text to display: Prioritize streaming content (AI speaking) -> then fallback to last transcript
     const lastSummary = realtimeTranscript.length > 0 ? realtimeTranscript[realtimeTranscript.length - 1] : null;
     const displayItem = streamingContent ? { role: 'ai', text: streamingContent } : lastSummary;
 
-    // --- Thinking Time Logic ---
     const [timeLeft, setTimeLeft] = useState<number | null>(null);
     const wasAiSpeakingRef = useRef(false);
 
-    // Watch for AI finish speaking to trigger countdown
     useEffect(() => {
         if (wasAiSpeakingRef.current && !isAiSpeaking && config.thinkingTime > 0) {
             setTimeLeft(config.thinkingTime);
@@ -216,19 +159,19 @@ export default function InterviewTab({ resumeData }: InterviewTabProps) {
 
     // Toggle Listening
     const toggleListening = () => {
-        // If timer is running, clicking mic cancels it (start answering early)
         if (timeLeft !== null) {
             setTimeLeft(null);
-            unmuteAudio(); // Re-enable VAD immediately
+            unmuteAudio();
             return;
         }
-        // Todo: Implement mute
-        console.log("Toggle mute not implemented yet");
+
+        if (isListening) {
+            stopSpeakingAndResponse();
+        } else {
+            unmuteAudio();
+        }
     };
 
-    // --- Render Selection Screen ---
-
-    // Triggered by role selection
     const startConfig = (role: InterviewRole) => {
         setSelectedRole(role);
         setStep('config');
@@ -297,7 +240,7 @@ export default function InterviewTab({ resumeData }: InterviewTabProps) {
                                 transition={{ duration: 0.3 }}
                                 className="space-y-8"
                             >
-                                <div className="text-center">
+                                <div className="text-center mb-8">
                                     <h2 className="text-2xl font-bold text-white mb-2">声音与节奏</h2>
                                     <p className="text-neutral-400">配置面试官的语音风格和思考时间</p>
                                 </div>
@@ -335,7 +278,7 @@ export default function InterviewTab({ resumeData }: InterviewTabProps) {
                                             <Volume2 className="w-5 h-5 text-emerald-400" />
                                             <Label className="text-lg font-semibold text-neutral-200">面试官声音</Label>
                                         </div>
-                                        <div className="space-y-2">
+                                        <div className="space-y-2 max-h-[180px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-neutral-700 scrollbar-track-transparent">
                                             {VOICE_OPTIONS.map((voice) => (
                                                 <div
                                                     key={voice.id}
@@ -382,7 +325,7 @@ export default function InterviewTab({ resumeData }: InterviewTabProps) {
                                                 onClick={() => setConfig({ ...config, avatarId: avatar.id as "anime" })}
                                                 className={`relative w-56 h-56 rounded-2xl overflow-hidden border-2 cursor-pointer transition-all group ${config.avatarId === avatar.id ? 'border-purple-500 ring-4 ring-purple-500/20' : 'border-neutral-700 hover:border-neutral-500'}`}
                                             >
-                                                <img src={avatar.src} alt={avatar.name} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                                                <Image src={avatar.src} alt={avatar.name} fill className="object-cover transition-transform group-hover:scale-110" />
                                                 <div className="absolute inset-x-0 bottom-0 bg-black/60 p-3 text-center text-sm font-medium text-white backdrop-blur-sm">
                                                     {avatar.name.split(' ')[0]}
                                                 </div>
@@ -486,7 +429,7 @@ export default function InterviewTab({ resumeData }: InterviewTabProps) {
             {/* Main Stage: Avatar & Subtitles */}
             <div className="flex-1 w-full relative flex flex-col items-center justify-center overflow-hidden pb-16">
                 <div className="relative z-10 transition-all duration-300 transform scale-90 md:scale-100">
-                    <CartoonAvatar isSpeaking={isAiSpeaking} />
+                    <Live2DAvatar isSpeaking={isAiSpeaking} className="w-[300px] h-[300px] md:w-[400px] md:h-[400px]" />
                 </div>
 
                 {/* Subtitles Area - Higher up */}
@@ -505,10 +448,37 @@ export default function InterviewTab({ resumeData }: InterviewTabProps) {
                                 }`}>
                                 <div className="text-lg font-medium leading-relaxed text-center line-clamp-3">
                                     &quot;{displayItem.text}&quot;
-                                    {displayItem.role === 'ai' && isAiSpeaking && (
-                                        <span className="inline-block w-2 H-4 ml-1 bg-sky-400 animate-pulse">|</span>
+
+                                    {/* Cursor / Thinking Indicator Logic */}
+                                    {displayItem.role === 'ai' && (
+                                        <>
+                                            {/* Text Streaming Cursor */}
+                                            {streamingContent && !isAiSpeaking && (
+                                                <span className="inline-block w-2 h-4 ml-1 bg-sky-400 animate-pulse" />
+                                            )}
+
+                                            {/* Audio Speaking Indicator */}
+                                            {isAiSpeaking && (
+                                                <span className="inline-block w-2 h-4 ml-1 bg-emerald-400 animate-pulse" />
+                                            )}
+
+                                            {/* Thinking/Generating Indicator (Text exists, but Audio hasn't started yet) */}
+                                            {/* We infer this: if streaming text exists OR transcript updated recently, but isAiSpeaking is false */}
+                                            {/* Actually, best check is: if role is AI, text length > 0, but !isAiSpeaking */}
+                                            {/* However, after audio finishes, !isAiSpeaking is also true. */}
+                                            {/* We need a 'isThinking' or 'isGeneratingAudio' prop, but lacking that, we can use a temporary UI hint for now */}
+                                            {/* Or just show 'Thinking...' below text if current item is AI and !isAiSpeaking and !isUserSpeaking */}
+                                        </>
                                     )}
                                 </div>
+
+                                {/* Status Badge below text */}
+                                {displayItem.role === 'ai' && !isAiSpeaking && streamingContent && (
+                                    <div className="mt-2 flex items-center justify-center gap-2 text-xs text-sky-400 font-mono animate-pulse">
+                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                        <span>正在组织语言 / 生成语音...</span>
+                                    </div>
+                                )}
                             </div>
                         </motion.div>
                     )}
