@@ -26,7 +26,7 @@ const panelVariants = {
   expanded: {
     width: 280,
     transition: {
-      type: "spring",
+      type: "spring" as const,
       damping: 20,
       stiffness: 300,
       duration: 0.6
@@ -35,7 +35,7 @@ const panelVariants = {
   collapsed: {
     width: 56,
     transition: {
-      type: "spring",
+      type: "spring" as const,
       damping: 20,
       stiffness: 300,
       duration: 0.6
@@ -48,7 +48,7 @@ const buttonVariants = {
   expanded: {
     right: 264,
     transition: {
-      type: "spring",
+      type: "spring" as const,
       damping: 25,
       stiffness: 400,
       duration: 0.5
@@ -57,7 +57,7 @@ const buttonVariants = {
   collapsed: {
     right: 40,
     transition: {
-      type: "spring",
+      type: "spring" as const,
       damping: 25,
       stiffness: 400,
       duration: 0.5
@@ -67,7 +67,7 @@ const buttonVariants = {
 
 // 内容动画配置
 const contentVariants = {
-  hidden: { 
+  hidden: {
     opacity: 0,
     x: 20,
     scale: 0.95
@@ -77,7 +77,7 @@ const contentVariants = {
     x: 0,
     scale: 1,
     transition: {
-      type: "spring",
+      type: "spring" as const,
       damping: 25,
       stiffness: 400,
       duration: 0.4,
@@ -100,7 +100,7 @@ const containerVariants = {
   show: {
     opacity: 1,
     transition: {
-      type: "spring",
+      type: "spring" as const,
       damping: 30,
       stiffness: 400,
       staggerChildren: 0.08,
@@ -140,11 +140,11 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
   const handleCustomizeTemplate = (template: MagicTemplateDSL) => {
     // 如果当前简历有自定义配置，合并到基础模板中显示当前状态
     let templateToCustomize = template;
-    
+
     if (activeResume?.customTemplate) {
       templateToCustomize = mergeTemplateConfig(template, activeResume.customTemplate);
     }
-    
+
     setCustomizingTemplate(templateToCustomize);
     setIsCustomizing(true);
   };
@@ -152,7 +152,7 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
   // 处理模板更新
   const handleTemplateChange = (updatedTemplate: MagicTemplateDSL) => {
     setCustomizingTemplate(updatedTemplate);
-    
+
     // 从基础模板中提取自定义配置差异
     const baseTemplate = templates.find(t => t.id === currentTemplateId);
     if (baseTemplate) {
@@ -160,7 +160,7 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
       // 实时更新到简历配置中，这样预览会立即显示效果
       updateCustomTemplate(customConfig || {});
     }
-    
+
     if (onTemplateUpdate) {
       onTemplateUpdate(updatedTemplate);
     }
@@ -177,7 +177,7 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
   const renderContent = () => {
     if (loading) {
       return (
-        <motion.div 
+        <motion.div
           className="grid grid-cols-2 gap-4"
           variants={containerVariants}
           initial="hidden"
@@ -185,21 +185,21 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
         >
           {/* 简化的骨架屏模板卡片 */}
           {Array.from({ length: 4 }).map((_, index) => (
-            <motion.div 
-              key={index} 
+            <motion.div
+              key={index}
               className="relative bg-neutral-800/80 border-2 border-neutral-600 aspect-[3/4] rounded-xl overflow-hidden"
               variants={{
-                hidden: { 
-                  opacity: 0, 
+                hidden: {
+                  opacity: 0,
                   y: 20,
                   scale: 0.9
                 },
-                show: { 
-                  opacity: 1, 
+                show: {
+                  opacity: 1,
                   y: 0,
                   scale: 1,
                   transition: {
-                    type: "spring",
+                    type: "spring" as const,
                     damping: 25,
                     stiffness: 500,
                     delay: index * 0.1
@@ -210,27 +210,27 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
               {/* 简化的骨架内容 */}
               <div className="h-full p-3 flex flex-col">
                 {/* 预览区域骨架 */}
-                <motion.div 
+                <motion.div
                   className="flex-1 mb-3 bg-neutral-700/50 rounded"
-                  animate={{ 
-                    opacity: [0.5, 0.8, 0.5] 
+                  animate={{
+                    opacity: [0.5, 0.8, 0.5]
                   }}
-                  transition={{ 
-                    duration: 1.5, 
-                    repeat: Infinity, 
-                    ease: "easeInOut" 
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "easeInOut"
                   }}
                 />
-                
+
                 {/* 模板名称骨架 */}
-                <motion.div 
+                <motion.div
                   className="h-4 bg-neutral-600 rounded w-1/2 mx-auto"
-                  animate={{ 
-                    opacity: [0.5, 0.8, 0.5] 
+                  animate={{
+                    opacity: [0.5, 0.8, 0.5]
                   }}
-                  transition={{ 
-                    duration: 1.5, 
-                    repeat: Infinity, 
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
                     ease: "easeInOut",
                     delay: 0.2
                   }}
@@ -244,18 +244,18 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
 
     if (error) {
       return (
-        <motion.div 
+        <motion.div
           className="flex flex-col items-center justify-center h-64 text-red-400"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ 
-            type: "spring", 
-            damping: 25, 
+          transition={{
+            type: "spring",
+            damping: 25,
             stiffness: 400,
             duration: 0.4
           }}
         >
-          <motion.p 
+          <motion.p
             className="text-sm mb-2"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -270,9 +270,9 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => window.location.reload()}
               className="text-xs"
             >
@@ -285,18 +285,18 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
 
     if (templates.length === 0) {
       return (
-        <motion.div 
+        <motion.div
           className="flex items-center justify-center h-64 text-neutral-400"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ 
-            type: "spring", 
-            damping: 25, 
+          transition={{
+            type: "spring",
+            damping: 25,
             stiffness: 400,
             duration: 0.4
           }}
         >
-          <motion.p 
+          <motion.p
             className="text-sm"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -319,29 +319,29 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
           <motion.div
             key={template.id}
             variants={{
-              hidden: { 
-                opacity: 0, 
+              hidden: {
+                opacity: 0,
                 y: 20,
                 scale: 0.9
               },
-              show: { 
-                opacity: 1, 
+              show: {
+                opacity: 1,
                 y: 0,
                 scale: 1,
                 transition: {
-                  type: "spring",
+                  type: "spring" as const,
                   damping: 25,
                   stiffness: 500,
                   duration: 0.4
                 }
               }
             }}
-            whileHover={{ 
+            whileHover={{
               scale: 1.02,
-              transition: { 
-                type: "spring", 
-                damping: 20, 
-                stiffness: 400 
+              transition: {
+                type: "spring",
+                damping: 20,
+                stiffness: 400
               }
             }}
             whileTap={{ scale: 0.98 }}
@@ -360,7 +360,7 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
 
   return (
     <>
-      <motion.aside 
+      <motion.aside
         className="fixed top-0 right-0 h-screen bg-neutral-900 border-l border-neutral-800 flex justify-center items-start p-2 z-40 overflow-auto scrollbar-hide"
         variants={panelVariants}
         animate={rightCollapsed ? 'collapsed' : 'expanded'}
@@ -368,7 +368,7 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
       >
         <AnimatePresence mode="wait">
           {!rightCollapsed && (
-            <motion.div 
+            <motion.div
               className="w-full h-full flex flex-col"
               variants={contentVariants}
               initial="hidden"
@@ -378,34 +378,34 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
             >
               {isCustomizing && customizingTemplate ? (
                 // 自定义面板
-                <motion.div 
+                <motion.div
                   className="h-full flex flex-col"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ 
-                    type: "spring", 
-                    damping: 25, 
+                  transition={{
+                    type: "spring",
+                    damping: 25,
                     stiffness: 400,
                     duration: 0.4
                   }}
                 >
                   <div className="p-4 border-b border-neutral-800">
-                    <motion.h2 
-                      className="text-xl font-semibold text-left"
+                    <motion.h2
+                      className="text-xl font-semibold text-left flex items-center"
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ 
+                      transition={{
                         delay: 0.1,
-                        type: "spring", 
-                        damping: 20, 
+                        type: "spring",
+                        damping: 20,
                         stiffness: 400
                       }}
                     >
                       <motion.div
                         className="inline-block mr-3"
                         animate={{ rotate: [0, 360] }}
-                        transition={{ 
-                          duration: 0.6, 
+                        transition={{
+                          duration: 0.6,
                           ease: "easeOut",
                           delay: 0.2
                         }}
@@ -415,14 +415,14 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
                       {t('templateCustomizer.title')}
                     </motion.h2>
                   </div>
-                  <motion.div 
+                  <motion.div
                     className="flex-1"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ 
+                    transition={{
                       delay: 0.2,
-                      type: "spring", 
-                      damping: 25, 
+                      type: "spring",
+                      damping: 25,
                       stiffness: 400
                     }}
                   >
@@ -436,33 +436,33 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
                 </motion.div>
               ) : (
                 // 模板列表
-                <motion.div 
+                <motion.div
                   className="p-4"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ 
-                    type: "spring", 
-                    damping: 25, 
+                  transition={{
+                    type: "spring",
+                    damping: 25,
                     stiffness: 400,
                     duration: 0.4
                   }}
                 >
-                  <motion.h2 
+                  <motion.h2
                     className="text-xl font-semibold mb-6 text-left"
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ 
+                    transition={{
                       delay: 0.1,
-                      type: "spring", 
-                      damping: 20, 
+                      type: "spring",
+                      damping: 20,
                       stiffness: 400
                     }}
                   >
                     <motion.div
                       className="inline-block mr-3"
                       animate={{ scale: [1, 1.1, 1] }}
-                      transition={{ 
-                        duration: 0.4, 
+                      transition={{
+                        duration: 0.4,
                         ease: "easeOut",
                         delay: 0.2
                       }}
@@ -474,10 +474,10 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ 
+                    transition={{
                       delay: 0.2,
-                      type: "spring", 
-                      damping: 25, 
+                      type: "spring",
+                      damping: 25,
                       stiffness: 400
                     }}
                   >

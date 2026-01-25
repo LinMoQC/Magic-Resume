@@ -34,8 +34,9 @@ import AIModal from '../_components/AIModal';
 import { useTranslation } from 'react-i18next';
 import { Loader2 } from 'lucide-react';
 import JsonModal from '../_components/JsonModal';
+import HeaderTab from '../_components/HeaderTab';
 
-const ResumePreviewPanel = dynamic(() => import('../_components/ResumePreviewPanel'), { 
+const ResumePreviewPanel = dynamic(() => import('../_components/ResumePreviewPanel'), {
   ssr: false,
   loading: () => (
     <div className="w-full h-full bg-black flex items-center justify-center text-white">
@@ -262,7 +263,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
                       /* eslint-disable @typescript-eslint/no-explicit-any */
                       itemRender={sidebarMenu.find(s => s.key === key)?.itemRender as any}
                       /* eslint-disable @typescript-eslint/no-explicit-any */
-                      items={(sectionItems?.[key as keyof Section] ?? []).map(item => ({...item, id: String(item.id)})) as any}
+                      items={(sectionItems?.[key as keyof Section] ?? []).map(item => ({ ...item, id: String(item.id) })) as any}
                       setItems={(items) => updateSectionItems(key, items as SectionItem[])}
                       className={isLast ? 'mb-0' : ''}
                       onModalStateChange={setIsAnyModalOpen}
@@ -310,21 +311,25 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
             onShowJson={openJsonModal}
           />
         </div>
-        <div 
-          className='flex-1 flex items-center justify-center bg-black relative transition-all duration-300' 
-          style={{ 
-            marginRight: rightCollapsed ? '56px' : '280px' 
+        <div
+          className='flex-1 flex items-center justify-center bg-black relative transition-all duration-300'
+          style={{
+            marginRight: rightCollapsed ? '56px' : '280px'
           }}
         >
+          <HeaderTab
+            title={activeResume?.name}
+            updatedAt={activeResume?.updatedAt}
+          />
           {/* 简历预览面板 */}
-        <ResumePreviewPanel
-          activeResume={activeResume}
-          previewScale={previewScale}
-          setPreviewScale={setPreviewScale}
-          onShowAI={openAIModal}
-          isAiJobRunning={isAiJobRunning}
-          rightCollapsed={rightCollapsed}
-        />
+          <ResumePreviewPanel
+            activeResume={activeResume}
+            previewScale={previewScale}
+            setPreviewScale={setPreviewScale}
+            onShowAI={openAIModal}
+            isAiJobRunning={isAiJobRunning}
+            rightCollapsed={rightCollapsed}
+          />
         </div>
       </main>
 
@@ -346,7 +351,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
       />
 
       {/* AI Modal */}
-      <AIModal 
+      <AIModal
         isOpen={isAIModalOpen}
         onClose={closeAIModal}
         resumeData={activeResume}

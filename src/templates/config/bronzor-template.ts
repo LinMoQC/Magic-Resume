@@ -85,7 +85,7 @@ export const bronzorTemplate: MagicTemplateDSL = {
         area: "main", 
       },
       props: {
-        title: "PROFESSIONAL EXPERIENCE"
+        title: "EXPERIENCE"
       },
       fieldMap: {
         title: ["company"],
@@ -125,7 +125,7 @@ export const bronzorTemplate: MagicTemplateDSL = {
         area: "main",
       },
       props: {
-        title: "TECHNICAL SKILLS"
+        title: "SKILLS"
       },
       fieldMap: {
         title: ["name", "skill"]

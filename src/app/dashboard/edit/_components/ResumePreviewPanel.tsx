@@ -14,7 +14,7 @@ interface ResumePreviewPanelProps {
   setPreviewScale: (scale: number) => void;
   onShowAI: () => void;
   isAiJobRunning: boolean;
-  rightCollapsed?: boolean; // 新增：模板栏是否收起
+  rightCollapsed?: boolean;
 }
 
 const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
@@ -45,6 +45,8 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
         limitToBounds={false}
         onTransformed={(_ref, state) => setPreviewScale(state.scale)}
         onInit={(controls) => controls.centerView(0.5, 0)}
+        onPanningStart={() => document.body.classList.add('grabbing')}
+        onPanningStop={() => document.body.classList.remove('grabbing')}
       >
         {({ zoomIn, zoomOut, resetTransform }) => (
           <>

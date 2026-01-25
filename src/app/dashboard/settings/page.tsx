@@ -62,7 +62,7 @@ export default function Settings() {
   return (
     <div className="flex-1 px-12 py-10 overflow-y-auto relative">
       <h1 className="text-3xl font-bold mb-4">{t('settings.title')}</h1>
-      
+
       <div className="space-y-12 max-w-4xl pb-24">
         <section id="llm-settings">
           <h2 className="text-2xl font-semibold mb-2">{t('settings.llm.title')}</h2>
@@ -77,7 +77,7 @@ export default function Settings() {
           <p className="text-neutral-400 mb-4 text-sm">
             {t('settings.llm.description3')}
           </p>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
             <div>
               <label htmlFor="apiKey" className="block text-sm font-medium text-neutral-300 mb-2">{t('settings.llm.apiKeyLabel')}</label>
@@ -136,19 +136,19 @@ export default function Settings() {
       <AnimatePresence>
         {isDirty && (
           <motion.div
-            className="rounded-3xl fixed bottom-6 left-1/2 -translate-x-1/2 w-auto bg-neutral-800 border border-neutral-700 shadow-2xl px-4 py-2 flex items-center justify-between z-50"
+            className="rounded-full fixed bottom-8 left-1/2 -translate-x-1/2 w-auto bg-neutral-900/90 backdrop-blur-md border border-neutral-800 shadow-2xl pl-5 pr-2 py-2 flex items-center justify-between z-50 gap-6"
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
           >
             <div className="flex items-center gap-3">
-              <InfoCircledIcon className="h-5 w-5 text-white" />
-              <p className="text-white font-medium text-sm">{t('settings.notifications.unsavedChanges')}</p>
+              <InfoCircledIcon className="h-5 w-5 text-neutral-400" />
+              <p className="text-neutral-200 font-medium text-sm">{t('settings.notifications.unsavedChanges')}</p>
             </div>
-            <div className="flex items-center gap-3 ml-3">
-              <Button onClick={handleReset} size="sm" className="h-6 rounded-2xl text-red-500 border-red-500 bg-red-500/20 hover:bg-red-500/10 hover:text-red-400">{t('settings.buttons.reset')}</Button>
-              <Button onClick={handleSave} size="sm" className="h-6 rounded-2xl text-gray-300 hover:text-gray-200 bg-green-500/20 hover:bg-green-500/10">{t('settings.buttons.save')}</Button>
+            <div className="flex items-center gap-2">
+              <Button onClick={handleReset} variant="ghost" size="sm" className="h-8 px-4 rounded-full text-neutral-400 hover:text-white hover:bg-white/10">{t('settings.buttons.reset')}</Button>
+              <Button onClick={handleSave} size="sm" className="h-8 px-5 rounded-full bg-white text-black hover:bg-neutral-200 font-medium transition-colors">{t('settings.buttons.save')}</Button>
             </div>
           </motion.div>
         )}

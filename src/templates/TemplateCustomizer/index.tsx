@@ -206,8 +206,6 @@ export default function TemplateCustomizer({
 
         {activeTab === 'typography' && (
           <div className="space-y-6">
-            <h3 className="text-sm font-semibold text-neutral-200">{t('templateCustomizer.typography.fontSettings')}</h3>
-            
             <div className="space-y-4">
               <FontSelector
                 label={t('templateCustomizer.typography.primaryFont')}
@@ -269,8 +267,6 @@ export default function TemplateCustomizer({
 
         {activeTab === 'layout' && (
           <div className="space-y-6">
-            <h3 className="text-sm font-semibold text-neutral-200">{t('templateCustomizer.layout.layoutSettings')}</h3>
-            
             {/* 容器设置 */}
             <div className="space-y-4">
               <h4 className="text-sm font-medium text-neutral-300">{t('templateCustomizer.layout.containerSettings')}</h4>
@@ -351,10 +347,7 @@ export default function TemplateCustomizer({
                   max="2.0"
                   step="0.1"
                   value={(template.designTokens.typography as { lineHeight?: number }).lineHeight || 1.5}
-                  onChange={(e) => updateTypography({
-                    ...template.designTokens.typography,
-                    lineHeight: parseFloat(e.target.value)
-                  } as typeof template.designTokens.typography & { lineHeight: number })}
+                  onChange={(e) => updateTypography({ lineHeight: parseFloat(e.target.value) })}
                   className="w-full h-2 bg-neutral-700 rounded-lg appearance-none cursor-pointer slider"
                 />
               </div>
@@ -373,10 +366,7 @@ export default function TemplateCustomizer({
                   max="3"
                   step="0.5"
                   value={parseFloat((template.designTokens.typography as { letterSpacing?: string }).letterSpacing || '0')}
-                  onChange={(e) => updateTypography({
-                    ...template.designTokens.typography,
-                    letterSpacing: `${e.target.value}px`
-                  } as typeof template.designTokens.typography & { letterSpacing: string })}
+                  onChange={(e) => updateTypography({ letterSpacing: `${e.target.value}px` })}
                   className="w-full h-2 bg-neutral-700 rounded-lg appearance-none cursor-pointer slider"
                 />
               </div>

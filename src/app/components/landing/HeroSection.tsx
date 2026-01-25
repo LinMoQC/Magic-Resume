@@ -9,13 +9,13 @@ import { MorphingText } from '@/app/components/morphing-text';
 import { useEffect, useState, useMemo } from 'react';
 
 // 简化的浮动图标组件
-const SimpleFloatingIcon = ({ icon: Icon, delay = 0 }: { 
-  icon: React.ComponentType<{ size?: number }>; 
-  delay?: number; 
+const SimpleFloatingIcon = ({ icon: Icon, delay = 0 }: {
+  icon: React.ComponentType<{ size?: number }>;
+  delay?: number;
 }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
-    animate={{ 
+    animate={{
       opacity: [0.2, 0.4, 0.2],
       y: [0, -15, 0],
     }}
@@ -35,21 +35,21 @@ const SimpleFloatingIcon = ({ icon: Icon, delay = 0 }: {
 const seededRandom = (seed: number) => {
   let state = seed;
   return () => {
-    state = (state * 1664525 + 1013904223) % 2**32;
-    return state / 2**32;
+    state = (state * 1664525 + 1013904223) % 2 ** 32;
+    return state / 2 ** 32;
   };
 };
 
 // 修复水合错误的粒子效果组件
 const SimpleParticleField = () => {
   const [isClient, setIsClient] = useState(false);
-  
+
   // 使用固定种子生成确定性随机数
   const particleElements = useMemo(() => {
     if (!isClient) return [];
-    
+
     const random = seededRandom(12345); // 固定种子
-    
+
     return Array.from({ length: 50 }, (_, i) => {
       const initialX = random() * 1200;
       const initialY = random() * 800;
@@ -57,12 +57,12 @@ const SimpleParticleField = () => {
       const endX = random() * 1200 + 50;
       const duration = random() * 5 + 5;
       const delay = random() * 4;
-      
+
       return (
         <motion.div
           key={i}
           className="absolute w-1 h-1 bg-purple-400/50 rounded-full"
-          initial={{ 
+          initial={{
             opacity: 0,
             x: initialX,
             y: initialY,
@@ -105,28 +105,30 @@ const SimpleParticleField = () => {
 
 const fadeIn = {
   hidden: { opacity: 0, y: 30, scale: 0.95 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
+  visible: {
+    opacity: 1,
+    y: 0,
     scale: 1,
-    transition: { 
-      duration: 0.8, 
-      ease: [0.25, 0.46, 0.45, 0.94] 
-    } 
+    transition: {
+      duration: 0.8,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ease: [0.25, 0.46, 0.45, 0.94] as any
+    }
   },
 };
 
 const slideIn = {
   hidden: { opacity: 0, x: 50, scale: 0.9 },
-  visible: { 
-    opacity: 1, 
-    x: 0, 
+  visible: {
+    opacity: 1,
+    x: 0,
     scale: 1,
-    transition: { 
-      duration: 1, 
-      ease: [0.25, 0.46, 0.45, 0.94],
+    transition: {
+      duration: 1,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ease: [0.25, 0.46, 0.45, 0.94] as any,
       delay: 0.2
-    } 
+    }
   },
 };
 
@@ -139,7 +141,7 @@ export function HeroSection() {
 
   const texts = [
     t("landing.morphingTexts.simpleAndSmart"),
-    t("landing.morphingTexts.aiPowered"), 
+    t("landing.morphingTexts.aiPowered"),
     t("landing.morphingTexts.beautifulTemplates"),
     t("landing.morphingTexts.freeAndSecure"),
   ];
@@ -147,15 +149,15 @@ export function HeroSection() {
   useEffect(() => {
     controls.start("visible");
   }, [controls]);
-  
+
   return (
-    <motion.section 
+    <motion.section
       className="relative container mx-auto px-6 py-10 md:py-20 min-h-screen flex items-center justify-center overflow-hidden"
       style={{ y, opacity }}
     >
       {/* 粒子背景 */}
       <SimpleParticleField />
-      
+
       {/* 浮动图标 */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="relative w-full h-full">
@@ -168,14 +170,14 @@ export function HeroSection() {
       {/* 主要内容网格 */}
       <div className="grid md:grid-cols-2 gap-16 items-center max-w-7xl mx-auto relative z-10">
         {/* 左侧内容 */}
-        <motion.div 
-          initial="hidden" 
-          animate={controls} 
+        <motion.div
+          initial="hidden"
+          animate={controls}
           variants={fadeIn}
           className="space-y-8"
         >
           {/* 标签 */}
-          <motion.div 
+          <motion.div
             initial={{ scale: 0, rotate: -10 }}
             animate={{ scale: 1, rotate: 0 }}
             transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
@@ -190,21 +192,21 @@ export function HeroSection() {
           </motion.div>
 
           {/* 主标题 */}
-          <motion.div 
+          <motion.div
             className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter leading-tight mb-6 max-w-2xl"
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.8 }}
           >
             <div className="min-h-[140px] md:min-h-[200px] lg:min-h-[280px] flex items-center justify-center md:justify-start relative">
-              <MorphingText 
+              <MorphingText
                 texts={texts}
               />
             </div>
           </motion.div>
 
           {/* 副标题 */}
-          <motion.p 
+          <motion.p
             className="text-xl md:text-2xl text-neutral-300 mb-8 max-w-lg leading-relaxed"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -214,7 +216,7 @@ export function HeroSection() {
           </motion.p>
 
           {/* 按钮组 */}
-          <motion.div 
+          <motion.div
             className="flex flex-col sm:flex-row gap-4"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -228,7 +230,7 @@ export function HeroSection() {
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-cyan-600 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-lg" />
                 <div className="relative z-10 bg-gradient-to-r from-purple-600 to-purple-700 text-white px-8 py-4 rounded-lg font-semibold transition-all duration-300 flex items-center gap-3 shadow-lg group-hover:shadow-purple-500/25 group-hover:shadow-xl">
-                  {t("landing.hero.getStarted")} 
+                  {t("landing.hero.getStarted")}
                   <motion.div
                     animate={{ x: [0, 4, 0] }}
                     transition={{ duration: 1.5, repeat: Infinity }}
@@ -242,7 +244,7 @@ export function HeroSection() {
           </motion.div>
 
           {/* 特性标签 */}
-          <motion.div 
+          <motion.div
             className="flex flex-wrap gap-3 pt-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -264,15 +266,15 @@ export function HeroSection() {
         </motion.div>
 
         {/* 右侧图片区域 */}
-        <motion.div 
-          initial="hidden" 
-          animate={controls} 
+        <motion.div
+          initial="hidden"
+          animate={controls}
           variants={slideIn}
           className="relative"
         >
           {/* 简化的背景光晕 */}
           <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-cyan-500/10 rounded-2xl" />
-          
+
           {/* 主图片容器 */}
           <div className="relative bg-neutral-900/90 border border-neutral-700/50 rounded-2xl p-2 shadow-lg group hover:border-purple-400/50 hover:shadow-xl transition-all duration-300">
             {/* 图片 */}
@@ -286,7 +288,7 @@ export function HeroSection() {
                 priority
                 quality={85}
               />
-              
+
               {/* 轻量级悬浮叠加 */}
               <div className="absolute inset-0 bg-gradient-to-t from-purple-900/0 to-purple-900/0 group-hover:from-purple-900/10 group-hover:to-transparent transition-all duration-300 rounded-xl" />
             </div>

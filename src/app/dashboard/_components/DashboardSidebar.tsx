@@ -101,9 +101,7 @@ export default function DashboardSidebar() {
                 onClick={() => setActiveSection(section.key)}
                 title={t(section.label)}
               >
-                <span className="h-5 w-5">
-                  <Icon />
-                </span>
+                <Icon className="w-4 h-4" />
               </Button>
             );
           })}

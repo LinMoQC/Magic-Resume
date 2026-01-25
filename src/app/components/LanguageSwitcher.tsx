@@ -27,11 +27,11 @@ export default function LanguageSwitcher() {
 
   const buttonVariants = {
     initial: { scale: 1 },
-    hover: { 
+    hover: {
       scale: 1.05,
-      transition: { duration: 0.2, ease: "easeOut" }
+      transition: { duration: 0.2, ease: "easeOut" as const }
     },
-    tap: { 
+    tap: {
       scale: 0.95,
       transition: { duration: 0.1 }
     }
@@ -54,30 +54,27 @@ export default function LanguageSwitcher() {
         whileHover="hover"
         whileTap="tap"
         aria-label="Change language"
-        className="group relative overflow-hidden"
+        className="group relative overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
       >
-        {/* 背景渐变层 */}
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-600/90 to-cyan-600/90 rounded-xl backdrop-blur-xl" />
-        
+        {/* 背景层 */}
+        <div className="absolute inset-0 bg-gray-900/95 backdrop-blur-sm rounded-full border border-gray-700/50" />
+
         {/* Hover 效果层 */}
-        <motion.div 
-          className="absolute inset-0 bg-gradient-to-br from-purple-500/80 to-cyan-500/80 rounded-xl"
+        <motion.div
+          className="absolute inset-0 bg-gray-800/90 rounded-full"
           initial={{ opacity: 0 }}
           animate={{ opacity: isHovered ? 1 : 0 }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.2 }}
         />
 
-        {/* 边框光晕 */}
-        <div className="absolute inset-0 rounded-xl border border-white/20 group-hover:border-white/30 transition-colors duration-300" />
-        
         {/* 内容容器 */}
-        <div className="relative flex items-center gap-2 px-3 py-2 text-white">
+        <div className="relative flex items-center gap-2 px-3 py-2.5 text-white">
           {/* 地球图标 */}
           <motion.div
-            animate={{ rotate: isHovered ? 360 : 0 }}
-            transition={{ duration: 0.6, ease: "easeInOut" }}
+            animate={{ rotate: isHovered ? 15 : 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
           >
-            <Globe2 size={14} className="text-white/90" />
+            <Globe2 size={16} className="text-gray-300" />
           </motion.div>
 
           {/* 语言文字 */}
@@ -89,15 +86,15 @@ export default function LanguageSwitcher() {
               animate="animate"
               exit="exit"
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="font-medium text-xs w-4 text-center"
+              className="font-medium text-sm w-5 text-center text-white"
             >
               {isEnglish ? "EN" : "中"}
             </motion.div>
           </AnimatePresence>
         </div>
 
-        {/* 底部阴影 */}
-        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-1.5 bg-purple-600/40 rounded-full blur-sm group-hover:w-8 group-hover:bg-purple-500/60 transition-all duration-300" />
+        {/* 底部微妙阴影 */}
+        <div className="absolute -bottom-0.5 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-gray-600/40 rounded-full blur-[1px] group-hover:w-10 group-hover:bg-gray-500/50 transition-all duration-300" />
       </motion.button>
     </div>
   );

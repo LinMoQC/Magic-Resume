@@ -93,6 +93,16 @@ const nextConfig: NextConfig = {
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
+
+  // 接口转发 (Proxy)
+  async rewrites() {
+    return [
+      {
+        source: '/api/interview/:path*',
+        destination: 'http://127.0.0.1:8000/api/interview/:path*',
+      },
+    ];
+  },
 };
 
 export default nextConfig;

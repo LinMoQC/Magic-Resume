@@ -11,7 +11,7 @@ const nextUrl = process.env.NEXT_PUBLIC_IF_USE_BACKEND === 'true' ? '/api' : '/a
 
 export const useResumeCreator = () => {
   const { t } = useTranslation();
-  const { apiKey, baseUrl, model } = useSettingStore();
+  const { apiKey, baseUrl, model, maxTokens } = useSettingStore();
   
   const { messages, setMessages, addMessage, isLoading, setIsLoading, updateLastAIMessage, updateLastAIMessageWithJSON } = useMessageStore();
   const { resumeDraft, setResumeDraft } = useResumeDraftStore();
@@ -88,7 +88,7 @@ export const useResumeCreator = () => {
     let streamStarted = false;
 
     try {
-      const config = { apiKey, baseUrl, modelName: model, maxTokens: 65536 };
+      const config = { apiKey, baseUrl, modelName: model, maxTokens: maxTokens || 4096 };
       
       const requestBody = {
         messages: [...messages, newUserMessage],
@@ -232,7 +232,7 @@ export const useResumeCreator = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [apiKey, t, messages, addMessage, updateLastAIMessage, updateLastAIMessageWithJSON, baseUrl, model, setIsLoading, generateResume, setResumeDraft]);
+  }, [apiKey, t, messages, addMessage, updateLastAIMessage, updateLastAIMessageWithJSON, baseUrl, model, maxTokens, setIsLoading, generateResume, setResumeDraft]);
 
   return { messages, isLoading: isLoading || isGenerating, resumeDraft, sendMessage, generateResume };
 };

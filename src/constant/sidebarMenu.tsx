@@ -1,11 +1,18 @@
-import { FaBook, FaBriefcase, FaCertificate,FaGraduationCap, FaLanguage, FaLayerGroup } from "react-icons/fa";
 import { ComponentType } from 'react';
 import { SectionItem } from "@/store/useResumeStore";
 import { dynamicFormFields, FieldConfig } from "./dynamicFormFields";
+import {
+  FolderKanban,
+  GraduationCap,
+  Zap,
+  Languages,
+  Award,
+  BriefcaseBusiness
+} from 'lucide-react';
 
 export type SidebarMenuItem = {
   key: string;
-  icon: ComponentType;
+  icon: ComponentType<{ className?: string }>;
   label: string;
   formFields?: FieldConfig[];
   itemRender?: (item: SectionItem) => React.ReactNode;
@@ -15,7 +22,7 @@ export type SidebarMenuItem = {
 const sidebarMenu: SidebarMenuItem[] = [
   {
     key: 'projects',
-    icon: FaBook,
+    icon: FolderKanban,
     label: 'sections.projects',
     itemRender: (item) => (
       <div className="flex flex-col gap-2 max-w-[155px]">
@@ -26,7 +33,7 @@ const sidebarMenu: SidebarMenuItem[] = [
   },
   {
     key: 'education',
-    icon: FaGraduationCap,
+    icon: GraduationCap,
     label: 'sections.education',
     formFields: dynamicFormFields.education,
     itemRender: (item) => (
@@ -38,25 +45,25 @@ const sidebarMenu: SidebarMenuItem[] = [
   },
   {
     key: 'skills',
-    icon: FaLayerGroup,
+    icon: Zap,
     label: 'sections.skills',
     itemRender: (item) => <div className="font-bold text-sm max-w-[155px]">{item.name}</div>
   },
   {
     key: 'languages',
-    icon: FaLanguage,
+    icon: Languages,
     label: 'sections.languages',
     itemRender: (item) => <div className="font-bold text-sm max-w-[155px]">{item.language}</div>
   },
   {
     key: 'certificates',
-    icon: FaCertificate,
+    icon: Award,
     label: 'sections.certificates',
     itemRender: (item) => <div className="font-bold text-sm max-w-[155px]">{item.certificate}</div>
   },
   {
     key: 'experience',
-    icon: FaBriefcase,
+    icon: BriefcaseBusiness,
     label: 'sections.experience',
     formFields: dynamicFormFields.experience,
     itemRender: (item) => (
@@ -68,7 +75,7 @@ const sidebarMenu: SidebarMenuItem[] = [
   },
   // {
   //   key: 'profiles',
-  //   icon: FaUser,
+  //   icon: User,
   //   label: 'sections.profiles',
   //   formFields: dynamicFormFields.profiles,
   //   itemRender: (item) => (
