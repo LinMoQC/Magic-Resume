@@ -1,9 +1,8 @@
 
 import axios from 'axios';
 
-// Define base URL - assuming proxy is set up or CORS allows 
-// If running locally, backend might be on localhost:8000
-const API_BASE_URL = 'http://localhost:8000/api'; 
+// Define base URL - using environment variable
+const API_BASE_URL = `${process.env.BACKEND_URL || 'http://localhost:8000'}/api`;
 
 export interface StartInterviewParams {
   resume_context: string;
