@@ -177,7 +177,7 @@ export function useRealtimeInterview() {
 
             // Connect WebSocket - Direct connection to backend (bypasses Next.js rewrites)
             // Next.js rewrites don't support WebSocket protocol upgrades on Vercel
-            const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+            const backendUrl = process.env.BACKEND_URL || 'http://localhost:8000';
             const backendHost = backendUrl.replace(/^https?:\/\//, ''); // Remove protocol
             const protocol = backendUrl.startsWith('https') ? 'wss:' : 'ws:';
             let wsUrl = `${protocol}//${backendHost}/api/interview/realtime/${sid}`;
