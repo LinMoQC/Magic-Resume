@@ -100,7 +100,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/api/interview/:path*',
-        destination: process.env.BACKEND_URL + '/api/interview/:path*',
+        destination: (process.env.BACKEND_URL || 'http://localhost:8000') + '/api/interview/:path*',
       },
     ];
   }
