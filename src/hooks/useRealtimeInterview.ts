@@ -175,9 +175,12 @@ export function useRealtimeInterview() {
             await recorderRef.current.start();
             addLog("🎙️ Audio Capture Started");
 
-            // Connect WebSocket
-            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            let wsUrl = `${protocol}//${window.location.host}/api/interview/realtime/${sid}`;
+            // Connect WebSocket - Direct connection to backend (bypasses Next.js rewrites)
+            // Next.js rewrites don't support WebSocket protocol upgrades on Vercel
+            const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+            const backendHost = backendUrl.replace(/^https?:\/\//, ''); // Remove protocol
+            const protocol = backendUrl.startsWith('https') ? 'wss:' : 'ws:';
+            let wsUrl = `${protocol}//${backendHost}/api/interview/realtime/${sid}`;
 
             // Append Query Params
             const params = new URLSearchParams();
