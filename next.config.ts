@@ -103,7 +103,7 @@ const nextConfig: NextConfig = {
         destination: process.env.BACKEND_URL + '/api/interview/:path*',
       },
     ];
-  },
+  }
 };
 
 export default nextConfig;
