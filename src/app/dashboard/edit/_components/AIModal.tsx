@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FlaskConical, Wand2, BarChart3, BotMessageSquare, Mic } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/app/components/ui/dialog";
 import { Resume, Section } from '@/store/useResumeStore';
@@ -8,6 +8,7 @@ import OptimizeTab from './AiLab/OptimizeTab';
 import AnalyzeTab from './AiLab/AnalyzeTab';
 import CreateTab from './AiLab/CreateTab';
 import InterviewTab from './AiLab/InterviewTab';
+import { useTrace } from '@/app/hooks/useTrace';
 
 type AIModalProps = {
   isOpen: boolean;
@@ -40,6 +41,26 @@ export default function AIModal({
 }: AIModalProps) {
   const { t } = useTranslation();
   const [activeTabKey, setActiveTabKey] = useState(TABS_CONFIG[0].key);
+  const { traceAiCreateViewed, traceAiOptimizeViewed, traceAiAnalyzeViewed, traceAiInterviewViewed } = useTrace();
+
+  useEffect(() => {
+    if (isOpen) {
+      switch (activeTabKey) {
+        case 'create':
+          traceAiCreateViewed();
+          break;
+        case 'optimize':
+          traceAiOptimizeViewed();
+          break;
+        case 'analyze':
+          traceAiAnalyzeViewed();
+          break;
+        case 'interview':
+          traceAiInterviewViewed();
+          break;
+      }
+    }
+  }, [isOpen, activeTabKey, traceAiCreateViewed, traceAiOptimizeViewed, traceAiAnalyzeViewed, traceAiInterviewViewed]);
 
 
   const handleApplySectionAndClose = (newSections: Section) => {
