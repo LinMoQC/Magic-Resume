@@ -8,6 +8,7 @@ import { LogItem } from './LogItem';
 import { useResumeOptimizer } from '@/app/hooks/useResumeOptimizer';
 import ResumePreview from '../ResumePreview';
 import { trackEvent } from '@/app/components/Analytics';
+import { useTrace } from '@/app/hooks/useTrace';
 
 import { EditorComponents } from '@/lib/componentOptimization';
 
@@ -23,6 +24,7 @@ type OptimizeTabProps = {
 
 export default function OptimizeTab({ resumeData, onApplyChanges, templateId, isAiJobRunning, setIsAiJobRunning }: OptimizeTabProps) {
   const { t } = useTranslation();
+  const { traceAiOptimizationStarted } = useTrace();
   const [isPreview, setIsPreview] = useState(false);
 
   const {
@@ -49,6 +51,8 @@ export default function OptimizeTab({ resumeData, onApplyChanges, templateId, is
       feature: 'resume_optimize',
       user_action: 'optimize_button_click'
     });
+
+    traceAiOptimizationStarted(!!jd);
 
     runOptimization({ jd, resumeData });
   };

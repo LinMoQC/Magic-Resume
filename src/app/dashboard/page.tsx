@@ -8,11 +8,13 @@ import NewResumeDialog from './_components/NewResumeDialog';
 import ImportResumeDialog from './_components/ImportResumeDialog';
 import ResumeList from './_components/ResumeList';
 import RenameResumeDialog from './_components/RenameResumeDialog';
+import { useTrace } from '@/app/hooks/useTrace';
 
 export default function Dashboard() {
   const router = useRouter();
   const { resumes, addResume, deleteResume, duplicateResume, updateResume, loadResumes } = useResumeStore();
   const { loadSettings } = useSettingStore();
+  const { traceDashboardViewed, traceCreateResume, traceResumeCreated, traceImportResume } = useTrace();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
@@ -22,19 +24,23 @@ export default function Dashboard() {
 
   // 初始化dashboard数据
   useEffect(() => {
+
     const initializeDashboard = async () => {
       try {
         await Promise.all([
           loadResumes(),
           loadSettings()
         ]);
+        // 追踪 Dashboard 查看，使用 store 中的最新状态
+        const currentResumes = useResumeStore.getState().resumes;
+        traceDashboardViewed(currentResumes.length);
       } catch (error) {
         console.error('Failed to initialize dashboard:', error);
       }
     };
 
     initializeDashboard();
-  }, [loadResumes, loadSettings]);
+  }, [loadResumes, loadSettings, traceDashboardViewed]);
 
   const handleOpenRenameDialog = (resume: Resume) => {
     setResumeToRename(resume);
@@ -51,11 +57,13 @@ export default function Dashboard() {
   };
 
   const handleAdd = () => {
+    traceCreateResume();
     setNewName('');
     setDialogOpen(true);
   };
 
   const handleImport = () => {
+    traceImportResume();
     setImportDialogOpen(true);
   };
 
@@ -69,6 +77,7 @@ export default function Dashboard() {
         updatedAt: Date.now(),
       };
       addResume(newResume);
+      traceResumeCreated(newId);
       setDialogOpen(false);
       router.push(`/dashboard/edit/${newId}`);
     }

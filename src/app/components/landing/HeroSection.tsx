@@ -5,6 +5,7 @@ import { motion, useAnimation, useScroll, useTransform } from 'framer-motion';
 import { FiArrowRight, FiZap, FiGithub } from 'react-icons/fi';
 import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
+import { useTrace } from '@/app/hooks/useTrace';
 import ShinyText from '@/components/ShinyText';
 import TextType from '@/components/TextType';
 import DotGrid from '@/components/DotGrid';
@@ -39,6 +40,7 @@ export function HeroSection() {
   const { scrollYProgress } = useScroll();
   const y = useTransform(scrollYProgress, [0, 1], [0, -50]);
   const [stars, setStars] = useState<number | null>(null);
+  const { traceGetStarted, traceGithubStar } = useTrace();
 
   // Fetch GitHub stars
   useEffect(() => {
@@ -138,7 +140,11 @@ export function HeroSection() {
             className="flex flex-col sm:flex-row gap-4 justify-start w-full"
           >
             {/* Primary Glowing Button */}
-            <Link href="/dashboard" className="w-full sm:w-auto">
+            <Link 
+              href="/dashboard"
+              className="w-full sm:w-auto"
+              onClick={() => traceGetStarted()}
+            >
               <div className="group relative rounded-full p-[1px] bg-gradient-to-b from-white/20 to-white/0 shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] transition-all duration-300">
                   <div className="relative rounded-full bg-gradient-to-b from-[#7e22ce] to-[#581c87] px-8 py-4 flex items-center justify-center sm:justify-start gap-2 overflow-hidden transition-all duration-300 group-hover:brightness-110">
                       <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -149,7 +155,13 @@ export function HeroSection() {
             </Link>
 
             {/* Glass Button (GitHub) - Hidden on mobile, moved to Footer */}
-             <a href="https://github.com/LinMoQC/Magic-Resume" target="_blank" rel="noopener noreferrer" className="hidden md:flex">
+             <a 
+               href="https://github.com/LinMoQC/Magic-Resume" 
+               target="_blank" 
+               rel="noopener noreferrer" 
+               className="hidden md:flex"
+               onClick={() => traceGithubStar('hero_glass_button')}
+             >
               <div className="px-8 py-4 rounded-full bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300 flex items-center gap-2 cursor-pointer">
                 <FiGithub className="text-neutral-300" />
                 <span className="text-neutral-200 font-medium">{t("landing.buttons.starOnGithub")}</span>
@@ -184,7 +196,10 @@ export function HeroSection() {
                 </span>
               }
               badge={
-                <Link href="https://github.com/LinMoQC/Magic-Resume">
+                <Link 
+                  href="https://github.com/LinMoQC/Magic-Resume"
+                  onClick={() => traceGithubStar('hero_macbook_badge')}
+                >
                   <div className="h-10 w-10 transform -rotate-12 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center shadow-lg hover:scale-110 transition-transform cursor-pointer">
                      <FiGithub className="text-white w-6 h-6" />
                   </div>

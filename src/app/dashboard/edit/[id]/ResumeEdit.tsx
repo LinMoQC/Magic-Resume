@@ -35,6 +35,7 @@ import { useTranslation } from 'react-i18next';
 import { Loader2 } from 'lucide-react';
 import JsonModal from '../_components/JsonModal';
 import HeaderTab from '../_components/HeaderTab';
+import { useTrace } from '@/app/hooks/useTrace';
 
 const ResumePreviewPanel = dynamic(() => import('../_components/ResumePreviewPanel'), {
   ssr: false,
@@ -81,6 +82,8 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     resumes,
   } = useResumeStore();
 
+  const { traceEditorViewed, traceResumeSaved, traceDownloadJson, traceTemplateChanged } = useTrace();
+
   const { isMobile } = useMobile();
   const [leftPanelOpen, setLeftPanelOpen] = useState(false);
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
@@ -107,8 +110,13 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     }
   };
 
-  // 下载简历json
   const handleDownloadJson = () => {
+    if (activeResume) {
+      traceDownloadJson({
+        resumeId: activeResume.id,
+        resumeName: activeResume.name
+      });
+    }
     if (!activeResume) return;
     const jsonString = JSON.stringify(activeResume, null, 2);
     const blob = new Blob([jsonString], { type: "application/json" });
@@ -172,6 +180,25 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     loadResumeForEdit(id);
   }, [id, loadResumeForEdit, isStoreLoading, resumes]);
 
+  // 追踪编辑器查看事件
+  useEffect(() => {
+    if (activeResume && !isStoreLoading) {
+      traceEditorViewed({
+        resumeId: activeResume.id,
+        templateId: activeResume.template,
+        resumeName: activeResume.name
+      });
+    }
+  }, [activeResume?.id, isStoreLoading, traceEditorViewed]); 
+  // removed activeResume dependency to avoid spamming view events on every keystroke, but relying on ID change should be stable enough for initial load/switch. 
+  // Actually, activeResume changes on every edit. We want 'viewed' only on entry.
+  // Better approach: track when ID changes or component mounts.
+  // The above useEffect runs when activeResume.id changes. That's good for switching resumes.
+  // But activeResume updates on typing? Yes.
+  // So we need to ensure we don't track on every typo.
+  // activeResume.id shouldn't change on typing. 
+  // Correct.
+
   // 同步activeResume的template到currentTemplateId
   useEffect(() => {
     if (activeResume?.template && activeResume.template !== currentTemplateId) {
@@ -181,12 +208,25 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
 
   // 保存简历
   const handleSave = async () => {
+    if (activeResume) {
+      traceResumeSaved({
+        resumeId: activeResume.id,
+        resumeName: activeResume.name
+      });
+    }
     const snapshot = await generateSnapshot();
     saveActiveResumeToResumes(snapshot ?? undefined);
   };
 
   // 选择模板
   const handleSelectTemplate = (templateId: string) => {
+    if (activeResume) {
+      traceTemplateChanged({
+        oldTemplate: currentTemplateId,
+        newTemplate: templateId,
+        resumeName: activeResume.name
+      });
+    }
     setCurrentTemplateId(templateId);
     updateTemplate(templateId);
   };

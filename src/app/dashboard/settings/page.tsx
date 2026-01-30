@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/app/components/ui/select";
 import { useTranslation, Trans } from 'react-i18next';
+import { useTrace } from '@/app/hooks/useTrace';
 
 export default function Settings() {
   const { t } = useTranslation();
@@ -33,13 +34,18 @@ export default function Settings() {
     resetSettings,
     loadSettings,
   } = useSettingStore();
+  const { traceSettingsViewed, traceSettingsSaved } = useTrace();
+
 
   useEffect(() => {
     loadSettings();
-  }, [loadSettings]);
+    traceSettingsViewed();
+  }, [loadSettings, traceSettingsViewed]);
+
 
   const handleSave = () => {
     saveSettings();
+    traceSettingsSaved({ model });
     toast.success(t('settings.notifications.settingsSaved'));
   };
 

@@ -5,6 +5,7 @@ import { Button } from '@/app/components/ui/button';
 import { Sparkles, BarChart3, Loader2, RotateCw } from 'lucide-react';
 import { ResumeAnalysisReport } from '@/app/components/ResumeAnalysisReport';
 import { useResumeAnalyzer } from '@/app/hooks/useResumeAnalyzer';
+import { useTrace } from '@/app/hooks/useTrace';
 
 type AnalyzeTabProps = {
   resumeData: Resume;   
@@ -15,12 +16,14 @@ type AnalyzeTabProps = {
 export default function AnalyzeTab({ resumeData, isAiJobRunning, setIsAiJobRunning }: AnalyzeTabProps) {
   const { t } = useTranslation();
   const { isAnalyzing, analysisResult, analysisProgress, runAnalysis, resetAnalysis } = useResumeAnalyzer();
+  const { traceAiAnalysisStarted } = useTrace();
 
   useEffect(() => {
     setIsAiJobRunning(isAnalyzing);
   }, [isAnalyzing, setIsAiJobRunning]);
 
   const handleAnalyze = () => {
+    traceAiAnalysisStarted();
     runAnalysis({ resumeData });
   };
   

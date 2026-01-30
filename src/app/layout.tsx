@@ -10,6 +10,8 @@ import I18nProvider from "@/app/dashboard/_components/I18nProvider";
 import PreloadOptimizer from "@/app/components/PreloadOptimizer";
 import StructuredData from "@/app/components/StructuredData";
 import Analytics from "@/app/components/Analytics";
+import { PHProvider } from "@/app/providers/posthog-provider";
+import PostHogPageView from "@/app/providers/PostHogPageView";
 
 // 字体配置
 const inter = Inter({ subsets: ["latin"] });
@@ -36,24 +38,27 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang={lang} className="hide-scrollbar">
         <body className={inter.className}>
-          <I18nProvider>
-            <Theme appearance="dark">
-              {children}
-              <Toaster />
-              {/* 性能优化和预加载 */}
-              <PreloadOptimizer />
-            </Theme>
-            {/* 语言切换 */}
+          <PHProvider>
+            <PostHogPageView />
+            <I18nProvider>
+              <Theme appearance="dark">
+                {children}
+                <Toaster />
+                {/* 性能优化和预加载 */}
+                <PreloadOptimizer />
+              </Theme>
+              {/* 语言切换 */}
 
-          </I18nProvider>
+            </I18nProvider>
 
-          {/* 结构化数据 */}
-          <StructuredData type="website" />
-          <StructuredData type="organization" />
-          <StructuredData type="product" />
-          
-          {/* 动态Analytics组件 */}
-          <Analytics />
+            {/* 结构化数据 */}
+            <StructuredData type="website" />
+            <StructuredData type="organization" />
+            <StructuredData type="product" />
+            
+            {/* 动态Analytics组件 */}
+            <Analytics />
+          </PHProvider>
         </body>
       </html>
     </ClerkProvider>
