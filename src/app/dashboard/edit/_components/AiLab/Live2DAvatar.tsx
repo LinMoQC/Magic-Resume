@@ -48,7 +48,6 @@ const Live2DAvatar = ({ isSpeaking, className = "" }: Live2DAvatarProps) => {
 
                 // Create Application
                 // Use type assertion or any because version 6/7/8 mismatch in types might occur
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const app = new PIXI.Application({
                     view: canvas,
                     width: 500,
