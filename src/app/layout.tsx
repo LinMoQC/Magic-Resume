@@ -6,7 +6,7 @@ import { Theme } from "@radix-ui/themes";
 import { Toaster } from "sonner";
 import metaConfig from "@/constant/metaConfig";
 import I18nProvider from "@/app/dashboard/_components/I18nProvider";
-import LanguageSwitcher from "@/app/components/LanguageSwitcher";
+
 import PreloadOptimizer from "@/app/components/PreloadOptimizer";
 import StructuredData from "@/app/components/StructuredData";
 import Analytics from "@/app/components/Analytics";
@@ -44,7 +44,7 @@ export default function RootLayout({
               <PreloadOptimizer />
             </Theme>
             {/* 语言切换 */}
-            <LanguageSwitcher />
+
           </I18nProvider>
 
           {/* 结构化数据 */}

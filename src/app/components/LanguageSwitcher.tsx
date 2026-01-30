@@ -2,100 +2,91 @@
 
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
-import { Globe2 } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Globe, Check, ChevronDown } from "lucide-react";
 
 export default function LanguageSwitcher() {
   const { i18n } = useTranslation();
   const [isMounted, setIsMounted] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsMounted(true);
+    
+    // Close dropdown when clicking outside
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const toggleLanguage = () => {
-    const newLang = i18n.language.startsWith("en") ? "zh" : "en";
-    i18n.changeLanguage(newLang);
+  if (!isMounted) return null;
+
+  const currentLang = i18n.language.startsWith("en") ? "en" : "zh";
+  
+  const languages = [
+    { code: "en", label: "English" },
+    { code: "zh", label: "中文" } // Simplified Chinese
+  ];
+
+  const handleLanguageChange = (langCode: string) => {
+    i18n.changeLanguage(langCode);
+    setIsOpen(false);
   };
-
-  const iconVariants = {
-    initial: { opacity: 0, scale: 0.5, rotateY: -90 },
-    animate: { opacity: 1, scale: 1, rotateY: 0 },
-    exit: { opacity: 0, scale: 0.5, rotateY: 90 },
-  };
-
-  const buttonVariants = {
-    initial: { scale: 1 },
-    hover: {
-      scale: 1.05,
-      transition: { duration: 0.2, ease: "easeOut" as const }
-    },
-    tap: {
-      scale: 0.95,
-      transition: { duration: 0.1 }
-    }
-  };
-
-  if (!isMounted) {
-    return null;
-  }
-
-  const isEnglish = i18n.language.startsWith("en");
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="relative z-50" ref={containerRef}>
       <motion.button
-        onClick={toggleLanguage}
-        onHoverStart={() => setIsHovered(true)}
-        onHoverEnd={() => setIsHovered(false)}
-        variants={buttonVariants}
-        initial="initial"
-        whileHover="hover"
-        whileTap="tap"
-        aria-label="Change language"
-        className="group relative overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
+        onClick={() => setIsOpen(!isOpen)}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors backdrop-blur-md"
       >
-        {/* 背景层 */}
-        <div className="absolute inset-0 bg-gray-900/95 backdrop-blur-sm rounded-full border border-gray-700/50" />
-
-        {/* Hover 效果层 */}
-        <motion.div
-          className="absolute inset-0 bg-gray-800/90 rounded-full"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: isHovered ? 1 : 0 }}
-          transition={{ duration: 0.2 }}
+        <Globe size={16} className="text-neutral-400 group-hover:text-white transition-colors" />
+        <span className="text-sm font-medium text-neutral-200">
+          {currentLang === "en" ? "English" : "中文"}
+        </span>
+        <ChevronDown 
+          size={14} 
+          className={`text-neutral-500 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} 
         />
-
-        {/* 内容容器 */}
-        <div className="relative flex items-center gap-2 px-3 py-2.5 text-white">
-          {/* 地球图标 */}
-          <motion.div
-            animate={{ rotate: isHovered ? 15 : 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-          >
-            <Globe2 size={16} className="text-gray-300" />
-          </motion.div>
-
-          {/* 语言文字 */}
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={i18n.language}
-              variants={iconVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="font-medium text-sm w-5 text-center text-white"
-            >
-              {isEnglish ? "EN" : "中"}
-            </motion.div>
-          </AnimatePresence>
-        </div>
-
-        {/* 底部微妙阴影 */}
-        <div className="absolute -bottom-0.5 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-gray-600/40 rounded-full blur-[1px] group-hover:w-10 group-hover:bg-gray-500/50 transition-all duration-300" />
       </motion.button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 8, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 8, scale: 0.95 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="absolute right-0 top-full mt-2 w-32 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-xl overflow-hidden backdrop-blur-xl"
+          >
+            <div className="p-1 flex flex-col gap-0.5">
+              {languages.map((lang) => (
+                <button
+                  key={lang.code}
+                  onClick={() => handleLanguageChange(lang.code)}
+                  className={`flex items-center justify-between w-full px-3 py-2 text-sm rounded-lg transition-all ${
+                    currentLang === lang.code 
+                      ? "bg-purple-500/20 text-purple-300" 
+                      : "text-neutral-400 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  <span>{lang.label}</span>
+                  {currentLang === lang.code && (
+                    <Check size={14} className="text-purple-400" />
+                  )}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 } 

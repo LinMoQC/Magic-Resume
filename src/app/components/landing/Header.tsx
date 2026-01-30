@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
-import StarOnGitHub from './StarOnGitHub';
+import LanguageSwitcher from '@/app/components/LanguageSwitcher';
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -67,7 +67,7 @@ export function Header() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3, duration: 0.6 }}
             >
-              <StarOnGitHub />
+              <LanguageSwitcher />
             </motion.div>
           </nav>
         </div>
