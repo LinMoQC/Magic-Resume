@@ -30,11 +30,23 @@
       "starOnGithub": "Star on GitHub"
     },
     "hero": {
-      "title": "The Modern, AI-Powered <1/> Resume Builder",
+      "title": "Magic Resume is an AI-powered tool for building resumes",
       "subtitle": "Craft your perfect resume with the power of AI. Simple, smart, and secure.",
       "getStarted": "Get Started",
       "browseTemplates": "Browse Templates",
-      "tag": "✨ Smart Resume Creation"
+      "tag": "Magic Resume V1.0",
+      "texts": [
+        "AI-powered resume optimization and suggestions",
+        "Beautiful, professional templates ready to use",
+        "100% free and privacy-focused, data stays local",
+        "Export to PDF with one click, ATS-friendly"
+      ],
+      "featureTags": {
+        "ai": "AI Powered",
+        "local": "Local First",
+        "openSource": "Open Source"
+      },
+      "macbookSubtitle": "AI-Powered Builder"
     },
     "morphingTexts": {
       "simpleAndSmart": "Simple & Smart",
@@ -87,14 +99,34 @@
     "contact": {
       "title": "Connect with Us",
       "subtitle": "Have questions or feedback? We'd love to hear from you. Reach out to us and we'll get back to you as soon as possible.",
-      "button": "Contact Us"
+      "button": "Send Message",
+      "form": {
+        "name": {
+          "label": "Name",
+          "placeholder": "Your full name"
+        },
+        "email": {
+          "label": "Email",
+          "placeholder": "Your email address"
+        },
+        "content": {
+          "label": "Message",
+          "placeholder": "Tell us what you'd like to say..."
+        }
+      }
     },
     "footer": {
-      "copyright": "© {{year}} Magic Resume. All rights reserved.",
+      "copyright": "© {{year}} Magic Resume. Open Source under MIT License.",
+      "brandSubtitle": "An open-source, local-first resume builder powered by AI. Your data never leaves your device.",
       "online": "Online",
       "madeWith": "Made with ❤️ for job seekers",
       "poweredBy": "Powered by AI & Modern Tech",
-      "openSource": "Open Source & Free Forever"
+      "openSource": "Open Source & Free Forever",
+      "product": "Product",
+      "builder": "Builder",
+      "project": "Project",
+      "github": "GitHub",
+      "issues": "Issues"
     },
     "buttons": {
       "learnMore": "Learn More",

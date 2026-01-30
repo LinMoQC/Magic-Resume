@@ -30,11 +30,23 @@
       "starOnGithub": "在 GitHub 上点赞"
     },
     "hero": {
-      "title": "现代化的 AI 驱动<1/>简历构建器",
+      "title": "Magic Resume 是一款为您提供 AI 加持的简历构建工具",
       "subtitle": "用 AI 的力量打造完美的简历。简单、智能、安全。",
       "getStarted": "开始使用",
       "browseTemplates": "浏览模板",
-      "tag": "✨ 智能简历创建"
+      "tag": "Magic Resume V1.0",
+      "texts": [
+        "AI 驱动的简历优化与建议",
+        "专业精美的模板，即开即用",
+        "100% 免费开源，注重隐私，数据本地存储",
+        "一键导出 PDF，ATS 友好"
+      ],
+      "featureTags": {
+        "ai": "AI 驱动",
+        "local": "隐私优先",
+        "openSource": "开源项目"
+      },
+      "macbookSubtitle": "AI 驱动的简历生成器"
     },
     "morphingTexts": {
       "simpleAndSmart": "简单 & 智能",
@@ -87,14 +99,34 @@
     "contact": {
       "title": "联系我们",
       "subtitle": "有任何问题或反馈吗？我们很乐意倾听您的声音。请联系我们，我们会尽快给您回复。",
-      "button": "联系我们"
+      "button": "发送消息",
+      "form": {
+        "name": {
+          "label": "姓名",
+          "placeholder": "您的真实姓名"
+        },
+        "email": {
+          "label": "邮箱",
+          "placeholder": "您的电子邮箱地址"
+        },
+        "content": {
+          "label": "留言内容",
+          "placeholder": "请输入您想对我们说的话..."
+        }
+      }
     },
     "footer": {
-      "copyright": "© {{year}} Magic Resume. 保留所有权利。",
+      "copyright": "© {{year}} Magic Resume. 基于 MIT 协议开源。",
+      "brandSubtitle": "一款开源、本地优先的人工智能简历生成器。您的数据永不离开设备。",
       "online": "在线",
       "madeWith": "用 ❤️ 为求职者而造",
       "poweredBy": "AI 与现代技术驱动",
-      "openSource": "开源且永久免费"
+      "openSource": "开源且永久免费",
+      "product": "产品",
+      "builder": "简历编辑器",
+      "project": "项目",
+      "github": "GitHub",
+      "issues": "问题反馈"
     },
     "buttons": {
       "learnMore": "了解更多",
