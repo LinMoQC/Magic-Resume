@@ -39,11 +39,11 @@ const AVATAR_OPTIONS = [
 ];
 
 const VOICE_OPTIONS = [
-    { id: 'shimmer', name: '原生 (Native) - Shimmer (快)' },
-    { id: 'paimon', name: '派蒙 (Paimon - 原神)' },
-    { id: 'furina', name: '芙宁娜 (Furina - 原神)' },
-    { id: 'yaemiko', name: '八重神子 (Yae Miko - 原神)' },
-    { id: 'kokomi', name: '珊瑚宫心海 (Kokomi - 原神)' },
+    { id: 'shimmer', nameKey: 'modals.aiModal.interviewTab.voices.shimmer' },
+    { id: 'paimon', nameKey: 'modals.aiModal.interviewTab.voices.paimon' },
+    { id: 'furina', nameKey: 'modals.aiModal.interviewTab.voices.furina' },
+    { id: 'yaemiko', nameKey: 'modals.aiModal.interviewTab.voices.yaemiko' },
+    { id: 'kokomi', nameKey: 'modals.aiModal.interviewTab.voices.kokomi' },
 ];
 
 const ANIME_VOICE_IDS = ['paimon', 'furina', 'yaemiko', 'kokomi'];
@@ -241,8 +241,8 @@ export default function InterviewTab({ resumeData }: InterviewTabProps) {
                                 className="space-y-8"
                             >
                                 <div className="text-center mb-8">
-                                    <h2 className="text-2xl font-bold text-white mb-2">声音与节奏</h2>
-                                    <p className="text-neutral-400">配置面试官的语音风格和思考时间</p>
+                                    <h2 className="text-2xl font-bold text-white mb-2">{t('modals.aiModal.interviewTab.config.voiceStep.title')}</h2>
+                                    <p className="text-neutral-400">{t('modals.aiModal.interviewTab.config.voiceStep.description')}</p>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -250,7 +250,7 @@ export default function InterviewTab({ resumeData }: InterviewTabProps) {
                                     <div className="bg-neutral-900/50 p-6 rounded-xl border border-neutral-800 space-y-4">
                                         <div className="flex items-center gap-2 mb-2">
                                             <Timer className="w-5 h-5 text-sky-400" />
-                                            <Label className="text-lg font-semibold text-neutral-200">思考时间</Label>
+                                            <Label className="text-lg font-semibold text-neutral-200">{t('modals.aiModal.interviewTab.config.thinkingTime.label')}</Label>
                                         </div>
                                         <RadioGroup
                                             value={config.thinkingTime.toString()}
@@ -265,7 +265,7 @@ export default function InterviewTab({ resumeData }: InterviewTabProps) {
                                                         className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-2 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-sky-500 peer-data-[state=checked]:bg-sky-500/10 cursor-pointer transition-all"
                                                     >
                                                         <span className="text-xl font-bold">{time}s</span>
-                                                        <span className="text-xs text-neutral-400">{time === 0 ? '即时' : '准备'}</span>
+                                                        <span className="text-xs text-neutral-400">{time === 0 ? t('modals.aiModal.interviewTab.config.thinkingTime.instant') : t('modals.aiModal.interviewTab.config.thinkingTime.prepare')}</span>
                                                     </Label>
                                                 </div>
                                             ))}
@@ -276,7 +276,7 @@ export default function InterviewTab({ resumeData }: InterviewTabProps) {
                                     <div className="bg-neutral-900/50 p-6 rounded-xl border border-neutral-800 space-y-4">
                                         <div className="flex items-center gap-2 mb-2">
                                             <Volume2 className="w-5 h-5 text-emerald-400" />
-                                            <Label className="text-lg font-semibold text-neutral-200">面试官声音</Label>
+                                            <Label className="text-lg font-semibold text-neutral-200">{t('modals.aiModal.interviewTab.config.voice.label')}</Label>
                                         </div>
                                         <div className="space-y-2 max-h-[180px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-neutral-700 scrollbar-track-transparent">
                                             {VOICE_OPTIONS.map((voice) => (
@@ -285,7 +285,7 @@ export default function InterviewTab({ resumeData }: InterviewTabProps) {
                                                     onClick={() => setConfig({ ...config, voiceId: voice.id })}
                                                     className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all ${config.voiceId === voice.id ? 'border-emerald-500 bg-emerald-500/10' : 'border-neutral-700 hover:border-neutral-600'}`}
                                                 >
-                                                    <span className="text-sm font-medium">{voice.name}</span>
+                                                    <span className="text-sm font-medium">{t(voice.nameKey)}</span>
                                                     {config.voiceId === voice.id && <div className="w-2 h-2 rounded-full bg-emerald-500" />}
                                                 </div>
                                             ))}
@@ -298,7 +298,7 @@ export default function InterviewTab({ resumeData }: InterviewTabProps) {
                                         onClick={() => setConfigStep('avatar')}
                                         className="bg-sky-600 hover:bg-sky-500 text-white rounded-full px-8 py-6 text-lg"
                                     >
-                                        下一步 <ArrowRight className="ml-2 w-5 h-5" />
+                                        {t('modals.aiModal.interviewTab.config.nextStep')} <ArrowRight className="ml-2 w-5 h-5" />
                                     </Button>
                                 </div>
                             </motion.div>
@@ -312,8 +312,8 @@ export default function InterviewTab({ resumeData }: InterviewTabProps) {
                                 className="space-y-8"
                             >
                                 <div className="text-center">
-                                    <h2 className="text-2xl font-bold text-white mb-2">面试官形象</h2>
-                                    <p className="text-neutral-400">选择一位让您感到舒适的面试官</p>
+                                    <h2 className="text-2xl font-bold text-white mb-2">{t('modals.aiModal.interviewTab.config.avatarStep.title')}</h2>
+                                    <p className="text-neutral-400">{t('modals.aiModal.interviewTab.config.avatarStep.description')}</p>
                                 </div>
 
                                 {/* Avatar Selection */}
@@ -339,7 +339,7 @@ export default function InterviewTab({ resumeData }: InterviewTabProps) {
                                         onClick={startRealInterview}
                                         className="bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-bold py-6 px-12 rounded-full text-lg shadow-lg hover:shadow-sky-500/25 transition-all w-full md:w-auto"
                                     >
-                                        开始面试 <ArrowRight className="ml-2 w-5 h-5" />
+                                        {t('modals.aiModal.interviewTab.config.startInterview')} <ArrowRight className="ml-2 w-5 h-5" />
                                     </Button>
                                 </div>
                             </motion.div>
@@ -377,7 +377,7 @@ export default function InterviewTab({ resumeData }: InterviewTabProps) {
                     size="icon"
                     onClick={() => setShowLogs(!showLogs)}
                     className={`transition-colors ${showLogs ? 'text-sky-400 bg-sky-950/30' : 'text-neutral-500 hover:text-white'}`}
-                    title="Realtime Console"
+                    title={t('modals.aiModal.interviewTab.controls.console')}
                 >
                     <Code2 size={20} />
                 </Button>
@@ -421,8 +421,8 @@ export default function InterviewTab({ resumeData }: InterviewTabProps) {
             {isConnecting && (
                 <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
                     <Loader2 className="w-12 h-12 text-sky-500 animate-spin mb-4" />
-                    <p className="text-white text-lg font-medium animate-pulse">正在连接面试官...</p>
-                    <p className="text-neutral-400 text-sm mt-2">正在阅读您的简历...</p>
+                    <p className="text-white text-lg font-medium animate-pulse">{t('modals.aiModal.interviewTab.status.connecting')}</p>
+                    <p className="text-neutral-400 text-sm mt-2">{t('modals.aiModal.interviewTab.status.readingResume')}</p>
                 </div>
             )}
 
@@ -476,7 +476,7 @@ export default function InterviewTab({ resumeData }: InterviewTabProps) {
                                 {displayItem.role === 'ai' && !isAiSpeaking && streamingContent && (
                                     <div className="mt-2 flex items-center justify-center gap-2 text-xs text-sky-400 font-mono animate-pulse">
                                         <Loader2 className="w-3 h-3 animate-spin" />
-                                        <span>正在组织语言 / 生成语音...</span>
+                                        <span>{t('modals.aiModal.interviewTab.status.thinking')}</span>
                                     </div>
                                 )}
                             </div>
@@ -509,8 +509,8 @@ export default function InterviewTab({ resumeData }: InterviewTabProps) {
                             </span>
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-sm font-medium text-white">思考时间</span>
-                            <span className="text-xs text-neutral-400">点击麦克风提前回答</span>
+                            <span className="text-sm font-medium text-white">{t('modals.aiModal.interviewTab.status.preAnswer')}</span>
+                            <span className="text-xs text-neutral-400">{t('modals.aiModal.interviewTab.status.answerHint')}</span>
                         </div>
                     </motion.div>
                 )}
@@ -542,13 +542,13 @@ export default function InterviewTab({ resumeData }: InterviewTabProps) {
                             ? 'bg-red-500 hover:bg-red-600 border-red-400 scale-110'
                             : 'bg-white hover:bg-neutral-100 border-neutral-200 text-neutral-900'
                             }`}
-                        title={isListening ? "停止录音" : "开始录音"}
+                        title={isListening ? t('modals.aiModal.interviewTab.controls.stopRecording') : t('modals.aiModal.interviewTab.controls.startRecording')}
                     >
                         {isListening ? <Square fill="currentColor" size={28} className="text-white" /> : <Mic size={32} />}
                     </Button>
                 </div>
                 <span className={`text-xs text-neutral-500 font-medium tracking-wide uppercase transition-opacity ${!isListening ? 'opacity-0 group-hover:opacity-100' : 'opacity-0 pointer-events-none'}`}>
-                    点击说话
+                    {t('modals.aiModal.interviewTab.controls.clickToSpeak')}
                 </span>
             </div>
 
