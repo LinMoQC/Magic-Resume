@@ -154,7 +154,8 @@
       "tabs": {
         "create": " Guided Create",
         "optimize": "Smart Optimize",
-        "analyze": "Resume Analysis"
+        "analyze": "Resume Analysis",
+        "interview": "Mock Interview"
       },
       "title": "AI Lab",
       "description": "Analyze and optimize your resume to match target job requirements, or get a professional Lighthouse-style analysis report.",
@@ -296,6 +297,71 @@
       "optimizePlaceholder": {
         "title": "Ready to elevate your resume?",
         "description": "Paste a job description and click \"Start Optimization\" to let the AI tailor your resume for your dream job."
+      },
+      "interviewTab": {
+        "back": "Back",
+        "exit": "Exit Interview",
+        "config": {
+          "voiceStep": {
+            "title": "Voice & Rhythm",
+            "description": "Configure the interviewer's voice style and thinking time"
+          },
+          "avatarStep": {
+            "title": "Interviewer Image",
+            "description": "Choose an interviewer you feel comfortable with"
+          },
+          "thinkingTime": {
+            "label": "Thinking Time",
+            "instant": "Instant",
+            "prepare": "Prepare"
+          },
+          "voice": {
+            "label": "Interviewer Voice"
+          },
+          "nextStep": "Next Step",
+          "startInterview": "Start Interview"
+        },
+        "status": {
+          "connecting": "Connecting to interviewer...",
+          "readingResume": "Reading your resume...",
+          "isListening": "Interviewer is listening...",
+          "isSpeaking": "AI is answering...",
+          "thinking": "Thinking / Generating voice...",
+          "preAnswer": "Thinking Time",
+          "answerHint": "Click microphone to answer early"
+        },
+        "controls": {
+          "stopRecording": "Stop Recording",
+          "startRecording": "Start Recording",
+          "clickToSpeak": "Click to Speak",
+          "console": "Realtime Console"
+        },
+        "voices": {
+          "shimmer": "Native - Shimmer (Fast)",
+          "paimon": "Paimon (Genshin Impact)",
+          "furina": "Furina (Genshin Impact)",
+          "yaemiko": "Yae Miko (Genshin Impact)",
+          "kokomi": "Kokomi (Genshin Impact)"
+        },
+        "roles": {
+          "title": "Choose Your Interviewer",
+          "frontend": {
+            "name": "Frontend Expert",
+            "description": "Focuses on React, Vue, CSS, and Frontend Engineering"
+          },
+          "backend": {
+            "name": "Backend Architect",
+            "description": "Focuses on System Design, Databases, API, and Microservices"
+          },
+          "fullstack": {
+            "name": "Fullstack Lead",
+            "description": "Focuses on End-to-end Delivery, System Integration, and Business Understanding"
+          },
+          "hr": {
+            "name": "HRBP",
+            "description": "Focuses on Soft Skills, Career Planning, and Culture Fit"
+          }
+        }
       },
       "progressText": "AI is working hard on analysis and creation..."
     }

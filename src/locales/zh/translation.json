@@ -300,9 +300,49 @@
       },
       "interviewTab": {
         "back": "返回",
-        "initialMessage": "你好！我是你的 AI 面试官。我已经阅读了你当前的简历。请问你申请的目标职位是什么？我们可以开始模拟面试了。",
-        "placeholder": "输入你的回答...",
-        "mockResponse": "面试结束后，记得向面试官询问关于团队文化和项目挑战的问题。",
+        "exit": "退出面试",
+        "config": {
+          "voiceStep": {
+            "title": "声音与节奏",
+            "description": "配置面试官的语音风格和思考时间"
+          },
+          "avatarStep": {
+            "title": "面试官形象",
+            "description": "选择一位让您感到舒适的面试官"
+          },
+          "thinkingTime": {
+            "label": "思考时间",
+            "instant": "即时",
+            "prepare": "准备"
+          },
+          "voice": {
+            "label": "面试官声音"
+          },
+          "nextStep": "下一步",
+          "startInterview": "开始面试"
+        },
+        "status": {
+          "connecting": "正在连接面试官...",
+          "readingResume": "正在阅读您的简历...",
+          "isListening": "AI 面试官正在聆听...",
+          "isSpeaking": "AI 正在回答...",
+          "thinking": "正在组织语言 / 生成语音...",
+          "preAnswer": "思考时间",
+          "answerHint": "点击麦克风提前回答"
+        },
+        "controls": {
+          "stopRecording": "停止录音",
+          "startRecording": "开始录音",
+          "clickToSpeak": "点击说话",
+          "console": "Realtime Console"
+        },
+        "voices": {
+          "shimmer": "原生 (Native) - Shimmer (快)",
+          "paimon": "派蒙 (Paimon - 原神)",
+          "furina": "芙宁娜 (Furina - 原神)",
+          "yaemiko": "八重神子 (Yae Miko - 原神)",
+          "kokomi": "珊瑚宫心海 (Kokomi - 原神)"
+        },
         "roles": {
           "title": "选择你的面试官",
           "frontend": {
@@ -321,12 +361,7 @@
             "name": "HRBP",
             "description": "关注软技能、职业规划和文化匹配"
           }
-        },
-        "digitalHuman": {
-          "status": "AI 面试官正在聆听...",
-          "speaking": "AI 正在回答..."
-        },
-        "exit": "退出面试"
+        }
       },
       "progressText": "AI 正在努力进行分析和创作..."
     }
