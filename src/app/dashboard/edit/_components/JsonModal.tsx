@@ -28,8 +28,16 @@ export default function JsonModal({ isJsonModalOpen, closeJsonModal, handleDownl
                 >
                     <FaDownload />
                 </button>
-                <pre className="text-sm bg-white p-4 rounded-md overflow-x-auto h-[80vh]">
-                    {activeResume && <ReactJsonView src={activeResume} displayDataTypes={false} />}
+                <pre className="text-sm bg-[#1b1929] p-4 rounded-md overflow-x-auto h-[80vh] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                    {activeResume && (
+                        <ReactJsonView 
+                            src={activeResume} 
+                            theme="monokai"
+                            displayDataTypes={false} 
+                            enableClipboard={false}
+                            style={{ backgroundColor: 'transparent' }}
+                        />
+                    )}
                 </pre>
             </div>
         </Modal>

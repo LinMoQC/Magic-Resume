@@ -36,6 +36,7 @@ import { Loader2 } from 'lucide-react';
 import JsonModal from '../_components/JsonModal';
 import HeaderTab from '../_components/HeaderTab';
 import { useTrace } from '@/app/hooks/useTrace';
+import VersionHistoryDialog from '../_components/VersionHistoryDialog';
 
 const ResumePreviewPanel = dynamic(() => import('../_components/ResumePreviewPanel'), {
   ssr: false,
@@ -100,6 +101,15 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
   const [isAiJobRunning, setIsAiJobRunning] = useState(false);
   const openAIModal = () => setIsAIModalOpen(true);
   const closeAIModal = () => setIsAIModalOpen(false);
+
+  const [isVersionHistoryOpen, setIsVersionHistoryOpen] = useState(false);
+  const openVersionHistory = () => setIsVersionHistoryOpen(true);
+  const closeVersionHistory = () => setIsVersionHistoryOpen(false);
+  const handleRestoreVersion = (versionId: string) => {
+    toast.success(t('editPage.notifications.saveSuccess')); // Mock restore
+    closeVersionHistory();
+  };
+
   const { t } = useTranslation();
 
   const handleApplyFullResume = (newResume: Resume) => {
@@ -360,6 +370,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
           <HeaderTab
             title={activeResume?.name}
             updatedAt={activeResume?.updatedAt}
+            syncStatus="syncing"
           />
           {/* 简历预览面板 */}
           <ResumePreviewPanel
@@ -367,6 +378,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
             previewScale={previewScale}
             setPreviewScale={setPreviewScale}
             onShowAI={openAIModal}
+            onVersionClick={openVersionHistory}
             isAiJobRunning={isAiJobRunning}
             rightCollapsed={rightCollapsed}
           />
@@ -400,6 +412,13 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
         templateId={currentTemplateId}
         isAiJobRunning={isAiJobRunning}
         setIsAiJobRunning={setIsAiJobRunning}
+      />
+
+      {/* Version History Dialog */}
+      <VersionHistoryDialog
+        isOpen={isVersionHistoryOpen}
+        onClose={closeVersionHistory}
+        onRestore={handleRestoreVersion}
       />
     </>
   );

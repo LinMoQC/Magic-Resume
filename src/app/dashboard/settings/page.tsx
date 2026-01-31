@@ -5,7 +5,7 @@ import { useSettingStore } from '@/store/useSettingStore';
 import { toast } from 'sonner';
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
-import { InfoCircledIcon, GearIcon, LockClosedIcon } from '@radix-ui/react-icons';
+import { InfoCircledIcon, LockClosedIcon } from '@radix-ui/react-icons';
 import { Cloud, Settings as SettingsIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MODEL_API_URL_MAP } from '@/constant/modals';

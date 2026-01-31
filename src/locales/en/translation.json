@@ -437,6 +437,15 @@
     },
     "avatarAlt": "Avatar"
   },
+  "header": {
+    "version": "Version Management",
+    "versionHistory": "Version History",
+    "synced": "Synced to Cloud",
+    "syncing": "Syncing...",
+    "localOnly": "Local Only",
+    "syncError": "Sync Error",
+    "lastUpdated": "Last Update"
+  },
   "mobileEdit": {
     "jsonData": "Resume JSON Data",
     "copyJson": "Copy JSON to clipboard"
@@ -556,7 +565,6 @@
       "parseFailed": "Failed to parse JSON file."
     },
     "success": "Resume imported successfully!",
-    "importedName": "{{name}} (Imported)",
     "cancel": "Cancel"
   },
   "dynamicForm": {

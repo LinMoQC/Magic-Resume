@@ -41,7 +41,7 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
           const newResume: Resume = {
             ...result,
             id: Date.now().toString(),
-            name: t('importDialog.importedName', { name: result.name || 'Imported Resume' }),
+            name: result.name || 'Imported Resume',
             updatedAt: Date.now(),
           };
           addResume(newResume);
