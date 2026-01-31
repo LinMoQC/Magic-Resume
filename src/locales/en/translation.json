@@ -12,6 +12,18 @@
       "maxTokensLabel": "Max Tokens",
       "modelPlaceholder": "Select a model"
     },
+    "cloudSync": {
+      "title": "Cloud Sync",
+      "description": "Sync your resume data across devices. Your data will be stored securely in the cloud.",
+      "toggleLabel": "Enable Cloud Sync",
+      "disclaimer": {
+        "title": "Cloud Sync Disclaimer",
+        "description": "Please read and agree to the following terms before enabling cloud sync:",
+        "content": "By enabling cloud sync, your resume data (including personal info, experience, etc.) will be uploaded to our secure servers. This allows you to access your resumes from any device. We use industry-standard encryption to protect your data. However, please be aware that this means your data is no longer stored solely on your local device.",
+        "agree": "I understand and agree",
+        "cancel": "Cancel"
+      }
+    },
     "notifications": {
       "unsavedChanges": "Unsaved changes",
       "settingsSaved": "Settings saved!",
@@ -514,7 +526,7 @@
     },
     "importResumeCard": {
       "title": "Import an existing resume",
-      "description": "LinkedIn, JSON Resume, etc."
+      "description": "Currently only supports Magic Resume JSON files"
     },
     "resumeCard": {
       "lastUpdated": "Last updated {{time}}",
