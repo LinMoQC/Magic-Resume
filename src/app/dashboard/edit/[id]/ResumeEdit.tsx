@@ -1,6 +1,9 @@
 "use client";
 import React, { useState, useEffect, useMemo } from 'react';
-import { Resume, useResumeStore } from '@/store/useResumeStore';
+import { useResumeStore, Section, SectionItem, Resume, getSanitizedResume } from '@/store/useResumeStore';
+import { useAuth } from '@clerk/nextjs';
+import { useSettingStore } from '@/store/useSettingStore';
+import debounce from 'lodash/debounce';
 import { FaUser } from 'react-icons/fa';
 import BasicForm from '../_components/BasicForm';
 import sidebarMenu from '@/constant/sidebarMenu';
@@ -26,15 +29,15 @@ import { toast } from 'sonner';
 import ResumeEditSkeleton from './ResumeEditSkeleton';
 import TemplatePanel from './TemplatePanel';
 import ResumeContent from './ResumeContent';
-import { Section, SectionItem } from '@/store/useResumeStore';
 import useMobile from '@/app/hooks/useMobile';
 import MobileResumEdit from '../_components/mobile/MobileResumEdit';
-import { generateSnapshot } from '@/lib/utils';
 import AIModal from '../_components/AIModal';
 import { useTranslation } from 'react-i18next';
 import { Loader2 } from 'lucide-react';
 import JsonModal from '../_components/JsonModal';
 import HeaderTab from '../_components/HeaderTab';
+import { useTrace } from '@/app/hooks/useTrace';
+import VersionHistoryDialog from '../_components/VersionHistoryDialog';
 
 const ResumePreviewPanel = dynamic(() => import('../_components/ResumePreviewPanel'), {
   ssr: false,
@@ -69,6 +72,8 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     activeResume,
     loadResumeForEdit,
     saveResume: saveActiveResumeToResumes,
+    restoreVersion,
+    syncToCloud,
     updateInfo,
     setSectionOrder: updateSectionOrder,
     updateSectionItems,
@@ -79,7 +84,15 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     activeSection,
     isStoreLoading,
     resumes,
+    syncStatus,
+    fetchCloudResume,
+    deleteVersion,
   } = useResumeStore();
+
+  const { getToken } = useAuth();
+  const cloudSync = useSettingStore(state => state.cloudSync);
+
+  const { traceEditorViewed, traceResumeSaved, traceDownloadJson, traceTemplateChanged } = useTrace();
 
   const { isMobile } = useMobile();
   const [leftPanelOpen, setLeftPanelOpen] = useState(false);
@@ -95,8 +108,33 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
 
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
   const [isAiJobRunning, setIsAiJobRunning] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const openAIModal = () => setIsAIModalOpen(true);
   const closeAIModal = () => setIsAIModalOpen(false);
+
+  const [isVersionHistoryOpen, setIsVersionHistoryOpen] = useState(false);
+  const [isFetchingHistory, setIsFetchingHistory] = useState(false);
+
+  const openVersionHistory = async () => {
+    setIsVersionHistoryOpen(true);
+    if (activeResume && cloudSync) {
+      const token = await getToken();
+      if (token) {
+        setIsFetchingHistory(true);
+        try {
+          await fetchCloudResume(activeResume.id, token);
+        } finally {
+          setIsFetchingHistory(false);
+        }
+      }
+    }
+  };
+  const closeVersionHistory = () => setIsVersionHistoryOpen(false);
+  const handleRestoreVersion = (versionId: string) => {
+    restoreVersion(versionId);
+    closeVersionHistory();
+  };
+
   const { t } = useTranslation();
 
   const handleApplyFullResume = (newResume: Resume) => {
@@ -107,10 +145,16 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     }
   };
 
-  // 下载简历json
   const handleDownloadJson = () => {
+    if (activeResume) {
+      traceDownloadJson({
+        resumeId: activeResume.id,
+        resumeName: activeResume.name
+      });
+    }
     if (!activeResume) return;
-    const jsonString = JSON.stringify(activeResume, null, 2);
+    const sanitized = getSanitizedResume(activeResume);
+    const jsonString = JSON.stringify(sanitized, null, 2);
     const blob = new Blob([jsonString], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -172,6 +216,17 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     loadResumeForEdit(id);
   }, [id, loadResumeForEdit, isStoreLoading, resumes]);
 
+  // 追踪编辑器查看事件
+  useEffect(() => {
+    if (activeResume && !isStoreLoading) {
+      traceEditorViewed({
+        resumeId: activeResume.id,
+        templateId: activeResume.template,
+        resumeName: activeResume.name
+      });
+    }
+  }, [activeResume?.id, activeResume?.template, activeResume?.name, isStoreLoading, traceEditorViewed]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // 同步activeResume的template到currentTemplateId
   useEffect(() => {
     if (activeResume?.template && activeResume.template !== currentTemplateId) {
@@ -181,12 +236,96 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
 
   // 保存简历
   const handleSave = async () => {
-    const snapshot = await generateSnapshot();
-    saveActiveResumeToResumes(snapshot ?? undefined);
+    if (isSaving) return;
+    
+    setIsSaving(true);
+    console.log('[Save] Starting manual save process...');
+    try {
+      if (activeResume) {
+        traceResumeSaved({
+          resumeId: activeResume.id,
+          resumeName: activeResume.name
+        });
+      }
+      
+      console.log('[Save] Calling store saveResume...');
+      
+      const token = cloudSync ? await getToken() : undefined;
+      
+      console.log('[Save] Calling store saveResume...');
+      // Let the store handle the full manual save process (metadata, cloud sync, and versioning)
+      // Pass activeResume explicitly to avoid stale state in async save
+      await saveActiveResumeToResumes(token as string | undefined, 'manual', activeResume || undefined);
+      console.log('[Save] Store saveResume completed.');
+      
+      // Update ref to prevent the auto-sync useEffect from thinking this is a fresh unsynced change
+      const freshResume = useResumeStore.getState().activeResume;
+      if (freshResume) {
+          lastUpdatedAtRef.current = freshResume.updatedAt;
+      }
+    } catch (err) {
+      console.error('[Save] Manual save failed:', err);
+    } finally {
+      setIsSaving(false);
+      console.log('[Save] Manual save process ended, loading state released.');
+    }
   };
+
+  // 自动同步逻辑 - 10000ms (10s) 防抖
+  const debouncedSync = useMemo(
+    () => debounce(async (token: string) => {
+      await syncToCloud(token);
+    }, 10000),
+    [syncToCloud]
+  );
+
+  // Ref to track the last synced/loaded update time
+  const lastUpdatedAtRef = React.useRef<number | null>(null);
+  
+  // Reset lastUpdatedAt when ID changes
+  useEffect(() => {
+    lastUpdatedAtRef.current = null;
+  }, [id]);
+
+  useEffect(() => {
+    const triggerSync = async () => {
+      if (cloudSync && activeResume && !isStoreLoading) {
+        // Initial load: capture current timestamp and skip sync
+        if (lastUpdatedAtRef.current === null) {
+          lastUpdatedAtRef.current = activeResume.updatedAt;
+          return;
+        }
+
+        // If timestamp hasn't changed, it's just a re-render or initial load double-invoke
+        if (activeResume.updatedAt === lastUpdatedAtRef.current) {
+          return;
+        }
+
+        const token = await getToken();
+        if (token) {
+          debouncedSync(token);
+          // Update ref to prevent re-triggering for same update
+          lastUpdatedAtRef.current = activeResume.updatedAt;
+        }
+      }
+    };
+    
+    triggerSync();
+    
+    return () => {
+      debouncedSync.cancel();
+    };
+  }, [activeResume, cloudSync, isStoreLoading, getToken, debouncedSync]);
 
   // 选择模板
   const handleSelectTemplate = (templateId: string) => {
+    if (activeResume) {
+      traceTemplateChanged({
+        oldTemplate: currentTemplateId,
+        newTemplate: templateId,
+        resumeName: activeResume.name
+      });
+    }
     setCurrentTemplateId(templateId);
     updateTemplate(templateId);
   };
@@ -309,6 +448,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
             renderSections={renderSections}
             handleSave={handleSave}
             onShowJson={openJsonModal}
+            isSaving={isSaving}
           />
         </div>
         <div
@@ -320,6 +460,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
           <HeaderTab
             title={activeResume?.name}
             updatedAt={activeResume?.updatedAt}
+            syncStatus={syncStatus}
           />
           {/* 简历预览面板 */}
           <ResumePreviewPanel
@@ -327,6 +468,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
             previewScale={previewScale}
             setPreviewScale={setPreviewScale}
             onShowAI={openAIModal}
+            onVersionClick={openVersionHistory}
             isAiJobRunning={isAiJobRunning}
             rightCollapsed={rightCollapsed}
           />
@@ -361,6 +503,21 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
         isAiJobRunning={isAiJobRunning}
         setIsAiJobRunning={setIsAiJobRunning}
       />
+
+      {/* Version History Dialog */}
+      <VersionHistoryDialog
+        isOpen={isVersionHistoryOpen}
+        onClose={closeVersionHistory}
+        onRestore={handleRestoreVersion}
+        onDelete={async (versionId) => {
+          const token = await getToken();
+          if (activeResume) {
+            await deleteVersion(activeResume.id, versionId, token || undefined);
+          }
+        }}
+        versions={activeResume?.versions || []}
+        isLoading={isFetchingHistory}
+      />
     </>
   );
-} 
+}

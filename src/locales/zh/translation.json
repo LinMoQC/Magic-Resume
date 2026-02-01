@@ -12,6 +12,18 @@
       "maxTokensLabel": "最大令牌数",
       "modelPlaceholder": "选择一个模型"
     },
+    "cloudSync": {
+      "title": "云端同步",
+      "description": "在不同设备间同步您的简历数据。您的数据将安全地存储在云端。",
+      "toggleLabel": "启用云端同步",
+      "disclaimer": {
+        "title": "云端同步免责声明",
+        "description": "在开启云端同步前，请阅读并同意以下条款：",
+        "content": "开启云端同步后，您的简历数据（包括个人信息、工作经历等）将被上传到我们的服务器。这将允许您在任何设备上访问您的简历。我们使用行业标准加密技术保护您的数据。但请知悉，这意味着您的数据将不再仅存储在您的本地设备上。",
+        "agree": "我已阅读并同意",
+        "cancel": "取消"
+      }
+    },
     "notifications": {
       "unsavedChanges": "未保存的更改",
       "settingsSaved": "设置已保存！",
@@ -425,6 +437,16 @@
     },
     "avatarAlt": "头像"
   },
+  "header": {
+    "version": "版本管理",
+    "versionHistory": "历史版本",
+    "synced": "已同步云端",
+    "syncing": "同步中...",
+    "localOnly": "本地模式",
+    "syncError": "同步失败",
+    "lastUpdated": "最后更新于",
+    "noHistory": "暂无历史版本"
+  },
   "mobileEdit": {
     "jsonData": "简历 JSON 数据",
     "copyJson": "将 JSON 复制到剪贴板"
@@ -514,7 +536,7 @@
     },
     "importResumeCard": {
       "title": "导入现有简历",
-      "description": "领英、JSON简历等"
+      "description": "目前仅支持导入Magic Resume导出的JSON文件"
     },
     "resumeCard": {
       "lastUpdated": "最后更新于 {{time}}",
@@ -544,7 +566,6 @@
       "parseFailed": "解析 JSON 文件失败。"
     },
     "success": "简历导入成功！",
-    "importedName": "{{name}}（已导入）",
     "cancel": "取消"
   },
   "dynamicForm": {
@@ -693,6 +714,8 @@
     }
   },
   "common": {
+    "manualSave": "主动保存",
+    "autoSave": "自动保存",
     "notifications": {
       "copySuccess": "JSON数据已复制到剪贴板",
       "copyFailed": "复制失败，请重试",
@@ -709,7 +732,15 @@
       "parseResumeData": "解析的简历数据",
       "closePreview": "关闭",
       "previewResume": "预览"
-    }
+    },
+    "confirmDeleteVersion": "确定要删除此历史记录吗？",
+    "confirmDeleteResume": "确定要删除这份简历吗？",
+    "deleteDescription": "此操作无法撤销。这将从云端和所有本地设备上永久删除该内容。",
+    "deleteDescriptionCloud": "此操作无法撤销。这将从云端和所有本地设备上永久删除该内容。",
+    "deleteDescriptionLocal": "此操作无法撤销。这将从您的设备上永久删除该内容。",
+    "delete": "删除",
+    "cancel": "取消",
+    "confirm": "确定"
   },
   "report": {
     "title": "简历分析报告",

@@ -44,49 +44,70 @@ export function generateSnapshot(options?: {
   } = options || {};
 
   return new Promise(async (resolve) => {
-    const element = document.getElementById('resume-to-export');
-    if (!element) {
-      MagicDebugger.error("Snapshot failed: Preview element not found.");
+    let clonedResume: HTMLElement | null = null;
+    
+    // Safety timeout: 10 seconds to generate snapshot
+    const timeoutId = setTimeout(() => {
+      MagicDebugger.error("Snapshot generation timed out after 10s");
+      if (clonedResume && clonedResume.parentNode) {
+        document.body.removeChild(clonedResume);
+      }
       resolve(null);
-      return;
-    }
-    
-    const clonedResume = element.cloneNode(true) as HTMLElement;
-    clonedResume.style.width = `${element.offsetWidth}px`;
-    clonedResume.style.position = 'absolute';
-    clonedResume.style.left = '-9999px';
-    clonedResume.style.top = '0px';
-    document.body.appendChild(clonedResume);
+    }, 10000);
 
-    const elements = [clonedResume, ...Array.from(clonedResume.getElementsByTagName('*')) as HTMLElement[]];
-    
-    elements.forEach(el => {
-      const style = window.getComputedStyle(el);
-      const colorProps = ['color', 'background-color', 'border-top-color', 'border-right-color', 'border-bottom-color', 'border-left-color'];
-      const oklchRegex = /oklch\(([^)]+)\)/;
-      
-      colorProps.forEach(prop => {
-        const value = style.getPropertyValue(prop);
-        const match = value.match(oklchRegex);
-        if (match) {
-          try {
-            const [l, c, h] = match[1].split(' ').map(s => parseFloat(s.replace('%', '')));
-            const [r, g, b] = oklchToRgb(l, c, h);
-            el.style.setProperty(prop, `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`, 'important');
-          } catch (e) {
-            MagicDebugger.warn(`Could not convert oklch color: ${match[0]}`, e);
-          }
-        }
-      });
-    });
+    const cleanup = () => {
+      clearTimeout(timeoutId);
+      if (clonedResume && clonedResume.parentNode) {
+        document.body.removeChild(clonedResume);
+      }
+    };
 
     try {
+      const element = document.getElementById('resume-to-export');
+      if (!element) {
+        MagicDebugger.error("Snapshot failed: Preview element not found.");
+        cleanup();
+        resolve(null);
+        return;
+      }
+      
+      clonedResume = element.cloneNode(true) as HTMLElement;
+      clonedResume.style.width = `${element.offsetWidth}px`;
+      clonedResume.style.position = 'absolute';
+      clonedResume.style.left = '-9999px';
+      clonedResume.style.top = '0px';
+      document.body.appendChild(clonedResume);
+
+      const elements = [clonedResume, ...Array.from(clonedResume.getElementsByTagName('*')) as HTMLElement[]];
+      
+      elements.forEach(el => {
+        const style = window.getComputedStyle(el);
+        const colorProps = ['color', 'background-color', 'border-top-color', 'border-right-color', 'border-bottom-color', 'border-left-color'];
+        const oklchRegex = /oklch\(([^)]+)\)/;
+        
+        colorProps.forEach(prop => {
+          const value = style.getPropertyValue(prop);
+          const match = value.match(oklchRegex);
+          if (match) {
+            try {
+              const [l, c, h] = match[1].split(' ').map(s => parseFloat(s.replace('%', '')));
+              const [r, g, b] = oklchToRgb(l, c, h);
+              el.style.setProperty(prop, `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`, 'important');
+            } catch (e) {
+              MagicDebugger.warn(`Could not convert oklch color: ${match[0]}`, e);
+            }
+          }
+        });
+      });
+
       const images = Array.from(clonedResume.getElementsByTagName('img'));
       const imageLoadPromises = images.map(img => {
         if (img.complete) return Promise.resolve();
-        return new Promise((resolve, reject) => {
-          img.onload = resolve;
-          img.onerror = reject;
+        return new Promise((res, rej) => {
+          img.onload = res;
+          img.onerror = rej;
+          // Single image timeout
+          setTimeout(res, 3000);
         });
       });
       await Promise.all(imageLoadPromises);
@@ -99,12 +120,12 @@ export function generateSnapshot(options?: {
       });
       
       canvas.toBlob((blob) => {
-        document.body.removeChild(clonedResume);
+        cleanup();
         resolve(blob);
       }, `image/${format}`, quality);
     } catch (error) {
-      document.body.removeChild(clonedResume);
       MagicDebugger.error("Error generating snapshot:", error);
+      cleanup();
       resolve(null);
     }
   });
