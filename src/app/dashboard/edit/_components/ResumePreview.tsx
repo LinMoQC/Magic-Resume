@@ -19,7 +19,7 @@ interface Props {
   customTemplate?: CustomTemplateConfig; // 新增：自定义模板配置差异
 }
 
-export default function ResumePreview({ info, sections, sectionOrder, templateId, customTemplate }: Props) {
+function ResumePreview({ info, sections, sectionOrder, templateId, customTemplate }: Props) {
   const [template, setTemplate] = useState<MagicTemplateDSL | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -97,6 +97,17 @@ export default function ResumePreview({ info, sections, sectionOrder, templateId
       </div>
     );
   }
-
   return <MagicResumeRenderer template={template} data={resumeData} />;
-} 
+}
+
+// 导出 memo 化的预览组件，避开非核心数据导致的重渲染
+export default React.memo(ResumePreview, (prevProps, nextProps) => {
+  // 深度检查核心内容是否有变化
+  return (
+    prevProps.templateId === nextProps.templateId &&
+    JSON.stringify(prevProps.info) === JSON.stringify(nextProps.info) &&
+    JSON.stringify(prevProps.sections) === JSON.stringify(nextProps.sections) &&
+    JSON.stringify(prevProps.sectionOrder) === JSON.stringify(nextProps.sectionOrder) &&
+    JSON.stringify(prevProps.customTemplate) === JSON.stringify(nextProps.customTemplate)
+  );
+});

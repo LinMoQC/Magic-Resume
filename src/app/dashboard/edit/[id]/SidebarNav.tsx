@@ -44,12 +44,12 @@ export default function SidebarNav({ sidebarMenu, handleSidebarClick }: SidebarN
         </div>
 
         <div className="mt-auto">
-          <div className="flex flex-col items-center gap-2 mb-2">
+          <div className="flex flex-col items-center gap-2 mb-2 min-h-[32px] min-w-[32px] h-8 w-8 justify-center">
             <ClerkLoading>
               <Skeleton className="w-8 h-8 rounded-full" />
             </ClerkLoading>
             <ClerkLoaded>
-              <UserButton afterSignOutUrl="/" />
+              <UserButton afterSignOutUrl="/" appearance={{ elements: { rootBox: 'w-8 h-8', avatarBox: 'w-8 h-8' } }}/>
             </ClerkLoaded>
           </div>
         </div>

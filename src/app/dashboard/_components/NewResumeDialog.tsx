@@ -1,4 +1,5 @@
 import React from 'react';
+import { Loader2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -16,9 +17,10 @@ type NewResumeDialogProps = {
   newName: string;
   setNewName: (name: string) => void;
   handleCreate: () => void;
+  isLoading?: boolean;
 };
 
-export default function NewResumeDialog({ open, onOpenChange, newName, setNewName, handleCreate }: NewResumeDialogProps) {
+export default function NewResumeDialog({ open, onOpenChange, newName, setNewName, handleCreate, isLoading }: NewResumeDialogProps) {
   const { t } = useTranslation();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -35,8 +37,10 @@ export default function NewResumeDialog({ open, onOpenChange, newName, setNewNam
           autoFocus
         />
         <DialogFooter>
-          <Button onClick={() => onOpenChange(false)}>{t('newResumeDialog.cancel')}</Button>
-          <Button onClick={handleCreate} disabled={!newName.trim()}>{t('newResumeDialog.create')}</Button>
+          <Button onClick={() => onOpenChange(false)} variant="ghost" disabled={isLoading}>{t('newResumeDialog.cancel')}</Button>
+          <Button onClick={handleCreate} disabled={!newName.trim() || isLoading} className="min-w-[80px]">
+            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : t('newResumeDialog.create')}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

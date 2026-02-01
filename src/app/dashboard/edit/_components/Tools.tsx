@@ -2,8 +2,9 @@ import { cn } from "@/lib/utils";
 import { exportOriginalStyle } from "@/lib/puppeteer-export";
 import { InfoType, CustomTemplateConfig } from "@/store/useResumeStore";
 import { DownloadIcon } from "@radix-ui/react-icons";
-import { Bot } from "lucide-react";
+import { Bot, History } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useSettingStore } from "@/store/useSettingStore";
 
 export type ToolsProps = {
   isMobile: boolean;
@@ -12,12 +13,13 @@ export type ToolsProps = {
   resetTransform: (step?: number) => void;
   info: InfoType;
   onShowAI: () => void;
+  onVersionClick?: () => void;
   rightCollapsed?: boolean;
   templateId?: string;
   customTemplate?: CustomTemplateConfig;
 };
 
-export function Tools({ isMobile, zoomIn, zoomOut, resetTransform, info, onShowAI, rightCollapsed = false, templateId, customTemplate }: ToolsProps){
+export function Tools({ isMobile, zoomIn, zoomOut, resetTransform, info, onShowAI, onVersionClick, rightCollapsed = false, templateId, customTemplate }: ToolsProps){
   const { t } = useTranslation();
   
   // 计算桌面端工具栏的right位置，避免被模板栏遮挡
@@ -47,6 +49,16 @@ export function Tools({ isMobile, zoomIn, zoomOut, resetTransform, info, onShowA
         </>
       )}
       
+      {useSettingStore.getState().cloudSync && (
+        <button
+          className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"
+          onClick={onVersionClick}
+          title={t('header.versionHistory')}
+          type="button"
+        >
+          <History size={18}/>
+        </button>
+      )}
       <button
         className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"
         onClick={() => exportOriginalStyle(info, templateId, customTemplate)}

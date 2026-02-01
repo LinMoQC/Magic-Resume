@@ -13,6 +13,7 @@ interface ResumePreviewPanelProps {
   previewScale: number;
   setPreviewScale: (scale: number) => void;
   onShowAI: () => void;
+  onVersionClick?: () => void;
   isAiJobRunning: boolean;
   rightCollapsed?: boolean;
 }
@@ -21,6 +22,7 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
   activeResume,
   setPreviewScale,
   onShowAI,
+  onVersionClick,
   isAiJobRunning,
   rightCollapsed = false
 }) => {
@@ -76,6 +78,7 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
               resetTransform={resetTransform} 
               info={activeResume.info} 
               onShowAI={onShowAI} 
+              onVersionClick={onVersionClick}
               rightCollapsed={rightCollapsed}
               templateId={activeResume.template}
               customTemplate={activeResume.customTemplate}

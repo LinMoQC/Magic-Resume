@@ -19,6 +19,8 @@ interface SettingsData {
   baseUrl: string;
   model: string;
   maxTokens: number;
+  cloudSync: boolean;
+  syncDisclaimerAgreed: boolean;
 }
 
 interface SettingsState extends SettingsData {
@@ -28,6 +30,8 @@ interface SettingsState extends SettingsData {
   setBaseUrl: (baseUrl: string) => void;
   setModel: (model: string) => void;
   setMaxTokens: (maxTokens: number) => void;
+  setCloudSync: (cloudSync: boolean) => void;
+  setSyncDisclaimerAgreed: (agreed: boolean) => void;
   saveSettings: () => Promise<void>;
   resetSettings: () => void;
   loadSettings: () => Promise<void>;
@@ -38,6 +42,8 @@ const defaultSettings: SettingsData = {
   baseUrl: 'http://localhost:11434/v1',
   model: 'gpt-3.5-turbo',
   maxTokens: 1024,
+  cloudSync: false,
+  syncDisclaimerAgreed: false,
 };
 
 export const useSettingStore = create<SettingsState>((set, get) => ({
@@ -65,11 +71,21 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
     const { initialSettings, ...currentSettings } = currentState;
     set({ maxTokens, isDirty: JSON.stringify(currentSettings) !== JSON.stringify(initialSettings) });
   },
+  setCloudSync: (cloudSync) => {
+    const currentState = { ...get(), cloudSync };
+    const { initialSettings, ...currentSettings } = currentState;
+    set({ cloudSync, isDirty: JSON.stringify(currentSettings) !== JSON.stringify(initialSettings) });
+  },
+  setSyncDisclaimerAgreed: (syncDisclaimerAgreed) => {
+    const currentState = { ...get(), syncDisclaimerAgreed };
+    const { initialSettings, ...currentSettings } = currentState;
+    set({ syncDisclaimerAgreed, isDirty: JSON.stringify(currentSettings) !== JSON.stringify(initialSettings) });
+  },
   
   saveSettings: async () => {
     await ensureDbInitialized();
-    const { apiKey, baseUrl, model, maxTokens } = get();
-    const newSettings = { apiKey, baseUrl, model, maxTokens };
+    const { apiKey, baseUrl, model, maxTokens, cloudSync, syncDisclaimerAgreed } = get();
+    const newSettings = { apiKey, baseUrl, model, maxTokens, cloudSync, syncDisclaimerAgreed };
     await dbClient.setItem('settings', newSettings);
     set({ initialSettings: newSettings, isDirty: false });
   },
