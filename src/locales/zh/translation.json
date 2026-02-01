@@ -386,7 +386,8 @@
     "exportPDF": "导出 PDF",
     "zoomIn": "放大",
     "zoomOut": "缩小",
-    "resetZoom": "重置缩放"
+    "resetZoom": "重置缩放",
+    "bugReport": "反馈建议"
   },
   "sections": {
     "projects": "项目",
