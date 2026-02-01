@@ -444,7 +444,8 @@
     "syncing": "同步中...",
     "localOnly": "本地模式",
     "syncError": "同步失败",
-    "lastUpdated": "最后更新于"
+    "lastUpdated": "最后更新于",
+    "noHistory": "暂无历史版本"
   },
   "mobileEdit": {
     "jsonData": "简历 JSON 数据",
@@ -713,6 +714,8 @@
     }
   },
   "common": {
+    "manualSave": "主动保存",
+    "autoSave": "自动保存",
     "notifications": {
       "copySuccess": "JSON数据已复制到剪贴板",
       "copyFailed": "复制失败，请重试",
@@ -729,7 +732,15 @@
       "parseResumeData": "解析的简历数据",
       "closePreview": "关闭",
       "previewResume": "预览"
-    }
+    },
+    "confirmDeleteVersion": "确定要删除此历史记录吗？",
+    "confirmDeleteResume": "确定要删除这份简历吗？",
+    "deleteDescription": "此操作无法撤销。这将从云端和所有本地设备上永久删除该内容。",
+    "deleteDescriptionCloud": "此操作无法撤销。这将从云端和所有本地设备上永久删除该内容。",
+    "deleteDescriptionLocal": "此操作无法撤销。这将从您的设备上永久删除该内容。",
+    "delete": "删除",
+    "cancel": "取消",
+    "confirm": "确定"
   },
   "report": {
     "title": "简历分析报告",

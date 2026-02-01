@@ -1,6 +1,6 @@
 import Modal from "@/app/components/ui/Modal";
 import { EditorComponents } from "@/lib/componentOptimization";
-import { Resume } from "@/store/useResumeStore";
+import { Resume, getSanitizedResume } from "@/store/useResumeStore";
 import { FaDownload } from "react-icons/fa";
 
 const ReactJsonView = EditorComponents.JsonViewer;
@@ -31,7 +31,7 @@ export default function JsonModal({ isJsonModalOpen, closeJsonModal, handleDownl
                 <pre className="text-sm bg-[#1b1929] p-4 rounded-md overflow-x-auto h-[80vh] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                     {activeResume && (
                         <ReactJsonView 
-                            src={activeResume} 
+                            src={getSanitizedResume(activeResume)} 
                             theme="monokai"
                             displayDataTypes={false} 
                             enableClipboard={false}

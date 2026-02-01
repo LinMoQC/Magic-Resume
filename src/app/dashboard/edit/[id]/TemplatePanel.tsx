@@ -178,6 +178,7 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
     if (loading) {
       return (
         <motion.div
+          key="loading-skeletons"
           className="grid grid-cols-2 gap-4"
           variants={containerVariants}
           initial="hidden"
@@ -187,7 +188,7 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
           {Array.from({ length: 4 }).map((_, index) => (
             <motion.div
               key={index}
-              className="relative bg-neutral-800/80 border-2 border-neutral-600 aspect-[3/4] rounded-xl overflow-hidden"
+              className="relative bg-neutral-800/80 border-2 border-neutral-600 aspect-3/4 rounded-xl overflow-hidden"
               variants={{
                 hidden: {
                   opacity: 0,
@@ -310,6 +311,7 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
 
     return (
       <motion.div
+        key="template-grid"
         className="grid grid-cols-2 gap-4"
         variants={containerVariants}
         initial="hidden"

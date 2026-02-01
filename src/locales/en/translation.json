@@ -444,7 +444,8 @@
     "syncing": "Syncing...",
     "localOnly": "Local Only",
     "syncError": "Sync Error",
-    "lastUpdated": "Last Update"
+    "lastUpdated": "Last Update",
+    "noHistory": "No version history"
   },
   "mobileEdit": {
     "jsonData": "Resume JSON Data",
@@ -644,6 +645,8 @@
     }
   },
   "common": {
+    "manualSave": "Manual Save",
+    "autoSave": "Auto Save",
     "notifications": {
       "copySuccess": "JSON data copied to clipboard",
       "copyFailed": "Copy failed, please try again",
@@ -660,7 +663,15 @@
       "parseResumeData": "Parsed Resume Data",
       "closePreview": "Close",
       "previewResume": "Preview"
-    }
+    },
+    "confirmDeleteVersion": "Are you sure you want to delete this history record?",
+    "confirmDeleteResume": "Are you sure you want to delete this resume?",
+    "deleteDescription": "This action cannot be undone. This will permanently delete the content from the cloud and all local devices.",
+    "deleteDescriptionCloud": "This action cannot be undone. This will permanently delete the content from the cloud and all local devices.",
+    "deleteDescriptionLocal": "This action cannot be undone. This will permanently delete the content from this device.",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "confirm": "Confirm"
   },
   "report": {
     "title": "Resume Analysis Report",

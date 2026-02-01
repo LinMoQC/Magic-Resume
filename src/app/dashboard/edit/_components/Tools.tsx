@@ -4,6 +4,7 @@ import { InfoType, CustomTemplateConfig } from "@/store/useResumeStore";
 import { DownloadIcon } from "@radix-ui/react-icons";
 import { Bot, History } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useSettingStore } from "@/store/useSettingStore";
 
 export type ToolsProps = {
   isMobile: boolean;
@@ -48,14 +49,16 @@ export function Tools({ isMobile, zoomIn, zoomOut, resetTransform, info, onShowA
         </>
       )}
       
-      <button
-        className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"
-        onClick={onVersionClick}
-        title={t('header.versionHistory')}
-        type="button"
-      >
-        <History size={18}/>
-      </button>
+      {useSettingStore.getState().cloudSync && (
+        <button
+          className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"
+          onClick={onVersionClick}
+          title={t('header.versionHistory')}
+          type="button"
+        >
+          <History size={18}/>
+        </button>
+      )}
       <button
         className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"
         onClick={() => exportOriginalStyle(info, templateId, customTemplate)}

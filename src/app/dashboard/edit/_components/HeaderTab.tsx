@@ -2,8 +2,9 @@ import { House, CloudCheck, CloudUpload, CloudOff } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { useSettingStore } from '@/store/useSettingStore';
 
-export type SyncStatus = 'saved' | 'syncing' | 'local' | 'error';
+export type SyncStatus = 'saved' | 'syncing' | 'modified' | 'local' | 'error';
 
 interface HeaderTabProps {
     title?: string;
@@ -28,8 +29,8 @@ export default function HeaderTab({ title, updatedAt, syncStatus = 'saved' }: He
         switch (syncStatus) {
             case 'syncing':
                 return (
-                    <div className="relative w-20 h-10 flex items-center justify-center">
-                        <svg viewBox="0 0 80 40" className="absolute inset-0 w-full h-full opacity-20 overflow-visible">
+                    <div className="relative w-16 h-10 flex items-center justify-end">
+                        <svg viewBox="0 0 64 40" className="absolute inset-0 w-full h-full opacity-20 overflow-visible">
                             <defs>
                                 <linearGradient id="pathGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                                     <stop offset="0%" stopColor="currentColor" stopOpacity="0" />
@@ -37,13 +38,13 @@ export default function HeaderTab({ title, updatedAt, syncStatus = 'saved' }: He
                                     <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
                                 </linearGradient>
                             </defs>
-                            <path d="M5 10 Q40 20 60 20" stroke="url(#pathGradient)" fill="none" strokeWidth="0.5" />
-                            <path d="M5 20 L60 20" stroke="url(#pathGradient)" fill="none" strokeWidth="0.5" />
-                            <path d="M5 30 Q40 20 60 20" stroke="url(#pathGradient)" fill="none" strokeWidth="0.5" />
+                            <path d="M5 10 Q32 20 50 20" stroke="url(#pathGradient)" fill="none" strokeWidth="0.5" />
+                            <path d="M5 20 L50 20" stroke="url(#pathGradient)" fill="none" strokeWidth="0.5" />
+                            <path d="M5 30 Q32 20 50 20" stroke="url(#pathGradient)" fill="none" strokeWidth="0.5" />
                             {[
-                                { d: "M5 10 Q40 20 60 20", delay: 0, dur: 1.2 },
-                                { d: "M5 20 L60 20", delay: 0.4, dur: 1 },
-                                { d: "M5 30 Q40 20 60 20", delay: 0.8, dur: 1.4 }
+                                { d: "M5 10 Q32 20 50 20", delay: 0, dur: 1.2 },
+                                { d: "M5 20 L50 20", delay: 0.4, dur: 1 },
+                                { d: "M5 30 Q32 20 50 20", delay: 0.8, dur: 1.4 }
                             ].map((path, i) => (
                                 <motion.path 
                                     key={i}
@@ -59,7 +60,7 @@ export default function HeaderTab({ title, updatedAt, syncStatus = 'saved' }: He
                                 />
                             ))}
                         </svg>
-                        <div className="relative z-10 translate-x-[22px] bg-neutral-900 rounded-full p-1 shadow-[0_0_15px_rgba(99,102,241,0.2)]">
+                        <div className="relative z-10 bg-neutral-900 rounded-full p-1 shadow-[0_0_15px_rgba(99,102,241,0.2)]">
                             <CloudUpload size={18} className="text-indigo-400" />
                             <motion.div
                                 className="absolute inset-0 bg-indigo-500/20 blur-xl rounded-full"
@@ -67,6 +68,12 @@ export default function HeaderTab({ title, updatedAt, syncStatus = 'saved' }: He
                                 transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                             />
                         </div>
+                    </div>
+                );
+            case 'modified':
+                return (
+                    <div className="relative w-8 h-10 flex items-center justify-end">
+                        <CloudUpload size={18} className="text-indigo-400/60" />
                     </div>
                 );
             case 'error':
@@ -135,40 +142,42 @@ export default function HeaderTab({ title, updatedAt, syncStatus = 'saved' }: He
                 <span className='text-neutral-200 font-medium truncate max-w-[320px] text-base'>{title || '未命名简历'}</span>
             </div>
 
-            <div className="flex items-center gap-6">
-                    <div className="flex items-center">
-                        <div className="w-20 flex justify-center">
-                            <AnimatePresence mode="wait">
-                                <motion.div
-                                    key={`visual-${syncStatus}`}
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.9 }}
-                                    transition={{ duration: 0.2 }}
-                                >
-                                    {renderSyncVisual()}
-                                </motion.div>
-                            </AnimatePresence>
+            {useSettingStore.getState().cloudSync && (
+                <div className="flex items-center gap-6">
+                        <div className="flex items-center">
+                            <div className={`${syncStatus === 'syncing' ? 'w-16' : 'w-8'} flex justify-end transition-all duration-300`}>
+                                <AnimatePresence mode="wait">
+                                    <motion.div
+                                        key={`visual-${syncStatus}`}
+                                        initial={{ opacity: 0, scale: 0.9 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.9 }}
+                                        transition={{ duration: 0.2 }}
+                                    >
+                                        {renderSyncVisual()}
+                                    </motion.div>
+                                </AnimatePresence>
+                            </div>
+                            
+                            <span className="mx-3 text-neutral-800 font-light text-lg select-none">|</span>
+                            
+                            <div className="flex items-center justify-end">
+                                <AnimatePresence mode="wait">
+                                    <motion.div
+                                        key={`label-${syncStatus}`}
+                                        initial={{ opacity: 0, x: 5 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: -5 }}
+                                        transition={{ duration: 0.2 }}
+                                        className="flex items-center justify-end w-full"
+                                    >
+                                        {renderSyncLabel()}
+                                    </motion.div>
+                                </AnimatePresence>
+                            </div>
                         </div>
-                        
-                        <span className="mx-4 text-neutral-800 font-light text-lg select-none">|</span>
-                        
-                        <div className="flex items-center justify-end">
-                            <AnimatePresence mode="wait">
-                                <motion.div
-                                    key={`label-${syncStatus}`}
-                                    initial={{ opacity: 0, x: 5 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -5 }}
-                                    transition={{ duration: 0.2 }}
-                                    className="flex items-center justify-end w-full"
-                                >
-                                    {renderSyncLabel()}
-                                </motion.div>
-                            </AnimatePresence>
-                        </div>
-                    </div>
-            </div>
+                </div>
+            )}
         </motion.div>
     );
 }
