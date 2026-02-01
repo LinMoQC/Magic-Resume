@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import { exportOriginalStyle } from "@/lib/puppeteer-export";
 import { InfoType, CustomTemplateConfig } from "@/store/useResumeStore";
 import { DownloadIcon } from "@radix-ui/react-icons";
-import { Bot, History as HistoryIcon, Bug, ChevronDown, ChevronUp } from "lucide-react";
+import { Bot, History as HistoryIcon, Bug, ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useSettingStore } from "@/store/useSettingStore";
 import { useState } from "react";
@@ -42,36 +42,37 @@ export function Tools({ isMobile, zoomIn, zoomOut, resetTransform, info, onShowA
       <AnimatePresence mode="wait">
         {isOpen && (
           <motion.div
-            initial={{ height: 0, opacity: 0, scale: 0.95 }}
-            animate={{ height: "auto", opacity: 1, scale: 1 }}
-            exit={{ height: 0, opacity: 0, scale: 0.95 }}
+            initial={isMobile ? { width: 0, opacity: 0 } : { height: 0, opacity: 0, scale: 0.95 }}
+            animate={isMobile ? { width: "auto", opacity: 1 } : { height: "auto", opacity: 1, scale: 1 }}
+            exit={isMobile ? { width: 0, opacity: 0 } : { height: 0, opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="flex flex-col gap-2 overflow-hidden origin-bottom"
+            className={cn(
+              "overflow-hidden group",
+              isMobile ? "flex flex-row gap-2 items-center" : "flex flex-col gap-2 origin-bottom"
+            )}
           >
             <>
               {!isMobile && (
-                <>
-                  <button
-                    className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"
-                    title={t('tools.aiAssistant')}
-                    type="button"
-                    onClick={onShowAI}
-                  >
-                    <Bot size={18}/>
-                  </button>
-                  
-                  <button
-                    className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-red-400 hover:bg-neutral-700 transition"
-                    onClick={() => window.open("https://github.com/LinMoQC/Magic-Resume/issues", "_blank")}
-                    title={t('tools.bugReport')}
-                    type="button"
-                  >
-                    <Bug size={18}/>
-                  </button>
-                </>
+                <button
+                  className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"
+                  onClick={onShowAI}
+                  title={t('tools.aiAssistant')}
+                  type="button"
+                >
+                  <Bot size={18}/>
+                </button>
               )}
               
-              {useSettingStore.getState().cloudSync && (
+              <button
+                className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-red-400 hover:bg-neutral-700 transition"
+                onClick={() => window.open("https://github.com/LinMoQC/Magic-Resume/issues", "_blank")}
+                title={t('tools.bugReport')}
+                type="button"
+              >
+                <Bug size={18}/>
+              </button>
+              
+              {useSettingStore.getState().cloudSync && !isMobile && (
                 <button
                   className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"
                   onClick={onVersionClick}
