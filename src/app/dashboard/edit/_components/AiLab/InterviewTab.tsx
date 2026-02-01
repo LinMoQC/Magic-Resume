@@ -64,6 +64,7 @@ export default function InterviewTab({ resumeData }: InterviewTabProps) {
         avatarId: 'anime',
         voiceId: 'shimmer', // Default to Shimmer for speed
     });
+    const [sessionId, setSessionId] = useState<string | null>(null);
 
     const { status, connect, disconnect, isUserSpeaking, isAiSpeaking, transcript: realtimeTranscript, logs, streamingContent, muteAudio, unmuteAudio, stopSpeakingAndResponse } = useRealtimeInterview();
     const [showLogs, setShowLogs] = useState(false);
@@ -103,6 +104,7 @@ export default function InterviewTab({ resumeData }: InterviewTabProps) {
                 throw new Error("Failed to get session ID from backend");
             }
 
+            setSessionId(sessionData.session_id);
             console.log("Session Created:", sessionData.session_id);
 
             // 2. Connect via WebSocket using the Session ID
@@ -337,7 +339,7 @@ export default function InterviewTab({ resumeData }: InterviewTabProps) {
                                 <div className="flex justify-center pt-8">
                                     <Button
                                         onClick={startRealInterview}
-                                        className="bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-bold py-6 px-12 rounded-full text-lg shadow-lg hover:shadow-sky-500/25 transition-all w-full md:w-auto"
+                                        className="bg-linear-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-bold py-6 px-12 rounded-full text-lg shadow-lg hover:shadow-sky-500/25 transition-all w-full md:w-auto"
                                     >
                                         {t('modals.aiModal.interviewTab.config.startInterview')} <ArrowRight className="ml-2 w-5 h-5" />
                                     </Button>
@@ -359,8 +361,17 @@ export default function InterviewTab({ resumeData }: InterviewTabProps) {
                 <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => {
+                    onClick={async () => {
+                        if (sessionId) {
+                            try {
+                                await interviewApi.deleteSession(sessionId);
+                                console.log("Session cache cleared");
+                            } catch (error) {
+                                console.error("Failed to clear session cache:", error);
+                            }
+                        }
                         disconnect();
+                        setSessionId(null);
                         setStep('selection');
                     }}
                     className="text-neutral-400 hover:text-white"
@@ -401,7 +412,7 @@ export default function InterviewTab({ resumeData }: InterviewTabProps) {
                         {logs.map((log, i) => (
                             <div key={i} className="flex gap-2 leading-relaxed">
                                 <span className="text-neutral-600 shrink-0 select-none">[{log.time}]</span>
-                                <span className={`break-words ${log.message.includes('🔥') || log.message.includes('❌') ? 'text-red-400 font-bold' :
+                                <span className={`wrap-break-word ${log.message.includes('🔥') || log.message.includes('❌') ? 'text-red-400 font-bold' :
                                     log.message.includes('🤖') ? 'text-sky-300' :
                                         log.message.includes('👤') ? 'text-emerald-300' :
                                             log.message.includes('🎤') ? 'text-yellow-400' :

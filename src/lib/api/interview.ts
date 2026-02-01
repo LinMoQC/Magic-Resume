@@ -33,5 +33,9 @@ export const interviewApi = {
   chat: async (params: ChatParams): Promise<InterviewResponse> => {
     const response = await axios.post(`${API_BASE_URL}/interview/chat`, params);
     return response.data;
+  },
+
+  deleteSession: async (sessionId: string): Promise<void> => {
+    await axios.delete(`${API_BASE_URL}/interview/session/${sessionId}`);
   }
 };
