@@ -139,7 +139,7 @@ export default function DashboardSidebar() {
       <>
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed top-4 right-4 z-5 p-2 bg-neutral-800 rounded-md"
+          className="fixed top-4 right-4 z-5 p-2 bg-neutral-800 rounded-md z-[99]"
           aria-label={t('sidebar.open')}
         >
           <FiMenu className="h-6 w-6 text-white" />
