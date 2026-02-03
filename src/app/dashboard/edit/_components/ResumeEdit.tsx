@@ -177,10 +177,15 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
       } else if (resume) {
         // 找到了简历，重置错误状态
         setResumeNotFound(false);
+        // 预加载所有弹窗路由，减少首次加载延迟
+        router.prefetch(`/dashboard/edit/${id}/ai-lab`);
+        router.prefetch(`/dashboard/edit/${id}/history`);
+        router.prefetch(`/dashboard/edit/${id}/json`);
+        router.prefetch(`/dashboard/edit/${id}/share`);
       }
     }
     loadResumeForEdit(id);
-  }, [id, loadResumeForEdit, isStoreLoading, resumes]);
+  }, [id, loadResumeForEdit, isStoreLoading, resumes, router]);
 
   // 追踪编辑器查看事件
   useEffect(() => {
