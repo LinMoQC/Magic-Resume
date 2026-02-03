@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { dbClient } from '@/lib/IndexDBClient';
+import { dbClient } from '@/lib/api/IndexDBClient';
 
 // 移除立即初始化，改为懒加载
 let dbInitialized = false;

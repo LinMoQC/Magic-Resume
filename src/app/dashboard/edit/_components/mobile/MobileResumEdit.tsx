@@ -1,18 +1,18 @@
-import { Button } from "@/app/components/ui/button";
-import ResumePreviewPanel from "../ResumePreviewPanel";
+import { Button } from "@/components/ui/button";
+import ResumePreviewPanel from "../preview/ResumePreviewPanel";
 import Link from "next/link";
 import { FiEdit, FiLayout } from "react-icons/fi";
 import { AnimatePresence, motion } from "framer-motion";
 import { FaCopy } from "react-icons/fa";
-import ResumeContent from "../../[id]/ResumeContent";
-import TemplatePanel from "../../[id]/TemplatePanel";
-import Modal from "@/app/components/ui/Modal";
+import ResumeContent from "../layout/ResumeContent";
+import TemplatePanel from "../templates/TemplatePanel";
+import Modal from "@/components/ui/Modal";
 import Image from "next/image";
-import { Resume } from "@/store/useResumeStore";
+import { Resume } from '@/types/frontend/resume';
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-import { EditorComponents } from '@/lib/componentOptimization';
+import { EditorComponents } from '@/lib/utils/componentOptimization';
 
 const ReactJsonView = EditorComponents.JsonViewer;
 

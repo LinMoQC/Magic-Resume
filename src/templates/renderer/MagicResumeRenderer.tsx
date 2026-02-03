@@ -1,6 +1,6 @@
 import React from 'react';
 import { MagicTemplateDSL, ComponentDefinition } from '../types/magic-dsl';
-import { Resume } from '@/store/useResumeStore';
+import { Resume } from '@/types/frontend/resume';
 import get from 'lodash.get';
 
 // 导入所有组件
@@ -137,14 +137,16 @@ export function MagicResumeRenderer({ template, data }: Props) {
     const sortedMainSections: ComponentDefinition[] = [];
     
     // 根据 sectionOrder 排序主区域的section组件
-    data.sectionOrder.forEach(sectionOrderItem => {
-      const matchingComponent = sectionComponents.find(comp => 
-        comp.dataBinding === `sections.${sectionOrderItem.key}`
-      );
-      if (matchingComponent) {
-        sortedMainSections.push(matchingComponent);
-      }
-    });
+    if (data.sectionOrder && Array.isArray(data.sectionOrder)) {
+      data.sectionOrder.forEach(sectionOrderItem => {
+        const matchingComponent = sectionComponents.find(comp => 
+          comp.dataBinding === `sections.${sectionOrderItem.key}`
+        );
+        if (matchingComponent) {
+          sortedMainSections.push(matchingComponent);
+        }
+      });
+    }
     
     // 添加任何在sectionOrder中没有的主区域section组件
     const remainingMainSections = sectionComponents.filter(comp => 

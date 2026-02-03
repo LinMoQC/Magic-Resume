@@ -1,5 +1,5 @@
 import React from 'react';
-import { InfoType } from '@/store/useResumeStore';
+import { InfoType } from '@/types/frontend/resume';
 import { MapPin, Phone, Mail, Globe } from 'lucide-react';
 import Image from 'next/image';
 

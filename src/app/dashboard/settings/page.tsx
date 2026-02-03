@@ -3,20 +3,20 @@
 import React, { useEffect, useState } from 'react';
 import { useSettingStore } from '@/store/useSettingStore';
 import { toast } from 'sonner';
-import { Button } from '@/app/components/ui/button';
-import { Input } from '@/app/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { InfoCircledIcon, LockClosedIcon } from '@radix-ui/react-icons';
 import { Cloud, Settings as SettingsIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MODEL_API_URL_MAP } from '@/constant/modals';
+import { MODEL_API_URL_MAP } from '@/lib/constants/modals';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/app/components/ui/select";
-import { Switch } from '@/app/components/ui/switch';
+} from "@/components/ui/select";
+import { Switch } from '@/components/ui/switch';
 import {
   Dialog,
   DialogContent,
@@ -24,10 +24,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/app/components/ui/dialog";
-import { Card, CardHeader, CardContent } from '@/app/components/ui/card';
+} from "@/components/ui/dialog";
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { useTranslation, Trans } from 'react-i18next';
-import { useTrace } from '@/app/hooks/useTrace';
+import { useTrace } from '@/hooks/useTrace';
 
 export default function Settings() {
   const { t } = useTranslation();

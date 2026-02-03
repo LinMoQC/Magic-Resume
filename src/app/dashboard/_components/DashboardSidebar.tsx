@@ -6,22 +6,22 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { UserButton, useUser } from '@clerk/nextjs';
 import { motion, AnimatePresence } from 'framer-motion';
-import useMobile from '@/app/hooks/useMobile';
+import useMobile from '@/hooks/useMobile';
 import { FiMenu, FiX } from 'react-icons/fi';
-import { FaRegFileAlt, FaCog } from 'react-icons/fa';
-import { Skeleton } from '@/app/components/ui/Skeleton';
+import { FaRegFileAlt, FaCog, FaBell } from 'react-icons/fa';
+import { Skeleton } from '@/components/ui/Skeleton';
+
 import { useResumeStore } from '@/store/useResumeStore';
-import sidebarMenu from '@/constant/sidebarMenu';
-import { Button } from '@/app/components/ui/button';
+import sidebarMenu from '@/lib/constants/sidebarMenu';
+import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
 
 export default function DashboardSidebar() {
   const { t } = useTranslation();
 
   const menuItems = [
-
-
     { href: '/dashboard', label: t('sidebar.resumes'), icon: FaRegFileAlt },
+    { href: '/dashboard/notifications', label: t('sidebar.notifications'), icon: FaBell },
     { href: '/dashboard/settings', label: t('sidebar.settings'), icon: FaCog },
   ];
 
