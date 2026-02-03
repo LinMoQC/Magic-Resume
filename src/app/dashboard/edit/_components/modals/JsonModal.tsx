@@ -26,7 +26,7 @@ export default function JsonModal({ isJsonModalOpen, closeJsonModal, handleDownl
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={closeJsonModal}
-                        className="fixed inset-0 bg-black/60 z-[100] backdrop-blur-md"
+                        className="fixed inset-0 bg-black/80 z-[100]"
                     />
                     <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none">
                         <motion.div
@@ -54,7 +54,7 @@ export default function JsonModal({ isJsonModalOpen, closeJsonModal, handleDownl
                         <div className="flex-1 overflow-hidden relative">
                             <button
                                 onClick={handleDownloadJson}
-                                className="absolute top-6 right-8 p-3 bg-neutral-800/80 hover:bg-sky-600 text-neutral-400 hover:text-white rounded-xl transition-all duration-200 z-10 backdrop-blur-sm border border-neutral-700/50"
+                                className="absolute top-6 right-8 p-3 bg-neutral-800/80 hover:bg-sky-600 text-neutral-400 hover:text-white rounded-xl transition-all duration-200 z-10 border border-neutral-700/50"
                                 aria-label="Download JSON file"
                                 title="Download JSON"
                             >
