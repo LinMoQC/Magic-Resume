@@ -1,4 +1,22 @@
 {
+  "notificationsPage": {
+    "title": "Notifications",
+    "unread": "{{count}} unread",
+    "empty": {
+      "title": "No notifications yet",
+      "description": "When people comment or reply to your resumes, they will appear here."
+    },
+    "type": {
+      "comment": "commented on",
+      "reply": "replied on"
+    },
+    "action": {
+      "view": "View details",
+      "markRead": "Mark as read"
+    },
+    "notificationUpdateFailed": "Failed to update notification",
+    "someone": "Someone"
+  },
   "settings": {
     "title": "Settings",
     "llm": {
@@ -170,6 +188,7 @@
         "interview": "Mock Interview"
       },
       "title": "AI Lab",
+      "subtitle": "Analyze and optimize your resume to match target job requirements, or get professional advice through Lighthouse-style reports.",
       "description": "Analyze and optimize your resume to match target job requirements, or get a professional Lighthouse-style analysis report.",
       "optimizeTab": {
         "jdLabel": "Target Job Description (JD)",
@@ -376,6 +395,69 @@
         }
       },
       "progressText": "AI is working hard on analysis and creation..."
+    },
+    "share": {
+      "title": "Share to Web",
+      "subtitle": "Publish your resume with a unique link.",
+      "publicAccess": "Public Access",
+      "publicAccessDesc": "Anyone with the link can view",
+      "privateAccessDesc": "Only you can access",
+      "syncing": "Syncing to cloud...",
+      "readOnly": "Read Only",
+      "allowComments": "Allow Comments",
+      "copySuccess": "Link copied to clipboard!",
+      "pleaseLogin": "Please login first"
+    },
+    "versionHistory": {
+      "title": "Version History",
+      "subtitle": "Restore previous versions of your resume",
+      "restore": "Restore",
+      "loading": "Loading..."
+    }
+  },
+  "sharedPage": {
+    "header": {
+      "createResume": "Create My Resume",
+      "create": "Create"
+    },
+    "toolbar": {
+      "zoomOut": "Zoom Out",
+      "resetZoom": "Reset Zoom",
+      "zoomIn": "Zoom In",
+      "feedbackList": "Feedback List",
+      "returnToView": "Return to View",
+      "commentMode": "Comment Mode"
+    },
+    "comments": {
+      "title": "Comments",
+      "noComments": "No comments yet.",
+      "markersHint": "Markers will appear here.",
+      "anonymous": "Anonymous",
+      "owner": "Owner",
+      "justNow": "Just now",
+      "replyPlaceholder": "Reply...",
+      "writeCommentPlaceholder": "Write a comment...",
+      "cancel": "Cancel",
+      "post": "Post"
+    },
+    "error": {
+      "resumeNotFound": "Resume not found or access denied",
+      "redirectingPre": "Redirecting to home in ",
+      "redirectingPost": " seconds...",
+      "returnNow": "Return Now"
+    },
+    "notifications": {
+      "resumeNotFound": "This resume doesn't exist or is not public.",
+      "syncing": "Resume is still syncing to cloud. Please wait a moment.",
+      "loginToComment": "Please login to comment",
+      "commentAdded": "Comment added",
+      "commentSaveFailed": "Failed to save comment",
+      "loginToReply": "Please login to reply",
+      "replyAdded": "Reply added",
+      "replySaveFailed": "Failed to save reply",
+      "loginToDelete": "Please login to delete",
+      "commentDeleted": "Comment deleted",
+      "commentDeleteFailed": "Failed to delete comment"
     }
   },
   "resumePreview": {
@@ -475,14 +557,14 @@
     "title": "Custom Template",
     "tabs": {
       "colors": "Colors",
-      "typography": "Font", 
+      "typography": "Font",
       "layout": "Layout"
     },
     "colors": {
       "quickThemes": "Quick Themes",
       "customColors": "Custom Colors",
       "primary": "Primary Color",
-      "secondary": "Secondary Color", 
+      "secondary": "Secondary Color",
       "text": "Text Color",
       "textSecondary": "Secondary Text Color",
       "background": "Background Color",
@@ -546,7 +628,8 @@
     }
   },
   "sidebar": {
-    "resumes": "Resumes",
+    "resumes": "My Resumes",
+    "notifications": "Notifications",
     "settings": "Settings",
     "open": "Open sidebar",
     "close": "Close sidebar"
@@ -641,7 +724,24 @@
       "resumeNotFound": "Resume not found for duplication.",
       "resumeDuplicated": "Resume \"{{name}}\" duplicated.",
       "resumeDeleted": "Resume \"{{name}}\" deleted.",
-      "resumeSaved": "Resume saved!"
+      "resumeSaved": "Resume saved!",
+      "createCloudFailed": "Failed to create in cloud. Creating locally instead.",
+      "importCloudFailed": "Failed to import resume to cloud. Importing locally.",
+      "resumeDuplicatedLocally": "Resume \"{{name}}\" duplicated locally.",
+      "renameSuccess": "Renamed successfully",
+      "renameCloudFailed": "Renamed locally, but failed to sync to cloud",
+      "deleteCloudFailed": "Failed to delete from cloud, but removing locally.",
+      "versionDeleted": "Version deleted",
+      "versionDeleteFailed": "Failed to delete version",
+      "resumeSavedCloud": "Resume saved to cloud!",
+      "resumeSavedLocally": "Resume saved locally!",
+      "versionNotFound": "Version not found",
+      "versionRestored": "Version restored!",
+      "loginToShare": "Please login to share resume",
+      "resumePublished": "Resume published!",
+      "resumeUnpublished": "Resume unpublished",
+      "sharingUpdateFailed": "Failed to update sharing settings",
+      "cloudSyncFailed": "Cloud sync failed. Please check your connection."
     }
   },
   "common": {
@@ -670,6 +770,7 @@
     "deleteDescriptionCloud": "This action cannot be undone. This will permanently delete the content from the cloud and all local devices.",
     "deleteDescriptionLocal": "This action cannot be undone. This will permanently delete the content from this device.",
     "delete": "Delete",
+    "done": "Done",
     "cancel": "Cancel",
     "confirm": "Confirm"
   },

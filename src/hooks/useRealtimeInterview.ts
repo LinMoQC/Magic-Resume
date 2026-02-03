@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { AudioRecorder, AudioPlayer } from '@/lib/audio-utils';
+import { AudioRecorder, AudioPlayer } from '@/lib/utils/audio-utils';
 import { nanoid } from 'nanoid';
 
 type RealtimeStatus = 'idle' | 'connecting' | 'connected' | 'error';

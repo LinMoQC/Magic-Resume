@@ -1,4 +1,4 @@
-import { Resume } from "@/store/useResumeStore";
+import { Resume } from "@/types/frontend/resume";
 
 /**
  * Extracts all meaningful text from a resume object and concatenates it into a single string.

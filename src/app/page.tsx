@@ -1,7 +1,7 @@
-import { Header } from '@/app/components/landing/Header';
-import { HeroSection } from '@/app/components/landing/HeroSection';
-import { FeatureSections } from '@/app/components/landing/FeatureSections';
-import { Footer } from '@/app/components/landing/Footer';
+import { Header } from '@/components/features/landing/Header';
+import { HeroSection } from '@/components/features/landing/HeroSection';
+import { FeatureSections } from '@/components/features/landing/FeatureSections';
+import { Footer } from '@/components/features/landing/Footer';
 import { Suspense } from 'react';
 
 export default async function LandingPage() {

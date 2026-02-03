@@ -1,5 +1,5 @@
 import React from 'react';
-import { InfoType } from '@/store/useResumeStore';
+import { InfoType } from '@/types/frontend/resume';
 import { FaEnvelope, FaPhone, FaGlobe, FaMapMarkerAlt } from 'react-icons/fa';
 
 interface Props {

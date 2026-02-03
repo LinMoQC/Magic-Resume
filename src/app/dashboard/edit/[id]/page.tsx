@@ -1,4 +1,4 @@
-import ResumeEdit from './ResumeEdit';
+import ResumeEdit from '../_components/ResumeEdit';
 
 export default async function Page({
   params,
