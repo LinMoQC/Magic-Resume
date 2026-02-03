@@ -95,7 +95,8 @@ export const resumeApi = {
    */
   fetchCloudResumes: async (token: string) => {
     try {
-      const response = await axios.get(CLOUD_API_BASE_URL, {
+      // Use the dedicated 'mine' endpoint to ensure we only get the user's own resumes
+      const response = await axios.get(`${CLOUD_API_BASE_URL}/mine`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       return response.data; // Expected { data: Resume[], total: number }
