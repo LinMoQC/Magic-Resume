@@ -427,6 +427,7 @@
       "createResume": "Create My Resume",
       "create": "Create"
     },
+    "titleSuffix": "'s Resume",
     "toolbar": {
       "zoomOut": "Zoom Out",
       "resetZoom": "Reset Zoom",
@@ -497,7 +498,14 @@
     "label": "Your feedback",
     "placeholder": "Tell us what you like or what could be better...",
     "submit": "Submit Feedback",
-    "close": "Close"
+    "close": "Close",
+    "characters": "characters",
+    "readyToSubmit": "Ready to submit",
+    "typeFeedback": "Type your feedback",
+    "error": {
+      "tooManyRequests": "Too many requests. Please try again later.",
+      "generic": "Failed to submit feedback. Please try again."
+    }
   },
   "sections": {
     "projects": "Projects",

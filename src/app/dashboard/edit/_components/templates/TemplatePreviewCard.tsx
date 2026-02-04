@@ -11,7 +11,7 @@ interface TemplatePreviewCardProps {
   onCustomize?: () => void;
 }
 
-export default function TemplatePreviewCard({ template, isSelected, onSelect, onCustomize }: TemplatePreviewCardProps) {
+const TemplatePreviewCard = React.memo(({ template, isSelected, onSelect, onCustomize }: TemplatePreviewCardProps) => {
   const { t } = useTranslation();
   const primaryColor = template.designTokens.colors.primary;
   
@@ -53,8 +53,8 @@ export default function TemplatePreviewCard({ template, isSelected, onSelect, on
             </h3>
             
             {/* 布局标识和颜色指示 */}
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-neutral-400">
+            <div className="flex items-center justify-between gap-1">
+              <span className="text-[10px] text-neutral-400 whitespace-nowrap truncate">
                 {template.layout.type === 'two-column' 
                   ? t('templatePanel.layoutTwoColumn') 
                   : t('templatePanel.layoutSingleColumn')}
@@ -117,4 +117,8 @@ export default function TemplatePreviewCard({ template, isSelected, onSelect, on
       </div>
     </div>
   );
-}
+});
+
+TemplatePreviewCard.displayName = 'TemplatePreviewCard';
+
+export default TemplatePreviewCard;

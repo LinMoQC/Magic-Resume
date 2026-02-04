@@ -16,7 +16,7 @@ interface ResumeTransformViewProps {
     children?: React.ReactNode;
 }
 
-export const ResumeTransformView = ({
+export const ResumeTransformView = React.memo(({
     transformComponentRef,
     initialScale,
     isCommentMode,
@@ -68,4 +68,6 @@ export const ResumeTransformView = ({
             </TransformWrapper>
         </main>
     );
-};
+});
+
+ResumeTransformView.displayName = 'ResumeTransformView';

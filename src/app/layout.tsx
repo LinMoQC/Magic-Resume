@@ -11,6 +11,7 @@ import Analytics from "@/components/features/analytics/Analytics";
 import { PHProvider } from "@/components/providers/posthog-provider";
 import PostHogPageView from "@/components/providers/PostHogPageView";
 import I18nProvider from "@/components/providers/I18nProvider";
+import { HttpClientProvider } from "@/components/providers/HttpClientProvider";
 
 // 字体配置：使用系统字体，避免构建时拉取远程字体
 
@@ -35,31 +36,33 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang={lang} className="hide-scrollbar">
-        <body className="font-sans">
-          <PHProvider>
-            <PostHogPageView />
-            <I18nProvider>
-              <Theme appearance="dark">
-                {children}
-                <Toaster />
-                {/* 性能优化和预加载 */}
-                <PreloadOptimizer />
-              </Theme>
-              {/* 语言切换 */}
+      <HttpClientProvider>
+        <html lang={lang} className="hide-scrollbar">
+          <body className="font-sans">
+            <PHProvider>
+              <PostHogPageView />
+              <I18nProvider>
+                <Theme appearance="dark">
+                  {children}
+                  <Toaster />
+                  {/* 性能优化和预加载 */}
+                  <PreloadOptimizer />
+                </Theme>
+                {/* 语言切换 */}
 
-            </I18nProvider>
+              </I18nProvider>
 
-            {/* 结构化数据 */}
-            <StructuredData type="website" />
-            <StructuredData type="organization" />
-            <StructuredData type="product" />
-            
-            {/* 动态Analytics组件 */}
-            <Analytics />
-          </PHProvider>
-        </body>
-      </html>
+              {/* 结构化数据 */}
+              <StructuredData type="website" />
+              <StructuredData type="organization" />
+              <StructuredData type="product" />
+              
+              {/* 动态Analytics组件 */}
+              <Analytics />
+            </PHProvider>
+          </body>
+        </html>
+      </HttpClientProvider>
     </ClerkProvider>
   );
 }

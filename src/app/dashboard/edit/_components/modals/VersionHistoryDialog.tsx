@@ -1,15 +1,45 @@
-import React, { useState, useEffect } from 'react';
-import { History, Clock, Bookmark, RotateCcw, Loader2, Trash2, X } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { 
+    History, 
+    Clock, 
+    Bookmark, 
+    RotateCcw, 
+    Loader2, 
+    Trash2, 
+    X 
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { EditorComponents } from "@/lib/utils/componentOptimization";
-import { ResumeVersion } from '@/types/frontend/resume';
+import { Resume, ResumeVersion } from '@/types/frontend/resume';
 import { getSanitizedResume } from '@/store/useResumeStore';
 import { useSettingStore } from '@/store/useSettingStore';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 
 const ReactJsonView = EditorComponents.JsonViewer;
+
+// --- Helper Utilities (Extracted outside to avoid re-creation) ---
+
+const formatTime = (timestamp: number) => {
+    return new Date(timestamp).toLocaleString('zh-CN', {
+        month: 'numeric',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+};
+
+// Generate a deterministic 7-char hash from string
+const generateHash = (str: string) => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+    }
+    return Math.abs(hash).toString(16).substring(0, 7).padEnd(7, '0');
+};
 
 type VersionHistoryDialogProps = {
     isOpen: boolean;
@@ -34,27 +64,9 @@ export default function VersionHistoryDialog({ isOpen, onClose, onRestore, onDel
         }
     }, [isOpen, versions, selectedVersionId]);
 
-    const formatTime = (timestamp: number) => {
-        return new Date(timestamp).toLocaleString('zh-CN', {
-            month: 'numeric',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
-
-    const selectedVersion = versions.find(v => v.id === selectedVersionId);
-    
-    // Generate a deterministic 7-char hash from string
-    const generateHash = (str: string) => {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) {
-            const char = str.charCodeAt(i);
-            hash = ((hash << 5) - hash) + char;
-            hash = hash & hash;
-        }
-        return Math.abs(hash).toString(16).substring(0, 7).padEnd(7, '0');
-    };
+    const selectedVersion = useMemo(() => 
+        versions.find(v => v.id === selectedVersionId),
+    [versions, selectedVersionId]);
 
     return (
         <AnimatePresence>
@@ -218,7 +230,7 @@ export default function VersionHistoryDialog({ isOpen, onClose, onRestore, onDel
                                                 <div className="p-6 pt-14 h-full overflow-y-auto font-mono text-[11px] leading-relaxed [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                                                     <ReactJsonView 
                                                         src={(() => {
-                                                            const data = selectedVersion?.data as Record<string, unknown>;
+                                                            const data = selectedVersion?.data as unknown as Resume & { content?: unknown };
                                                             // Handle legacy dirty data: if 'content' string exists, parse it
                                                             if (data?.content && typeof data.content === 'string') {
                                                                 try {

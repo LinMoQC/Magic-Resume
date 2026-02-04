@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { immer } from 'zustand/middleware/immer';
 import i18next from 'i18next';
 import sidebarMenu from '@/lib/constants/sidebarMenu';
 import { dbClient, RESUMES_KEY } from '@/lib/api/IndexDBClient';
@@ -7,13 +8,16 @@ import { toast } from "sonner";
 import { useSettingStore } from './useSettingStore';
 import { resumeApi } from '@/lib/api/resume';
 import debounce from 'lodash/debounce';
+import isEqual from 'lodash/isEqual';
 import { 
   Resume, 
   InfoType, 
   Section, 
   SectionItem, 
   SectionOrder, 
-  CustomTemplateConfig 
+  CustomTemplateConfig,
+  CloudResume,
+  CloudVersion
 } from '@/types/frontend/resume';
 
 type ResumeState = {
@@ -33,7 +37,7 @@ type ResumeState = {
   renameResume: (id: string, newName: string, token?: string) => Promise<void>;
   deleteResume: (id: string, token?: string) => Promise<void>;
   deleteVersion: (resumeId: string, versionId: string, token?: string) => Promise<void>;
-  loadResumeForEdit: (id: string) => void;
+  loadResumeForEdit: (id: string, token?: string) => void;
   saveResume: (token?: string, type?: 'auto' | 'manual', resumeData?: Resume) => Promise<void>;
   createVersion: (type: 'auto' | 'manual', name?: string, token?: string, resumeData?: Resume) => Promise<void>;
   restoreVersion: (versionId: string) => void;
@@ -75,23 +79,28 @@ export const initialResume: Omit<Resume, 'id' | 'updatedAt' | 'name'> = {
   template: 'classic',
   themeColor: '#f97316',
   typography: 'inter',
+  customTemplate: {},
 };
 
-export const getSanitizedResume = (resume: any): Omit<Resume, 'id' | 'updatedAt' | 'versions'> => { // eslint-disable-line @typescript-eslint/no-explicit-any
+export const getSanitizedResume = (resume: Resume): Omit<Resume, 'id' | 'updatedAt' | 'versions'> => {
   const r = resume || {};
-  return {
+  const sanitized: Omit<Resume, 'id' | 'updatedAt' | 'versions'> = {
     info: r.info || initialResume.info,
     sections: r.sections || initialResume.sections,
     sectionOrder: r.sectionOrder || initialResume.sectionOrder,
     template: r.template || initialResume.template,
     themeColor: r.themeColor || initialResume.themeColor,
     typography: r.typography || initialResume.typography,
-    customTemplate: r.customTemplate as CustomTemplateConfig,
+    customTemplate: (r.customTemplate || initialResume.customTemplate) as CustomTemplateConfig,
     name: (r.name as string) || '',
-    isPublic: r.isPublic,
-    shareId: r.shareId,
-    shareRole: r.shareRole,
   };
+
+  // Only include sharing fields if they are explicitly present (usually from cloud sync)
+  if (r.isPublic !== undefined) sanitized.isPublic = r.isPublic;
+  if (r.shareId !== undefined) sanitized.shareId = r.shareId;
+  if (r.shareRole !== undefined) sanitized.shareRole = r.shareRole;
+
+  return sanitized;
 };
 
 // Helper for local persistence: include identity but strip version history and snapshots
@@ -104,15 +113,16 @@ export const getSanitizedResumeForLocal = (resume: Resume) => {
   };
 };
 
-const useResumeStore = create<ResumeState>((set, get) => ({
-  resumes: [],
-  activeResume: null,
-  isStoreLoading: true,
-  rightCollapsed: false,
-  activeSection: 'basics',
-  syncStatus: 'saved',
-  isSyncing: false,
-  isAiGenerating: false,
+const useResumeStore = create<ResumeState>()(
+  immer((set, get) => ({
+    resumes: [],
+    activeResume: null,
+    isStoreLoading: true,
+    rightCollapsed: false,
+    activeSection: 'basics',
+    syncStatus: 'saved',
+    isSyncing: false,
+    isAiGenerating: false,
 
   setIsAiGenerating: (isGenerating) => set({ isAiGenerating: isGenerating }),
 
@@ -134,9 +144,9 @@ const useResumeStore = create<ResumeState>((set, get) => ({
       
       // Cleanup: Remove legacy redundant 'content' field from local storage if present
       localResumes = localResumes.map(r => {
-        if ('content' in r) {
+        if ('content' in (r as object)) {
             const rest = { ...r };
-            delete (rest as any).content; // eslint-disable-line @typescript-eslint/no-explicit-any
+            delete (rest as Record<string, unknown>).content;
             return rest as Resume;
         }
         return r;
@@ -154,28 +164,34 @@ const useResumeStore = create<ResumeState>((set, get) => ({
             // The response is wrapped by TransformInterceptor: { code: 200, data: { data: [...] }, ... }
             // So cloudResult.data is the { data: [...], total } object
             // We need to access cloudResult.data.data for the actual array
-            const cloudResumes = Array.isArray(cloudResult.data) 
+            const cloudResumes = (Array.isArray(cloudResult.data) 
                 ? cloudResult.data 
-                : (cloudResult.data?.data || []);
+                : (cloudResult.data?.data || [])) as CloudResume[];
             
             if (Array.isArray(cloudResumes)) {
                 // Set of valid Cloud IDs
-                const cloudIds = new Set(cloudResumes.map((cr: { id: string }) => cr.id));
+                const cloudIds = new Set(cloudResumes.map(cr => cr.id));
 
-                cloudResumes.forEach((cr: { id: string; title: string; updatedAt: string; content: string; versions?: unknown[] }) => {
+                cloudResumes.forEach(cr => {
                   const local = mergedMap.get(cr.id);
                   if (!local || new Date(cr.updatedAt).getTime() > local.updatedAt) {
                     // Convert cloud structure back to local if necessary
                     const rawParsed = typeof cr.content === 'string' ? JSON.parse(cr.content) : cr.content;
                     
                     // Strict whitelist sanitization using helper
-                    const sanitizedContent = getSanitizedResume(rawParsed || { name: cr.title });
+                    const sanitizedContent = getSanitizedResume({
+                      ...(rawParsed || {}),
+                      name: cr.title,
+                      isPublic: cr.isPublic,
+                      shareId: cr.shareId,
+                      shareRole: cr.shareRole
+                    });
                     
                     const mergedResume: Resume = {
                       id: cr.id,
                       updatedAt: new Date(cr.updatedAt).getTime(),
                       ...sanitizedContent,
-                      versions: ((cr.versions || local?.versions || []) as any[]).map((v: { id: string; createdAt?: string; timestamp?: number; changelog?: string; type?: string; content: string }) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any
+                      versions: ((cr.versions || local?.versions || []) as CloudVersion[]).map(v => ({
                         id: v.id,
                         updatedAt: v.createdAt ? new Date(v.createdAt).getTime() : (v.timestamp || Date.now()),
                         type: (v.changelog === 'Manual Save' ? 'manual' : (v.changelog === 'Auto Save' || v.changelog === 'Initial version' ? 'auto' : (v.type || 'auto'))) as 'manual' | 'auto',
@@ -487,53 +503,73 @@ const useResumeStore = create<ResumeState>((set, get) => ({
     }
   },
 
-  loadResumeForEdit: (id) => {
-    const { resumes, isStoreLoading, loadResumes } = get();
+  loadResumeForEdit: (id, token) => {
+    const { resumes, isStoreLoading, loadResumes, fetchCloudResume } = get();
+    const isCloudSyncOn = useSettingStore.getState().cloudSync;
     
+    // 如果开启了云端同步且有 Token，主动拉取一次云端数据以保证最新
+    // 增加：如果当前 activeResume 已经是这个 id 且刚刚同步过，或者正在通过 fetchCloudResume 同步，则跳过
+    const { isSyncing, activeResume: currentActive } = get();
+    if (isCloudSyncOn && token && !isSyncing) {
+        // 如果本地还没有或者 id 不匹配，或者明确需要更新
+        if (!currentActive || currentActive.id !== id) {
+            console.log('[Store] Cloud sync is ON, fetching latest resume data for edit:', id);
+            fetchCloudResume(id, token);
+        }
+    }
+
     // 如果还在加载中，等待加载完成后再尝试
     if (isStoreLoading) {
-      loadResumes().then(() => {
+      loadResumes(token).then(() => {
         const updatedResumes = get().resumes;
         const resume = updatedResumes.find(r => r.id === id);
         if (resume) {
           // Data migration on the fly: Ensure 'basics' section exists
-          if (!resume.sectionOrder.find(s => s.key === 'basics')) {
-            const migratedResume = {
-              ...resume,
-              sectionOrder: [
-                { key: 'basics', label: 'Basics' },
-                ...resume.sectionOrder,
-              ],
-            };
-            set({ activeResume: migratedResume });
-          } else {
-            set({ activeResume: { ...resume } });
-          }
-        } else {
-          MagicDebugger.warn(`Resume with id ${id} not found.`);
+          const hasBasics = resume.sectionOrder.some(s => s.key === 'basics');
+          
+          set(state => {
+            if (!state.activeResume || state.activeResume.id !== id) {
+                if (!hasBasics) {
+                    state.activeResume = {
+                        ...resume,
+                        sectionOrder: [
+                          { key: 'basics', label: 'Basics' },
+                          ...resume.sectionOrder,
+                        ],
+                    };
+                } else {
+                    state.activeResume = { ...resume };
+                }
+            }
+          });
         }
       });
       return;
     }
 
-    // 如果数据已经加载完成，直接查找
+    // 如果数据已经加载完成，从当前列表查找
     const resume = resumes.find(r => r.id === id);
     if (resume) {
-      // Data migration on the fly: Ensure 'basics' section exists
-      if (!resume.sectionOrder.find(s => s.key === 'basics')) {
-        const migratedResume = {
-          ...resume,
-          sectionOrder: [
-            { key: 'basics', label: 'Basics' },
-            ...resume.sectionOrder,
-          ],
-        };
-        set({ activeResume: migratedResume });
-      } else {
-        set({ activeResume: { ...resume } });
-      }
+      const hasBasics = resume.sectionOrder.some(s => s.key === 'basics');
+      
+      set(state => {
+        // Only set if not already matched to avoid unnecessary re-renders
+        if (state.activeResume?.id !== id) {
+            if (!hasBasics) {
+                state.activeResume = {
+                    ...resume,
+                    sectionOrder: [
+                      { key: 'basics', label: 'Basics' },
+                      ...resume.sectionOrder,
+                    ],
+                };
+            } else {
+                state.activeResume = { ...resume };
+            }
+        }
+      });
     } else {
-      MagicDebugger.warn(`Resume with id ${id} not found.`);
+      MagicDebugger.warn(`Resume with id ${id} not found in local list.`);
     }
   },
 
@@ -624,138 +660,182 @@ const useResumeStore = create<ResumeState>((set, get) => ({
   },
   
   updateInfo: (info) => {
+    const { activeResume } = get();
+    if (!activeResume) return;
+    
+    const currentInfo = activeResume.info;
+    const newInfo = { ...currentInfo, ...info };
+    
+    if (isEqual(currentInfo, newInfo)) {
+      return;
+    }
+
     set(state => {
-      if (!state.activeResume) return state;
-      const updatedResume = {
-        ...state.activeResume,
-        info: { ...state.activeResume.info, ...info },
-        updatedAt: Date.now()
-      };
+      if (!state.activeResume) return;
+      state.activeResume.info = newInfo;
+      state.activeResume.updatedAt = Date.now();
       
-      // Update in resumes list as well to keep them in sync
-      const newResumes = state.resumes.map(r => 
-        r.id === updatedResume.id ? updatedResume : r
-      );
+      const resumeIndex = state.resumes.findIndex(r => r.id === state.activeResume?.id);
+      if (resumeIndex !== -1) {
+        state.resumes[resumeIndex].info = newInfo;
+        state.resumes[resumeIndex].updatedAt = state.activeResume.updatedAt;
+      }
       
       const isCloudSyncOn = useSettingStore.getState().cloudSync;
-      return {
-        activeResume: updatedResume,
-        resumes: newResumes,
-        syncStatus: isCloudSyncOn ? 'modified' : 'local'
-      };
+      state.syncStatus = isCloudSyncOn ? 'modified' : 'local';
     });
   },
   
   setSectionOrder: (sectionOrder) => {
+    const { activeResume } = get();
+    if (!activeResume) return;
+
+    if (isEqual(activeResume.sectionOrder, sectionOrder)) {
+      return;
+    }
+
     set(state => {
-      if (!state.activeResume) return state;
-      const updatedResume = { ...state.activeResume, sectionOrder, updatedAt: Date.now() };
-      const newResumes = state.resumes.map(r => 
-        r.id === updatedResume.id ? updatedResume : r
-      );
+      if (!state.activeResume) return;
+      state.activeResume.sectionOrder = sectionOrder;
+      state.activeResume.updatedAt = Date.now();
+
+      const resumeIndex = state.resumes.findIndex(r => r.id === state.activeResume?.id);
+      if (resumeIndex !== -1) {
+        state.resumes[resumeIndex].sectionOrder = sectionOrder;
+        state.resumes[resumeIndex].updatedAt = state.activeResume.updatedAt;
+      }
+
       const isCloudSyncOn = useSettingStore.getState().cloudSync;
-      return {
-        activeResume: updatedResume,
-        resumes: newResumes,
-        syncStatus: isCloudSyncOn ? 'modified' : 'local'
-      };
+      state.syncStatus = isCloudSyncOn ? 'modified' : 'local';
     });
   },
 
   updateSectionItems: (key, items) => {
+    const { activeResume } = get();
+    if (!activeResume) return;
+    
+    if (isEqual(activeResume.sections[key], items)) {
+      return;
+    }
+
     set(state => {
-      if (!state.activeResume) return state;
-      const updatedResume = {
-        ...state.activeResume,
-        sections: { ...state.activeResume.sections, [key]: items },
-        updatedAt: Date.now()
-      };
-      const newResumes = state.resumes.map(r => 
-        r.id === updatedResume.id ? updatedResume : r
-      );
+      if (!state.activeResume) return;
+      state.activeResume.sections[key] = items;
+      state.activeResume.updatedAt = Date.now();
+
+      const resumeIndex = state.resumes.findIndex(r => r.id === state.activeResume?.id);
+      if (resumeIndex !== -1) {
+        state.resumes[resumeIndex].sections[key] = items;
+        state.resumes[resumeIndex].updatedAt = state.activeResume.updatedAt;
+      }
+
       const isCloudSyncOn = useSettingStore.getState().cloudSync;
-      return {
-        activeResume: updatedResume,
-        resumes: newResumes,
-        syncStatus: isCloudSyncOn ? 'modified' : 'local'
-      };
+      state.syncStatus = isCloudSyncOn ? 'modified' : 'local';
     });
   },
 
   updateSections: (sections) => {
+    const { activeResume } = get();
+    if (!activeResume) return;
+
+    if (isEqual(activeResume.sections, sections)) {
+      return;
+    }
+
     set(state => {
-      if (!state.activeResume) return state;
-      const updatedResume = { ...state.activeResume, sections, updatedAt: Date.now() };
-      const newResumes = state.resumes.map(r => 
-        r.id === updatedResume.id ? updatedResume : r
-      );
+      if (!state.activeResume) return;
+      state.activeResume.sections = sections;
+      state.activeResume.updatedAt = Date.now();
+
+      const resumeIndex = state.resumes.findIndex(r => r.id === state.activeResume?.id);
+      if (resumeIndex !== -1) {
+        state.resumes[resumeIndex].sections = sections;
+        state.resumes[resumeIndex].updatedAt = state.activeResume.updatedAt;
+      }
+
       const isCloudSyncOn = useSettingStore.getState().cloudSync;
-      return {
-        activeResume: updatedResume,
-        resumes: newResumes,
-        syncStatus: isCloudSyncOn ? 'modified' : 'local'
-      };
+      state.syncStatus = isCloudSyncOn ? 'modified' : 'local';
     });
   },
 
   updateTemplate: (template) => {
+    const { activeResume } = get();
+    if (!activeResume || activeResume.template === template) return;
+
     set(state => {
-      if (!state.activeResume) return state;
-      const updatedResume = { ...state.activeResume, template, updatedAt: Date.now() };
-      const newResumes = state.resumes.map(r => 
-        r.id === updatedResume.id ? updatedResume : r
-      );
+      if (!state.activeResume) return;
+      state.activeResume.template = template;
+      state.activeResume.updatedAt = Date.now();
+
+      const resumeIndex = state.resumes.findIndex(r => r.id === state.activeResume?.id);
+      if (resumeIndex !== -1) {
+        state.resumes[resumeIndex].template = template;
+        state.resumes[resumeIndex].updatedAt = state.activeResume.updatedAt;
+      }
+
       const isCloudSyncOn = useSettingStore.getState().cloudSync;
-      return {
-        activeResume: updatedResume,
-        resumes: newResumes,
-        syncStatus: isCloudSyncOn ? 'syncing' : 'local'
-      };
+      state.syncStatus = isCloudSyncOn ? 'modified' : 'local';
     });
   },
 
   updateCustomTemplate: (customTemplate) => {
+    const { activeResume } = get();
+    if (!activeResume) return;
+    if (isEqual(activeResume.customTemplate, customTemplate)) return;
+
     set(state => {
-      if (!state.activeResume) return state;
-      const updatedResume = { ...state.activeResume, customTemplate, updatedAt: Date.now() };
-      const newResumes = state.resumes.map(r => 
-        r.id === updatedResume.id ? updatedResume : r
-      );
-      return {
-        activeResume: updatedResume,
-        resumes: newResumes,
-        syncStatus: 'syncing'
-      };
+      if (!state.activeResume) return;
+      state.activeResume.customTemplate = customTemplate;
+      state.activeResume.updatedAt = Date.now();
+
+      const resumeIndex = state.resumes.findIndex(r => r.id === state.activeResume?.id);
+      if (resumeIndex !== -1) {
+        state.resumes[resumeIndex].customTemplate = customTemplate;
+        state.resumes[resumeIndex].updatedAt = state.activeResume.updatedAt;
+      }
+
+      const isCloudSyncOn = useSettingStore.getState().cloudSync;
+      state.syncStatus = isCloudSyncOn ? 'modified' : 'local';
     });
   },
 
   updateThemeColor: (themeColor) => {
+    const { activeResume } = get();
+    if (!activeResume || activeResume.themeColor === themeColor) return;
+
     set(state => {
-      if (!state.activeResume) return state;
-      const updatedResume = { ...state.activeResume, themeColor, updatedAt: Date.now() };
-      const newResumes = state.resumes.map(r => 
-        r.id === updatedResume.id ? updatedResume : r
-      );
-      return {
-        activeResume: updatedResume,
-        resumes: newResumes,
-        syncStatus: 'syncing'
-      };
+      if (!state.activeResume) return;
+      state.activeResume.themeColor = themeColor;
+      state.activeResume.updatedAt = Date.now();
+
+      const resumeIndex = state.resumes.findIndex(r => r.id === state.activeResume?.id);
+      if (resumeIndex !== -1) {
+        state.resumes[resumeIndex].themeColor = themeColor;
+        state.resumes[resumeIndex].updatedAt = state.activeResume.updatedAt;
+      }
+
+      const isCloudSyncOn = useSettingStore.getState().cloudSync;
+      state.syncStatus = isCloudSyncOn ? 'modified' : 'local';
     });
   },
 
   updateTypography: (typography) => {
+    const { activeResume } = get();
+    if (!activeResume || activeResume.typography === typography) return;
+
     set(state => {
-      if (!state.activeResume) return state;
-      const updatedResume = { ...state.activeResume, typography, updatedAt: Date.now() };
-      const newResumes = state.resumes.map(r => 
-        r.id === updatedResume.id ? updatedResume : r
-      );
-      return {
-        activeResume: updatedResume,
-        resumes: newResumes,
-        syncStatus: 'syncing'
-      };
+      if (!state.activeResume) return;
+      state.activeResume.typography = typography;
+      state.activeResume.updatedAt = Date.now();
+
+      const resumeIndex = state.resumes.findIndex(r => r.id === state.activeResume?.id);
+      if (resumeIndex !== -1) {
+        state.resumes[resumeIndex].typography = typography;
+        state.resumes[resumeIndex].updatedAt = state.activeResume.updatedAt;
+      }
+
+      const isCloudSyncOn = useSettingStore.getState().cloudSync;
+      state.syncStatus = isCloudSyncOn ? 'modified' : 'local';
     });
   },
 
@@ -901,22 +981,30 @@ const useResumeStore = create<ResumeState>((set, get) => ({
   },
 
   fetchCloudResume: async (id: string, token: string) => {
+    if (get().isSyncing) return;
+    
     try {
-      const result = await resumeApi.fetchResumeById(id, token);
-      if (result && result.data) {
-          const cloudResume = result.data;
+      set({ isSyncing: true, syncStatus: 'syncing' });
+      const cloudResume = (await resumeApi.fetchCloudResumeById(id, token)) as CloudResume;
+      if (cloudResume) {
           const { content: rawContent } = cloudResume;
           
           const rawParsed = typeof rawContent === 'string' ? JSON.parse(rawContent) : rawContent;
           
           // Strict whitelist sanitization using helper
-          const sanitizedContent = getSanitizedResume(rawParsed || { name: cloudResume.title });
+          const sanitizedContent = getSanitizedResume({
+            ...(rawParsed || {}),
+            name: cloudResume.title,
+            isPublic: cloudResume.isPublic,
+            shareId: cloudResume.shareId,
+            shareRole: cloudResume.shareRole,
+          });
           
           const mergedResume: Resume = {
             id: cloudResume.id,
             updatedAt: new Date(cloudResume.updatedAt).getTime(),
             ...sanitizedContent,
-            versions: ((cloudResume.versions || []) as any[]).map((v: { id: string; createdAt?: string; timestamp?: number; changelog?: string; type?: string; content: string }) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any
+            versions: (cloudResume.versions || []).map(v => ({
               id: v.id,
               updatedAt: v.createdAt ? new Date(v.createdAt).getTime() : (v.timestamp || Date.now()),
               type: (v.changelog === 'Manual Save' ? 'manual' : (v.changelog === 'Auto Save' || v.changelog === 'Initial version' ? 'auto' : (v.type || 'auto'))) as 'manual' | 'auto',
@@ -935,7 +1023,8 @@ const useResumeStore = create<ResumeState>((set, get) => ({
           const newResumes = get().resumes.map(r => r.id === id ? mergedResume : r);
           set({ 
             resumes: newResumes,
-            activeResume: get().activeResume?.id === id ? mergedResume : get().activeResume
+            activeResume: get().activeResume?.id === id ? mergedResume : get().activeResume,
+            syncStatus: 'saved'
           });
           
           // Persist to local DB (Sanitized)
@@ -943,9 +1032,12 @@ const useResumeStore = create<ResumeState>((set, get) => ({
       }
     } catch (error) {
       console.error('Failed to fetch individual cloud resume:', error);
+      set({ syncStatus: 'error' });
+    } finally {
+      set({ isSyncing: false });
     }
   },
-}));
+})));
 
 // Debounced IndexedDB persistence to prevent data loss on page refresh
 const debouncedLocalPersist = debounce((resumes: Resume[]) => {

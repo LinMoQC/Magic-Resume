@@ -18,6 +18,7 @@ interface ResumePreviewPanelProps {
   isAiJobRunning: boolean;
   rightCollapsed?: boolean;
   onShareClick?: () => void;
+  onFeedbackClick?: () => void;
 }
 
 const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
@@ -27,7 +28,8 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
   onVersionClick,
   isAiJobRunning,
   rightCollapsed = false,
-  onShareClick
+  onShareClick,
+  onFeedbackClick
 }) => {
   const { isMobile } = useMobile();
   const { t } = useTranslation();
@@ -87,6 +89,7 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
               templateId={activeResume.template}
               customTemplate={activeResume.customTemplate}
               onShareClick={onShareClick}
+              onFeedbackClick={onFeedbackClick}
             />
           </>
         )}

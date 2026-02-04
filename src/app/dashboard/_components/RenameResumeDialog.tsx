@@ -15,13 +15,13 @@ type RenameResumeDialogProps = {
   handleRename: () => void;
 };
 
-export default function RenameResumeDialog({
+const RenameResumeDialog = React.memo(({
   open,
   onOpenChange,
   newName,
   setNewName,
   handleRename,
-}: RenameResumeDialogProps) {
+}: RenameResumeDialogProps) => {
   const { t } = useTranslation();
   return (
     <AnimatePresence>
@@ -84,5 +84,9 @@ export default function RenameResumeDialog({
       )}
     </AnimatePresence>
   );
-}
+});
+
+RenameResumeDialog.displayName = 'RenameResumeDialog';
+
+export default RenameResumeDialog;
  

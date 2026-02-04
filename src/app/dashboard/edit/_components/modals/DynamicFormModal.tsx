@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -65,20 +65,20 @@ export default function DynamicFormModal<T extends Item>({
     }
   }, [currentItem, fields, richtextKey]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  }, []);
 
-  const handleQuillChange = (content: string) => {
+  const handleQuillChange = useCallback((content: string) => {
     if (richtextKey) {
       setFormData(prev => ({ ...prev, [richtextKey]: content }));
     }
-  };
+  }, [richtextKey]);
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     onSave(formData as T);
-  };
+  }, [onSave, formData]);
   
   return (
     <AnimatePresence>

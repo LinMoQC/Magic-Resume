@@ -1,6 +1,6 @@
-# i18n Scan Report (2026/2/4 18:04:46)
+# i18n Scan Report (2026/2/5 01:20:18)
 
-Found 61 issues in 21 files.
+Found 56 issues in 18 files.
 
 ## 📄 src/app/page.tsx
 
@@ -8,7 +8,6 @@ Found 61 issues in 21 files.
 
 ## 📄 src/components/ui/macbook-scroll.tsx
 
-- L84: **[MISSING_KEY]** Missing key "hero.macbookTitle" in en/translation.json
 - L202: **[HARDCODED_TEXT]** Hardcoded JSX text: "esc"
 - L206: **[HARDCODED_TEXT]** Hardcoded JSX text: "F1"
 - L210: **[HARDCODED_TEXT]** Hardcoded JSX text: "F2"
@@ -112,17 +111,4 @@ Found 61 issues in 21 files.
 ## 📄 src/app/dashboard/edit/_components/layout/SidebarNav.tsx
 
 - L31: **[HARDCODED_TEXT]** Hardcoded attribute alt: "simple-logo"
-
-## 📄 src/app/dashboard/edit/_components/layout/Tools.tsx
-
-- L55: **[HARDCODED_TEXT]** Hardcoded attribute title: "Share"
-
-## 📄 src/app/dashboard/edit/_components/mobile/MobileResumEdit.tsx
-
-- L69: **[HARDCODED_TEXT]** Hardcoded attribute alt: "Magic Resume Logo"
-
-## 📄 src/app/dashboard/edit/_components/modals/JsonModal.tsx
-
-- L41: **[HARDCODED_TEXT]** Hardcoded JSX text: "JSON"
-- L59: **[HARDCODED_TEXT]** Hardcoded attribute title: "Download JSON"
 

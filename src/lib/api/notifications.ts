@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-const CLOUD_API_BASE_URL = `${process.env.NEXT_PUBLIC_CLOUD_API_URL || 'http://localhost:3111'}/api/notifications`;
+import { httpClient, withAuth } from './httpClient';
 
 export interface Notification {
   id: string;
@@ -31,9 +29,7 @@ export const notificationsApi = {
    */
   fetchAll: async (token: string): Promise<Notification[]> => {
     try {
-      const response = await axios.get(CLOUD_API_BASE_URL, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await httpClient.api.get('/api/notifications', withAuth(token));
       return response.data.data;
     } catch (error) {
       console.error('Failed to fetch notifications:', error);
@@ -46,9 +42,11 @@ export const notificationsApi = {
    */
   markAsRead: async (id: string, token: string): Promise<Notification> => {
     try {
-      const response = await axios.patch(`${CLOUD_API_BASE_URL}/${id}/read`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await httpClient.api.patch(
+        `/api/notifications/${id}/read`, 
+        {}, 
+        withAuth(token)
+      );
       return response.data.data;
     } catch (error) {
       console.error(`Failed to mark notification ${id} as read:`, error);

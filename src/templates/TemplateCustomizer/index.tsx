@@ -11,11 +11,11 @@ interface TemplateCustomizerProps {
   onBack?: () => void; // 新增：返回回调
 }
 
-export default function TemplateCustomizer({ 
+const TemplateCustomizer = React.memo(({ 
   template, 
   onTemplateChange,
   onBack
-}: TemplateCustomizerProps) {
+}: TemplateCustomizerProps) => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'colors' | 'typography' | 'layout'>('colors');
 
@@ -455,4 +455,8 @@ export default function TemplateCustomizer({
       )}
     </div>
   );
-} 
+});
+
+TemplateCustomizer.displayName = 'TemplateCustomizer';
+
+export default TemplateCustomizer;

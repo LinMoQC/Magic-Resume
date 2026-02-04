@@ -15,6 +15,7 @@ import { useResumeStore } from '@/store/useResumeStore';
 import sidebarMenu from '@/lib/constants/sidebarMenu';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
+import { SectionOrder } from '@/types/frontend/resume';
 
 export default function DashboardSidebar() {
   const { t } = useTranslation();
@@ -116,7 +117,7 @@ export default function DashboardSidebar() {
         </div>
         
         <nav className="flex-1 flex flex-col items-center justify-center gap-2 w-full overflow-y-auto hide-scrollbar py-4">
-          {activeResume?.sectionOrder.map((section) => {
+          {activeResume?.sectionOrder.map((section: SectionOrder) => {
             const iconItem = sidebarMenu.find((item) => item.key === section.key);
             if (!iconItem) return null;
             const Icon = iconItem.icon;

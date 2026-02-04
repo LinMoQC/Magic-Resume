@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { InfoType, Resume, Section, CustomTemplateConfig } from '@/types/frontend/resume';
 
 // 新的Magic DSL渲染器
@@ -55,7 +55,7 @@ function ResumePreview({ info, sections, sectionOrder, templateId, customTemplat
     loadTemplate();
   }, [templateId, customTemplate]);
 
-  const resumeData: Resume = {
+  const resumeData = useMemo<Resume>(() => ({
     id: 'preview',
     name: 'Preview Resume',
     updatedAt: Date.now(),
@@ -68,7 +68,7 @@ function ResumePreview({ info, sections, sectionOrder, templateId, customTemplat
     template: templateId,
     themeColor: '#3b82f6',
     typography: 'Inter'
-  };
+  }), [info, sections, sectionOrder, templateId]);
 
   if (loading || !template) {
     return (

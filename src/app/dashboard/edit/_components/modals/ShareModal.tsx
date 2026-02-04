@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Globe, Link, Copy, Check, Lock } from "lucide-react";
 
@@ -33,18 +33,21 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
             });
         }
     }
-  }, [isOpen, activeResume?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isOpen, activeResume, syncStatus, getToken, saveResume]); 
 
   const isSyncing = syncStatus === 'syncing';
 
   // Derive state from activeResume
   const isPublic = activeResume?.isPublic || false;
   const shareRole = activeResume?.shareRole || 'VIEWER';
-  const shareUrl = typeof window !== 'undefined' && activeResume?.shareId 
-    ? `${window.location.origin}/s/${activeResume.shareId}`
-    : '';
+  
+  const shareUrl = useMemo(() => {
+    return typeof window !== 'undefined' && activeResume?.shareId 
+      ? `${window.location.origin}/s/${activeResume.shareId}`
+      : '';
+  }, [activeResume?.shareId]);
 
-  const handleTogglePublic = async (checked: boolean) => {
+  const handleTogglePublic = useCallback(async (checked: boolean) => {
     setLoading(true);
     try {
         const token = await getToken();
@@ -56,9 +59,9 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
     } finally {
         setLoading(false);
     }
-  };
+  }, [getToken, shareRole, updateSharing, t]);
 
-  const handleRoleChange = async (role: 'VIEWER' | 'COMMENTER') => {
+  const handleRoleChange = useCallback(async (role: 'VIEWER' | 'COMMENTER') => {
     if (!isPublic) return;
     setLoading(true);
     try {
@@ -71,15 +74,15 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
     } finally {
         setLoading(false);
     }
-  };
+  }, [isPublic, getToken, updateSharing, t]);
 
-  const copyToClipboard = () => {
+  const copyToClipboard = useCallback(() => {
     if (!shareUrl) return;
     navigator.clipboard.writeText(shareUrl);
     setCopied(true);
     toast.success(t('modals.share.copySuccess'));
     setTimeout(() => setCopied(false), 2000);
-  };
+  }, [shareUrl, t]);
 
   return (
     <AnimatePresence>
@@ -90,9 +93,9 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/50 z-100 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/50 z-[100] backdrop-blur-sm"
           />
-          <div className="fixed inset-0 z-101 flex items-center justify-center p-4 pointer-events-none">
+          <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}

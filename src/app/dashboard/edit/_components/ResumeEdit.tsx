@@ -167,25 +167,36 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
 
   // 监听store loading状态和resumes变化，确保数据加载完成后能正确加载简历
   useEffect(() => {
-    if (!isStoreLoading) {
-      // 数据加载完成，检查简历是否存在
-      const resume = resumes.find(r => r.id === id);
-      if (!resume && resumes.length > 0) {
-        // 如果有其他简历但找不到目标简历，说明确实不存在
-        setResumeNotFound(true);
-        return;
-      } else if (resume) {
-        // 找到了简历，重置错误状态
-        setResumeNotFound(false);
-        // 预加载所有弹窗路由，减少首次加载延迟
-        router.prefetch(`/dashboard/edit/${id}/ai-lab`);
-        router.prefetch(`/dashboard/edit/${id}/history`);
-        router.prefetch(`/dashboard/edit/${id}/json`);
-        router.prefetch(`/dashboard/edit/${id}/share`);
+    const setupEditor = async () => {
+      // 1. 检查是否存在 (UI 逻辑)
+      if (!isStoreLoading) {
+        const resume = resumes.find(r => r.id === id);
+        if (!resume && resumes.length > 0) {
+          setResumeNotFound(true);
+        } else if (resume) {
+          setResumeNotFound(false);
+          // 预加载
+          router.prefetch(`/dashboard/edit/${id}/ai-lab`);
+          router.prefetch(`/dashboard/edit/${id}/history`);
+          router.prefetch(`/dashboard/edit/${id}/json`);
+          router.prefetch(`/dashboard/edit/${id}/share`);
+        }
       }
-    }
-    loadResumeForEdit(id);
-  }, [id, loadResumeForEdit, isStoreLoading, resumes, router]);
+
+      // 2. 触发加载 (数据逻辑)
+      const token = await getToken();
+      
+      // 避免重复加载：如果当前已经是这个 id 且不是在加载状态，可以跳过
+      const { activeResume, isSyncing } = useResumeStore.getState();
+      if (activeResume?.id === id && !isStoreLoading && !isSyncing) {
+          return;
+      }
+
+      loadResumeForEdit(id, token || undefined);
+    };
+
+    setupEditor();
+  }, [id, loadResumeForEdit, isStoreLoading, resumes, router, getToken]); // resumes 依然保留，但靠内部 activeResume?.id === id 熔断
 
   // 追踪编辑器查看事件
   useEffect(() => {
@@ -406,6 +417,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
         handleSave={handleSave}
         onShowAI={openAIModal}
         isAiJobRunning={isAiGenerating}
+        onShareClick={openShareModal}
       />
     );
   }

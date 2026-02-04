@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { useAuth, useClerk } from '@clerk/nextjs';
 import { resumeApi } from '@/lib/api/resume';
@@ -171,7 +171,7 @@ export function useSharedResume() {
     }, [shareId, t]);
 
     // Handlers
-    const handleResumeMouseUp = (e: React.MouseEvent<HTMLDivElement>) => {
+    const handleResumeMouseUp = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         if (!isCommentMode || !resumeContainerRef.current) return;
         
         if (isDraggingMarkerRef.current) {
@@ -234,9 +234,9 @@ export function useSharedResume() {
                 });
             }
         }
-    };
+    }, [isCommentMode, activeCommentId]);
 
-    const handleSaveDraft = async (content: string, color: string) => {
+    const handleSaveDraft = useCallback(async (content: string, color: string) => {
         if (!draftComment || !resume?.id) return;
         
         try {
@@ -259,13 +259,14 @@ export function useSharedResume() {
             }
 
             setIsSaving(true);
-            const newComment = await resumeApi.addComment(resume.id, content, {
+            const newComment = await resumeApi.addComment(shareId, {
+                content,
                 position: { x: draftComment.x, y: draftComment.y, highlightRects: draftComment.highlightRects },
                 color: color,
                 selectedText: draftComment.selectedText
             }, token);
             
-            setComments([...comments, mapBackendComment(newComment, resume.userId)]);
+            setComments(prev => [...prev, mapBackendComment(newComment, resume.userId)]);
             setDraftComment(null);
             window.getSelection()?.removeAllRanges();
             toast.success(t('sharedPage.notifications.commentAdded'));
@@ -275,9 +276,9 @@ export function useSharedResume() {
         } finally {
             setIsSaving(false);
         }
-    };
+    }, [draftComment, resume, shareId, t, currentUserId, getToken, redirectToSignIn]);
 
-    const handleReply = async (commentId: string, content: string) => {
+    const handleReply = useCallback(async (commentId: string, content: string) => {
         if (!resume?.id) return;
 
         try {
@@ -293,10 +294,10 @@ export function useSharedResume() {
                 return;
             }
 
-            const reply = await resumeApi.addReply(resume.id, commentId, content, token);
+            const reply = await resumeApi.addReply(shareId, commentId, { content }, token);
             
             // Update comments tree
-            setComments(comments.map(c => {
+            setComments(prev => prev.map(c => {
                 if (c.id === commentId) {
                     return { ...c, replies: [...(c.replies || []), mapBackendComment(reply, resume.userId)] };
                 }
@@ -307,9 +308,9 @@ export function useSharedResume() {
             console.error("Failed to save reply", e);
             toast.error(t('sharedPage.notifications.replySaveFailed'));
         }
-    };
+    }, [resume, shareId, t, currentUserId, getToken, redirectToSignIn]);
 
-    const handleDeleteComment = async (commentId: string) => {
+    const handleDeleteComment = useCallback(async (commentId: string) => {
         if (!resume?.id) return;
 
         try {
@@ -327,7 +328,7 @@ export function useSharedResume() {
             // Validated on backend, but good to check here too or just let backend fail
             await resumeApi.deleteComment(resume.id, commentId, token);
 
-            setComments(comments.filter(c => c.id !== commentId));
+            setComments(prev => prev.filter(c => c.id !== commentId));
             if (activeCommentId === commentId) {
                 setActiveCommentId(null);
             }
@@ -336,19 +337,19 @@ export function useSharedResume() {
             console.error("Failed to delete comment", e);
             toast.error(t('sharedPage.notifications.commentDeleteFailed'));
         }
-    };
+    }, [resume, t, currentUserId, getToken, activeCommentId]);
 
-    const toggleCommentMode = () => {
+    const toggleCommentMode = useCallback(() => {
         if (isCommentMode) {
             setDraftComment(null);
             setActiveCommentId(null);
         }
-        setIsCommentMode(!isCommentMode);
-    };
+        setIsCommentMode(prev => !prev);
+    }, [isCommentMode]);
 
-    const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+    const toggleSidebar = useCallback(() => setIsSidebarOpen(prev => !prev), []);
 
-    const scrollToComment = (commentId: string) => {
+    const scrollToComment = useCallback((commentId: string) => {
         const comment = comments.find(c => c.id === commentId);
         if (comment && transformComponentRef.current) {
             // Focus and open popover
@@ -357,7 +358,7 @@ export function useSharedResume() {
             // Optional: center the view on the comment
             // transformComponentRef.current.zoomToElement(...);
         }
-    };
+    }, [comments]);
 
     return {
         resume,

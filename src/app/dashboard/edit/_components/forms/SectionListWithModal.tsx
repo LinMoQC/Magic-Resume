@@ -1,5 +1,4 @@
-"use client";
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   DndContext,
@@ -21,15 +20,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { FaPlus, FaGripVertical } from 'react-icons/fa';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuPortal,
-  DropdownMenuCheckboxItem,
-  DropdownMenuSeparator
-} from '@/components/ui/dropdown-menu';
+import { DropMenu } from '@/components/ui/drop-menu';
 import { DotsHorizontalIcon, Pencil2Icon, CopyIcon, TrashIcon } from '@radix-ui/react-icons';
 import { UniqueIdentifier } from '@dnd-kit/core';
 import { EditorComponents } from '@/lib/utils/componentOptimization';
@@ -39,7 +30,7 @@ import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import { Label } from '@/components/ui/label';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, Eye, EyeOff } from 'lucide-react';
 
 import { useResumeStore } from '@/store/useResumeStore';
 
@@ -64,6 +55,7 @@ type SortableItemProps<T extends BaseItem> = {
 
 function SortableItem<T extends BaseItem>({ id, item, index, handleEdit, handleDelete, handleCopy, toggleVisibility, itemRender, disabled }: SortableItemProps<T>) {
   const { t } = useTranslation();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const {
     attributes,
     listeners,
@@ -78,12 +70,38 @@ function SortableItem<T extends BaseItem>({ id, item, index, handleEdit, handleD
     transition,
   };
 
+  const menuItems = [
+    {
+      label: item.visible !== false ? t('sections.shared.hide') : t('sections.shared.show'),
+      icon: item.visible !== false ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />,
+      onClick: () => toggleVisibility(index),
+      separator: true,
+    },
+    {
+      label: t('sections.shared.edit'),
+      icon: <Pencil2Icon className="h-4 w-4" />,
+      onClick: () => handleEdit(index),
+    },
+    {
+      label: t('sections.shared.copy'),
+      icon: <CopyIcon className="h-4 w-4" />,
+      onClick: () => handleCopy(index),
+    },
+    {
+      label: t('sections.shared.remove'),
+      icon: <TrashIcon className="h-4 w-4" />,
+      onClick: () => handleDelete(index),
+      variant: 'danger' as const,
+      separator: true,
+    },
+  ];
+
   return (
     <div ref={setNodeRef} style={style} className={cn("relative flex items-center gap-2 mb-2 p-3 bg-neutral-900 rounded-md border border-zinc-800",isDragging ? 'opacity-50' : 'opacity-100', item.visible === false && "opacity-50")}>
       <div {...attributes} {...listeners} className={cn("p-2", disabled ? "cursor-default" : "cursor-grab")}>
         <FaGripVertical />
       </div>
-      <div className="flex-grow">
+      <div className="grow">
         {itemRender ? itemRender(item) : (
           <div>
             <p className="font-semibold">{item.title || item.name || item.degree || t('sections.shared.untitled')}</p>
@@ -91,38 +109,25 @@ function SortableItem<T extends BaseItem>({ id, item, index, handleEdit, handleD
           </div>
         )}
       </div>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0 outline-none focus:outline-none focus:ring-0">
+      <DropMenu
+        width="w-40"
+        side="bottom"
+        align="end"
+        items={menuItems}
+        onOpenChange={setIsMenuOpen}
+        trigger={
+          <Button 
+            variant="ghost" 
+            className={cn(
+              "h-8 w-8 p-0 outline-none focus:outline-none focus:ring-0 transition-colors",
+              isMenuOpen ? "bg-white/10 text-white" : "text-neutral-400 hover:text-white"
+            )}
+          >
             <span className="sr-only">{t('sections.shared.openMenu')}</span>
             <DotsHorizontalIcon className="h-4 w-4" />
           </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuPortal>
-          <DropdownMenuContent align="end" className="w-[160px] bg-neutral-900 border-neutral-700 text-white">
-            <DropdownMenuCheckboxItem
-              checked={item.visible !== false}
-              onCheckedChange={() => toggleVisibility(index)}
-              className="cursor-pointer"
-            >
-              <span className='ml-2'>{t('sections.shared.visible')}</span>
-            </DropdownMenuCheckboxItem>
-            <DropdownMenuSeparator className="bg-neutral-700" />
-            <DropdownMenuItem onSelect={() => handleEdit(index)} className="cursor-pointer">
-              <Pencil2Icon className="mr-2 h-4 w-4" />
-              {t('sections.shared.edit')}
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => handleCopy(index)} className="cursor-pointer">
-              <CopyIcon className="mr-2 h-4 w-4" />
-              {t('sections.shared.copy')}
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => handleDelete(index)} className="text-red-500 cursor-pointer focus:text-red-400 focus:bg-red-500/10">
-              <TrashIcon className="mr-2 h-4 w-4" />
-              {t('sections.shared.remove')}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenuPortal>
-      </DropdownMenu>
+        }
+      />
     </div>
   );
 }
@@ -170,21 +175,21 @@ export default function SectionListWithModal<T extends BaseItem>({
     })
   );
 
-  const handleOpenModal = (item: T | null, index: number | null) => {
+  const handleOpenModal = useCallback((item: T | null, index: number | null) => {
     setCurrentItem(item ? { ...item } : { id: Date.now().toString(), visible: true, ...fields.reduce((acc, f) => ({ ...acc, [f.name]: '' }), {} as Record<string, string>), [richtextKey]: '' } as T);
     setCurrentIndex(index);
     setIsOpen(true);
     onModalStateChange?.(true);
-  };
+  }, [fields, richtextKey, onModalStateChange]);
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setIsOpen(false);
     setCurrentItem(null);
     setCurrentIndex(null);
     onModalStateChange?.(false);
-  };
+  }, [onModalStateChange]);
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     if (!currentItem) return;
 
     const requiredFieldNames = fields
@@ -216,32 +221,32 @@ export default function SectionListWithModal<T extends BaseItem>({
       ? t('sections.notifications.sectionUpdated', { label: translatedLabel })
       : t('sections.notifications.sectionAdded', { label: translatedLabel });
     toast.success(notificationMessage);
-  };
+  }, [currentItem, fields, richtextKey, items, currentIndex, setItems, handleCloseModal, t, translatedLabel]);
 
-  const handleDelete = (index: number) => {
+  const handleDelete = useCallback((index: number) => {
     const newItems = items.filter((_, i) => i !== index);
     setItems(newItems);
     toast.success(t('sections.notifications.itemRemoved'));
-  };
+  }, [items, setItems, t]);
 
-  const handleCopy = (index: number) => {
+  const handleCopy = useCallback((index: number) => {
     const itemToCopy = items[index];
     const newItem = { ...itemToCopy, id: Date.now().toString() } as T;
     const newItems = [...items.slice(0, index + 1), newItem, ...items.slice(index + 1)];
     setItems(newItems);
     toast.success(t('sections.notifications.itemCopied'));
-  };
+  }, [items, setItems, t]);
 
-  const toggleVisibility = (index: number) => {
+  const toggleVisibility = useCallback((index: number) => {
     const newItems = [...items];
     const item = newItems[index];
     newItems[index] = { ...item, visible: item.visible === false ? true : false };
     setItems(newItems);
     const status = newItems[index].visible !== false ? t('sections.shared.shown') : t('sections.shared.hidden');
     toast.success(t('sections.notifications.visibilityToggled', { status }));
-  };
+  }, [items, setItems, t]);
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
       const oldIndex = items.findIndex((item) => item.id === active.id);
@@ -250,19 +255,19 @@ export default function SectionListWithModal<T extends BaseItem>({
         setItems(arrayMove(items, oldIndex, newIndex));
       }
     }
-  };
+  }, [items, setItems]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     if (currentItem) {
       setCurrentItem({ ...currentItem, [e.target.name]: e.target.value });
     }
-  };
+  }, [currentItem]);
 
-  const handleQuillChange = (content: string) => {
+  const handleQuillChange = useCallback((content: string) => {
     if (currentItem) {
       setCurrentItem({ ...currentItem, [richtextKey]: content });
     }
-  };
+  }, [currentItem, richtextKey]);
 
   const baseButtonClasses = "inline-flex items-center justify-center rounded-sm text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border bg-transparent hover:bg-accent hover:text-accent-foreground active:scale-95";
 
@@ -325,9 +330,9 @@ export default function SectionListWithModal<T extends BaseItem>({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={handleCloseModal}
-              className="fixed inset-0 bg-black/60 z-[100] backdrop-blur-md"
+              className="fixed inset-0 bg-black/60 z-100 backdrop-blur-md"
             />
-            <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none">
+            <div className="fixed inset-0 z-101 flex items-center justify-center p-4 pointer-events-none">
               <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -351,7 +356,7 @@ export default function SectionListWithModal<T extends BaseItem>({
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   {fields.map((field) => (
                     <div key={field.name} className="space-y-2">
-                      <Label className="text-neutral-400 text-xs uppercase font-bold tracking-widest ml-1" htmlFor={field.name}>
+                      <Label className="text-neutral-400 text-xs font-semibold ml-1" htmlFor={field.name}>
                         {field.label}
                       </Label>
                       <Input
@@ -366,7 +371,7 @@ export default function SectionListWithModal<T extends BaseItem>({
                   ))}
                 </div>
                 <div className="space-y-3">
-                    <Label className="text-neutral-400 text-xs uppercase font-bold tracking-widest ml-1">
+                    <Label className="text-neutral-400 text-xs font-semibold ml-1">
                         {t('modals.dynamicForm.descriptionLabel')}
                     </Label>
                     <div className="rounded-2xl border border-neutral-800 overflow-hidden bg-neutral-900/30">

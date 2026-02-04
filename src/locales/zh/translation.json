@@ -426,6 +426,7 @@
       "createResume": "创建我的简历",
       "create": "创建"
     },
+    "titleSuffix": "的简历",
     "toolbar": {
       "zoomOut": "缩小",
       "resetZoom": "重置",
@@ -496,7 +497,14 @@
     "label": "你的反馈",
     "placeholder": "告诉我们你喜欢的地方或可以改进的地方...",
     "submit": "提交反馈",
-    "close": "关闭"
+    "close": "关闭",
+    "characters": "字符",
+    "readyToSubmit": "准备提交",
+    "typeFeedback": "请输入您的反馈",
+    "error": {
+      "tooManyRequests": "请求过于频繁。请稍后再试。",
+      "generic": "提交反馈失败。请稍后重试。"
+    }
   },
   "sections": {
     "projects": "项目",

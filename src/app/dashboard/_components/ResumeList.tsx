@@ -2,19 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { DropMenu } from '@/components/ui/drop-menu';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { FaPlus, FaDownload, FaRegClone, FaEdit, FaTrash } from 'react-icons/fa';
 import { Resume } from '@/types/frontend/resume';
 import { useSettingStore } from '@/store/useSettingStore';
-import { formatTime } from '@/lib/utils';
+import { formatTime, cn } from '@/lib/utils';
 import Link from 'next/link';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
 import { getMagicTemplateList } from '@/templates/config/magic-templates';
 import { MagicTemplateDSL } from '@/templates/types/magic-dsl';
 import { FiMoreVertical, FiCloud, FiArrowRight } from 'react-icons/fi';
@@ -30,9 +24,10 @@ type ResumeListProps = {
   onDelete: (id: string) => void;
   onDuplicate: (id: string) => void;
   onRename: (resume: Resume) => void;
+  isLoading?: boolean;
 };
 
-function ResumeCard({ 
+const ResumeCard = React.memo(({ 
   resume, 
   onDelete,
   onDuplicate,
@@ -44,9 +39,31 @@ function ResumeCard({
   onDuplicate: (id: string) => void,
   onRename: (resume: Resume) => void,
   templates: MagicTemplateDSL[],
-}) {
+}) => {
   const { t } = useTranslation();
   const template = templates.find(t => t.id === resume.template);
+
+  const menuItems = [
+    {
+      label: t('dashboard.resumeCard.rename'),
+      icon: <FaEdit className="h-4 w-4" />,
+      onClick: () => onRename(resume),
+    },
+    {
+      label: t('dashboard.resumeCard.duplicate'),
+      icon: <FaRegClone className="h-4 w-4" />,
+      onClick: () => onDuplicate(resume.id),
+    },
+    {
+      label: t('dashboard.resumeCard.delete'),
+      icon: <FaTrash className="h-4 w-4" />,
+      onClick: () => onDelete(resume.id),
+      variant: 'danger' as const,
+      separator: true,
+    },
+  ];
+
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
     <motion.div
@@ -58,11 +75,20 @@ function ResumeCard({
       whileTap={{ scale: 0.98 }}
       layout
     >
-      <Card className="group h-64 flex flex-col justify-between cursor-pointer relative overflow-hidden bg-neutral-900 border border-neutral-800 hover:border-neutral-700">
+      <Card className={cn(
+        "group h-64 flex flex-col justify-between cursor-pointer relative overflow-hidden bg-neutral-900 border transition-all duration-300",
+        isMenuOpen ? "border-neutral-700" : "border-neutral-800 hover:border-neutral-700"
+      )}>
         <Link href={`/dashboard/edit/${resume.id}`} className="block w-full h-full">
           <div className="relative w-full h-full p-2 bg-neutral-800">
             {template ? (
-              <ResumeMiniPreview template={template} className="scale-[0.8] origin-top opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
+              <ResumeMiniPreview 
+                template={template} 
+                className={cn(
+                  "scale-[0.8] origin-top transition-opacity duration-300",
+                  isMenuOpen ? "opacity-100" : "opacity-60 group-hover:opacity-100"
+                )} 
+              />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <FaRegClone className="text-4xl text-neutral-600" />
@@ -74,41 +100,57 @@ function ResumeCard({
         
         <CardFooter className="absolute bottom-0 left-0 w-full p-4 z-10">
           <div>
-            <div className="font-semibold text-white text-base truncate group-hover:text-sky-400 transition-colors">{resume.name}</div>
+            <div className={cn(
+              "font-semibold text-white text-base truncate transition-colors",
+              isMenuOpen ? "text-sky-400" : "group-hover:text-sky-400"
+            )}>{resume.name}</div>
             <div className="text-xs text-neutral-400 mt-1">{t('dashboard.resumeCard.lastUpdated', { time: formatTime(resume.updatedAt) })}</div>
           </div>
         </CardFooter>
 
-        <div className="absolute top-2 right-2 z-20">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+        <div className={`absolute top-2 right-2 z-20 transition-all duration-200 ${isMenuOpen ? 'opacity-100 scale-100' : 'opacity-0 group-hover:opacity-100'}`}>
+          <DropMenu
+            width="w-36"
+            side="bottom"
+            align="end"
+            items={menuItems}
+            onOpenChange={setIsMenuOpen}
+            trigger={
               <motion.button 
-                whileHover={{ scale: 1.2 }}
-                className="p-2 rounded-full bg-black hover:bg-neutral-700 text-white transition-colors focus:outline-none"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className={cn(
+                  "p-2.5 rounded-xl backdrop-blur-md shadow-lg shadow-black/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-sky-500/20",
+                  isMenuOpen 
+                    ? "bg-neutral-800/90 text-white border-neutral-700" 
+                    : "bg-neutral-900/80 text-neutral-400 hover:text-white border-neutral-800/50 hover:border-neutral-700"
+                )}
                 onClick={e => e.stopPropagation()}
               >
-                <FiMoreVertical />
+                <FiMoreVertical className="w-4 h-4" />
               </motion.button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent onClick={e => e.stopPropagation()} side="bottom" align="end" className='bg-neutral-900 border-neutral-700 text-white'>
-              <DropdownMenuItem onClick={() => onRename(resume)} className='cursor-pointer'>
-                <FaEdit className="mr-2" />
-                {t('dashboard.resumeCard.rename')}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onDuplicate(resume.id)} className='cursor-pointer'>
-                <FaRegClone className="mr-2" />
-                {t('dashboard.resumeCard.duplicate')}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => onDelete(resume.id)} className='cursor-pointer text-red-500 focus:text-red-500 focus:bg-red-500/10'>
-                <FaTrash className="mr-2" />
-                {t('dashboard.resumeCard.delete')}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            }
+          />
         </div>
       </Card>
     </motion.div>
+  );
+});
+
+ResumeCard.displayName = 'ResumeCard';
+
+function ResumeCardSkeleton() {
+  return (
+    <div className="h-64 flex flex-col justify-between relative overflow-hidden bg-neutral-900 border border-neutral-800 rounded-2xl">
+      <div className="relative w-full h-full p-2 bg-neutral-800">
+        <div className="w-full h-full bg-neutral-700/50 animate-pulse rounded" />
+      </div>
+      
+      <div className="absolute bottom-0 left-0 w-full p-4">
+        <div className="h-5 bg-neutral-700/50 rounded w-3/4 mb-2 animate-pulse" />
+        <div className="h-3 bg-neutral-700/30 rounded w-1/2 animate-pulse" />
+      </div>
+    </div>
   );
 }
 
@@ -150,7 +192,7 @@ function CloudSyncBanner() {
   );
 }
 
-export default function ResumeList({ resumes, onAdd, onImport, onDelete, onDuplicate, onRename }: ResumeListProps) {
+const ResumeList = React.memo(({ resumes, onAdd, onImport, onDelete, onDuplicate, onRename, isLoading = false }: ResumeListProps) => {
   const { t } = useTranslation();
   const [isMounted, setIsMounted] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -190,8 +232,8 @@ export default function ResumeList({ resumes, onAdd, onImport, onDelete, onDupli
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {/* 新建简历卡片 */}
           <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.98 }}>
-            <Card className="group cursor-pointer h-64 flex flex-col items-center justify-center relative overflow-hidden bg-neutral-900 border border-neutral-800 hover:border-blue-500/50 transition-colors" onClick={onAdd}>
-              <CardContent className="flex-1 flex flex-col items-center justify-center">
+            <Card className="group cursor-pointer h-64 flex flex-col items-center relative overflow-hidden bg-neutral-900 border border-neutral-800 hover:border-blue-500/50 transition-colors" onClick={onAdd}>
+              <CardContent className="flex-1 flex flex-col items-center pt-16 text-center px-4">
                 <div className="w-12 h-12 rounded-full bg-neutral-800 flex items-center justify-center mb-4 group-hover:bg-blue-500/20 transition-colors">
                   <FaPlus className="text-xl text-neutral-400 group-hover:text-blue-500 transition-colors" />
                 </div>
@@ -202,8 +244,8 @@ export default function ResumeList({ resumes, onAdd, onImport, onDelete, onDupli
           </motion.div>
           {/* 导入简历卡片 */}
           <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.98 }}>
-            <Card className="group cursor-pointer h-64 flex flex-col items-center justify-center relative overflow-hidden bg-neutral-900 border border-neutral-800 hover:border-blue-500/50 transition-colors" onClick={onImport}>
-              <CardContent className="flex-1 flex flex-col items-center justify-center text-center p-6">
+            <Card className="group cursor-pointer h-64 flex flex-col items-center relative overflow-hidden bg-neutral-900 border border-neutral-800 hover:border-blue-500/50 transition-colors" onClick={onImport}>
+              <CardContent className="flex-1 flex flex-col items-center pt-16 text-center px-4">
                 <div className="w-12 h-12 rounded-full bg-neutral-800 flex items-center justify-center mb-4 transition-colors group-hover:bg-blue-500/20">
                   <FaDownload className="text-xl text-neutral-500 transition-colors group-hover:text-blue-400" />
                 </div>
@@ -213,18 +255,25 @@ export default function ResumeList({ resumes, onAdd, onImport, onDelete, onDupli
             </Card>
           </motion.div>
           {/* 简历卡片列表 */}
-          <AnimatePresence>
-            {resumes.map(resume => (
-              <ResumeCard 
-                key={resume.id} 
-                resume={resume} 
-                onDelete={(id) => setDeleteId(id)}
-                onDuplicate={onDuplicate}
-                onRename={onRename}
-                templates={templates}
-              />
-            ))}
-          </AnimatePresence>
+          {isLoading ? (
+            // Show skeleton loaders while loading
+            Array.from({ length: 6 }).map((_, i) => (
+              <ResumeCardSkeleton key={`skeleton-${i}`} />
+            ))
+          ) : (
+            <AnimatePresence>
+              {resumes.map(resume => (
+                <ResumeCard 
+                  key={resume.id} 
+                  resume={resume} 
+                  onDelete={(id) => setDeleteId(id)}
+                  onDuplicate={onDuplicate}
+                  onRename={onRename}
+                  templates={templates}
+                />
+              ))}
+            </AnimatePresence>
+          )}
         </div>
       </div>
 
@@ -239,4 +288,8 @@ export default function ResumeList({ resumes, onAdd, onImport, onDelete, onDupli
       />
     </div>
   );
-}
+});
+
+ResumeList.displayName = 'ResumeList';
+
+export default ResumeList;

@@ -57,14 +57,16 @@ export function Tools({ isMobile, zoomIn, zoomOut, resetTransform, info, onShowA
         )}
       >
         <>
-          <button
-            className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"
-            title={t('tools.aiAssistant')}
-            type="button"
-            onClick={onShowAI}
-          >
-            <Bot size={18}/>
-          </button>
+          {!isMobile && (
+            <button
+              className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"
+              title={t('tools.aiAssistant')}
+              type="button"
+              onClick={onShowAI}
+            >
+              <Bot size={18}/>
+            </button>
+          )}
           
           {cloudSync && (
             <button
@@ -93,7 +95,7 @@ export function Tools({ isMobile, zoomIn, zoomOut, resetTransform, info, onShowA
             <MessageCircle size={18}/>
           </button>
 
-          {cloudSync && (
+          {cloudSync && !isMobile && (
             <button
               className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"
               onClick={onVersionClick}
