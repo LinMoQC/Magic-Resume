@@ -1,4 +1,22 @@
 {
+  "notificationsPage": {
+    "title": "Notifications",
+    "unread": "{{count}} unread",
+    "empty": {
+      "title": "No notifications yet",
+      "description": "When people comment or reply to your resumes, they will appear here."
+    },
+    "type": {
+      "comment": "commented on",
+      "reply": "replied on"
+    },
+    "action": {
+      "view": "View details",
+      "markRead": "Mark as read"
+    },
+    "notificationUpdateFailed": "Failed to update notification",
+    "someone": "Someone"
+  },
   "settings": {
     "title": "Settings",
     "llm": {
@@ -41,9 +59,20 @@
       "goToApp": "Go to App",
       "starOnGithub": "Star on GitHub"
     },
+    "tags": {
+      "aiEnhancement": "AI Enhancement",
+      "dataSecurityGuarantee": "Privacy & Data Security"
+    },
+    "buttons": {
+      "experienceAI": "Experience AI Assistant",
+      "experienceNow": "Experience Now",
+      "starOnGithub": "Star on GitHub"
+    },
     "hero": {
+      "brandName": "Magic Resume",
       "title": "Magic Resume is an AI-powered tool for building resumes",
       "subtitle": "Craft your perfect resume with the power of AI. Simple, smart, and secure.",
+      "previewAlt": "Magic Resume Preview",
       "getStarted": "Get Started",
       "browseTemplates": "Browse Templates",
       "tag": "Magic Resume V1.0",
@@ -58,7 +87,11 @@
         "local": "Local First",
         "openSource": "Open Source"
       },
-      "macbookSubtitle": "AI-Powered Builder"
+      "macbookSubtitle": "AI-Powered Builder",
+      "badge": "AI-Powered Job Hunting Suite",
+      "primaryButton": "Get Started for Free",
+      "secondaryButton": "Star on GitHub",
+      "macbookTitle": "This Macbook is built with Tailwindcss. <br /> No kidding."
     },
     "morphingTexts": {
       "simpleAndSmart": "Simple & Smart",
@@ -128,30 +161,17 @@
       }
     },
     "footer": {
-      "copyright": "© {{year}} Magic Resume. Open Source under MIT License.",
-      "brandSubtitle": "An open-source, local-first resume builder powered by AI. Your data never leaves your device.",
-      "online": "Online",
-      "madeWith": "Made with ❤️ for job seekers",
-      "poweredBy": "Powered by AI & Modern Tech",
-      "openSource": "Open Source & Free Forever",
+      "brandSubtitle": "The next-gen AI resume platform that makes hiring simple.",
       "product": "Product",
-      "builder": "Builder",
+      "builder": "Online Builder",
       "project": "Project",
       "github": "GitHub",
-      "issues": "Issues"
+      "issues": "Issues",
+      "contributors": "Contributors",
+      "copyright": "© {{year}} Magic Resume. All rights reserved."
     },
-    "buttons": {
-      "learnMore": "Learn More",
-      "experienceAI": "Experience AI Features",
-      "experienceNow": "Experience Now",
-      "starOnGithub": "Star on GitHub"
-    },
-    "tags": {
-      "aiSmart": "AI Smart",
-      "freeForever": "Completely Free",
-      "dataSecurity": "Data Security",
-      "aiEnhancement": "AI Enhancement",
-      "dataSecurityGuarantee": "Data Security Guarantee"
+    "header": {
+      "dashboard": "Go to Dashboard"
     }
   },
   "modals": {
@@ -170,10 +190,14 @@
         "interview": "Mock Interview"
       },
       "title": "AI Lab",
+      "subtitle": "Analyze and optimize your resume to match target job requirements, or get professional advice through Lighthouse-style reports.",
       "description": "Analyze and optimize your resume to match target job requirements, or get a professional Lighthouse-style analysis report.",
       "optimizeTab": {
         "jdLabel": "Target Job Description (JD)",
-        "jdPlaceholder": "Paste the target job's JD here, and the AI will optimize your resume based on it...",
+        "jdPlaceholder": "Paste the Job Description (JD) here to help AI better tailor your resume...",
+        "optimizedCount": "Optimized {{count}} sections",
+        "resultsReady": "Optimization results are ready",
+        "applyHint": "Click Apply to update your resume",
         "optimizeButton": "Start Optimization",
         "optimizingButton": "Optimizing...",
         "previewButton": "Preview",
@@ -334,19 +358,21 @@
           "startInterview": "Start Interview"
         },
         "status": {
-          "connecting": "Connecting to interviewer...",
-          "readingResume": "Reading your resume...",
+          "connecting": "Connecting to Interviewer...",
+          "readingResume": "Reading your resume context...",
+          "waitingConnection": "Waiting for connection...",
+          "thinking": "AI is thinking...",
+          "preAnswer": "Preparing Answer...",
+          "answerHint": "Think before you speak",
           "isListening": "Interviewer is listening...",
-          "isSpeaking": "AI is answering...",
-          "thinking": "Thinking / Generating voice...",
-          "preAnswer": "Thinking Time",
-          "answerHint": "Click microphone to answer early"
+          "isSpeaking": "AI is answering..."
         },
         "controls": {
+          "console": "Console",
+          "consoleTitle": "Realtime Console",
           "stopRecording": "Stop Recording",
           "startRecording": "Start Recording",
-          "clickToSpeak": "Click to Speak",
-          "console": "Realtime Console"
+          "clickToSpeak": "Click to Speak"
         },
         "voices": {
           "shimmer": "Native - Shimmer (Fast)",
@@ -376,6 +402,76 @@
         }
       },
       "progressText": "AI is working hard on analysis and creation..."
+    },
+    "share": {
+      "title": "Share to Web",
+      "subtitle": "Publish your resume with a unique link.",
+      "publicAccess": "Public Access",
+      "publicAccessDesc": "Anyone with the link can view",
+      "privateAccessDesc": "Only you can access",
+      "syncing": "Syncing to cloud...",
+      "readOnly": "Read Only",
+      "allowComments": "Allow Comments",
+      "copySuccess": "Link copied to clipboard!",
+      "pleaseLogin": "Please login first"
+    },
+    "versionHistory": {
+      "title": "Version History",
+      "subtitle": "Restore previous versions of your resume",
+      "restore": "Restore",
+      "loading": "Loading..."
+    }
+  },
+  "sharedPage": {
+    "header": {
+      "createResume": "Create My Resume",
+      "create": "Create"
+    },
+    "toolbar": {
+      "zoomOut": "Zoom Out",
+      "resetZoom": "Reset Zoom",
+      "zoomIn": "Zoom In",
+      "feedbackList": "Feedback List",
+      "returnToView": "Return to View",
+      "commentMode": "Comment Mode"
+    },
+    "templates": {
+      "title": "Templates",
+      "error": "Error loading templates",
+      "retry": "Retry",
+      "none": "No templates available"
+    },
+    "comments": {
+      "title": "Comments",
+      "noComments": "No comments yet.",
+      "markersHint": "Markers will appear here.",
+      "anonymous": "Anonymous",
+      "owner": "Owner",
+      "justNow": "Just now",
+      "replyPlaceholder": "Reply...",
+      "writeCommentPlaceholder": "Write a comment...",
+      "cancel": "Cancel",
+      "post": "Post"
+    },
+    "error": {
+      "resumeNotFound": "Resume not found or access denied",
+      "redirectingPre": "Redirecting to home in ",
+      "redirectingPost": " seconds...",
+      "returnNow": "Return Now",
+      "failedToLoad": "Failed to load resume. Please check your network or link."
+    },
+    "notifications": {
+      "resumeNotFound": "This resume doesn't exist or is not public.",
+      "syncing": "Resume is still syncing to cloud. Please wait a moment.",
+      "loginToComment": "Please login to comment",
+      "commentAdded": "Comment added",
+      "commentSaveFailed": "Failed to save comment",
+      "loginToReply": "Please login to reply",
+      "replyAdded": "Reply added",
+      "replySaveFailed": "Failed to save reply",
+      "loginToDelete": "Please login to delete",
+      "commentDeleted": "Comment deleted",
+      "commentDeleteFailed": "Failed to delete comment"
     }
   },
   "resumePreview": {
@@ -408,7 +504,9 @@
       "addItem": "Add Item",
       "openMenu": "Open menu",
       "editTitle": "Edit {{label}}",
-      "addTitle": "Add New {{label}}"
+      "addTitle": "Add New {{label}}",
+      "shown": "Shown",
+      "hidden": "Hidden"
     },
     "notifications": {
       "requiredFields": "Please fill in the following required fields: {{fields}}",
@@ -470,20 +568,26 @@
   },
   "templatePanel": {
     "title": "Template",
-    "placeholder": "Template {{index}}"
+    "placeholder": "Template {{index}}",
+    "layoutTwoColumn": "Two Column",
+    "layoutSingleColumn": "Single Column",
+    "customize": "Customize Template",
+    "error": "Failed to load templates",
+    "retry": "Retry",
+    "none": "No templates found"
   },
   "templateCustomizer": {
     "title": "Custom Template",
     "tabs": {
       "colors": "Colors",
-      "typography": "Font", 
+      "typography": "Font",
       "layout": "Layout"
     },
     "colors": {
       "quickThemes": "Quick Themes",
       "customColors": "Custom Colors",
       "primary": "Primary Color",
-      "secondary": "Secondary Color", 
+      "secondary": "Secondary Color",
       "text": "Text Color",
       "textSecondary": "Secondary Text Color",
       "background": "Background Color",
@@ -547,7 +651,8 @@
     }
   },
   "sidebar": {
-    "resumes": "Resumes",
+    "resumes": "My Resumes",
+    "notifications": "Notifications",
     "settings": "Settings",
     "open": "Open sidebar",
     "close": "Close sidebar"
@@ -567,7 +672,9 @@
       "parseFailed": "Failed to parse JSON file."
     },
     "success": "Resume imported successfully!",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "importing": "Importing and syncing...",
+    "defaultName": "Imported Resume"
   },
   "dynamicForm": {
     "fields": {
@@ -642,12 +749,38 @@
       "resumeNotFound": "Resume not found for duplication.",
       "resumeDuplicated": "Resume \"{{name}}\" duplicated.",
       "resumeDeleted": "Resume \"{{name}}\" deleted.",
-      "resumeSaved": "Resume saved!"
+      "resumeSaved": "Resume saved!",
+      "createCloudFailed": "Failed to create in cloud. Creating locally instead.",
+      "importCloudFailed": "Failed to import resume to cloud. Importing locally.",
+      "resumeDuplicatedLocally": "Resume \"{{name}}\" duplicated locally.",
+      "renameSuccess": "Renamed successfully",
+      "renameCloudFailed": "Renamed locally, but failed to sync to cloud",
+      "deleteCloudFailed": "Failed to delete from cloud, but removing locally.",
+      "versionDeleted": "Version deleted",
+      "versionDeleteFailed": "Failed to delete version",
+      "resumeSavedCloud": "Resume saved to cloud!",
+      "resumeSavedLocally": "Resume saved locally!",
+      "versionNotFound": "Version not found",
+      "versionRestored": "Version restored!",
+      "loginToShare": "Please login to share resume",
+      "resumePublished": "Resume published!",
+      "resumeUnpublished": "Resume unpublished",
+      "sharingUpdateFailed": "Failed to update sharing settings",
+      "cloudSyncFailed": "Cloud sync failed. Please check your connection."
     }
   },
   "common": {
+    "loading": "Loading...",
+    "logoAlt": "Magic Resume Logo",
+    "userAvatarAlt": "User Avatar",
     "manualSave": "Manual Save",
+    "info": {
+      "title": "Basic Information",
+      "contact": "Contact"
+    },
     "autoSave": "Auto Save",
+    "expand": "Expand",
+    "collapse": "Collapse",
     "notifications": {
       "copySuccess": "JSON data copied to clipboard",
       "copyFailed": "Copy failed, please try again",
@@ -663,7 +796,9 @@
       "view": "View",
       "parseResumeData": "Parsed Resume Data",
       "closePreview": "Close",
-      "previewResume": "Preview"
+      "previewResume": "Preview",
+      "json": "JSON",
+      "downloadJson": "Download JSON"
     },
     "confirmDeleteVersion": "Are you sure you want to delete this history record?",
     "confirmDeleteResume": "Are you sure you want to delete this resume?",
@@ -671,6 +806,7 @@
     "deleteDescriptionCloud": "This action cannot be undone. This will permanently delete the content from the cloud and all local devices.",
     "deleteDescriptionLocal": "This action cannot be undone. This will permanently delete the content from this device.",
     "delete": "Delete",
+    "done": "Done",
     "cancel": "Cancel",
     "confirm": "Confirm"
   },
@@ -687,5 +823,53 @@
       "ClarityAndReadability": "Clarity and Readability",
       "ProfessionalSummary": "Professional Summary"
     }
+  },
+  "errorPage": {
+    "title": "Something went wrong!",
+    "description": "We apologize for the inconvenience. An unexpected error has occurred. You can try refreshing the page or navigating back home.",
+    "buttons": {
+      "tryAgain": "Try again",
+      "backHome": "Back to Home"
+    }
+  },
+  "notFoundPage": {
+    "title": "Page not found",
+    "description": "Sorry, we couldn't find the page you're looking for. It might have been moved or deleted.",
+    "buttons": {
+      "backHome": "Back to Home",
+      "goBack": "Go Back"
+    }
+  },
+  "loading": {
+    "common": "Loading...",
+    "aiThinking": "AI Thinking...",
+    "aiLab": {
+      "start": "Starting AI Lab...",
+      "preparing": "Preparing smart interviewer and analysis tools..."
+    },
+    "history": {
+      "title": "Loading history...",
+      "description": "Fetching your resume modification records..."
+    },
+    "json": {
+      "title": "Generating JSON...",
+      "description": "Preparing a structured preview of your resume..."
+    },
+    "share": {
+      "title": "Preparing share configuration...",
+      "description": "Loading permissions and link options..."
+    }
+  },
+  "dashboardPage": {
+    "cloudSyncBanner": {
+      "title": "Cloud Sync is Now Live!",
+      "description": "Enable to sync multi-device and auto-backup all versions. Your data is safe and secure. You are currently in local storage mode.",
+      "button": "Go to Settings"
+    }
+  },
+  "hero": {
+    "title": "Build Your Resume with AI",
+    "subtitle": "Professional templates, AI-powered writing, and real-time preview.",
+    "macbookTitle": "This Macbook is built with Tailwindcss. <br /> No kidding."
   }
 }

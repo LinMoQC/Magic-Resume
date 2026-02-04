@@ -1,4 +1,4 @@
-import metaConfig from "@/constant/metaConfig";
+import metaConfig from "@/lib/constants/metaConfig";
 import { Metadata } from "next";
 
 export const metadata: Metadata = metaConfig.Edit;

@@ -1,22 +1,21 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from '@clerk/nextjs';
 import { Theme } from "@radix-ui/themes";
 import { Toaster } from "sonner";
-import metaConfig from "@/constant/metaConfig";
-import I18nProvider from "@/app/dashboard/_components/I18nProvider";
+import metaConfig from "@/lib/constants/metaConfig";
 
-import PreloadOptimizer from "@/app/components/PreloadOptimizer";
-import StructuredData from "@/app/components/StructuredData";
-import Analytics from "@/app/components/Analytics";
-import { PHProvider } from "@/app/providers/posthog-provider";
-import PostHogPageView from "@/app/providers/PostHogPageView";
+import PreloadOptimizer from "@/components/shared/PreloadOptimizer";
+import StructuredData from "@/components/shared/StructuredData";
+import Analytics from "@/components/features/analytics/Analytics";
+import { PHProvider } from "@/components/providers/posthog-provider";
+import PostHogPageView from "@/components/providers/PostHogPageView";
+import I18nProvider from "@/components/providers/I18nProvider";
 
-// 字体配置
-const inter = Inter({ subsets: ["latin"] });
+// 字体配置：使用系统字体，避免构建时拉取远程字体
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://magic-resume.cn'),
   ...metaConfig.Landing,
   alternates: {
     canonical: '/',
@@ -37,7 +36,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang={lang} className="hide-scrollbar">
-        <body className={inter.className}>
+        <body className="font-sans">
           <PHProvider>
             <PostHogPageView />
             <I18nProvider>

@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Card, CardContent, CardFooter } from '@/app/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { FaPlus, FaDownload, FaRegClone, FaEdit, FaTrash } from 'react-icons/fa';
-import { Resume } from '@/store/useResumeStore';
+import { Resume } from '@/types/frontend/resume';
 import { useSettingStore } from '@/store/useSettingStore';
 import { formatTime } from '@/lib/utils';
 import Link from 'next/link';
@@ -14,13 +14,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-} from '@/app/components/ui/dropdown-menu';
+} from '@/components/ui/dropdown-menu';
 import { getMagicTemplateList } from '@/templates/config/magic-templates';
 import { MagicTemplateDSL } from '@/templates/types/magic-dsl';
 import { FiMoreVertical, FiCloud, FiArrowRight } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
-import ConfirmDialog from '@/app/components/ConfirmDialog';
+import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import ResumeMiniPreview from './ResumeMiniPreview';
+import { FileText } from 'lucide-react';
 
 type ResumeListProps = {
   resumes: Resume[];
@@ -112,6 +113,7 @@ function ResumeCard({
 }
 
 function CloudSyncBanner() {
+  const { t } = useTranslation();
   const cloudSync = useSettingStore(state => state.cloudSync);
 
   if (cloudSync) return null;
@@ -133,13 +135,13 @@ function CloudSyncBanner() {
                 <FiCloud size={20} />
               </div>
               <div>
-                <h4 className="text-blue-100 font-semibold mb-0.5">云端同步功能现已上线！</h4>
-                <p className="text-sm text-blue-200/70">开启后可多端同步并自动备份所有简历版本，数据安全无忧。目前您处于本地存储模式。</p>
+                <h4 className="text-blue-100 font-semibold mb-0.5">{t('dashboardPage.cloudSyncBanner.title')}</h4>
+                <p className="text-sm text-blue-200/70">{t('dashboardPage.cloudSyncBanner.description')}</p>
               </div>
             </div>
             
             <div className="flex items-center gap-2 text-blue-400 font-medium text-sm whitespace-nowrap group-hover:translate-x-1 transition-transform">
-              前往设置开启 <FiArrowRight />
+              {t('dashboardPage.cloudSyncBanner.button')} <FiArrowRight />
             </div>
           </div>
         </div>
@@ -172,48 +174,58 @@ export default function ResumeList({ resumes, onAdd, onImport, onDelete, onDupli
   }
 
   return (
-    <div className="flex-1 flex flex-col px-12 py-10 overflow-auto">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-4xl font-bold">{t('dashboard.title')}</h1>
+    <div className="flex-1 overflow-y-auto relative bg-[#0a0a0a]">
+       {/* Sticky Header */}
+      <div className="sticky top-0 z-40 bg-[#0a0a0a]/80 backdrop-blur-md px-12 py-6 border-b border-white/5 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-blue-500/10 rounded-xl">
+            <FileText className="w-6 h-6 text-blue-500" />
+          </div>
+          <h1 className="text-3xl font-bold text-white">{t('dashboard.title')}</h1>
+        </div>
       </div>
 
-      <CloudSyncBanner />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-        {/* 新建简历卡片 */}
-        <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.98 }}>
-          <Card className="group cursor-pointer h-64 flex flex-col items-center justify-center relative overflow-hidden" onClick={onAdd}>
-            <CardContent className="flex-1 flex flex-col items-center justify-center">
-              <FaPlus className="text-4xl text-neutral-600 group-hover:text-blue-500 mb-2 transition" />
-              <div className="text-lg font-semibold text-neutral-300">{t('dashboard.newResumeCard.title')}</div>
-              <div className="text-xs text-neutral-500 mt-1">{t('dashboard.newResumeCard.description')}</div>
-            </CardContent>
-          </Card>
-        </motion.div>
-        {/* 导入简历卡片 */}
-        <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.98 }}>
-          <Card className="group cursor-pointer h-64 flex flex-col items-center justify-center relative overflow-hidden" onClick={onImport}>
-            <CardContent className="flex-1 flex flex-col items-center justify-center text-center p-6">
-              <div className="w-16 h-16 rounded-full bg-neutral-800 flex items-center justify-center mb-4 transition-colors group-hover:bg-blue-500/20">
-                <FaDownload className="text-3xl text-neutral-500 transition-colors group-hover:text-blue-400" />
-              </div>
-              <div className="text-lg font-semibold text-neutral-200">{t('dashboard.importResumeCard.title')}</div>
-              <div className="text-sm text-neutral-500 mt-1">{t('dashboard.importResumeCard.description')}</div>
-            </CardContent>
-          </Card>
-        </motion.div>
-        {/* 简历卡片列表 */}
-        <AnimatePresence>
-          {resumes.map(resume => (
-            <ResumeCard 
-              key={resume.id} 
-              resume={resume} 
-              onDelete={(id) => setDeleteId(id)}
-              onDuplicate={onDuplicate}
-              onRename={onRename}
-              templates={templates}
-            />
-          ))}
-        </AnimatePresence>
+      <div className="px-12 py-8 space-y-8 pb-32">
+        <CloudSyncBanner />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {/* 新建简历卡片 */}
+          <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.98 }}>
+            <Card className="group cursor-pointer h-64 flex flex-col items-center justify-center relative overflow-hidden bg-neutral-900 border border-neutral-800 hover:border-blue-500/50 transition-colors" onClick={onAdd}>
+              <CardContent className="flex-1 flex flex-col items-center justify-center">
+                <div className="w-12 h-12 rounded-full bg-neutral-800 flex items-center justify-center mb-4 group-hover:bg-blue-500/20 transition-colors">
+                  <FaPlus className="text-xl text-neutral-400 group-hover:text-blue-500 transition-colors" />
+                </div>
+                <div className="text-lg font-semibold text-neutral-200 group-hover:text-white transition-colors">{t('dashboard.newResumeCard.title')}</div>
+                <div className="text-xs text-neutral-500 mt-1">{t('dashboard.newResumeCard.description')}</div>
+              </CardContent>
+            </Card>
+          </motion.div>
+          {/* 导入简历卡片 */}
+          <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.98 }}>
+            <Card className="group cursor-pointer h-64 flex flex-col items-center justify-center relative overflow-hidden bg-neutral-900 border border-neutral-800 hover:border-blue-500/50 transition-colors" onClick={onImport}>
+              <CardContent className="flex-1 flex flex-col items-center justify-center text-center p-6">
+                <div className="w-12 h-12 rounded-full bg-neutral-800 flex items-center justify-center mb-4 transition-colors group-hover:bg-blue-500/20">
+                  <FaDownload className="text-xl text-neutral-500 transition-colors group-hover:text-blue-400" />
+                </div>
+                <div className="text-lg font-semibold text-neutral-200 group-hover:text-white transition-colors">{t('dashboard.importResumeCard.title')}</div>
+                <div className="text-sm text-neutral-500 mt-1">{t('dashboard.importResumeCard.description')}</div>
+              </CardContent>
+            </Card>
+          </motion.div>
+          {/* 简历卡片列表 */}
+          <AnimatePresence>
+            {resumes.map(resume => (
+              <ResumeCard 
+                key={resume.id} 
+                resume={resume} 
+                onDelete={(id) => setDeleteId(id)}
+                onDuplicate={onDuplicate}
+                onRename={onRename}
+                templates={templates}
+              />
+            ))}
+          </AnimatePresence>
+        </div>
       </div>
 
       <ConfirmDialog 

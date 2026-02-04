@@ -1,127 +1,20 @@
 import { create } from 'zustand';
-import sidebarMenu from '@/constant/sidebarMenu';
-import { dbClient, RESUMES_KEY } from '@/lib/IndexDBClient';
-import { MagicDebugger } from '@/lib/debuggger';
+import i18next from 'i18next';
+import sidebarMenu from '@/lib/constants/sidebarMenu';
+import { dbClient, RESUMES_KEY } from '@/lib/api/IndexDBClient';
+import { MagicDebugger } from '@/lib/utils/debuggger';
 import { toast } from "sonner";
 import { useSettingStore } from './useSettingStore';
 import { resumeApi } from '@/lib/api/resume';
 import debounce from 'lodash/debounce';
-
-// 自定义模板配置类型 - 只保存用户修改的部分
-export type CustomTemplateConfig = {
-  // 设计令牌的部分自定义
-  designTokens?: {
-    colors?: Partial<{
-      primary: string;
-      secondary: string;
-      text: string;
-      textSecondary: string;
-      background: string;
-      border: string;
-      accent?: string;
-      sidebar?: string;
-    }>;
-    typography?: {
-      fontFamily?: {
-        primary?: string;
-        secondary?: string;
-        mono?: string;
-      };
-      fontSize?: Partial<{
-        xs: string;
-        sm: string;
-        md: string;
-        lg: string;
-        xl: string;
-        xxl: string;
-      }>;
-      fontWeight?: Partial<{
-        normal: number;
-        medium: number;
-        bold: number;
-      }>;
-    };
-    spacing?: Partial<{
-      xs: string;
-      sm: string;
-      md: string;
-      lg: string;
-      xl: string;
-    }>;
-    borderRadius?: Partial<{
-      none: string;
-      sm: string;
-      md: string;
-      lg: string;
-    }>;
-  };
-  
-  // 布局的部分自定义
-  layout?: {
-    type?: 'single-column' | 'two-column' | 'sidebar' | 'grid';
-    containerWidth?: string;
-    containerHeight?: string;
-    padding?: string;
-    gap?: string;
-    twoColumn?: {
-      leftWidth?: string;
-      rightWidth?: string;
-      gap?: string;
-    };
-    sidebar?: {
-      position?: 'left' | 'right';
-      width?: string;
-      gap?: string;
-    };
-  };
-};
-
-export type InfoType = {
-  fullName: string;
-  headline: string;
-  email: string;
-  phoneNumber: string;
-  address: string;
-  website: string;
-  avatar: string;
-};
-
-export type SectionItem = {
-  id: string;
-  visible: boolean;
-  [key: string]: string | boolean;
-};
-
-export type Section = {
-  [key: string]: SectionItem[];
-};
-
-export type SectionOrder = {
-  key: string;
-  label: string;
-};
-
-export type ResumeVersion = {
-  id: string;
-  updatedAt: number;
-  type: 'auto' | 'manual';
-  data: Omit<Resume, 'versions'>;
-  name?: string;
-};
-
-export type Resume = {
-  id: string;
-  name: string;
-  updatedAt: number;
-  info: InfoType;
-  sections: Section;
-  sectionOrder: SectionOrder[];
-  template: string; // 基础模板ID
-  customTemplate?: CustomTemplateConfig; // 用户自定义的配置差异
-  themeColor: string;
-  typography: string;
-  versions?: ResumeVersion[];
-};
+import { 
+  Resume, 
+  InfoType, 
+  Section, 
+  SectionItem, 
+  SectionOrder, 
+  CustomTemplateConfig 
+} from '@/types/frontend/resume';
 
 type ResumeState = {
   resumes: Resume[];
@@ -136,7 +29,8 @@ type ResumeState = {
   importResume: (resume: Resume, token?: string) => Promise<string>;
   addResume: (resume: Resume) => void;
   updateResume: (id: string, updates: Partial<Resume>) => void;
-  duplicateResume: (id: string) => void;
+  duplicateResume: (id: string, token?: string) => Promise<void>;
+  renameResume: (id: string, newName: string, token?: string) => Promise<void>;
   deleteResume: (id: string, token?: string) => Promise<void>;
   deleteVersion: (resumeId: string, versionId: string, token?: string) => Promise<void>;
   loadResumeForEdit: (id: string) => void;
@@ -155,6 +49,12 @@ type ResumeState = {
   updateTypography: (typography: string) => void;
   setRightCollapsed: (collapsed: boolean) => void;
   setActiveSection: (section: string) => void;
+  updateSharing: (isPublic: boolean, shareRole: 'VIEWER' | 'COMMENTER' | 'EDITOR' | undefined, token: string) => Promise<void>;
+  
+  // AI State
+  isAiGenerating: boolean;
+  setIsAiGenerating: (isGenerating: boolean) => void;
+  applyFullResume: (resume: Resume) => void;
 };
 
 export const initialResume: Omit<Resume, 'id' | 'updatedAt' | 'name'> = {
@@ -188,6 +88,9 @@ export const getSanitizedResume = (resume: any): Omit<Resume, 'id' | 'updatedAt'
     typography: r.typography || initialResume.typography,
     customTemplate: r.customTemplate as CustomTemplateConfig,
     name: (r.name as string) || '',
+    isPublic: r.isPublic,
+    shareId: r.shareId,
+    shareRole: r.shareRole,
   };
 };
 
@@ -209,6 +112,18 @@ const useResumeStore = create<ResumeState>((set, get) => ({
   activeSection: 'basics',
   syncStatus: 'saved',
   isSyncing: false,
+  isAiGenerating: false,
+
+  setIsAiGenerating: (isGenerating) => set({ isAiGenerating: isGenerating }),
+
+  applyFullResume: (newResume) => {
+    const { updateInfo, updateSections, setSectionOrder } = get();
+    updateInfo(newResume.info);
+    updateSections(newResume.sections);
+    if (newResume.sectionOrder) {
+      setSectionOrder(newResume.sectionOrder);
+    }
+  },
 
   loadResumes: async (token) => {
     if (!get().isStoreLoading) {
@@ -333,7 +248,7 @@ const useResumeStore = create<ResumeState>((set, get) => ({
         }
       } catch (error) {
         console.error('Failed to create resume in cloud:', error);
-        toast.error('Failed to create in cloud. Creating locally instead.');
+        toast.error(i18next.t('store.notifications.createCloudFailed'));
       }
     }
 
@@ -359,7 +274,7 @@ const useResumeStore = create<ResumeState>((set, get) => ({
         }
       } catch (error) {
         console.error('Failed to import resume to cloud:', error);
-        toast.error('Failed to sync to cloud. Importing locally.');
+        toast.error(i18next.t('store.notifications.importCloudFailed'));
       }
     }
 
@@ -400,20 +315,117 @@ const useResumeStore = create<ResumeState>((set, get) => ({
     // We can't easily wait for DB here in a sync function, but subscribe handles it now
   },
 
-  duplicateResume: (id) => {
+  duplicateResume: async (id, token) => {
+    const isCloudSyncOn = useSettingStore.getState().cloudSync;
     const resumeToDuplicate = get().resumes.find(r => r.id === id);
     if (!resumeToDuplicate) {
-      toast.error(`Resume not found.`);
+      toast.error(i18next.t('store.notifications.resumeNotFound'));
       return;
     }
+
+    // Cloud Duplicate
+    const isLocalId = !isNaN(Number(id)) && id.length > 10;
+    if (isCloudSyncOn && !isLocalId && token) {
+      try {
+        toast.promise(
+          async () => {
+             const newResume = await resumeApi.duplicateResume(id, token);
+             if (newResume) {
+               // Add directly to store
+               // Backend returns decrypted object similar to fetchOne
+               // We must parse the content string to get the resume data (info, sections, etc)
+               const parsedContent = typeof newResume.content === 'string' 
+                  ? JSON.parse(newResume.content) 
+                  : newResume.content;
+
+               const cloudResume: Resume = {
+                 ...parsedContent,
+                 id: newResume.id,
+                 name: newResume.title, // Backend uses 'title', Frontend uses 'name'
+                 updatedAt: new Date(newResume.updatedAt).getTime(),
+                 isPublic: false,
+                 shareId: undefined,
+                 shareRole: undefined,
+                 versions: undefined,
+                 // Ensure customTemplate is handled if backend returns string
+                 customTemplate: typeof newResume.customTemplate === 'string' 
+                   ? JSON.parse(newResume.customTemplate) 
+                   : newResume.customTemplate
+               };
+               get().addResume(cloudResume);
+             }
+          },
+          {
+            loading: i18next.t('store.notifications.duplicatingInCloud'),
+            success: i18next.t('store.notifications.duplicateCloudSuccess'),
+            error: i18next.t('store.notifications.duplicateCloudError')
+          }
+        );
+        return;
+      } catch (error) {
+        // Fallback or just error
+        console.error("Cloud duplication failed", error);
+        return;
+      }
+    }
+
+    // Local Duplicate
     const newResume: Resume = {
       ...resumeToDuplicate,
       id: Date.now().toString(),
       name: `${resumeToDuplicate.name} (Copy)`,
       updatedAt: Date.now(),
+      // Reset share fields
+      isPublic: false,
+      shareId: undefined,
+      shareRole: undefined,
+      // Strip history/versions/comments
+      versions: undefined,
     };
     get().addResume(newResume);
-    toast.success(`Resume "${resumeToDuplicate.name}" duplicated.`);
+    toast.success(i18next.t('store.notifications.resumeDuplicatedLocally', { name: resumeToDuplicate.name }));
+  },
+
+  renameResume: async (id, newName, token) => {
+    const isCloudSyncOn = useSettingStore.getState().cloudSync;
+    const now = Date.now();
+    const { resumes } = get();
+    const targetResume = resumes.find(r => r.id === id);
+
+    if (!targetResume) return;
+
+    // 1. Update local state immediately
+    const updatedResume = { ...targetResume, name: newName, updatedAt: now };
+    
+    set(state => {
+      const newResumes = state.resumes.map(r =>
+        r.id === id ? updatedResume : r
+      );
+      const isUpdatingActive = state.activeResume && state.activeResume.id === id;
+      
+      return {
+        resumes: newResumes,
+        ...(isUpdatingActive && {
+          activeResume: updatedResume
+        })
+      };
+    });
+
+    // 2. Persist local
+    const currentResumes = get().resumes; // Retrieve updated list
+    dbClient.setItem(RESUMES_KEY, currentResumes.map(r => getSanitizedResumeForLocal(r)));
+
+    // 3. Sync to Cloud
+    const isLocalId = !isNaN(Number(id)) && id.length > 10;
+    if (isCloudSyncOn && !isLocalId && token) {
+        try {
+            await resumeApi.syncResume(updatedResume, token);
+            toast.success(i18next.t('store.notifications.renameSuccess'));
+        } catch (error) {
+            console.error("Failed to rename in cloud", error);
+            toast.error(i18next.t('store.notifications.renameCloudFailed'));
+        }
+    }
   },
 
   deleteResume: async (id, token) => {
@@ -427,14 +439,14 @@ const useResumeStore = create<ResumeState>((set, get) => ({
         await resumeApi.deleteResume(id, token);
       } catch (error) {
         console.error('Failed to delete cloud resume:', error);
-        toast.error('Failed to delete from cloud, but removing locally.');
+        toast.error(i18next.t('store.notifications.deleteCloudFailed'));
       }
     }
 
     const newResumes = get().resumes.filter(r => r.id !== id);
     set({ resumes: newResumes });
     dbClient.setItem(RESUMES_KEY, newResumes.map(r => getSanitizedResumeForLocal(r)));
-    toast.success(`Resume "${resumeToDelete?.name || ''}" deleted.`);
+    toast.success(i18next.t('store.notifications.resumeDeleted', { name: resumeToDelete?.name || '' }));
   },
 
   deleteVersion: async (resumeId, versionId, token) => {
@@ -467,10 +479,10 @@ const useResumeStore = create<ResumeState>((set, get) => ({
         });
         
         dbClient.setItem(RESUMES_KEY, updatedResumes.map(r => getSanitizedResumeForLocal(r)));
-        toast.success('Version deleted');
+        toast.success(i18next.t('store.notifications.versionDeleted'));
       } catch (error) {
         console.error('Failed to delete version:', error);
-        toast.error('Failed to delete version');
+        toast.error(i18next.t('store.notifications.versionDeleteFailed'));
       }
     }
   },
@@ -558,14 +570,14 @@ const useResumeStore = create<ResumeState>((set, get) => ({
         await get().createVersion('manual', undefined, token, targetResume);
         // Manual save implies immediate cloud sync, skip the auto-versioning check
         await get().syncToCloud(token, { skipVersioning: true });
-        toast.success('Resume saved to cloud!');
+        toast.success(i18next.t('store.notifications.resumeSavedCloud'));
       } else {
         // Auto-save: just trigger syncToCloud
         get().syncToCloud(token);
       }
     } else {
         set({ syncStatus: 'local' });
-        if (type === 'manual') toast.success('Resume saved locally!');
+        if (type === 'manual') toast.success(i18next.t('store.notifications.resumeSavedLocally'));
     }
   },
 
@@ -595,7 +607,7 @@ const useResumeStore = create<ResumeState>((set, get) => ({
 
     const version = activeResume.versions.find(v => v.id === versionId);
     if (!version) {
-      toast.error('Version not found');
+      toast.error(i18next.t('store.notifications.versionNotFound'));
       return;
     }
 
@@ -608,7 +620,7 @@ const useResumeStore = create<ResumeState>((set, get) => ({
       updatedAt: Date.now()
     });
     
-    toast.success('Version restored!');
+    toast.success(i18next.t('store.notifications.versionRestored'));
   },
   
   updateInfo: (info) => {
@@ -751,6 +763,50 @@ const useResumeStore = create<ResumeState>((set, get) => ({
   
   setActiveSection: (section) => set({ activeSection: section }),
 
+  updateSharing: async (isPublic, shareRole, token) => {
+    const { activeResume } = get();
+    
+    if (!activeResume || !token) {
+      toast.error(i18next.t('store.notifications.loginToShare'));
+      return;
+    }
+
+    try {
+        const result = await resumeApi.updateSharing(activeResume.id, { isPublic, shareRole }, token);
+        
+        // Update local state
+        set(state => {
+            if (!state.activeResume) return state;
+            const updatedResume = { 
+                ...state.activeResume, 
+                isPublic: result.isPublic,
+                shareId: result.shareId,
+                shareRole: result.shareRole
+            };
+            
+             const newResumes = state.resumes.map(r => 
+                r.id === updatedResume.id ? updatedResume : r
+            );
+            
+            return {
+                activeResume: updatedResume,
+                resumes: newResumes
+            };
+        });
+        
+        // Persist local
+        const { resumes } = get();
+        dbClient.setItem(RESUMES_KEY, resumes.map(r => getSanitizedResumeForLocal(r)));
+        
+        toast.success(isPublic 
+          ? i18next.t('store.notifications.resumePublished') 
+          : i18next.t('store.notifications.resumeUnpublished'));
+    } catch (error) {
+        console.error('Failed to update sharing:', error);
+        toast.error(i18next.t('store.notifications.sharingUpdateFailed'));
+    }
+  },
+
   syncToCloud: async (token: string, options?: { skipVersioning?: boolean }) => {
     const { activeResume, isSyncing } = get();
     if (!activeResume || !useSettingStore.getState().cloudSync || !token) return;
@@ -836,7 +892,7 @@ const useResumeStore = create<ResumeState>((set, get) => ({
     } catch (error) {
       console.error('[Sync] Cloud sync failed:', error);
       set({ syncStatus: 'error' });
-      toast.error('Cloud sync failed. Please check your connection.');
+      toast.error(i18next.t('store.notifications.cloudSyncFailed'));
     } finally {
       // Release LOCK
       set({ isSyncing: false });

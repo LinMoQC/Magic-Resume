@@ -1,7 +1,7 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatAnthropic } from "@langchain/anthropic";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
-import { MODEL_API_URL_MAP } from "@/constant/modals";
+import { MODEL_API_URL_MAP } from "@/lib/constants/modals";
 
 interface ModelConfig {
   apiKey: string;

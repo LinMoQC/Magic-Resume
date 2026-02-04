@@ -3,20 +3,20 @@
 import React, { useEffect, useState } from 'react';
 import { useSettingStore } from '@/store/useSettingStore';
 import { toast } from 'sonner';
-import { Button } from '@/app/components/ui/button';
-import { Input } from '@/app/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { InfoCircledIcon, LockClosedIcon } from '@radix-ui/react-icons';
 import { Cloud, Settings as SettingsIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MODEL_API_URL_MAP } from '@/constant/modals';
+import { MODEL_API_URL_MAP } from '@/lib/constants/modals';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/app/components/ui/select";
-import { Switch } from '@/app/components/ui/switch';
+} from "@/components/ui/select";
+import { Switch } from '@/components/ui/switch';
 import {
   Dialog,
   DialogContent,
@@ -24,10 +24,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/app/components/ui/dialog";
-import { Card, CardHeader, CardContent } from '@/app/components/ui/card';
+} from "@/components/ui/dialog";
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { useTranslation, Trans } from 'react-i18next';
-import { useTrace } from '@/app/hooks/useTrace';
+import { useTrace } from '@/hooks/useTrace';
 
 export default function Settings() {
   const { t } = useTranslation();
@@ -151,6 +151,7 @@ export default function Settings() {
                   {t('settings.llm.description1')}
                 </p>
                 <p className="text-neutral-400 text-sm leading-relaxed">
+                  {/* i18n-ignore */}
                   <Trans i18nKey="settings.llm.description2">
                     You have the option to <a href="https://platform.openai.com/account/api-keys" target="_blank" rel="noopener noreferrer" className="text-sky-400 hover:underline">obtain your own OpenAI API key</a>. This key empowers you to leverage the API as you see fit. Alternatively, if you wish to disable the AI features in Reactive Resume altogether, you can simply remove the key from your settings.
                   </Trans>
@@ -249,14 +250,14 @@ export default function Settings() {
                 onClick={handleReset} 
                 variant="ghost" 
                 size="sm" 
-                className="h-10 px-6 rounded-full text-neutral-400 hover:text-white hover:bg-white/5 transition-all whitespace-nowrap flex-shrink-0"
+                className="h-10 px-6 rounded-full text-neutral-400 hover:text-white hover:bg-white/5 transition-all whitespace-nowrap shrink-0"
               >
                 {t('settings.buttons.reset')}
               </Button>
               <Button 
                 onClick={handleSave} 
                 size="sm" 
-                className="h-10 px-8 rounded-full bg-sky-500 text-white hover:bg-sky-400 font-semibold shadow-lg shadow-sky-500/20 transition-all whitespace-nowrap flex-shrink-0"
+                className="h-10 px-8 rounded-full bg-sky-500 text-white hover:bg-sky-400 font-semibold shadow-lg shadow-sky-500/20 transition-all whitespace-nowrap shrink-0"
               >
                 {t('settings.buttons.save')}
               </Button>

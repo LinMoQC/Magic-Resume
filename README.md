@@ -1,301 +1,150 @@
 <div align="center">
-  <img width="455" alt="Magic Resume Logo" src="./public/magic-resume-logo.png">
-  
-  <p><strong>AI 驱动的现代化简历构建器</strong></p>
-  
-  [![License](https://img.shields.io/github/license/LinMoQC/Magic-Resume?style=flat-square)](https://github.com/LinMoQC/Magic-Resume/blob/master/LICENSE) [![Stars](https://img.shields.io/github/stars/LinMoQC/Magic-Resume?style=flat-square)](https://github.com/LinMoQC/Magic-Resume/stargazers) [![Forks](https://img.shields.io/github/forks/LinMoQC/Magic-Resume?style=flat-square)](https://github.com/LinMoQC/Magic-Resume/network/members) [![Issues](https://img.shields.io/github/issues/LinMoQC/Magic-Resume?style=flat-square)](https://github.com/LinMoQC/Magic-Resume/issues)
-</div>
+  <a href="https://magic-resume.cn">
+    <img width="160" alt="Magic Resume Logo" src="./public/simple-logo.png">
+  </a>
 
----
+  <h1>Magic Resume</h1>
 
-## 🌟 项目简介
+  <p><strong>The next-gen AI-powered resume platform that makes hiring simple.</strong></p>
 
-**Magic Resume** 是一款现代化的 AI 驱动简历构建器，采用 Next.js 14 构建。它不仅提供直观的在线编辑体验，还能根据目标职位智能优化简历内容，让您的求职之路更加顺畅。
+**English** · [简体中文](./README.zh-CN.md) · [Official Site][official-site] · [Feedback][github-issues-link]
 
-### ✨ 核心特性
+  <!-- SHIELD GROUP -->
 
-- 🎨 **可视化模板自定义** - 22种精美字体 + 实时颜色/布局调整
-- 🤖 **AI 智能优化** - 根据 JD 自动优化简历内容和匹配度
-- 📊 **专业分析报告** - Lighthouse 风格的简历健康度分析
-- 🌐 **完整国际化** - 中英文界面无缝切换
-- 💾 **本地存储优先** - 数据安全，支持多格式导出
-- 🎯 **实时预览** - 所见即所得的编辑体验
-
----
-
-## 🏗️ 技术架构
-
-<div align="center">
-
-| 分类 | 技术栈 |
-|------|-------|
-| **前端框架** | Next.js 14 · React 18 · TypeScript |
-| **UI 设计** | Tailwind CSS · Radix UI · shadcn/ui · Framer Motion |
-| **AI 能力** | OpenAI API · Tavily Search · LangChain |
-| **用户认证** | Clerk · NextAuth (可选) |
-| **第三方集成** | GitHub API · 后端服务支持 |
-| **状态管理** | Zustand · Immer |
-| **富文本** | Tiptap Editor · Dnd Kit |
-| **工具链** | ESLint · Husky · Zod |
+[![][vercel-shield]][vercel-link]
+[![][github-contributors-shield]][github-contributors-link]
+[![][github-forks-shield]][github-forks-link]
+[![][github-stars-shield]][github-stars-link]
+[![][github-issues-shield]][github-issues-link]
+[![][github-license-shield]][github-license-link]
 
 </div>
 
-## 📁 项目结构
-
-```
-resume/
-├── src/
-│   ├── app/                    # Next.js App Router
-│   │   ├── dashboard/          # 仪表盘页面
-│   │   ├── components/         # 全局组件
-│   │   └── globals.css         # 全局样式
-│   ├── templates/              # 简历模板系统
-│   │   ├── config/             # 模板配置
-│   │   ├── templateLayout/     # 布局组件
-│   │   ├── TemplateCustomizer/ # 自定义器组件
-│   │   └── renderer/           # 渲染引擎
-│   ├── lib/                    # 工具库
-│   ├── store/                  # 状态管理
-│   ├── locales/                # 国际化
-│   └── prompts/                # AI 提示词
-└── public/                     # 静态资源
-```
-
-## 🚀 快速开始
-
-### 📦 安装与配置
-
-```bash
-# 1. 克隆项目
-git clone https://github.com/LinMoQC/Magic-Resume.git
-cd Magic-Resume
-
-# 2. 安装依赖
-npm install
-
-# 3. 配置环境变量
-cp .env.local.example .env.local
-# 编辑 .env.local 填入您的密钥
-```
-
-### 🔑 环境变量配置
-
-创建 `.env.local` 文件进行配置：
-
-```bash
-# 必需配置
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxx
-CLERK_SECRET_KEY=sk_test_xxx
-
-# 可选配置 - Google Analytics
-NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
-```
-
-**核心配置项：**
-
-| 配置类别 | 必需性 | 说明 |
-|---------|-------|------|
-| **Clerk 认证** | ✅ 必需 | 用户登录注册系统 |
-| **Google Analytics** | ⚙️ 可选 | 网站流量分析 |
-| **后端服务** | ⚙️ 可选 | 完整后端支持 |
-
-### 🏃‍♂️ 运行项目
-
-```bash
-# 开发环境
-npm run dev
-
-# 生产构建
-npm run build && npm run start
-
-# 代码检查
-npm run lint
-```
-
-打开 [http://localhost:3000](http://localhost:3000) 开始使用！
-
-### 🔧 详细配置指南
-
 <details>
-<summary><strong>📋 Clerk 用户认证配置 (必需)</strong></summary>
+<summary><kbd>Table of contents</kbd></summary>
 
-1. 访问 [Clerk.com](https://clerk.com/) 注册账号
-2. 创建新应用，选择认证方式
-3. 在 Dashboard → API Keys 获取密钥：
-   ```env
-   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxx
-   CLERK_SECRET_KEY=sk_test_xxx
-   ```
-4. 配置重定向URL（可选）
+#### TOC
+
+- [👋� Getting Started](#-getting-started)
+- [✨ Features](#-features)
+  - [Build: Visual Template Customization](#build-visual-template-customization)
+  - [Analyze: Lighthouse-style Reports](#analyze-lighthouse-style-reports)
+  - [Optimize: AInd intelligent JD Matching](#optimize-intelligent-jd-matching)
+  - [Privacy: Local-First Data Security](#privacy-local-first-data-security)
+- [🛳 Self Hosting](#-self-hosting)
+  - [Deploying with Vercel](#deploying-with-vercel)
+- [📦 Ecosystem](#-ecosystem)
+- [⌨️ Local Development](#️-local-development)
+- [🤝 Contributing](#-contributing)
+- [📈 Star History](#-star-history)
+
+####
+
+<br/>
 
 </details>
 
-<details>
-<summary><strong>🤖 AI 功能配置 (可选)</strong></summary>
+<br/>
 
-**OpenAI API** - 简历智能优化
-1. 访问 [OpenAI Platform](https://platform.openai.com/) 
-2. 创建 API 密钥
-3. 配置：`OPENAI_API_KEY=sk-xxx`
+![Banner](./public/magic-resume-preview.png)
 
-**Tavily API** - 智能搜索增强
-1. 访问 [Tavily.com](https://tavily.com/)
-2. 注册并获取 API 密钥
-3. 配置：`TAVILY_API_KEY=tvly-xxx`
+## 👋🏻 Getting Started
 
-</details>
+**Magic Resume** is a modern, AI-powered resume builder designed to help job seekers craft professional, high-impact resumes with ease. Built with Next.js 15, it combines a sleek user interface with powerful AI capabilities to streamline your job search journey.
 
-<details>
-<summary><strong>📱 GitHub 集成 (可选)</strong></summary>
+## ✨ Features
 
-用于从 GitHub 导入项目数据：
-1. 访问 [GitHub Settings → Tokens](https://github.com/settings/tokens)
-2. 生成 Personal Access Token
-3. 配置：`GITHUB_TOKEN=ghp-xxx`
-4. 权限选择：`repo`, `user:email`
+### Build: Visual Template Customization
 
-</details>
+Create a professional resume in minutes with our intuitive visual editor.
 
-<details>
-<summary><strong>🚀 后端服务配置 (可选)</strong></summary>
+- **Real-time Preview**: See your changes instantly as you type.
+- **Flexible Templates**: Choose from professional, ATS-friendly templates.
+- **Rich Customization**: Adjust colors, fonts (22+ styles), spacing, and layouts with ease.
 
-如需使用完整后端功能：
-1. 启动后端服务（通常在端口 8000）
-2. 配置后端地址：`BACKEND_URL=http://127.0.0.1:8000`
-3. 启用后端：`NEXT_PUBLIC_IF_USE_BACKEND=true`
-4. 详见后端项目的部署文档
+### Analyze: Lighthouse-style Reports
 
-</details>
+Get professional feedback on your resume's health.
 
-<details>
-<summary><strong>📊 Google Analytics 配置 (可选)</strong></summary>
+- **Overall Score**: A comprehensive rating of your resume's impact.
+- **Detailed Analysis**: Insights into keyword matching, actionability, and readability.
+- **Actionable Suggestions**: Specific advice to make your resume stand out.
 
-**网站流量分析** - 了解用户行为和网站性能
-1. 访问 [Google Analytics](https://analytics.google.com/)
-2. 创建账户和媒体资源
-3. 获取测量ID：`NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX`
+### Optimize: Intelligent JD Matching
 
-**隐私保护特性**：
-- 仅在生产环境启用
-- 其他用户部署时不会影响您的数据
-- 支持自定义事件追踪
+Tailor your resume to specific job descriptions with AI.
 
-详细配置请参考：[ANALYTICS_SETUP.md](./ANALYTICS_SETUP.md)
+- **Smart Alignment**: AI analyzes the Job Description (JD) and suggests content optimizations.
+- **Role-based Suggestions**: Get advice tailored to specific industries and roles.
 
-</details>
+### Privacy: Local-First Data Security
 
-<details>
-<summary><strong>🔐 认证系统配置</strong></summary>
+Your data stays with you.
 
-**Clerk (推荐)** - 现代认证方案
-- 完整的用户管理界面
-- 多种登录方式支持
-
-**NextAuth (可选)** - 传统认证方案  
-- 配置：`NEXTAUTH_URL` 和 `NEXTAUTH_SECRET`
-- 适用于自定义认证需求
-
-</details>
-
-## 💡 功能特性详解
-
-### 🎨 模板自定义系统
-
-<table>
-<tr>
-<td width="50%">
-
-**颜色主题**
-- 5种快速主题切换
-- 6种详细颜色配置
-- 实时预览效果
-
-**字体系统**  
-- 22种精选字体
-- 包含现代、手写、科技感字体
-- 6级字体大小调节
-
-</td>
-<td width="50%">
-
-**布局控制**
-- 容器宽度调整 (600-1000px)
-- 内边距和间距设置
-- 文本行高和字符间距
-- 段落和章节间距
-
-**实时保存**
-- 自动保存配置差异
-- 减少90%存储空间
-- 完整的撤销/重做
-
-</td>
-</tr>
-</table>
-
-### 🤖 AI 智能功能
-
-| 功能 | 技术支持 | 描述 |
-|-----|---------|------|
-| **智能优化** | OpenAI GPT | 根据 JD 自动优化简历内容 |
-| **健康分析** | AI 分析引擎 | Lighthouse 风格的专业分析 |
-| **引导创建** | 对话式 AI | AI 对话式简历生成 |
-| **智能搜索** | Tavily API | 增强的网络搜索能力 |
-| **GitHub 集成** | GitHub API | 自动导入项目经历 |
-
-## 📸 产品预览
-
-<div align="center">
-<table>
-  <tr>
-    <td align="center" width="50%"><strong>🎨 模板自定义</strong></td>
-    <td align="center" width="50%"><strong>🤖 AI 智能优化</strong></td>
-  </tr>
-  <tr>
-    <td><img src="./public/magic-resume-preview.png" alt="模板自定义" style="border-radius: 8px;"></td>
-    <td><img src="./public/magic-resume-optimize.png" alt="AI 智能优化" style="border-radius: 8px;"></td>
-  </tr>
-  <tr>
-    <td align="center"><strong>💬 AI 对话助手</strong></td>
-    <td align="center"><strong>🎯 文本选择优化</strong></td>
-  </tr>
-  <tr>
-    <td><img src="./public/magic-resume-chat.png" alt="AI 对话助手" style="border-radius: 8px;"></td>
-    <td><img src="./public/magic-resume-select.png" alt="智能模板选择" style="border-radius: 8px;"></td>
-  </tr>
-  <tr>
-    <td align="center"><strong>📊 专业分析</strong></td>
-    <td align="center"><strong>📱 多端适配</strong></td>
-  </tr>
-  <tr>
-    <td><img src="./public/magic-resume-analysis.png" alt="专业分析" style="border-radius: 8px;"></td>
-    <td><img src="./public/magic-resume-import.png" alt="多端适配" style="border-radius: 8px;"></td>
-  </tr>
-</table>
-</div>
+- **Local Storage**: All resume data is stored locally in your browser by default.
+- **Optional Cloud Sync**: Securely sync your data across devices if you choose.
+- **Multi-format Export**: Export your resume to high-quality PDF or structured JSON.
 
 ---
 
-## 🤝 参与贡献
+## 🛠 Tech Stack
 
-我们欢迎所有形式的贡献！无论是新功能、Bug 修复、文档改进还是问题反馈。
+- **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **AI / LLM**: [LangChain](https://www.langchain.com/), [LangGraph](https://www.langchain.com/langgraph), [Google GenAI](https://ai.google.dev/), [Anthropic](https://www.anthropic.com/)
+- **Authentication**: [Clerk](https://clerk.com/)
+- **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
+- **UI Components**: [Radix UI](https://www.radix-ui.com/), [Lucide Icons](https://lucide.dev/)
+- **Animations**: [Framer Motion](https://www.framer.com/motion/), [GSAP](https://gsap.com/)
+- **State Management**: [Zustand](https://zustand-demo.pmnd.rs/)
+- **Database / Storage**: [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) (Local-first)
+- **Rich Text Editor**: [Tiptap](https://tiptap.dev/), [Monaco Editor](https://microsoft.github.io/monaco-editor/)
+- **Internationalization**: [i18next](https://www.i18next.com/)
+- **Analytics**: [PostHog](https://posthog.com/)
 
-### 📋 贡献指南
+---
 
-1. **Fork 项目** 并创建您的功能分支
-2. **提交变更** 并编写清晰的 commit 信息  
-3. **推送到分支** 并创建 Pull Request
-4. **等待审核** 我们会尽快回复
+## 🛳 Self Hosting
+
+Deploy your own instance of Magic Resume in minutes.
+
+### Deploying with Vercel
+
+Click the button below to deploy to Vercel:
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FLinMoQC%2FMagic-Resume)
+
+> [!TIP]
+>
+> Remember to configure your `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` in the Vercel dashboard.
+
+---
+
+## 📦 Ecosystem
+
+- **Magic Resume Core**: The primary resume builder and AI engine.
+- **i18n Scanner**: A custom tool to ensure full localization coverage.
+
+---
+
+## ⌨️ Local Development
+
+Clone the repository and start the development server:
 
 ```bash
-git checkout -b feature/amazing-feature
-git commit -m 'feat: 添加某个很棒的功能'
-git push origin feature/amazing-feature
+$ git clone https://github.com/LinMoQC/Magic-Resume.git
+$ cd Magic-Resume
+$ npm install
+$ npm run dev
 ```
 
-### 💻 贡献者
+For more details, check our [Development Guide](./docs/development.md) (coming soon).
 
-感谢所有为 Magic Resume 做出贡献的开发者！
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 <a href="https://github.com/LinMoQC/Magic-Resume/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=LinMoQC/Magic-Resume" alt="contributors" />
@@ -305,23 +154,26 @@ git push origin feature/amazing-feature
 
 ## 📈 Star History
 
-<div align="center">
-  <a href="https://star-history.com/#LinMoQC/Magic-Resume&Date">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=LinMoQC/Magic-Resume&type=Date&theme=dark" />
-      <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=LinMoQC/Magic-Resume&type=Date" />
-      <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=LinMoQC/Magic-Resume&type=Date" />
-    </picture>
-  </a>
-</div>
+[![Star History Chart](https://api.star-history.com/svg?repos=LinMoQC/Magic-Resume&type=Date)](https://star-history.com/#LinMoQC/Magic-Resume&Date)
 
 ---
 
-## 📄 开源协议
+Copyright © 2026 [Magic Resume Team](https://github.com/LinMoQC). <br />
+This project is [MIT](./LICENSE) licensed.
 
-本项目基于 [MIT License](LICENSE) 开源协议。
+<!-- LINK GROUP -->
 
-<div align="center">
-  <p>如果这个项目对您有帮助，请考虑给我们一个 ⭐</p>
-  <p>Made with ❤️ by Magic Resume Team</p>
-</div>
+[official-site]: https://magic-resume.cn
+[github-issues-link]: https://github.com/LinMoQC/Magic-Resume/issues
+[vercel-shield]: https://img.shields.io/badge/vercel-online-55b467?labelColor=black&logo=vercel&style=flat-square
+[vercel-link]: https://magic-resume.cn
+[github-contributors-shield]: https://img.shields.io/github/contributors/LinMoQC/Magic-Resume?color=c4f042&labelColor=black&style=flat-square
+[github-contributors-link]: https://github.com/LinMoQC/Magic-Resume/graphs/contributors
+[github-forks-shield]: https://img.shields.io/github/forks/LinMoQC/Magic-Resume?color=8ae8ff&labelColor=black&style=flat-square
+[github-forks-link]: https://github.com/LinMoQC/Magic-Resume/network/members
+[github-stars-shield]: https://img.shields.io/github/stars/LinMoQC/Magic-Resume?color=ffcb47&labelColor=black&style=flat-square
+[github-stars-link]: https://github.com/LinMoQC/Magic-Resume/stargazers
+[github-issues-shield]: https://img.shields.io/github/issues/LinMoQC/Magic-Resume?color=ff80eb&labelColor=black&style=flat-square
+[github-license-shield]: https://img.shields.io/badge/license-MIT-white?labelColor=black&style=flat-square
+[github-license-link]: https://github.com/LinMoQC/Magic-Resume/blob/master/LICENSE
+[image-star]: https://github.com/user-attachments/assets/3216e25b-186f-4a54-9cb4-2f124aec0471

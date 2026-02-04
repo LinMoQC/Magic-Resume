@@ -2,28 +2,24 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useResumeStore, Resume } from '@/store/useResumeStore';
+import { Resume } from '@/types/frontend/resume';
+import { useResumeStore } from '@/store/useResumeStore';
 import { useSettingStore } from '@/store/useSettingStore';
 import { useAuth } from '@clerk/nextjs';
-import NewResumeDialog from './_components/NewResumeDialog';
-import ImportResumeDialog from './_components/ImportResumeDialog';
 import ResumeList from './_components/ResumeList';
 import RenameResumeDialog from './_components/RenameResumeDialog';
-import { useTrace } from '@/app/hooks/useTrace';
+import { useTrace } from '@/hooks/useTrace';
 
 export default function Dashboard() {
   const router = useRouter();
-  const { resumes, createResume, deleteResume, duplicateResume, updateResume, loadResumes } = useResumeStore();
+  const { resumes, deleteResume, duplicateResume, loadResumes, renameResume } = useResumeStore();
   const { loadSettings } = useSettingStore();
   const { getToken } = useAuth();
-  const { traceDashboardViewed, traceCreateResume, traceResumeCreated, traceImportResume } = useTrace();
+  const { traceDashboardViewed, traceCreateResume, traceImportResume } = useTrace();
 
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [resumeToRename, setResumeToRename] = useState<Resume | null>(null);
   const [newName, setNewName] = useState('');
-  const [isCreating, setIsCreating] = useState(false);
 
   // Dashboard initialization
   const initialized = React.useRef(false);
@@ -57,9 +53,10 @@ export default function Dashboard() {
     setRenameDialogOpen(true);
   };
 
-  const handleRename = () => {
+  const handleRename = async () => {
     if (resumeToRename && newName.trim()) {
-      updateResume(resumeToRename.id, { name: newName });
+      const token = await getToken();
+      await renameResume(resumeToRename.id, newName, token || undefined);
       setRenameDialogOpen(false);
       setResumeToRename(null);
     }
@@ -67,28 +64,12 @@ export default function Dashboard() {
 
   const handleAdd = () => {
     traceCreateResume();
-    setNewName('');
-    setDialogOpen(true);
+    router.push('/dashboard/new');
   };
 
   const handleImport = () => {
     traceImportResume();
-    setImportDialogOpen(true);
-  };
-
-  const handleCreate = async () => {
-    if (newName.trim()) {
-      setIsCreating(true);
-      try {
-        const token = await getToken();
-        const newId = await createResume(newName, token || undefined);
-        setDialogOpen(false);
-        router.push(`/dashboard/edit/${newId}`);
-        traceResumeCreated(newId);
-      } finally {
-        setIsCreating(false);
-      }
-    }
+    router.push('/dashboard/import');
   };
 
   const handleResumeDelete = async (id: string) => {
@@ -96,20 +77,13 @@ export default function Dashboard() {
     await deleteResume(id, token || undefined);
   };
 
+  const handleDuplicate = async (id: string) => {
+    const token = await getToken();
+    duplicateResume(id, token || undefined);
+  };
+
   return (
     <main className="flex flex-col h-full">
-      <NewResumeDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        newName={newName}
-        setNewName={setNewName}
-        handleCreate={handleCreate}
-        isLoading={isCreating}
-      />
-      <ImportResumeDialog
-        open={importDialogOpen}
-        onOpenChange={setImportDialogOpen}
-      />
       <RenameResumeDialog
         open={renameDialogOpen}
         onOpenChange={setRenameDialogOpen}
@@ -122,7 +96,7 @@ export default function Dashboard() {
         onAdd={handleAdd}
         onImport={handleImport}
         onDelete={handleResumeDelete}
-        onDuplicate={duplicateResume}
+        onDuplicate={handleDuplicate}
         onRename={handleOpenRenameDialog}
       />
     </main>

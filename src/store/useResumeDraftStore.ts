@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { Resume, initialResume } from './useResumeStore';
+import { Resume } from '@/types/frontend/resume';
+import { initialResume } from './useResumeStore';
 import { nanoid } from 'nanoid';
 
 interface ResumeDraftState {

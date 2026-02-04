@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { nanoid } from 'nanoid';
-import { Resume } from './useResumeStore';
+import { Resume } from '@/types/frontend/resume';
 
 export interface Message {
   id: string;

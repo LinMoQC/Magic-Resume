@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Resume } from '@/store/useResumeStore';
+import { Resume } from '@/types/frontend/resume';
 
 export interface LogEntry {
     id: string;

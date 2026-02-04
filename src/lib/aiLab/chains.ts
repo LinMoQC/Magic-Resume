@@ -1,11 +1,11 @@
 import { PromptTemplate } from "@langchain/core/prompts";
 import { z } from "zod";
 import { StructuredOutputParser, OutputFixingParser } from "langchain/output_parsers";
-import { resumeOptimizePrompt } from "@/prompts/agent-modify-prompt";
-import { jdAnalysisPrompt } from "@/prompts/jd-analysis-prompt";
-import { polishTextPrompt } from "@/prompts/polish-text-prompt";
+import { resumeOptimizePrompt } from "@/lib/aiLab/prompts/agent-modify-prompt";
+import { jdAnalysisPrompt } from "@/lib/aiLab/prompts/jd-analysis-prompt";
+import { polishTextPrompt } from "@/lib/aiLab/prompts/polish-text-prompt";
 import { StringOutputParser } from "@langchain/core/output_parsers";
-import { resumeAnalysisPrompt, createSubAnalysisPrompt } from "@/prompts/resume-analysis-prompt";
+import { resumeAnalysisPrompt, createSubAnalysisPrompt } from "@/lib/aiLab/prompts/resume-analysis-prompt";
 import { getModel } from "./aiService";
 import { Runnable } from "@langchain/core/runnables";
 
