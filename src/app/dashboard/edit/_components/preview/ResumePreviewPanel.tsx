@@ -7,6 +7,7 @@ import { Resume } from '@/types/frontend/resume';
 import useMobile from '@/hooks/useMobile';
 import { Tools } from '../layout/Tools';
 import AiThinkingOverlay from '../modals/AiThinkingOverlay';
+import { useTranslation } from 'react-i18next';
 
 interface ResumePreviewPanelProps {
   activeResume: Resume | null;
@@ -29,11 +30,12 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
   onShareClick
 }) => {
   const { isMobile } = useMobile();
+  const { t } = useTranslation();
 
   if (!activeResume) {
     return (
       <section className="flex-1 flex items-center justify-center bg-black relative overflow-hidden max-h-screen">
-        <div className="text-white">Loading...</div>
+        <div className="text-white">{t('common.loading')}</div>
       </section>
     );
   }

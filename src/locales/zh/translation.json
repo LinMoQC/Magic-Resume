@@ -58,9 +58,24 @@
       "goToApp": "进入应用",
       "starOnGithub": "在 GitHub 上点赞"
     },
+    "tags": {
+      "aiSmart": "AI 智能",
+      "freeForever": "完全免费",
+      "dataSecurity": "数据安全",
+      "aiEnhancement": "AI 智能加持",
+      "dataSecurityGuarantee": "隐私数据安全保证"
+    },
+    "buttons": {
+      "learnMore": "了解更多",
+      "experienceAI": "体验 AI 加持",
+      "experienceNow": "立即体验",
+      "starOnGithub": "在 GitHub 上点赞"
+    },
     "hero": {
+      "brandName": "Magic Resume",
       "title": "Magic Resume 是一款为您提供 AI 加持的简历构建工具",
       "subtitle": "用 AI 的力量打造完美的简历。简单、智能、安全。",
+      "previewAlt": "Magic Resume 预览",
       "getStarted": "开始使用",
       "browseTemplates": "浏览模板",
       "tag": "Magic Resume V1.0",
@@ -75,7 +90,10 @@
         "local": "隐私优先",
         "openSource": "开源项目"
       },
-      "macbookSubtitle": "AI 驱动的简历生成器"
+      "macbookSubtitle": "AI 驱动的简历生成器",
+      "badge": "由 AI 驱动的求职神器",
+      "primaryButton": "立即开始免费体验",
+      "secondaryButton": "在 GitHub 上关注我们"
     },
     "morphingTexts": {
       "simpleAndSmart": "简单 & 智能",
@@ -145,30 +163,14 @@
       }
     },
     "footer": {
-      "copyright": "© {{year}} Magic Resume. 基于 MIT 协议开源。",
-      "brandSubtitle": "一款开源、本地优先的人工智能简历生成器。您的数据永不离开设备。",
-      "online": "在线",
-      "madeWith": "用 ❤️ 为求职者而造",
-      "poweredBy": "AI 与现代技术驱动",
-      "openSource": "开源且永久免费",
+      "brandSubtitle": "下一代 AI 简历平台，让招聘变得简单。",
       "product": "产品",
-      "builder": "简历编辑器",
+      "builder": "在线制作",
       "project": "项目",
       "github": "GitHub",
-      "issues": "问题反馈"
-    },
-    "buttons": {
-      "learnMore": "了解更多",
-      "experienceAI": "体验 AI 功能",
-      "experienceNow": "立即体验",
-      "starOnGithub": "在 GitHub 上点赞"
-    },
-    "tags": {
-      "aiSmart": "AI 智能",
-      "freeForever": "完全免费",
-      "dataSecurity": "数据安全",
-      "aiEnhancement": "AI 智能加持",
-      "dataSecurityGuarantee": "数据安全保障"
+      "issues": "问题反馈",
+      "contributors": "贡献者",
+      "copyright": "© {{year}} Magic Resume. 保留所有权利。"
     }
   },
   "modals": {
@@ -191,15 +193,18 @@
       "description": "分析和优化您的简历以匹配目标工作要求，或获取专业的Lighthouse式分析报告。",
       "optimizeTab": {
         "jdLabel": "目标职位描述 (JD)",
-        "jdPlaceholder": "在此处粘贴目标职位的 JD，AI 将据此优化您的简历...",
-        "optimizeButton": "开始优化",
+        "jdPlaceholder": "在此粘贴目标职位的 JD，AI 将根据其对简历进行针对性优化...",
+        "optimizedCount": "优化完成，共处理 {{count}} 个章节",
+        "resultsReady": "优化结果已准备就绪",
+        "applyHint": "点击应用将更新您的简历",
+        "optimizeButton": "开始 AI 优化",
         "optimizingButton": "优化中...",
         "previewButton": "预览",
         "rawJsonButton": "查看原始 JSON",
         "applyChangesButton": "应用更改",
         "revertChangesButton": "还原更改",
-        "outputTitle": "优化结果",
         "jsonButton": "JSON",
+        "outputTitle": "优化结果",
         "steps": {
           "preparer": {
             "title": "准备输入数据",
@@ -351,7 +356,15 @@
           "nextStep": "下一步",
           "startInterview": "开始面试"
         },
+        "controls": {
+          "consoleTitle": "终端控制台",
+          "stopRecording": "停止录音",
+          "startRecording": "开始录音",
+          "clickToSpeak": "点击说话",
+          "console": "实时控制台"
+        },
         "status": {
+          "waitingConnection": "正在等待连接...",
           "connecting": "正在连接面试官...",
           "readingResume": "正在阅读您的简历...",
           "isListening": "AI 面试官正在聆听...",
@@ -359,12 +372,6 @@
           "thinking": "正在组织语言 / 生成语音...",
           "preAnswer": "思考时间",
           "answerHint": "点击麦克风提前回答"
-        },
-        "controls": {
-          "stopRecording": "停止录音",
-          "startRecording": "开始录音",
-          "clickToSpeak": "点击说话",
-          "console": "Realtime Console"
         },
         "voices": {
           "shimmer": "原生 (Native) - Shimmer (快)",
@@ -427,6 +434,12 @@
       "returnToView": "返回预览",
       "commentMode": "评论模式"
     },
+    "templates": {
+      "title": "模板",
+      "error": "获取模板失败",
+      "retry": "重试",
+      "none": "暂无可用的模板"
+    },
     "comments": {
       "title": "评论",
       "noComments": "暂无评论",
@@ -443,7 +456,8 @@
       "resumeNotFound": "无法找到简历或访问被拒绝",
       "redirectingPre": "",
       "redirectingPost": " 秒后返回首页...",
-      "returnNow": "立即返回"
+      "returnNow": "立即返回",
+      "failedToLoad": "加载简历失败，请检查网络或链接。"
     },
     "notifications": {
       "resumeNotFound": "此简历不存在或尚未公开。",
@@ -489,7 +503,9 @@
       "addItem": "新增",
       "openMenu": "打开菜单",
       "editTitle": "编辑 {{label}}",
-      "addTitle": "添加新的 {{label}}"
+      "addTitle": "添加新的 {{label}}",
+      "shown": "已显示",
+      "hidden": "已隐藏"
     },
     "notifications": {
       "requiredFields": "请填写以下必填字段：{{fields}}",
@@ -550,8 +566,14 @@
     }
   },
   "templatePanel": {
-    "title": "模板",
-    "placeholder": "模板 {{index}}"
+    "title": "选择模板",
+    "placeholder": "模板 {{index}}",
+    "layoutTwoColumn": "双栏",
+    "layoutSingleColumn": "单栏",
+    "customize": "自定义模板",
+    "error": "加载模板失败",
+    "retry": "重试",
+    "none": "未找到模板"
   },
   "templateCustomizer": {
     "title": "自定义模板",
@@ -819,8 +841,17 @@
     }
   },
   "common": {
+    "loading": "加载中...",
+    "logoAlt": "Magic Resume 徽标",
+    "userAvatarAlt": "用户头像",
     "manualSave": "主动保存",
+    "info": {
+      "title": "基本信息",
+      "contact": "联系方式"
+    },
     "autoSave": "自动保存",
+    "expand": "展开",
+    "collapse": "收起",
     "notifications": {
       "copySuccess": "JSON数据已复制到剪贴板",
       "copyFailed": "复制失败，请重试",
@@ -836,7 +867,9 @@
       "view": "查看",
       "parseResumeData": "解析的简历数据",
       "closePreview": "关闭",
-      "previewResume": "预览"
+      "previewResume": "预览",
+      "json": "JSON",
+      "downloadJson": "下载 JSON"
     },
     "confirmDeleteVersion": "确定要删除此历史记录吗？",
     "confirmDeleteResume": "确定要删除这份简历吗？",
@@ -861,5 +894,53 @@
       "ClarityAndReadability": "清晰度与可读性",
       "ProfessionalSummary": "专业摘要"
     }
+  },
+  "errorPage": {
+    "title": "出了点问题！",
+    "description": "抱歉，发生了意外错误。您可以尝试刷新页面或返回首页。",
+    "buttons": {
+      "tryAgain": "重试",
+      "backHome": "返回首页"
+    }
+  },
+  "notFoundPage": {
+    "title": "页面未找到",
+    "description": "抱歉，我们找不到您要查找的页面。它可能已被移动或删除。",
+    "buttons": {
+      "backHome": "返回首页",
+      "goBack": "返回上一页"
+    }
+  },
+  "loading": {
+    "common": "加载中...",
+    "aiThinking": "AI 思考中...",
+    "aiLab": {
+      "start": "正在启动 AI 实验室...",
+      "preparing": "正在准备智能面试官与分析工具..."
+    },
+    "history": {
+      "title": "正在加载历史版本...",
+      "description": "正在获取您的简历修改记录..."
+    },
+    "json": {
+      "title": "正在生成 JSON 数据...",
+      "description": "正在准备简历的结构化预览..."
+    },
+    "share": {
+      "title": "正在准备分享配置...",
+      "description": "正在加载权限与链接选项..."
+    }
+  },
+  "dashboardPage": {
+    "cloudSyncBanner": {
+      "title": "云端同步功能现已上线！",
+      "description": "开启后可多端同步并自动备份所有简历版本，数据安全无忧。目前您处于本地存储模式。",
+      "button": "前往设置开启"
+    }
+  },
+  "hero": {
+    "title": "使用 AI 打造您的简历",
+    "subtitle": "专业的模板、AI 驱动的写作和实时预览。",
+    "macbookTitle": "这台苹果电脑是用 Tailwindcss 做的。<br />真的，没开玩笑。"
   }
 }

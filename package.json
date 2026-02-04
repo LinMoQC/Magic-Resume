@@ -13,10 +13,14 @@
     "build:analyze": "npm run build && npm run analyze:bundle",
     "analyze:bundle": "npx @next/bundle-analyzer",
     "build:prod": "NODE_ENV=production next build",
-    "build:standalone": "next build && next export"
+    "build:standalone": "next build && next export",
+    "i18n:check": "tsx scripts/i18n-check.ts"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": "eslint --fix",
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "npm run i18n:check"
+    ],
     "*.{json,md,yml,yaml}": "prettier --write"
   },
   "dependencies": {
@@ -86,14 +90,18 @@
     "@eslint/eslintrc": "^3",
     "@next/bundle-analyzer": "^15.3.3",
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20.19.0",
+    "@types/node": "^20.19.31",
     "@types/react": "^19.1.6",
     "@types/react-dom": "^19",
     "cross-env": "^7.0.3",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
+    "glob": "^13.0.1",
     "husky": "^9.1.7",
     "tailwindcss": "^4",
+    "ts-morph": "^27.0.2",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "^5",
     "webpack-bundle-analyzer": "^4.10.2"
   }

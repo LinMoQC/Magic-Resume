@@ -1,6 +1,7 @@
 import React from 'react';
 import { MagicTemplateDSL } from '@/templates/types/magic-dsl';
 import { Settings } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import ResumeMiniPreview from '../../../_components/ResumeMiniPreview';
 
 interface TemplatePreviewCardProps {
@@ -11,6 +12,7 @@ interface TemplatePreviewCardProps {
 }
 
 export default function TemplatePreviewCard({ template, isSelected, onSelect, onCustomize }: TemplatePreviewCardProps) {
+  const { t } = useTranslation();
   const primaryColor = template.designTokens.colors.primary;
   
   return (
@@ -53,7 +55,9 @@ export default function TemplatePreviewCard({ template, isSelected, onSelect, on
             {/* 布局标识和颜色指示 */}
             <div className="flex items-center justify-between">
               <span className="text-xs text-neutral-400">
-                {template.layout.type === 'two-column' ? '双栏' : '单栏'}
+                {template.layout.type === 'two-column' 
+                  ? t('templatePanel.layoutTwoColumn') 
+                  : t('templatePanel.layoutSingleColumn')}
               </span>
               
               {/* 颜色指示器 */}
@@ -105,7 +109,7 @@ export default function TemplatePreviewCard({ template, isSelected, onSelect, on
               onCustomize();
             }}
             className="absolute top-2 left-2 w-6 h-6 bg-neutral-700/80 hover:bg-neutral-600 border border-neutral-600 rounded-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-            title="自定义模板"
+            title={t('templatePanel.customize')}
           >
             <Settings size={12} className="text-neutral-300" />
           </button>

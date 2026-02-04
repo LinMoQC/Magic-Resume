@@ -2,7 +2,6 @@ import Link from 'next/link';
 import React from 'react';
 import {
   UserButton,
-  ClerkLoading,
   ClerkLoaded,
 } from "@clerk/nextjs";
 import Image from 'next/image';

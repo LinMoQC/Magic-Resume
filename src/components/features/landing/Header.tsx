@@ -4,9 +4,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '@/components/shared/LanguageSwitcher';
 
 export function Header() {
+  const { t } = useTranslation();
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -30,7 +32,7 @@ export function Header() {
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
       {/* 顶部装饰线 */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
+      <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-purple-500/50 to-transparent" />
       
       <div className="container mx-auto px-6 py-4">
         <div className="flex justify-between items-center">
@@ -48,13 +50,13 @@ export function Header() {
               >
                 <Image 
                   src="/magic-resume-logo.png" 
-                  alt="magic-resume-logo" 
+                  alt={t("common.logoAlt")} 
                   width={160} 
                   height={40} 
                   className="transition-all duration-300 group-hover:brightness-110" 
                 />
                 {/* Logo 光晕效果 */}
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-cyan-400/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl" />
+                <div className="absolute inset-0 bg-linear-to-r from-purple-400/20 to-cyan-400/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl" />
               </motion.div>
             </Link>
           </motion.div>
@@ -75,7 +77,7 @@ export function Header() {
 
       {/* 底部装饰线 */}
       <motion.div 
-        className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-neutral-700 to-transparent"
+        className="absolute bottom-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-neutral-700 to-transparent"
         initial={{ scaleX: 0 }}
         animate={{ scaleX: 1 }}
         transition={{ delay: 0.8, duration: 1 }}

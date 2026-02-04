@@ -44,7 +44,7 @@ export default function DashboardSidebar() {
           <div className="h-10 flex items-center">
             <Image 
               src="/magic-resume-logo.png" 
-              alt="Magic Resume Logo" 
+              alt={t('common.logoAlt')} 
               width={150} 
               height={40} 
               priority
@@ -111,7 +111,7 @@ export default function DashboardSidebar() {
         {/* Logo Placeholder */}
         <div className="pt-6 pb-8 shrink-0">
           <Link href="/dashboard" className="transition-transform active:scale-95">
-            <Image src="/simple-logo.png" alt="Magic Resume Logo" width={40} height={40} priority />
+            <Image src="/simple-logo.png" alt={t('common.logoAlt')} width={40} height={40} priority />
           </Link>
         </div>
         

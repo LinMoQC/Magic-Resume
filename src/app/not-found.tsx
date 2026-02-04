@@ -4,8 +4,10 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Home } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function NotFound() {
+  const { t } = useTranslation();
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center p-4 relative overflow-hidden">
@@ -30,18 +32,18 @@ export default function NotFound() {
         </motion.h1>
         
         <h2 className="text-2xl font-bold text-white mb-4 mt-8">
-          Page not found
+          {t('notFoundPage.title')}
         </h2>
         
         <p className="text-neutral-400 mb-10 text-lg">
-          Sorry, we couldn&apos;t find the page you&apos;re looking for. It might have been moved or deleted.
+          {t('notFoundPage.description')}
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link href="/">
             <Button size="lg" className="gap-2 bg-white text-black hover:bg-neutral-200">
               <Home className="w-4 h-4" />
-              Back to Home
+              {t('notFoundPage.buttons.backHome')}
             </Button>
           </Link>
           <Button 
@@ -51,7 +53,7 @@ export default function NotFound() {
             onClick={() => window.history.back()}
           >
             <ArrowLeft className="w-4 h-4" />
-            Go Back
+            {t('notFoundPage.buttons.goBack')}
           </Button>
         </div>
       </motion.div>

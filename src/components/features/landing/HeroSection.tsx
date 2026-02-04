@@ -150,8 +150,8 @@ export function HeroSection() {
               onClick={() => traceGetStarted()}
             >
               <div className="group relative rounded-full p-px bg-linear-to-b from-white/20 to-white/0 shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] transition-all duration-300">
-                  <div className="relative rounded-full bg-gradient-to-b from-[#7e22ce] to-[#581c87] px-8 py-4 flex items-center justify-center sm:justify-start gap-2 overflow-hidden transition-all duration-300 group-hover:brightness-110">
-                      <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="relative rounded-full bg-linear-to-b from-[#7e22ce] to-[#581c87] px-8 py-4 flex items-center justify-center sm:justify-start gap-2 overflow-hidden transition-all duration-300 group-hover:brightness-110">
+                      <div className="absolute inset-0 bg-linear-to-tr from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       <span className="font-semibold text-white tracking-wide">{t("landing.hero.getStarted")}</span>
                       <FiArrowRight className="text-white group-hover:translate-x-1 transition-transform" />
                   </div>
@@ -194,8 +194,8 @@ export function HeroSection() {
               src="/magic-resume-preview.png"
               showGradient={false}
               title={
-                <span className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-neutral-500">
-                  Magic Resume <br /> 
+                <span className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-linear-to-b from-white to-neutral-500">
+                  {t("landing.hero.brandName")} <br /> 
                   <span className="text-2xl md:text-3xl text-purple-400">{t("landing.hero.macbookSubtitle")}</span>
                 </span>
               }
@@ -222,12 +222,12 @@ export function HeroSection() {
             <div className="relative rounded-2xl border border-white/10 overflow-hidden shadow-2xl shadow-purple-500/10">
               <Image 
                 src="/magic-resume-preview.png" 
-                alt="Magic Resume Preview" 
+                alt={t("landing.hero.previewAlt")} 
                 width={800} 
                 height={600} 
                 className="w-full h-auto"
               />
-              <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-black to-transparent" />
             </div>
           </motion.div>
         </div>

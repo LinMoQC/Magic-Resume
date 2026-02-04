@@ -44,15 +44,15 @@ export const MessageItem: React.FC<MessageItemProps> = ({
       {/* 头像 */}
       <div 
         className={`
-          flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center overflow-hidden
-          ${isUser ? 'bg-neutral-600' : 'bg-gradient-to-br from-blue-500 to-purple-600'}
+          shrink-0 w-8 h-8 rounded-full flex items-center justify-center overflow-hidden
+          ${isUser ? 'bg-neutral-600' : 'bg-linear-to-br from-blue-500 to-purple-600'}
         `}
       >
         {isUser ? (
           user?.imageUrl ? (
             <Image 
               src={user.imageUrl} 
-              alt="User Avatar" 
+              alt={t('common.userAvatarAlt')} 
               width={32} 
               height={32} 
               className="w-full h-full object-cover"
@@ -72,7 +72,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
           className={`
             p-3 rounded-2xl shadow-sm border-0
             ${isUser 
-              ? 'bg-gradient-to-r text-white ml-auto' 
+              ? 'bg-linear-to-r text-white ml-auto' 
               : 'bg-neutral-800 text-neutral-200'
             }
           `}
