@@ -128,14 +128,14 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
         setTemplates(templateList);
       } catch (err) {
         console.error('Failed to load templates:', err);
-        setError('Failed to load templates');
+        setError(t('templatePanel.error'));
       } finally {
         setLoading(false);
       }
     };
 
     loadTemplates();
-  }, []);
+  }, [t]);
 
   // 处理模板自定义
   const handleCustomizeTemplate = (template: MagicTemplateDSL) => {
@@ -263,7 +263,7 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            Error loading templates
+            {error}
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -278,7 +278,7 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
               onClick={() => window.location.reload()}
               className="text-xs"
             >
-              Retry
+              {t('templatePanel.retry')}
             </Button>
           </motion.div>
         </motion.div>
@@ -304,7 +304,7 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            No templates available
+            {t('templatePanel.none')}
           </motion.p>
         </motion.div>
       );
@@ -506,7 +506,7 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
           onClick={() => {
             setRightCollapsed(!rightCollapsed);
           }}
-          title={`Panel is ${rightCollapsed ? 'collapsed' : 'expanded'}. Click to ${rightCollapsed ? 'expand' : 'collapse'}.`}
+          title={rightCollapsed ? t('common.expand') : t('common.collapse')}
         >
           <motion.div
             animate={{ rotate: rightCollapsed ? 0 : 180 }}

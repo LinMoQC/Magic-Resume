@@ -193,7 +193,7 @@ const TiptapEditor = ({ content, onChange, placeholder, isPolishing, setIsPolish
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-invert dark:prose-invert min-h-[150px] max-h-[250px] overflow-y-auto w-full max-w-none rounded-b-md border border-b-neutral-700 border-x-neutral-700 bg-black px-3 py-2 text-sm text-gray-200 focus:outline-none border-none bg-neutral-800 hide-scrollbar',
+        class: 'prose prose-invert dark:prose-invert min-h-[150px] max-h-[250px] overflow-y-auto w-full max-w-none rounded-b-md border border-b-neutral-700 border-x-neutral-700 bg-black px-3 py-2 text-sm text-gray-200 focus:outline-none border-none bg-neutral-800 hide-scrollbar cursor-text',
       },
     },
   });

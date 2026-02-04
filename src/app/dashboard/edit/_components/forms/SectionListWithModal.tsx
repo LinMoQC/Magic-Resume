@@ -347,7 +347,7 @@ export default function SectionListWithModal<T extends BaseItem>({
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
+              <div className="flex-1 overflow-y-auto hide-scrollbar p-6 space-y-6">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   {fields.map((field) => (
                     <div key={field.name} className="space-y-2">

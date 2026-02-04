@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, RotateCcw, Home } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
 
 export default function Error({
   error,
@@ -13,6 +14,7 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const { t } = useTranslation();
   useEffect(() => {
     // Log the error to an error reporting service
     console.error('Global Error Boundary caught:', error);
@@ -36,11 +38,11 @@ export default function Error({
         </div>
 
         <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
-          Something went wrong!
+          {t('errorPage.title')}
         </h2>
         
         <p className="text-neutral-400 mb-8 leading-relaxed">
-          We apologize for the inconvenience. An unexpected error has occurred. You can try refreshing the page or navigating back home.
+          {t('errorPage.description')}
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -50,7 +52,7 @@ export default function Error({
             className="w-full sm:w-auto gap-2 bg-white text-black hover:bg-neutral-200"
           >
             <RotateCcw className="w-4 h-4" />
-            Try again
+            {t('errorPage.buttons.tryAgain')}
           </Button>
           
           <Link href="/" className="w-full sm:w-auto">
@@ -60,7 +62,7 @@ export default function Error({
               className="w-full gap-2 bg-transparent border-neutral-800 text-neutral-300 hover:bg-neutral-900"
             >
               <Home className="w-4 h-4" />
-              Back to Home
+              {t('errorPage.buttons.backHome')}
             </Button>
           </Link>
         </div>

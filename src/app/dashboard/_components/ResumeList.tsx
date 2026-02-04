@@ -113,6 +113,7 @@ function ResumeCard({
 }
 
 function CloudSyncBanner() {
+  const { t } = useTranslation();
   const cloudSync = useSettingStore(state => state.cloudSync);
 
   if (cloudSync) return null;
@@ -134,13 +135,13 @@ function CloudSyncBanner() {
                 <FiCloud size={20} />
               </div>
               <div>
-                <h4 className="text-blue-100 font-semibold mb-0.5">云端同步功能现已上线！</h4>
-                <p className="text-sm text-blue-200/70">开启后可多端同步并自动备份所有简历版本，数据安全无忧。目前您处于本地存储模式。</p>
+                <h4 className="text-blue-100 font-semibold mb-0.5">{t('dashboardPage.cloudSyncBanner.title')}</h4>
+                <p className="text-sm text-blue-200/70">{t('dashboardPage.cloudSyncBanner.description')}</p>
               </div>
             </div>
             
             <div className="flex items-center gap-2 text-blue-400 font-medium text-sm whitespace-nowrap group-hover:translate-x-1 transition-transform">
-              前往设置开启 <FiArrowRight />
+              {t('dashboardPage.cloudSyncBanner.button')} <FiArrowRight />
             </div>
           </div>
         </div>

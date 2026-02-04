@@ -66,7 +66,7 @@ export default function MobileResumEdit({
         <div className="fixed w-[90vw] top-6 left-1/2 -translate-x-1/2 z-10 flex items-center justify-between gap-4">
             <Button onClick={() => setLeftPanelOpen(true)} className="rounded-full h-12 w-12"><FiEdit /></Button>
             <Link href="/dashboard" className="rounded-full h-12 w-12 flex items-center justify-center">
-                <Image src="/simple-logo.png" alt="Magic Resume Logo" width={50} height={50} />
+                <Image src="/simple-logo.png" alt={t('common.logoAlt')} width={50} height={50} />
             </Link>
             <Button onClick={() => setRightPanelOpen(true)} className="rounded-full h-12 w-12"><FiLayout /></Button>
         </div>

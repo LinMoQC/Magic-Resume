@@ -84,24 +84,24 @@ export const LogItem: React.FC<LogItemProps> = ({ log, isLast, onToggleExpand, e
   return (
     <div className="relative w-full">
       <div className="flex items-start max-w-full">
-        <div className="flex flex-col items-center mr-4 self-stretch flex-shrink-0">
+        <div className="flex flex-col items-center mr-4 self-stretch shrink-0">
           <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white z-10 shadow-lg transition-all duration-300 ${
             log.status === 'completed' 
-              ? 'bg-gradient-to-r from-green-500 to-emerald-600 shadow-green-500/25' 
+              ? 'bg-linear-to-r from-green-500 to-emerald-600 shadow-green-500/25' 
               : log.status === 'in_progress' 
-              ? 'bg-gradient-to-r from-sky-500 to-blue-600 shadow-sky-500/25 animate-pulse' 
-              : 'bg-gradient-to-r from-neutral-600 to-neutral-500 shadow-neutral-500/25'
+              ? 'bg-linear-to-r from-sky-500 to-blue-600 shadow-sky-500/25 animate-pulse' 
+              : 'bg-linear-to-r from-neutral-600 to-neutral-500 shadow-neutral-500/25'
           }`}>
             {log.status === 'in_progress' && <Loader2 size={18} className="animate-spin" />}
             {log.status === 'completed' && <CheckCircle size={18} />}
             {log.status === 'pending' && <div className="w-3 h-3 bg-neutral-300 rounded-full opacity-60" />}
           </div>
-          {!isLast && <div className="w-0.5 flex-grow bg-gradient-to-b from-neutral-600 to-neutral-700 rounded-full mt-2" />}
+          {!isLast && <div className="w-0.5 grow bg-linear-to-b from-neutral-600 to-neutral-700 rounded-full mt-2" />}
         </div>
         <div className="flex-1 pt-1 pb-4 min-w-0 overflow-hidden">
           <div className="flex items-center min-w-0">
             {isExpandable && (
-              <div className="flex-shrink-0 w-6 flex justify-center">
+              <div className="shrink-0 w-6 flex justify-center">
                   <Button
                     variant="ghost"
                     size="icon"
@@ -112,10 +112,10 @@ export const LogItem: React.FC<LogItemProps> = ({ log, isLast, onToggleExpand, e
                   </Button>
               </div>
             )}
-            <h4 className={`font-semibold text-neutral-100 text-sm ${isExpandable ? 'ml-1' : ''} truncate min-w-0`}>{log.title}</h4>
+            <h4 className={`font-semibold text-neutral-100 text-sm ${isExpandable ? 'ml-1' : ''} truncate wrap-break-word min-w-0`}>{log.title}</h4>
           </div>
           <div className={`${isExpandable ? "pl-7" : ""} min-w-0 max-w-full overflow-hidden`}>
-            <p className="text-xs text-neutral-400 mt-1 leading-relaxed break-words overflow-wrap-anywhere">{getStatusText(log)}</p>
+            <p className="text-xs text-neutral-400 mt-1 leading-relaxed wrap-wrap-breakword">{getStatusText(log)}</p>
 
             <AnimatePresence>
               {contentElement && (
@@ -126,7 +126,7 @@ export const LogItem: React.FC<LogItemProps> = ({ log, isLast, onToggleExpand, e
                   className="mb-2"
                 >
                   <div className="p-4 bg-black/90 border border-neutral-600/50 rounded-lg max-h-64 overflow-auto backdrop-blur-sm shadow-xl max-w-full">
-                    <div className="text-sm text-neutral-200 leading-relaxed break-words overflow-wrap-anywhere max-w-full">
+                    <div className="text-sm text-neutral-200 leading-relaxed wrap-break-word overflow-wrap-anywhere max-w-full">
                       {contentElement}
                     </div>
                   </div>
@@ -139,7 +139,7 @@ export const LogItem: React.FC<LogItemProps> = ({ log, isLast, onToggleExpand, e
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="mt-3 p-3 bg-gradient-to-br from-neutral-800/40 to-neutral-700/20 border border-neutral-600/30 rounded-lg backdrop-blur-sm shadow-lg overflow-hidden"
+                  className="mt-3 p-3 bg-linear-to-br from-neutral-800/40 to-neutral-700/20 border border-neutral-600/30 rounded-lg backdrop-blur-sm shadow-lg overflow-hidden"
                 >
                 {log.children!.map((child, index) => (
                   <LogItem

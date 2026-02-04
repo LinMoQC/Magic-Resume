@@ -73,9 +73,9 @@ export default function OptimizeTab({ resumeData, onApplyChanges, templateId, is
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 h-full mt-3">
       {/* 左侧输入区域 */}
       <div className="lg:col-span-2 space-y-4 flex flex-col h-[62vh]">
-        <div className="flex-1 flex flex-col bg-gradient-to-br from-neutral-900/50 to-neutral-800/30 p-4 rounded-lg border border-neutral-700/50 backdrop-blur-sm">
+        <div className="flex-1 flex flex-col bg-linear-to-br from-neutral-900/50 to-neutral-800/30 p-4 rounded-lg border border-neutral-700/50 backdrop-blur-sm">
           <label htmlFor="jd" className="font-bold text-neutral-200 flex items-center mb-3 text-base">
-            <div className="w-6 h-6 bg-gradient-to-r from-sky-500 to-blue-600 rounded-md flex items-center justify-center mr-2">
+            <div className="w-6 h-6 bg-linear-to-r from-sky-500 to-blue-600 rounded-md flex items-center justify-center mr-2">
               <Paperclip size={14} className="text-white" />
             </div>
             {t('modals.aiModal.optimizeTab.jdLabel')}
@@ -93,7 +93,7 @@ export default function OptimizeTab({ resumeData, onApplyChanges, templateId, is
         <Button
           onClick={handleOptimize}
           disabled={isAiJobRunning}
-          className="optimize-button w-full h-10 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-semibold mt-auto rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] disabled:transform-none disabled:hover:scale-100"
+          className="optimize-button w-full h-10 bg-linear-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-semibold mt-auto rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] disabled:transform-none disabled:hover:scale-100"
         >
           {isLoading ? (
             <>
@@ -110,10 +110,10 @@ export default function OptimizeTab({ resumeData, onApplyChanges, templateId, is
       </div>
 
       {/* 右侧输出区域 */}
-      <div className="lg:col-span-3 bg-gradient-to-br from-neutral-900/50 to-neutral-800/30 rounded-lg border border-neutral-700/50 backdrop-blur-sm flex flex-col h-[62vh] shadow-xl">
-        <div className="p-4 border-b border-neutral-700/50 flex items-center justify-between bg-gradient-to-r from-neutral-800/30 to-neutral-700/20 rounded-t-lg">
+      <div className="lg:col-span-3 bg-linear-to-br from-neutral-900/50 to-neutral-800/30 rounded-lg border border-neutral-700/50 backdrop-blur-sm flex flex-col h-[62vh] shadow-xl">
+        <div className="p-4 border-b border-neutral-700/50 flex items-center justify-between bg-linear-to-r from-neutral-800/30 to-neutral-700/20 rounded-t-lg">
           <div className="flex items-center">
-            <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center mr-3 shadow-lg shadow-green-500/25">
+            <div className="w-8 h-8 bg-linear-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center mr-3 shadow-lg shadow-green-500/25">
               <CheckCircle size={16} className="text-white" />
             </div>
             <div>
@@ -122,7 +122,7 @@ export default function OptimizeTab({ resumeData, onApplyChanges, templateId, is
               </h3>
               {optimizedResume && (
                 <p className="text-xs text-neutral-400 mt-0.5">
-                  优化完成，共处理 {Object.keys(optimizedResume.sections || {}).length} 个章节
+                  {t('modals.aiModal.optimizeTab.optimizedCount', { count: Object.keys(optimizedResume.sections || {}).length })}
                 </p>
               )}
             </div>
@@ -133,7 +133,7 @@ export default function OptimizeTab({ resumeData, onApplyChanges, templateId, is
                 size="sm"
                 onClick={() => setIsPreview(false)}
                 className={`px-3 py-2 h-auto text-xs font-medium rounded-md transition-all duration-200 ${!isPreview
-                  ? 'bg-gradient-to-r from-sky-600 to-blue-700 text-white shadow-md shadow-sky-500/25'
+                  ? 'bg-linear-to-r from-sky-600 to-blue-700 text-white shadow-md shadow-sky-500/25'
                   : 'bg-transparent text-neutral-400 hover:bg-neutral-700/40 hover:text-neutral-300'
                   }`}
               >
@@ -143,7 +143,7 @@ export default function OptimizeTab({ resumeData, onApplyChanges, templateId, is
                 size="sm"
                 onClick={() => setIsPreview(true)}
                 className={`px-3 py-2 h-auto text-xs font-medium rounded-md transition-all duration-200 ${isPreview
-                  ? 'bg-gradient-to-r from-sky-600 to-blue-700 text-white shadow-md shadow-sky-500/25'
+                  ? 'bg-linear-to-r from-sky-600 to-blue-700 text-white shadow-md shadow-sky-500/25'
                   : 'bg-transparent text-neutral-400 hover:bg-neutral-700/40 hover:text-neutral-300'
                   }`}
               >
@@ -171,8 +171,8 @@ export default function OptimizeTab({ resumeData, onApplyChanges, templateId, is
             </div>
           ) : !isLoading && !optimizedResume ? (
             <div className="flex-1 flex flex-col items-center justify-center text-neutral-500 text-center p-6">
-              <div className="bg-gradient-to-br from-neutral-800/50 to-neutral-700/30 rounded-xl p-8 border border-neutral-600/30 backdrop-blur-sm shadow-xl">
-                <div className="w-12 h-12 bg-gradient-to-r from-sky-500/20 to-blue-600/20 rounded-xl flex items-center justify-center mb-4 mx-auto">
+              <div className="bg-linear-to-br from-neutral-800/50 to-neutral-700/30 rounded-xl p-8 border border-neutral-600/30 backdrop-blur-sm shadow-xl">
+                <div className="w-12 h-12 bg-linear-to-r from-sky-500/20 to-blue-600/20 rounded-xl flex items-center justify-center mb-4 mx-auto">
                   <Wand2 size={24} className="text-sky-400" />
                 </div>
                 <h3 className="text-lg font-bold text-neutral-200 mb-2">{t('modals.aiModal.optimizePlaceholder.title')}</h3>
@@ -194,7 +194,7 @@ export default function OptimizeTab({ resumeData, onApplyChanges, templateId, is
                 </div>
               ) : (
                 <div className="p-3 bg-neutral-900/50 h-full overflow-y-auto backdrop-blur-sm">
-                  <div className="bg-gradient-to-br from-black/90 to-neutral-900/90 rounded-lg p-4 border border-neutral-700/50 shadow-xl">
+                  <div className="bg-linear-to-br from-black/90 to-neutral-900/90 rounded-lg p-4 border border-neutral-700/50 shadow-xl">
                     <div className="json-viewer-enhanced">
                       <ReactJsonView
                         src={optimizedResume}
@@ -219,19 +219,19 @@ export default function OptimizeTab({ resumeData, onApplyChanges, templateId, is
         </div>
 
         {optimizedResume && !isLoading && (
-          <div className="p-4 border-t border-neutral-700/50 bg-gradient-to-r from-neutral-800/30 to-neutral-700/20 rounded-b-lg">
+          <div className="p-4 border-t border-neutral-700/50 bg-linear-to-r from-neutral-800/30 to-neutral-700/20 rounded-b-lg">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center text-xs text-neutral-400">
                 <div className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-                优化结果已准备就绪
+                {t('modals.aiModal.optimizeTab.resultsReady')}
               </div>
               <div className="text-xs text-neutral-500">
-                点击应用将更新您的简历
+                {t('modals.aiModal.optimizeTab.applyHint')}
               </div>
             </div>
             <Button
               onClick={handleApply}
-              className="apply-changes-button w-full h-10 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] relative overflow-hidden"
+              className="apply-changes-button w-full h-10 bg-linear-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] relative overflow-hidden"
             >
               <CheckCircle className="mr-2 h-4 w-4" />
               <span className="text-sm">{t('modals.aiModal.optimizeTab.applyChangesButton')}</span>

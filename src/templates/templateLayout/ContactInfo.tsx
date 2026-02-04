@@ -1,6 +1,7 @@
 import React from 'react';
 import { InfoType } from '@/types/frontend/resume';
 import { FaEnvelope, FaPhone, FaGlobe, FaMapMarkerAlt } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   data: InfoType;
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export function ContactInfo({ data: info, style }: Props) {
+  const { t } = useTranslation();
   const contactItems = [
     {
       icon: FaMapMarkerAlt,
@@ -55,7 +57,7 @@ export function ContactInfo({ data: info, style }: Props) {
           marginBottom: 'var(--paragraph-spacing)',
         }}
       >
-        Contact
+        {t('common.info.contact')}
       </h3>
       
       <div className="space-y-3">
@@ -64,7 +66,7 @@ export function ContactInfo({ data: info, style }: Props) {
           const content = (
             <div className="flex items-center space-x-3" style={{ color: textColor, lineHeight: 1.2 }}>
               <IconComponent 
-                className="w-4 h-4 flex-shrink-0" 
+                className="w-4 h-4 shrink-0" 
                 style={{ 
                   color: iconColor,
                   marginTop: '-2px',

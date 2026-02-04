@@ -37,13 +37,25 @@ export default function DashboardSidebar() {
   }, []);
 
   const sidebarContent = (
-    <>
-      <div className="px-4 mb-8 flex justify-center">
-        <Link href="/dashboard">
-          <Image src="/magic-resume-logo.png" alt="Magic Resume Logo" width={150} height={0} />
+    <div className="flex flex-col h-full overflow-hidden">
+      {/* Logo Placeholder */}
+      <div className="pt-8 pb-6 flex justify-center shrink-0">
+        <Link href="/dashboard" className="transition-transform active:scale-95">
+          <div className="h-10 flex items-center">
+            <Image 
+              src="/magic-resume-logo.png" 
+              alt={t('common.logoAlt')} 
+              width={150} 
+              height={40} 
+              priority
+              className="object-contain h-10"
+            />
+          </div>
         </Link>
       </div>
-      <nav className="flex-1 px-4">
+
+      {/* Navigation Area */}
+      <nav className="flex-1 px-4 overflow-y-auto hide-scrollbar">
         {menuItems.map(({ href, label, icon: Icon }) => (
           <Link
             key={href}
@@ -55,39 +67,55 @@ export default function DashboardSidebar() {
           </Link>
         ))}
       </nav>
-      <div className="px-6 mt-auto flex items-center gap-3">
-        <UserButton afterSignOutUrl="/" />
-        <div className='flex flex-col'>
-          <span className='text-sm font-bold'>{user?.fullName}</span>
-          <span className='text-xs text-neutral-400'>{user?.primaryEmailAddress?.emailAddress}</span>
+
+      {/* Profile Placeholder */}
+      <div className="px-6 pt-6 pb-4 border-t border-neutral-800 bg-black shrink-0 flex items-center gap-3">
+        <div className="relative w-8 h-8 shrink-0">
+          <div className="absolute inset-0 bg-neutral-800 rounded-full animate-pulse z-0" />
+          <div className="relative z-10 w-8 h-8 flex items-center justify-center">
+            <UserButton afterSignOutUrl="/" />
+          </div>
+        </div>
+        <div className='flex flex-col overflow-hidden'>
+          <span className='text-sm font-bold truncate'>{user?.fullName}</span>
+          <span className='text-xs text-neutral-400 truncate'>{user?.primaryEmailAddress?.emailAddress}</span>
         </div>
       </div>
-    </>
+    </div>
   );
 
   if (pathname.includes('/edit')) {
     if (!hasMounted) {
       return (
-        <aside className="w-20 bg-black border-r border-neutral-800 flex-col py-8 hidden md:flex items-center">
-          <Skeleton className="h-10 w-10 mb-8 rounded-md" />
-          <div className="flex-1 flex flex-col justify-center gap-4">
-            <Skeleton className="h-10 w-10 rounded-md" />
-            <Skeleton className="h-10 w-10 rounded-md" />
-            <Skeleton className="h-10 w-10 rounded-md" />
+        <aside className="w-20 bg-black border-r border-neutral-800 hidden md:flex flex-col items-center">
+          {/* Logo Placeholder */}
+          <div className="pt-12 pb-8 shrink-0">
             <Skeleton className="h-10 w-10 rounded-md" />
           </div>
-          <div className="mt-auto">
+          {/* Nav Placeholder */}
+          <div className="flex-1 flex flex-col items-center justify-center gap-4 w-full px-4 py-4">
+            <Skeleton className="h-10 w-full rounded-md shrink-0" />
+            <Skeleton className="h-10 w-full rounded-md shrink-0" />
+            <Skeleton className="h-10 w-full rounded-md shrink-0" />
+            <Skeleton className="h-10 w-full rounded-md shrink-0" />
+          </div>
+          {/* Profile Placeholder */}
+          <div className="pt-4 pb-4 shrink-0">
             <Skeleton className="h-8 w-8 rounded-full" />
           </div>
         </aside>
       );
     }
     return (
-      <aside className="border-r border-neutral-800 bg-neutral-900 flex-col p-4 w-20 items-center hidden md:flex">
-        <Link href="/dashboard" className="mb-8">
-          <Image src="/simple-logo.png" alt="Magic Resume Logo" width={40} height={40} />
-        </Link>
-        <nav className="flex flex-col gap-2 flex-grow justify-center">
+      <aside className="border-r border-neutral-800 bg-neutral-900 w-20 h-full hidden md:flex flex-col items-center">
+        {/* Logo Placeholder */}
+        <div className="pt-6 pb-8 shrink-0">
+          <Link href="/dashboard" className="transition-transform active:scale-95">
+            <Image src="/simple-logo.png" alt={t('common.logoAlt')} width={40} height={40} priority />
+          </Link>
+        </div>
+        
+        <nav className="flex-1 flex flex-col items-center justify-center gap-2 w-full overflow-y-auto hide-scrollbar py-4">
           {activeResume?.sectionOrder.map((section) => {
             const iconItem = sidebarMenu.find((item) => item.key === section.key);
             if (!iconItem) return null;
@@ -97,7 +125,7 @@ export default function DashboardSidebar() {
               <Button
                 key={section.key}
                 variant="ghost"
-                className='h-12 w-12 hover:bg-neutral-800 bg-transparent z-[1]'
+                className='h-12 w-12 hover:bg-neutral-800 bg-transparent z-[1] shrink-0'
                 onClick={() => setActiveSection(section.key)}
                 title={t(section.label)}
               >
@@ -106,8 +134,15 @@ export default function DashboardSidebar() {
             );
           })}
         </nav>
-        <div className="mt-auto">
-          <UserButton afterSignOutUrl="/" />
+
+        {/* Profile Placeholder */}
+        <div className="pt-4 pb-4 shrink-0">
+          <div className="relative w-8 h-8">
+            <div className="absolute inset-0 bg-neutral-800 rounded-full animate-pulse z-0" />
+            <div className="relative z-10 w-8 h-8 flex items-center justify-center">
+              <UserButton afterSignOutUrl="/" />
+            </div>
+          </div>
         </div>
       </aside>
     );
@@ -115,16 +150,20 @@ export default function DashboardSidebar() {
 
   if (!hasMounted) {
     return (
-      <aside className="w-64 bg-black border-r border-neutral-800 flex-col py-8 hidden md:flex">
-        <div className="px-4 mb-8">
-          <Skeleton className="h-10 w-36" />
+      <aside className="w-64 bg-black border-r border-neutral-800 hidden md:flex flex-col h-full">
+        {/* Logo Placeholder */}
+        <div className="pt-12 pb-8 flex justify-center shrink-0">
+          <Skeleton className="h-10 w-36 rounded-md" />
         </div>
-        <nav className="flex-1 px-4 space-y-2">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
+        {/* Nav Placeholder */}
+        <nav className="flex-1 px-4 space-y-2 overflow-hidden pt-4">
+          <Skeleton className="h-10 w-full shrink-0" />
+          <Skeleton className="h-10 w-full shrink-0" />
+          <Skeleton className="h-10 w-full shrink-0" />
         </nav>
-        <div className="px-6 mt-auto flex items-center gap-3">
-          <Skeleton className="h-8 w-8 rounded-full" />
+        {/* Profile Placeholder */}
+        <div className="px-6 pt-6 pb-4 border-t border-neutral-800 bg-black shrink-0 flex items-center gap-3">
+          <Skeleton className="h-8 w-8 rounded-full shrink-0" />
           <div className="flex-1 space-y-1">
             <Skeleton className="h-4 w-24" />
             <Skeleton className="h-3 w-32" />
@@ -160,7 +199,7 @@ export default function DashboardSidebar() {
                 animate={{ x: 0 }}
                 exit={{ x: '-100%' }}
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className="fixed top-0 left-0 h-full w-64 bg-black border-r border-neutral-800 flex flex-col py-8 z-50"
+                className="fixed top-0 left-0 h-full w-64 bg-black border-r border-neutral-800 flex flex-col z-50"
               >
                 <button
                   onClick={() => setIsOpen(false)}
@@ -181,7 +220,7 @@ export default function DashboardSidebar() {
   }
 
   return (
-    <aside className="w-64 bg-black border-r border-neutral-800 flex flex-col py-8">
+    <aside className="w-64 bg-black border-r border-neutral-800 flex flex-col">
       {sidebarContent}
     </aside>
   );

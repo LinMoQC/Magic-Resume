@@ -81,7 +81,7 @@ export function TwoColumnLayout({ children, layout }: Props) {
       >
         {/* 左侧边栏 */}
         <div
-          className="flex-shrink-0 flex flex-col"
+          className="shrink-0 flex flex-col"
           style={sidebarStyle}
         >
           {sidebarComponents}

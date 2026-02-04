@@ -5,11 +5,11 @@ export default function ResumeEditSkeleton() {
     <main className="flex flex-col lg:flex-row flex-1 h-screen bg-black text-white font-sans overflow-hidden relative">
 
       {/* Main Form Panel - Desktop Only */}
-      <div className="hidden lg:block w-[300px] p-8 overflow-y-auto flex-shrink-0 border-r border-neutral-800">
+      <div className="hidden lg:block w-[300px] p-8 overflow-y-auto shrink-0 border-r border-neutral-800">
         <div className="mb-8">
           <Skeleton className="h-8 w-32 mb-6" />
           <div className="flex items-center gap-4 mb-6">
-            <Skeleton className="h-16 w-16 rounded-full flex-shrink-0" />
+            <Skeleton className="h-16 w-16 rounded-full shrink-0" />
             <div className="w-full space-y-2">
               <Skeleton className="h-5 w-24" />
               <Skeleton className="h-10 w-full" />
@@ -52,7 +52,7 @@ export default function ResumeEditSkeleton() {
 
         {/* Main Resume Paper Skeleton */}
         <div className="w-full max-w-4xl h-full flex items-center justify-center">
-          <Skeleton className="w-full lg:w-[210mm] max-w-full aspect-[210/297] rounded-lg shadow-2xl opacity-50 lg:opacity-100" />
+          <Skeleton className="w-full lg:w-[210mm] max-w-full aspect-210/297 rounded-lg shadow-2xl opacity-50 lg:opacity-100" />
         </div>
 
         {/* Desktop Bottom Toolbar Logic */}
@@ -74,11 +74,11 @@ export default function ResumeEditSkeleton() {
       </div>
 
       {/* Right Template Panel - Desktop Only */}
-      <div className="hidden lg:block w-80 bg-black border-l border-neutral-800 p-6 flex-shrink-0 overflow-y-auto">
+      <div className="hidden lg:block w-80 bg-black border-l border-neutral-800 p-6 shrink-0 overflow-y-auto">
         <Skeleton className="h-8 w-32 mb-6" />
         <div className="grid grid-cols-2 gap-4">
           {[...Array(6)].map((_, i) => (
-            <Skeleton key={i} className="w-full aspect-[210/297] rounded-md" />
+            <Skeleton key={i} className="w-full aspect-210/297 rounded-md" />
           ))}
         </div>
       </div>

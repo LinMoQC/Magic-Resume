@@ -22,7 +22,7 @@ export default function ColorPicker({ label, value, onChange, presetColors = def
       
       {/* 当前颜色和输入框 */}
       <div className="flex items-center gap-4">
-        <div className="relative w-10 h-10 flex-shrink-0">
+        <div className="relative w-10 h-10 shrink-0">
           <div 
             className="w-full h-full rounded-lg border-2 border-neutral-600"
             style={{ backgroundColor: value }}

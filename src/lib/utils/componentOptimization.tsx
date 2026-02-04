@@ -44,7 +44,7 @@ export const EditorComponents = {
     () => import('@/components/features/resume/TiptapEditor'),
     {
       ssr: false,
-      loading: () => <div className="animate-pulse bg-gray-100 h-32 rounded border" />,
+      loading: () => <div className="animate-pulse bg-neutral-800 h-[200px] rounded border border-neutral-700" />,
     }
   ),
 

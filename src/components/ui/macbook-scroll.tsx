@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { MotionValue, motion, useScroll, useTransform } from "motion/react";
+import { useTranslation } from 'react-i18next';
 import { cn } from "@/lib/utils";
 import {
   IconBrightnessDown,
@@ -37,6 +38,7 @@ export const MacbookScroll = ({
   title?: string | React.ReactNode;
   badge?: React.ReactNode;
 }) => {
+  const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -79,9 +81,7 @@ export const MacbookScroll = ({
         className="mb-20 text-center text-3xl font-bold text-neutral-800 dark:text-white"
       >
         {title || (
-          <span>
-            This Macbook is built with Tailwindcss. <br /> No kidding.
-          </span>
+          <span dangerouslySetInnerHTML={{ __html: t('hero.macbookTitle') }} />
         )}
       </motion.h2>
       {/* Lid */}

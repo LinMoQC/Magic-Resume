@@ -33,7 +33,7 @@ export function Footer() {
           <div className="space-y-4 max-w-sm">
             <Link 
               href="/" 
-              className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60 tracking-tight"
+              className="text-2xl font-bold bg-clip-text text-transparent bg-linear-to-r from-white to-white/60 tracking-tight"
             >
               Magic Resume
             </Link>
@@ -108,7 +108,7 @@ export function Footer() {
             >
               <Image 
                 src="https://contrib.rocks/image?repo=LinMoQC/Magic-Resume" 
-                alt="contributors" 
+                alt={t("landing.footer.contributors")} 
                 width={200}
                 height={36}
                 unoptimized

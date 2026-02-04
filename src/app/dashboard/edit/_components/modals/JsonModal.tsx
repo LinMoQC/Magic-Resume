@@ -38,7 +38,7 @@ export default function JsonModal({ isJsonModalOpen, closeJsonModal, handleDownl
                         <div className="flex items-center justify-between p-6 border-b border-neutral-800 bg-neutral-900/20">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-2xl bg-sky-500/10 flex items-center justify-center text-sky-400 border border-sky-500/20">
-                                    <pre className="text-xs font-bold">JSON</pre>
+                                    <pre className="text-xs font-bold">{t('common.ui.json')}</pre>
                                 </div>
                                 <h2 className="text-xl font-bold text-white uppercase tracking-wider">{t('mobileEdit.jsonData')}</h2>
                             </div>
@@ -55,8 +55,8 @@ export default function JsonModal({ isJsonModalOpen, closeJsonModal, handleDownl
                             <button
                                 onClick={handleDownloadJson}
                                 className="absolute top-6 right-8 p-3 bg-neutral-800/80 hover:bg-sky-600 text-neutral-400 hover:text-white rounded-xl transition-all duration-200 z-10 border border-neutral-700/50"
-                                aria-label="Download JSON file"
-                                title="Download JSON"
+                                aria-label={t('common.ui.downloadJson')}
+                                title={t('common.ui.downloadJson')}
                             >
                                 <FaDownload size={18} />
                             </button>
