@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion, useAnimation, useScroll, useTransform } from 'framer-motion';
 import { FiArrowRight, FiZap, FiGithub } from 'react-icons/fi';
 import Image from 'next/image';
@@ -39,8 +40,9 @@ export function HeroSection() {
   const y = useTransform(scrollYProgress, [0, 1], [0, -50]);
   const [stars, setStars] = useState<number | null>(null);
   const { traceGetStarted, traceGithubStar } = useTrace();
+  const router = useRouter();
 
-  // Fetch GitHub stars
+  // Fetch GitHub stars and prefetch dashboard modals
   useEffect(() => {
     fetch('/api/github-stars')
       .then(res => res.json())
@@ -48,7 +50,11 @@ export function HeroSection() {
         if (data.stars) setStars(data.stars);
       })
       .catch(console.error);
-  }, []);
+
+    // Prefetch parallel route modals for instant access
+    router.prefetch('/dashboard/import');
+    router.prefetch('/dashboard/new');
+  }, [router]);
 
 
   useEffect(() => {
@@ -143,7 +149,7 @@ export function HeroSection() {
               className="w-full sm:w-auto"
               onClick={() => traceGetStarted()}
             >
-              <div className="group relative rounded-full p-[1px] bg-gradient-to-b from-white/20 to-white/0 shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] transition-all duration-300">
+              <div className="group relative rounded-full p-px bg-linear-to-b from-white/20 to-white/0 shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] transition-all duration-300">
                   <div className="relative rounded-full bg-gradient-to-b from-[#7e22ce] to-[#581c87] px-8 py-4 flex items-center justify-center sm:justify-start gap-2 overflow-hidden transition-all duration-300 group-hover:brightness-110">
                       <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       <span className="font-semibold text-white tracking-wide">{t("landing.hero.getStarted")}</span>

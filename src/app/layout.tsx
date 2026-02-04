@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from '@clerk/nextjs';
 import { Theme } from "@radix-ui/themes";
@@ -13,8 +12,7 @@ import { PHProvider } from "@/components/providers/posthog-provider";
 import PostHogPageView from "@/components/providers/PostHogPageView";
 import I18nProvider from "@/components/providers/I18nProvider";
 
-// 字体配置
-const inter = Inter({ subsets: ["latin"] });
+// 字体配置：使用系统字体，避免构建时拉取远程字体
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://magic-resume.cn'),
@@ -38,7 +36,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang={lang} className="hide-scrollbar">
-        <body className={inter.className}>
+        <body className="font-sans">
           <PHProvider>
             <PostHogPageView />
             <I18nProvider>

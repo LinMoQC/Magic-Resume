@@ -50,12 +50,6 @@ const nextConfig: NextConfig = {
     },
   },
 
-  // 外部包配置（服务器端）
-  serverExternalPackages: [
-    'three',
-    'jspdf',
-  ],
-
   // 实验性功能
   experimental: {
     // 优化包导入
@@ -65,7 +59,6 @@ const nextConfig: NextConfig = {
       '@radix-ui/react-icons',
       'framer-motion',
       '@langchain/core',
-      '@langchain/community',
     ],
     viewTransition: true,
   },
