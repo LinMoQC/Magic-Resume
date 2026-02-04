@@ -119,6 +119,8 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
   const [isCustomizing, setIsCustomizing] = useState(false);
   const [customizingTemplate, setCustomizingTemplate] = useState<MagicTemplateDSL | null>(null);
 
+  console.log('[TemplatePanel] Component rendered, onSelectTemplate:', typeof onSelectTemplate);
+
   useEffect(() => {
     const loadTemplates = async () => {
       try {
@@ -350,7 +352,12 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
             <TemplatePreviewCard
               template={template}
               isSelected={currentTemplateId === template.id}
-              onSelect={() => onSelectTemplate(template.id)}
+              onSelect={() => {
+                console.log('[TemplatePanel] onSelect callback triggered for:', template.id);
+                console.log('[TemplatePanel] About to call onSelectTemplate, type:', typeof onSelectTemplate);
+                onSelectTemplate(template.id);
+                console.log('[TemplatePanel] onSelectTemplate called');
+              }}
               onCustomize={() => handleCustomizeTemplate(template)}
             />
           </motion.div>

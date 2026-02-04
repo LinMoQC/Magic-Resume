@@ -51,6 +51,7 @@ export default function HistoryModalPage() {
     if (activeResume && activeResume.id === id) {
         loadHistory();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeResume?.id, id, cloudSync, fetchCloudResume, getToken]);
 
   const handleOpenChange = (open: boolean) => {

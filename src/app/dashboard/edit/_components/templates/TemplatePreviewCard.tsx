@@ -15,12 +15,20 @@ const TemplatePreviewCard = React.memo(({ template, isSelected, onSelect, onCust
   const { t } = useTranslation();
   const primaryColor = template.designTokens.colors.primary;
   
+  const handleSelect = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('[TemplatePreviewCard] Template selected:', template.id);
+    onSelect();
+  };
+
   return (
     <div
       className={`relative group cursor-pointer transition-all duration-200 ${
         isSelected ? 'scale-[1.02]' : 'hover:scale-[1.01]'
       }`}
-      onClick={onSelect}
+      onClick={handleSelect}
+      onTouchEnd={handleSelect}
     >
       {/* 主卡片 */}
       <div

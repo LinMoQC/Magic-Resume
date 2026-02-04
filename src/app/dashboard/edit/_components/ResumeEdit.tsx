@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Section, SectionItem } from '@/types/frontend/resume';
 import { useResumeStore, getSanitizedResume } from '@/store/useResumeStore';
 import { useAuth } from '@clerk/nextjs';
@@ -300,7 +300,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
   }, [activeResume, cloudSync, isStoreLoading, getToken, debouncedSync]);
 
   // 选择模板
-  const handleSelectTemplate = (templateId: string) => {
+  const handleSelectTemplate = useCallback((templateId: string) => {
     if (activeResume) {
       traceTemplateChanged({
         oldTemplate: currentTemplateId,
@@ -310,7 +310,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     }
     setCurrentTemplateId(templateId);
     updateTemplate(templateId);
-  };
+  }, [activeResume, currentTemplateId, traceTemplateChanged, updateTemplate]);
 
   // 拖拽排序
   function handleDragEnd(event: DragEndEvent) {
@@ -418,6 +418,8 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
         onShowAI={openAIModal}
         isAiJobRunning={isAiGenerating}
         onShareClick={openShareModal}
+        onSelectTemplate={handleSelectTemplate}
+        currentTemplateId={currentTemplateId}
       />
     );
   }
