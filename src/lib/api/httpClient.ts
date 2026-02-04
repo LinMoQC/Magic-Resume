@@ -66,7 +66,7 @@ const createHttpClient = (
  */
 export const httpClient = {
   // Main API (NestJS backend for resumes, users, feedback, notifications, etc.)
-  api: createHttpClient(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3111'),
+  api: createHttpClient(process.env.NEXT_PUBLIC_CLOUD_API_URL || 'http://localhost:3111'),
   
   // Agent API (Python backend for AI interview)
   agent: createHttpClient(process.env.BACKEND_URL || 'http://localhost:8000'),
