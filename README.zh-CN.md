@@ -165,6 +165,12 @@ Copyright © 2026 [Magic Resume Team](https://github.com/LinMoQC). <br />
 
 [official-site]: https://magic-resume.cn
 [github-issues-link]: https://github.com/LinMoQC/Magic-Resume/issues
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> master
 [vercel-shield]: https://img.shields.io/badge/vercel-online-55b467?labelColor=black&logo=vercel&style=flat-square
 [vercel-link]: https://magic-resume.cn
 [github-contributors-shield]: https://img.shields.io/github/contributors/LinMoQC/Magic-Resume?color=c4f042&labelColor=black&style=flat-square
@@ -176,4 +182,26 @@ Copyright © 2026 [Magic Resume Team](https://github.com/LinMoQC). <br />
 [github-issues-shield]: https://img.shields.io/github/issues/LinMoQC/Magic-Resume?color=ff80eb&labelColor=black&style=flat-square
 [github-license-shield]: https://img.shields.io/badge/license-MIT-white?labelColor=black&style=flat-square
 [github-license-link]: https://github.com/LinMoQC/Magic-Resume/blob/master/LICENSE
+<<<<<<< HEAD
+=======
+=======
+[github-release-link]: https://github.com/LinMoQC/Magic-Resume/releases
+[github-release-shield]: https://img.shields.io/github/v/release/LinMoQC/Magic-Resume?color=369eff&labelColor=black&logo=github&style=flat-square
+>>>>>>> master
+[vercel-shield]: https://img.shields.io/badge/vercel-online-55b467?labelColor=black&logo=vercel&style=flat-square
+[vercel-link]: https://magic-resume.cn
+[github-contributors-shield]: https://img.shields.io/github/contributors/LinMoQC/Magic-Resume?color=c4f042&labelColor=black&style=flat-square
+[github-contributors-link]: https://github.com/LinMoQC/Magic-Resume/graphs/contributors
+[github-forks-shield]: https://img.shields.io/github/forks/LinMoQC/Magic-Resume?color=8ae8ff&labelColor=black&style=flat-square
+[github-forks-link]: https://github.com/LinMoQC/Magic-Resume/network/members
+[github-stars-shield]: https://img.shields.io/github/stars/LinMoQC/Magic-Resume?color=ffcb47&labelColor=black&style=flat-square
+[github-stars-link]: https://github.com/LinMoQC/Magic-Resume/stargazers
+[github-issues-shield]: https://img.shields.io/github/issues/LinMoQC/Magic-Resume?color=ff80eb&labelColor=black&style=flat-square
+[github-license-shield]: https://img.shields.io/badge/license-MIT-white?labelColor=black&style=flat-square
+<<<<<<< HEAD
+[github-license-link]: https://github.com/LinMoQC/Magic-Resume/blob/master/LICENSE
+=======
+>>>>>>> master
+>>>>>>> master
+>>>>>>> master
 [image-star]: https://github.com/user-attachments/assets/3216e25b-186f-4a54-9cb4-2f124aec0471
