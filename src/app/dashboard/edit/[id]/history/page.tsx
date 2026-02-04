@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation';
 import { useResumeStore } from '@/store/useResumeStore';
 import VersionHistoryDialog from '@/app/dashboard/edit/_components/modals/VersionHistoryDialog';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { useSettingStore } from '@/store/useSettingStore';
 
@@ -23,6 +23,7 @@ export default function HistoryModalPage() {
   } = useResumeStore();
 
   const [isLoading, setIsLoading] = useState(false);
+  const hasLoadedHistory = useRef(false);
 
   // Ensure resume is loaded
   useEffect(() => {
@@ -34,10 +35,11 @@ export default function HistoryModalPage() {
   // Fetch history logic (same as intercepting route)
   useEffect(() => {
     const loadHistory = async () => {
-        if (activeResume && cloudSync) {
+        if (activeResume && cloudSync && !hasLoadedHistory.current) {
             const token = await getToken();
             if (token) {
               setIsLoading(true);
+              hasLoadedHistory.current = true;
               try {
                 await fetchCloudResume(activeResume.id, token);
               } finally {
@@ -46,10 +48,10 @@ export default function HistoryModalPage() {
             }
           }
     };
-    if (activeResume) {
+    if (activeResume && activeResume.id === id) {
         loadHistory();
     }
-  }, [activeResume, cloudSync, fetchCloudResume, getToken]); // Rely on activeResume loaded
+  }, [activeResume?.id, id, cloudSync, fetchCloudResume, getToken]);
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {

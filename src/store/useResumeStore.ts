@@ -466,41 +466,59 @@ const useResumeStore = create<ResumeState>()(
   },
 
   deleteVersion: async (resumeId, versionId, token) => {
-    if (token) {
+    // 1. If token and cloud sync enabled, try cloud delete first
+    const isCloudSyncOn = useSettingStore.getState().cloudSync;
+    const isLocalId = !isNaN(Number(resumeId)) && resumeId.length > 10;
+    
+    console.log('[deleteVersion] Debug:', {
+      resumeId,
+      versionId,
+      isCloudSyncOn,
+      isLocalId,
+      hasToken: !!token,
+      willCallAPI: isCloudSyncOn && !isLocalId && !!token
+    });
+    
+    if (isCloudSyncOn && !isLocalId && token) {
       try {
+        console.log('[deleteVersion] Calling API to delete version...');
         await resumeApi.deleteVersion(resumeId, versionId, token);
-        
-        // Update local state by removing the version
-        const { resumes, activeResume } = get();
-        const updatedResumes = resumes.map(r => {
-          if (r.id === resumeId && r.versions) {
-            return {
-              ...r,
-              versions: r.versions.filter(v => v.id !== versionId)
-            };
-          }
-          return r;
-        });
-
-        const updatedActiveResume = activeResume?.id === resumeId && activeResume.versions
-          ? {
-              ...activeResume,
-              versions: activeResume.versions.filter(v => v.id !== versionId)
-            }
-          : activeResume;
-
-        set({ 
-          resumes: updatedResumes,
-          activeResume: updatedActiveResume
-        });
-        
-        dbClient.setItem(RESUMES_KEY, updatedResumes.map(r => getSanitizedResumeForLocal(r)));
-        toast.success(i18next.t('store.notifications.versionDeleted'));
+        console.log('[deleteVersion] API call successful');
       } catch (error) {
-        console.error('Failed to delete version:', error);
+        console.error('Failed to delete version from cloud:', error);
         toast.error(i18next.t('store.notifications.versionDeleteFailed'));
+        return; // Don't delete locally if cloud failed (to keep sync)
       }
+    } else {
+      console.log('[deleteVersion] Skipping API call, proceeding with local deletion only');
     }
+
+    // 2. Update local state (for both local and cloud resumes)
+    const { resumes, activeResume } = get();
+    const updatedResumes = resumes.map(r => {
+      if (r.id === resumeId && r.versions) {
+        return {
+          ...r,
+          versions: r.versions.filter(v => v.id !== versionId)
+        };
+      }
+      return r;
+    });
+
+    const updatedActiveResume = activeResume?.id === resumeId && activeResume.versions
+      ? {
+          ...activeResume,
+          versions: activeResume.versions.filter(v => v.id !== versionId)
+        }
+      : activeResume;
+
+    set({ 
+      resumes: updatedResumes,
+      activeResume: updatedActiveResume
+    });
+    
+    await dbClient.setItem(RESUMES_KEY, updatedResumes.map(r => getSanitizedResumeForLocal(r)));
+    toast.success(i18next.t('store.notifications.versionDeleted'));
   },
 
   loadResumeForEdit: (id, token) => {
