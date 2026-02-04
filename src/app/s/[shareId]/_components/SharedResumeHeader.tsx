@@ -17,7 +17,7 @@ const Logo = () => (
   </div>
 );
 
-export const SharedResumeHeader = () => {
+export const SharedResumeHeader = React.memo(() => {
     const { t } = useTranslation();
     return (
         <header className="relative z-50 w-full border-b border-white/10 bg-black/20 backdrop-blur-md">
@@ -36,4 +36,6 @@ export const SharedResumeHeader = () => {
             </div>
         </header>
     );
-};
+});
+
+SharedResumeHeader.displayName = 'SharedResumeHeader';

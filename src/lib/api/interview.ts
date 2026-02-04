@@ -1,8 +1,4 @@
-
-import axios from 'axios';
-
-// Define base URL - using environment variable
-const API_BASE_URL = `${process.env.BACKEND_URL || 'http://localhost:8000'}/api`;
+import { httpClient } from './httpClient';
 
 export interface StartInterviewParams {
   resume_context: string;
@@ -26,16 +22,16 @@ export interface InterviewResponse {
 export const interviewApi = {
   
   start: async (params: StartInterviewParams): Promise<InterviewResponse> => {
-    const response = await axios.post(`${API_BASE_URL}/interview/start`, params);
+    const response = await httpClient.agent.post('/api/interview/start', params);
     return response.data;
   },
 
   chat: async (params: ChatParams): Promise<InterviewResponse> => {
-    const response = await axios.post(`${API_BASE_URL}/interview/chat`, params);
+    const response = await httpClient.agent.post('/api/interview/chat', params);
     return response.data;
   },
 
   deleteSession: async (sessionId: string): Promise<void> => {
-    await axios.delete(`${API_BASE_URL}/interview/session/${sessionId}`);
+    await httpClient.agent.delete(`/api/interview/session/${sessionId}`);
   }
 };

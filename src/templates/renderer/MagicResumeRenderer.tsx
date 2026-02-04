@@ -38,12 +38,27 @@ function getSectionData(data: Resume, dataBinding: string) {
     return data.info;
   }
   
+  const isVisible = (item: unknown) => {
+    if (!item || typeof item !== 'object') return true;
+    const obj = item as Record<string, unknown>;
+    return obj.visible !== false && obj.visible !== 'false' && obj.visible !== 0;
+  };
+
   if (dataBinding.startsWith('sections.')) {
     const sectionKey = dataBinding.replace('sections.', '');
-    return data.sections[sectionKey as keyof typeof data.sections];
+    const sectionItems = data.sections[sectionKey as keyof typeof data.sections];
+    // Filter out items that are not visible
+    if (Array.isArray(sectionItems)) {
+      return sectionItems.filter(isVisible);
+    }
+    return sectionItems;
   }
   
-  return get(data, dataBinding);
+  const value = get(data, dataBinding);
+  if (Array.isArray(value)) {
+    return value.filter(isVisible);
+  }
+  return value;
 }
 
 function generateCSSVariables(designTokens: MagicTemplateDSL['designTokens'], layout: MagicTemplateDSL['layout']) {
@@ -115,7 +130,7 @@ function ComponentWrapper({
   );
 }
 
-export function MagicResumeRenderer({ template, data }: Props) {
+export const MagicResumeRenderer = React.memo(({ template, data }: Props) => {
   const { layout, designTokens, components } = template;
   
   // 生成CSS变量
@@ -211,4 +226,6 @@ export function MagicResumeRenderer({ template, data }: Props) {
       </LayoutContainer>
     </div>
   );
-} 
+});
+
+MagicResumeRenderer.displayName = 'MagicResumeRenderer';

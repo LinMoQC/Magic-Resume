@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ArrowLeft, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FaRegClone } from 'react-icons/fa';
@@ -138,7 +138,7 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
   }, [t]);
 
   // 处理模板自定义
-  const handleCustomizeTemplate = (template: MagicTemplateDSL) => {
+  const handleCustomizeTemplate = useCallback((template: MagicTemplateDSL) => {
     // 如果当前简历有自定义配置，合并到基础模板中显示当前状态
     let templateToCustomize = template;
 
@@ -148,10 +148,10 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
 
     setCustomizingTemplate(templateToCustomize);
     setIsCustomizing(true);
-  };
+  }, [activeResume?.customTemplate]);
 
   // 处理模板更新
-  const handleTemplateChange = (updatedTemplate: MagicTemplateDSL) => {
+  const handleTemplateChange = useCallback((updatedTemplate: MagicTemplateDSL) => {
     setCustomizingTemplate(updatedTemplate);
 
     // 从基础模板中提取自定义配置差异
@@ -165,15 +165,13 @@ export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSel
     if (onTemplateUpdate) {
       onTemplateUpdate(updatedTemplate);
     }
-  };
-
-
+  }, [templates, currentTemplateId, updateCustomTemplate, onTemplateUpdate]);
 
   // 返回模板列表
-  const handleBackToTemplates = () => {
+  const handleBackToTemplates = useCallback(() => {
     setIsCustomizing(false);
     setCustomizingTemplate(null);
-  };
+  }, []);
 
   const renderContent = () => {
     if (loading) {

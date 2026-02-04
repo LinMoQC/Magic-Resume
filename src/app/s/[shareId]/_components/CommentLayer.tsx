@@ -22,7 +22,7 @@ interface CommentLayerProps {
     isResumeOwner?: boolean;
 }
 
-export const CommentLayer = ({
+export const CommentLayer = React.memo(({
     comments,
     setComments,
     draftComment,
@@ -151,4 +151,6 @@ export const CommentLayer = ({
             )}
         </>
     );
-};
+});
+
+CommentLayer.displayName = 'CommentLayer';

@@ -5,7 +5,7 @@ import {
   FolderKanban,
   GraduationCap,
   Zap,
-  Languages,
+  Globe,
   Award,
   BriefcaseBusiness
 } from 'lucide-react';
@@ -51,7 +51,7 @@ const sidebarMenu: SidebarMenuItem[] = [
   },
   {
     key: 'languages',
-    icon: Languages,
+    icon: Globe,
     label: 'sections.languages',
     itemRender: (item) => <div className="font-bold text-sm max-w-[155px]">{item.language}</div>
   },

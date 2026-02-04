@@ -115,3 +115,24 @@ export type Resume = {
   shareId?: string;
   shareRole?: 'VIEWER' | 'COMMENTER' | 'EDITOR';
 };
+
+// Types mapping backend Prisma model
+export interface CloudVersion {
+  id: string;
+  createdAt?: string;
+  timestamp?: number;
+  changelog?: string;
+  type?: string;
+  content: string | object;
+}
+
+export interface CloudResume {
+  id: string;
+  title: string;
+  updatedAt: string;
+  content: string | object;
+  isPublic: boolean;
+  shareId?: string;
+  shareRole: 'VIEWER' | 'COMMENTER' | 'EDITOR';
+  versions?: CloudVersion[];
+}

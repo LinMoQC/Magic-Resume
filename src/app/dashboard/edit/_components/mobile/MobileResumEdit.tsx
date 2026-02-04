@@ -31,6 +31,8 @@ interface MobileResumEditProps {
     handleSave: () => void;
     onShowAI: () => void;
     isAiJobRunning: boolean;
+    onShareClick?: () => void;
+    onFeedbackClick?: () => void;
 }
 
 export default function MobileResumEdit({
@@ -47,7 +49,9 @@ export default function MobileResumEdit({
     renderSections,
     handleSave,
     onShowAI,
-    isAiJobRunning
+    isAiJobRunning,
+    onShareClick,
+    onFeedbackClick
 }: MobileResumEditProps) {
     const { t } = useTranslation();
     const [currentTemplateId, setCurrentTemplateId] = React.useState('default-classic');
@@ -60,6 +64,8 @@ export default function MobileResumEdit({
                 setPreviewScale={setPreviewScale}
                 onShowAI={onShowAI}
                 isAiJobRunning={isAiJobRunning}
+                onShareClick={onShareClick}
+                onFeedbackClick={onFeedbackClick}
             />
         </div>
 

@@ -6,7 +6,7 @@ interface ResumeMiniPreviewProps {
   className?: string;
 }
 
-export default function ResumeMiniPreview({ template, className = "" }: ResumeMiniPreviewProps) {
+const ResumeMiniPreview = React.memo(({ template, className = "" }: ResumeMiniPreviewProps) => {
   const { layout, designTokens } = template;
   const isTwo = layout.type === 'two-column';
   
@@ -67,4 +67,8 @@ export default function ResumeMiniPreview({ template, className = "" }: ResumeMi
       )}
     </div>
   );
-}
+});
+
+ResumeMiniPreview.displayName = 'ResumeMiniPreview';
+
+export default ResumeMiniPreview;

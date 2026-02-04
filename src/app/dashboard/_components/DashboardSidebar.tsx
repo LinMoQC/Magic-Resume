@@ -15,6 +15,7 @@ import { useResumeStore } from '@/store/useResumeStore';
 import sidebarMenu from '@/lib/constants/sidebarMenu';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
+import { SectionOrder } from '@/types/frontend/resume';
 
 export default function DashboardSidebar() {
   const { t } = useTranslation();
@@ -116,7 +117,7 @@ export default function DashboardSidebar() {
         </div>
         
         <nav className="flex-1 flex flex-col items-center justify-center gap-2 w-full overflow-y-auto hide-scrollbar py-4">
-          {activeResume?.sectionOrder.map((section) => {
+          {activeResume?.sectionOrder.map((section: SectionOrder) => {
             const iconItem = sidebarMenu.find((item) => item.key === section.key);
             if (!iconItem) return null;
             const Icon = iconItem.icon;
@@ -125,7 +126,7 @@ export default function DashboardSidebar() {
               <Button
                 key={section.key}
                 variant="ghost"
-                className='h-12 w-12 hover:bg-neutral-800 bg-transparent z-[1] shrink-0'
+                className='h-12 w-12 hover:bg-neutral-800 bg-transparent z-1 shrink-0'
                 onClick={() => setActiveSection(section.key)}
                 title={t(section.label)}
               >
@@ -178,7 +179,7 @@ export default function DashboardSidebar() {
       <>
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed top-4 right-4 z-5 p-2 bg-neutral-800 rounded-md"
+          className="fixed top-4 right-4 z-5 p-2 bg-neutral-800 rounded-md z-[99]"
           aria-label={t('sidebar.open')}
         >
           <FiMenu className="h-6 w-6 text-white" />

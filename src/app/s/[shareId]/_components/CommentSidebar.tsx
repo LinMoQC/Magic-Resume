@@ -33,7 +33,7 @@ const formatDate = (dateStr: string, t: any) => {
     }
 };
 
-const CommentItem = ({ 
+const CommentItem = React.memo(({ 
     comment, 
     active, 
     onClick,
@@ -209,9 +209,11 @@ const CommentItem = ({
             )}
         </div>
     );
-};
+});
 
-export const CommentSidebar = ({
+CommentItem.displayName = 'CommentItem';
+
+export const CommentSidebar = React.memo(({
     isOpen,
     onClose,
     comments,
@@ -306,4 +308,6 @@ export const CommentSidebar = ({
             )}
         </AnimatePresence>
     );
-};
+});
+
+CommentSidebar.displayName = 'CommentSidebar';

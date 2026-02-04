@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Resume } from '@/types/frontend/resume';
 import { useResumeStore } from '@/store/useResumeStore';
@@ -20,6 +20,7 @@ export default function Dashboard() {
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [resumeToRename, setResumeToRename] = useState<Resume | null>(null);
   const [newName, setNewName] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   // Dashboard initialization
   const initialized = React.useRef(false);
@@ -31,6 +32,7 @@ export default function Dashboard() {
 
     const initializeDashboard = async () => {
       try {
+        setIsLoading(true);
         const token = await getToken();
         await Promise.all([
           loadResumes(token || undefined),
@@ -41,46 +43,48 @@ export default function Dashboard() {
         traceDashboardViewed(currentResumes.length);
       } catch (error) {
         console.error('Failed to initialize dashboard:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     initializeDashboard();
   }, [loadResumes, loadSettings, traceDashboardViewed, getToken]);
 
-  const handleOpenRenameDialog = (resume: Resume) => {
+  const handleOpenRenameDialog = useCallback((resume: Resume) => {
     setResumeToRename(resume);
     setNewName(resume.name);
     setRenameDialogOpen(true);
-  };
+  }, []);
 
-  const handleRename = async () => {
+  const handleRename = useCallback(async () => {
     if (resumeToRename && newName.trim()) {
       const token = await getToken();
       await renameResume(resumeToRename.id, newName, token || undefined);
       setRenameDialogOpen(false);
       setResumeToRename(null);
     }
-  };
+  }, [resumeToRename, newName, getToken, renameResume]);
 
-  const handleAdd = () => {
+  const handleAdd = useCallback(() => {
     traceCreateResume();
     router.push('/dashboard/new');
-  };
+  }, [traceCreateResume, router]);
 
-  const handleImport = () => {
+  const handleImport = useCallback(() => {
     traceImportResume();
     router.push('/dashboard/import');
-  };
+  }, [traceImportResume, router]);
 
-  const handleResumeDelete = async (id: string) => {
+  const handleResumeDelete = useCallback(async (id: string) => {
     const token = await getToken();
     await deleteResume(id, token || undefined);
-  };
+  }, [getToken, deleteResume]);
 
-  const handleDuplicate = async (id: string) => {
+  const handleDuplicate = useCallback(async (id: string) => {
     const token = await getToken();
     duplicateResume(id, token || undefined);
-  };
+  }, [getToken, duplicateResume]);
 
   return (
     <main className="flex flex-col h-full">
@@ -98,7 +102,9 @@ export default function Dashboard() {
         onDelete={handleResumeDelete}
         onDuplicate={handleDuplicate}
         onRename={handleOpenRenameDialog}
+        isLoading={isLoading}
       />
     </main>
   );
-} 
+}
+ 
