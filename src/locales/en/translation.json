@@ -479,11 +479,25 @@
   },
   "tools": {
     "aiAssistant": "AI Assistant",
+    "share": "Share",
+    "feedback": "Feedback",
     "exportPDF": "Export PDF",
     "zoomIn": "Zoom In",
     "zoomOut": "Zoom Out",
     "resetZoom": "Reset Zoom",
-    "bugReport": "Bug Report"
+    "bugReport": "Bug Report",
+    "collapse": "Collapse",
+    "expand": "Expand"
+  },
+  "feedback": {
+    "title": "Feedback",
+    "description": "Help us improve Magic Resume. Share your thoughts or report issues.",
+    "thankYou": "Thank you!",
+    "received": "We have received your feedback.",
+    "label": "Your feedback",
+    "placeholder": "Tell us what you like or what could be better...",
+    "submit": "Submit Feedback",
+    "close": "Close"
   },
   "sections": {
     "projects": "Projects",
