@@ -11,19 +11,12 @@
 
   <!-- SHIELD GROUP -->
 
-<<<<<<< HEAD
 [![][vercel-shield]][vercel-link]
-=======
-[![][github-release-shield]][github-release-link]
-[![][vercel-shield]][vercel-link]
-[![][github-action-test-shield]][github-action-test-link]
-
-> > > > > > > master
-> > > > > > > [![][github-contributors-shield]][github-contributors-link]
-> > > > > > > [![][github-forks-shield]][github-forks-link]
-> > > > > > > [![][github-stars-shield]][github-stars-link]
-> > > > > > > [![][github-issues-shield]][github-issues-link]
-> > > > > > > [![][github-license-shield]][github-license-link]
+[![][github-contributors-shield]][github-contributors-link]
+[![][github-forks-shield]][github-forks-link]
+[![][github-stars-shield]][github-stars-link]
+[![][github-issues-shield]][github-issues-link]
+[![][github-license-shield]][github-license-link]
 
 </div>
 
