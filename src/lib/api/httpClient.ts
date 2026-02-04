@@ -87,7 +87,7 @@ export const httpClient = {
  */
 export const configureHttpClient = (getToken: () => Promise<string | null>) => {
   httpClient.api = createHttpClient(
-    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3111',
+    process.env.NEXT_PUBLIC_CLOUD_API_URL || 'http://localhost:3111',
     getToken
   );
   httpClient.agent = createHttpClient(

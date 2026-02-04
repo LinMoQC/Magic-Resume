@@ -64,6 +64,11 @@ export default function VersionHistoryDialog({ isOpen, onClose, onRestore, onDel
         }
     }, [isOpen, versions, selectedVersionId]);
 
+    // Debug: Track confirmId changes
+    useEffect(() => {
+        console.log('[VersionHistoryDialog] confirmId changed to:', confirmId);
+    }, [confirmId]);
+
     const selectedVersion = useMemo(() => 
         versions.find(v => v.id === selectedVersionId),
     [versions, selectedVersionId]);
@@ -162,9 +167,10 @@ export default function VersionHistoryDialog({ isOpen, onClose, onRestore, onDel
                                                 <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
+                                                        console.log('[VersionHistoryDialog] Delete button clicked for version:', version.id);
                                                         setConfirmId(version.id);
                                                     }}
-                                                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-red-500/0 hover:bg-red-500/10 text-red-500/0 group-hover:text-red-500 transition-all duration-200"
+                                                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg text-neutral-400 opacity-0 group-hover:opacity-100 hover:text-red-500 hover:bg-red-500/10 transition-all duration-200"
                                                     title={t('common.delete')}
                                                 >
                                                     <Trash2 size={16} />
@@ -277,6 +283,7 @@ export default function VersionHistoryDialog({ isOpen, onClose, onRestore, onDel
                         isOpen={!!confirmId}
                         onClose={() => setConfirmId(null)}
                         onConfirm={() => {
+                            console.log('[VersionHistoryDialog] Confirm button clicked, calling onDelete for:', confirmId);
                             if (confirmId) onDelete(confirmId);
                         }}
                         title={t('common.confirmDeleteVersion')}

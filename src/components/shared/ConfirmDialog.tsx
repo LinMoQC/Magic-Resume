@@ -38,33 +38,37 @@ export default function ConfirmDialog({
 
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
-      <AlertDialogContent className="bg-neutral-950 border-neutral-800 text-white">
-        <AlertDialogHeader>
-          <AlertDialogTitle className="text-xl font-bold">{title}</AlertDialogTitle>
-          {description && (
-            <AlertDialogDescription className="text-neutral-400">
-              {description}
-            </AlertDialogDescription>
-          )}
-        </AlertDialogHeader>
-        <AlertDialogFooter className="mt-4">
-          <AlertDialogCancel 
-            onClick={onClose}
-            className="bg-transparent border-neutral-700 hover:bg-neutral-900 text-white"
-          >
-            {cancelText || t('common.cancel')}
-          </AlertDialogCancel>
-          <AlertDialogAction
-            onClick={() => {
-              onConfirm();
-              onClose();
-            }}
-            className={variant === 'danger' ? "bg-red-600 hover:bg-red-500 text-white border-none" : "bg-indigo-600 hover:bg-indigo-500 text-white border-none"}
-          >
-            {confirmText || t('common.confirm')}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
+      {/* Add overlay with higher z-index */}
+      <div className={`fixed inset-0 z-150 ${isOpen ? 'block' : 'hidden'}`}>
+        <div className="fixed inset-0 bg-black/50" onClick={onClose} />
+        <AlertDialogContent className="bg-neutral-950 border-neutral-800 text-white fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-150">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-bold">{title}</AlertDialogTitle>
+            {description && (
+              <AlertDialogDescription className="text-neutral-400">
+                {description}
+              </AlertDialogDescription>
+            )}
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4">
+            <AlertDialogCancel 
+              onClick={onClose}
+              className="bg-transparent border-neutral-700 hover:bg-neutral-900 text-white"
+            >
+              {cancelText || t('common.cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                onConfirm();
+                onClose();
+              }}
+              className={variant === 'danger' ? "bg-red-600 hover:bg-red-500 text-white border-none" : "bg-indigo-600 hover:bg-indigo-500 text-white border-none"}
+            >
+              {confirmText || t('common.confirm')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </div>
     </AlertDialog>
   );
 }
