@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Resume } from '@/types/frontend/resume';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import { Sparkles, BarChart3, Loader2, RotateCw, Code2, Briefcase, Users, Cpu } from 'lucide-react';
+import { Sparkles, BarChart3, RotateCw, Code2, Briefcase, Users, Cpu } from 'lucide-react';
 import MultiPersonaAnalysisReport from '@/components/MultiPersonaAnalysisReport';
 import { useMultiPersonaAnalyzer } from '@/hooks/useMultiPersonaAnalyzer';
 import { useTrace } from '@/hooks/useTrace';

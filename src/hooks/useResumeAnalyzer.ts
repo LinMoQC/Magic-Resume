@@ -60,7 +60,7 @@ export const useResumeAnalyzer = () => {
       let buffer = '';
       const analysisCategories = ['KeySkillsMatch', 'ImpactAndActionability', 'QuantifiableAchievements', 'ClarityAndReadability', 'ProfessionalSummary'];
       let completedCategories = 0;
-      let analysisReport: Record<string, any> = {};
+      let analysisReport: Record<string, { score: number; justification: string; suggestions: string[] }> = {};
 
       const processMessage = (message: string) => {
         if (!message.trim() || !message.startsWith('data: ')) return;
@@ -120,12 +120,12 @@ export const useResumeAnalyzer = () => {
       }
 
       // 计算总分
-      const scores = Object.values(analysisReport).map((cat: any) => cat.score || 0);
+      const scores = Object.values(analysisReport).map((cat) => cat.score || 0);
       const overallScore = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
 
       const result: ResumeAnalysis = {
         overallScore,
-        analysis: Object.entries(analysisReport).map(([category, data]: [string, any]) => ({
+        analysis: Object.entries(analysisReport).map(([category, data]) => ({
           category,
           score: data.score || 0,
           justification: data.justification || '',
