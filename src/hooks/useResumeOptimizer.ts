@@ -100,6 +100,25 @@ export const useResumeOptimizer = () => {
         }
       }
 
+      if (nodeId === 'company_analysis') {
+        const staticLogIndex = updatedLogs.findIndex(log => log.id === 'company_analysis');
+        if (staticLogIndex !== -1) {
+          updatedLogs[staticLogIndex].status = 'completed';
+          updatedLogs[staticLogIndex].content = nodeState.companyContext;
+          if (staticLogIndex + 1 < updatedLogs.length) {
+            updatedLogs[staticLogIndex + 1].status = 'in_progress';
+          }
+        }
+      }
+      
+      if (nodeId === 'adversarial_critique') {
+        const staticLogIndex = updatedLogs.findIndex(log => log.id === 'adversarial_critique');
+        if (staticLogIndex !== -1) {
+          updatedLogs[staticLogIndex].status = 'completed';
+          updatedLogs[staticLogIndex].content = nodeState.critiqueResult;
+        }
+      }
+
       if (nodeId === 'web_searcher') {
         const parentLog = updatedLogs.find(l => l.id === 'web_searcher');
         if (parentLog) {
@@ -243,7 +262,14 @@ export const useResumeOptimizer = () => {
       { id: 'reflection', title: t('modals.aiModal.optimizeTab.steps.reflection.title'), status: 'pending' },
       { id: 'final_answer', title: t('modals.aiModal.optimizeTab.steps.final_answer.title'), status: 'pending' },
       { id: 'combiner', title: t('modals.aiModal.optimizeTab.steps.combiner.title'), status: 'pending' },
+      
+      // New Smart Optimization Steps
+      { id: 'company_analysis', title: t('modals.aiModal.optimizeTab.steps.company_analysis.title', 'Company Deep-Dive'), status: 'pending' },
+      
       { id: 'prepare_rewriter', title: t('modals.aiModal.optimizeTab.steps.prepare_rewriter.title'), status: 'pending' },
+      // Rewrite section logs will be injected here
+      
+      { id: 'adversarial_critique', title: t('modals.aiModal.optimizeTab.steps.adversarial_critique.title', 'Recruiter Critique'), status: 'pending' },
     ];
     setLogs(() => initialLogs);
 

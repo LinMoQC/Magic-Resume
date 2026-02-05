@@ -278,6 +278,16 @@
           "analyzing_category": {
             "in_progress": "Analyzing {{category}}...",
             "completed": "{{category}} analysis complete."
+          },
+          "company_analysis": {
+            "title": "Company Deep-Dive",
+            "in_progress": "Analyzing company culture and tech stack...",
+            "completed": "Company analysis complete."
+          },
+          "adversarial_critique": {
+            "title": "Recruiter Critique",
+            "in_progress": "Recruiter AI is evaluating your resume...",
+            "completed": "Evaluation complete."
           }
         },
         "optimizationProgress": {
@@ -303,6 +313,12 @@
           "summary": "Evaluating 'Professional Summary' quality...",
           "finalizing": "Compiling score and generating report...",
           "done": "Analysis complete!"
+        },
+        "multiSteps": {
+          "peer": "Peer Developer is checking code quality...",
+          "lead": "Tech Lead is evaluating architectural impact...",
+          "hrbp": "HRBP is assessing soft skills and consistency...",
+          "finalizing": "Finalizing comprehensive interview panel report..."
         },
         "placeholder": {
           "title": "Get Professional Analysis",
@@ -843,8 +859,23 @@
       "ImpactAndActionability": "Impact and Actionability",
       "QuantifiableAchievements": "Quantifiable Achievements",
       "ClarityAndReadability": "Clarity and Readability",
-      "ProfessionalSummary": "Professional Summary"
-    }
+      "ProfessionalSummary": "Professional Summary",
+      "impact": "Impact",
+      "metrics": "Metrics",
+      "clarity": "Clarity",
+      "summary": "Summary"
+    },
+    "strengths": "Strengths",
+    "improvements": "Improvements",
+    "overallRating": "Overall Rating",
+    "attributeMatrix": "Attribute Matrix",
+    "status": {
+      "critical": "Critical",
+      "normal": "Normal",
+      "good": "Good"
+    },
+    "optimizationRoadmap": "Optimization Roadmap",
+    "roadmapSubtitle": "High-level insights from the panel"
   },
   "errorPage": {
     "title": "Something went wrong!",
@@ -893,5 +924,25 @@
     "title": "Build Your Resume with AI",
     "subtitle": "Professional templates, AI-powered writing, and real-time preview.",
     "macbookTitle": "This Macbook is built with Tailwindcss. <br /> No kidding."
+  },
+  "persona": {
+    "peer": {
+      "title": "Peer Developer",
+      "subtitle": "CO-WORKER / PEER",
+      "short": "Peer"
+    },
+    "lead": {
+      "title": "Tech Lead / Leader",
+      "subtitle": "HIRING MANAGER / +1",
+      "short": "Leader"
+    },
+    "leader": {
+      "short": "Leader"
+    },
+    "hrbp": {
+      "title": "HRBP",
+      "subtitle": "CULTURE / SOFT SKILLS",
+      "short": "HRBP"
+    }
   }
 }
