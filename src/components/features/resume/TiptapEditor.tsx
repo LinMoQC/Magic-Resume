@@ -141,8 +141,6 @@ const TiptapEditor = ({ content, onChange, placeholder, isPolishing, setIsPolish
   // 处理自动隐藏逻辑和倒计时
   useEffect(() => {
     if (lastPolished) {
-      setCountdown(15);
-      
       // 倒计时定时器
       const countdownInterval = setInterval(() => {
         setCountdown(prev => {
@@ -159,17 +157,10 @@ const TiptapEditor = ({ content, onChange, placeholder, isPolishing, setIsPolish
       setAutoHideTimer(countdownInterval);
       
       return () => {
-        if (countdownInterval) clearInterval(countdownInterval);
+        clearInterval(countdownInterval);
       };
-    } else {
-      // 清理定时器
-      if (autoHideTimer) {
-        clearInterval(autoHideTimer);
-        setAutoHideTimer(null);
-      }
-      setCountdown(15);
     }
-  }, [lastPolished, autoHideTimer, t]);
+  }, [lastPolished, t]);
   
   const editor = useEditor({
     extensions: [
@@ -218,6 +209,7 @@ const TiptapEditor = ({ content, onChange, placeholder, isPolishing, setIsPolish
           // Typing finished
           const newTo = from + polishedText.length;
           editor.chain().focus().setTextSelection({ from, to: newTo }).run();
+          setCountdown(15); // 初始化倒计时
           setLastPolished({ from, to: newTo, originalText, polishedText });
           resolve();
         }
