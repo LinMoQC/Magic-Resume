@@ -277,6 +277,16 @@
           "analyzing_category": {
             "in_progress": "正在分析 {{category}}...",
             "completed": "{{category}} 分析完毕。"
+          },
+          "company_analysis": {
+            "title": "公司深度背景调查",
+            "in_progress": "正在分析目标公司的文化和技术栈...",
+            "completed": "公司背景调查完成。"
+          },
+          "adversarial_critique": {
+            "title": "招聘官模拟面试",
+            "in_progress": "AI 招聘官正在评估您的简历...",
+            "completed": "招聘官评估完成。"
           }
         },
         "optimizationProgress": {
@@ -302,6 +312,12 @@
           "summary": "正在评估'专业摘要'的质量...",
           "finalizing": "正在编译分数并生成报告...",
           "done": "分析完成！"
+        },
+        "multiSteps": {
+          "peer": "Peer Developer 正在检查代码质量...",
+          "lead": "Tech Lead 正在评估架构影响力...",
+          "hrbp": "HRBP 正在评估软技能和一致性...",
+          "finalizing": "正在整理最终的面试官综合分析报告..."
         },
         "placeholder": {
           "title": "获取专业分析",
@@ -914,8 +930,23 @@
       "ImpactAndActionability": "影响力与行动性",
       "QuantifiableAchievements": "可量化成就",
       "ClarityAndReadability": "清晰度与可读性",
-      "ProfessionalSummary": "专业摘要"
-    }
+      "ProfessionalSummary": "专业摘要",
+      "impact": "影响力",
+      "metrics": "量化结果",
+      "clarity": "清晰度",
+      "summary": "专业总结"
+    },
+    "strengths": "核心优势",
+    "improvements": "改进建议",
+    "overallRating": "综合评分",
+    "attributeMatrix": "能力矩阵图",
+    "status": {
+      "critical": "风险",
+      "normal": "正常",
+      "good": "优秀"
+    },
+    "optimizationRoadmap": "优化路线图",
+    "roadmapSubtitle": "来自专家面板的核心洞察"
   },
   "errorPage": {
     "title": "出了点问题！",
@@ -964,5 +995,25 @@
     "title": "使用 AI 打造您的简历",
     "subtitle": "专业的模板、AI 驱动的写作和实时预览。",
     "macbookTitle": "这台苹果电脑是用 Tailwindcss 做的。<br />真的，没开玩笑。"
+  },
+  "persona": {
+    "peer": {
+      "title": "Peer Developer",
+      "subtitle": "同行 / 协作者",
+      "short": "同行"
+    },
+    "lead": {
+      "title": "Tech Lead / Leader",
+      "subtitle": "主管 / +1",
+      "short": "主管"
+    },
+    "leader": {
+      "short": "主管"
+    },
+    "hrbp": {
+      "title": "HRBP",
+      "subtitle": "文化价值观 / 软技能",
+      "short": "HRBP"
+    }
   }
 }

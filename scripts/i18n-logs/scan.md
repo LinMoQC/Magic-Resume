@@ -1,6 +1,6 @@
-# i18n Scan Report (2026/2/5 01:20:18)
+# i18n Scan Report (2026/2/5 12:29:50)
 
-Found 56 issues in 18 files.
+Found 63 issues in 19 files.
 
 ## 📄 src/app/page.tsx
 
@@ -111,4 +111,14 @@ Found 56 issues in 18 files.
 ## 📄 src/app/dashboard/edit/_components/layout/SidebarNav.tsx
 
 - L31: **[HARDCODED_TEXT]** Hardcoded attribute alt: "simple-logo"
+
+## 📄 src/app/dashboard/edit/[id]/multi-persona-demo/page.tsx
+
+- L47: **[HARDCODED_TEXT]** Hardcoded JSX text: "Multi-Persona Resume Analysis"
+- L49: **[HARDCODED_TEXT]** Hardcoded JSX text: "Get comprehensive feedback from ATS Bot, Hiring Manager, and HR Specialist perspectives"
+- L63: **[HARDCODED_TEXT]** Hardcoded JSX text: "English"
+- L73: **[HARDCODED_TEXT]** Hardcoded JSX text: "简体中文"
+- L81: **[HARDCODED_TEXT]** Hardcoded JSX text: "Please load a resume first. Go to the editor and load or create a resume."
+- L95: **[HARDCODED_TEXT]** Hardcoded JSX text: "Analyzing..."
+- L107: **[HARDCODED_TEXT]** Hardcoded JSX text: "Reset"
 

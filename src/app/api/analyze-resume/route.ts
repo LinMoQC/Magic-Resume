@@ -1,26 +1,19 @@
 export async function POST(request: Request) {
   try {
-    const { state, config } = await request.json();
+    const { resumeData, config } = await request.json();
 
-    if (!state || !config) {
-      return new Response(JSON.stringify({ error: "Missing state or config" }), { status: 400 });
+    if (!resumeData || !config) {
+      return new Response(JSON.stringify({ error: "Missing resumeData or config" }), { status: 400 });
     }
 
-    // const graph = createAnalysisGraph(config);
-    // const stream = await graph.stream(state, { recursionLimit: 25 });
-
-    // return streamResponse(stream);
-
     const backendUrl = process.env.BACKEND_URL;
-    const backendResponse = await fetch(`${backendUrl}/api/graph/analyze`, {
+    const backendResponse = await fetch(`${backendUrl}/api/graph/analyze-resume`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ state, config }),
+      body: JSON.stringify({ resumeData, config }),
     });
-
-    console.log("[BACKEND_RESPONSE]");
 
     if (!backendResponse.ok) {
       const errorBody = await backendResponse.text();
@@ -41,7 +34,7 @@ export async function POST(request: Request) {
     });
 
   } catch (error: unknown) {
-    console.error("[ANALYZE_GRAPH_API_ERROR]", error);
+    console.error("[ANALYZE_RESUME_API_ERROR]", error);
     const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
     const errorResponse = { error: errorMessage };
     return new Response(JSON.stringify(errorResponse), { status: 500 });
