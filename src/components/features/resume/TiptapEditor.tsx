@@ -233,7 +233,74 @@ const TiptapEditor = ({ content, onChange, placeholder, isPolishing, setIsPolish
 
     setIsPolishing(true);
     setLastPolished(null); // Clear previous reset state
+    
+    // 应用 loading mark
     editor.chain().focus().setTextSelection({ from, to }).toggleMark('loading').run();
+    
+    // 在选中文本后面插入 emoji
+    editor.chain().focus().insertContentAt(to, ' 🤖').run();
+    const emojiEnd = to + 3; // ' 🤖' 的长度
+    
+    // 使用 DOM 操作给 emoji 添加旋转动画
+    const wrapEmoji = () => {
+      const editorElement = editor.view.dom;
+      
+      // 使用 TreeWalker 查找所有文本节点
+      const walker = document.createTreeWalker(
+        editorElement,
+        NodeFilter.SHOW_TEXT,
+        null
+      );
+      
+      const textNodes: Node[] = [];
+      let node;
+      while (node = walker.nextNode()) {
+        if (node.textContent?.includes('🤖')) {
+          textNodes.push(node);
+        }
+      }
+      
+      console.log('Found text nodes with emoji:', textNodes.length);
+      
+      // 找到最后一个包含 emoji 的文本节点（应该是我们刚插入的）
+      if (textNodes.length > 0) {
+        const lastNode = textNodes[textNodes.length - 1];
+        const text = lastNode.textContent || '';
+        const emojiIndex = text.lastIndexOf('🤖');
+        
+        console.log('Last emoji node:', lastNode, 'Text:', text, 'Index:', emojiIndex);
+        
+        if (emojiIndex !== -1 && lastNode.parentNode) {
+          const before = text.substring(0, emojiIndex);
+          const emoji = text.substring(emojiIndex, emojiIndex + 2);
+          const after = text.substring(emojiIndex + 2);
+          
+          const span = document.createElement('span');
+          span.className = 'rotating-bot';
+          span.textContent = emoji;
+          span.setAttribute('data-ai-emoji', 'true');
+          
+          const fragment = document.createDocumentFragment();
+          if (before) fragment.appendChild(document.createTextNode(before));
+          fragment.appendChild(span);
+          if (after) fragment.appendChild(document.createTextNode(after));
+          
+          lastNode.parentNode.replaceChild(fragment, lastNode);
+          console.log('Successfully wrapped emoji in rotating span');
+          return true;
+        }
+      }
+      
+      console.log('Failed to wrap emoji');
+      return false;
+    };
+    
+    // 尝试多次包装 emoji，因为 DOM 更新可能有延迟
+    setTimeout(() => {
+      if (!wrapEmoji()) {
+        setTimeout(wrapEmoji, 100);
+      }
+    }, 50);
 
     try {
       if (!apiKey) {
@@ -243,12 +310,27 @@ const TiptapEditor = ({ content, onChange, placeholder, isPolishing, setIsPolish
       const chain = createPolishTextChain({ apiKey, baseUrl, modelName: model, maxTokens });
       const polishedText = await chain.invoke({ text: selectedText });
       
+      // 移除 emoji（包括可能的 span 包装）
+      const emojiSpan = editor.view.dom.querySelector('[data-ai-emoji="true"]');
+      if (emojiSpan) {
+        emojiSpan.remove();
+      } else {
+        editor.chain().focus().setTextSelection({ from: to, to: emojiEnd }).deleteSelection().run();
+      }
+      
       await typewriterInsert(from, to, selectedText, polishedText);
 
     } catch (error) {
       const message = error instanceof Error ? error.message : t('modals.aiModal.notifications.unknownError');
       if (message !== 'API Key not found') {
         toast.error(t('tiptap.notifications.polishFailed', { message }));
+      }
+      // 出错时也要移除 emoji
+      const emojiSpan = editor.view.dom.querySelector('[data-ai-emoji="true"]');
+      if (emojiSpan) {
+        emojiSpan.remove();
+      } else {
+        editor.chain().focus().setTextSelection({ from: to, to: emojiEnd }).deleteSelection().run();
       }
       editor.chain().focus().setTextSelection({ from, to }).unsetMark('loading').run();
     } finally {

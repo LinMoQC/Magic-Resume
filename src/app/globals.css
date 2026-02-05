@@ -213,6 +213,9 @@ button {
 /* 编辑器样式 */
 /* Basic editor styles */
 .tiptap {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  
   :first-child {
     margin-top: 0;
   }
@@ -300,6 +303,11 @@ button {
     border-top: 1px solid var(--gray-2);
     margin: 2rem 0;
   }
+  
+  p {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
 }
 
 /* Custom styles for Tiptap editor list items */
@@ -317,52 +325,42 @@ button {
 
 .ai-loading-effect {
   --ai-color: 56, 189, 248; /* 默认sky-400颜色的RGB值 */
-  background: linear-gradient(90deg, 
-    rgba(var(--ai-color), 0.1), 
-    rgba(var(--ai-color), 0.25), 
-    rgba(var(--ai-color), 0.1)
-  );
+  background: rgba(var(--ai-color), 0.2);
   background-size: 200% 100%;
-  border-radius: 6px;
-  padding: 2px 4px;
-  margin: -2px -4px;
+  border-radius: 2px;
+  padding: 5px 7px;
+  margin: -5px -7px;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
   animation: ai-text-shimmer 2s ease-in-out infinite, ai-pulse-glow 3s ease-in-out infinite;
-  border: 1px solid rgba(var(--ai-color), 0.3);
   position: relative;
-  overflow: hidden;
-  box-shadow: 0 0 8px rgba(var(--ai-color), 0.2);
+  overflow: visible;
+  box-shadow: 
+    0 0 0 1px rgba(var(--ai-color), 0.4),
+    0 0 12px rgba(var(--ai-color), 0.3);
+  display: inline;
+  line-height: 2;
 }
 
 .ai-loading-effect::before {
   content: '';
   position: absolute;
-  top: 0;
+  top: -3px;
   left: -100%;
   width: 100%;
-  height: 100%;
+  height: calc(100% + 6px);
   background: linear-gradient(90deg, 
     transparent, 
-    rgba(255, 255, 255, 0.6), 
-    rgba(var(--ai-color), 0.3),
-    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0.4), 
+    rgba(var(--ai-color), 0.2),
+    rgba(255, 255, 255, 0.4),
     transparent
   );
   animation: ai-sweep 1.8s ease-in-out infinite;
   mix-blend-mode: overlay;
+  pointer-events: none;
 }
 
-.ai-loading-effect::after {
-  content: '🤖';
-  display: inline-block;
-  font-size: 12px;
-  margin-left: 4px;
-  vertical-align: baseline;
-  filter: hue-rotate(0deg);
-  animation: ai-sparkle 1s ease-in-out infinite, ai-hue-cycle 3s linear infinite;
-  transition: all 0.3s ease;
-}
 
 .ai-loading-effect:hover {
   background-size: 150% 100%;
@@ -370,12 +368,21 @@ button {
   transform: scale(1.02);
 }
 
-.ai-loading-effect:hover::after {
-  transform: scale(1.3) rotate(360deg);
-  animation-duration: 0.5s, 1.5s;
+
+
+/* 旋转的 bot emoji 动画 */
+.tiptap .rotating-bot,
+.rotating-bot {
+  display: inline-block !important;
+  animation: spin 2s linear infinite !important;
+  transform-origin: center center;
+  will-change: transform;
 }
 
 @keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
   to {
     transform: rotate(360deg);
   }
