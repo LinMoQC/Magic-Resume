@@ -6,12 +6,9 @@ import { motion } from 'framer-motion';
 import { 
   Users, 
   Briefcase, 
-  TrendingUp, 
-  Target, 
+  TrendingUp,  
   Lightbulb,
   Code2,
-  CheckCircle2,
-  AlertTriangle,
   AlertCircle
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -82,7 +79,7 @@ export default function MultiPersonaAnalysisReport({ analysis }: MultiPersonaAna
     ProfessionalSummary: t('report.categories.summary', 'Summary'),
   };
 
-  const personaConfig: Record<string, { title: string; subtitle: string; icon: any; color: string; bgColor: string; borderColor: string }> = {
+  const personaConfig: Record<string, { title: string; subtitle: string; icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>; color: string; bgColor: string; borderColor: string }> = {
     peer_developer: {
       title: t('persona.peer.title', 'Peer Developer'),
       subtitle: t('persona.peer.subtitle', 'CO-WORKER / PEER'),
