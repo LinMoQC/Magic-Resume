@@ -207,6 +207,22 @@
         "outputTitle": "Optimization Result",
         "emptyState": "Paste the job description and click Start Optimization to get targeted resume suggestions.",
         "jsonButton": "JSON",
+        "diffButton": "Diff",
+        "nodeInspector": {
+            "unknown_agent": "Unknown Agent",
+            "agent_status": "Agent Status",
+            "idle": "Idle",
+            "execution_log": "Execution Log",
+            "no_logs": "No logs yet...",
+            "payload_data": "Payload Data",
+            "realtime_link": "Realtime Link",
+            "active": "Active",
+            "nodes": "Nodes"
+        },
+        "companyNameLabel": "Company Name *",
+        "companyNamePlaceholder": "e.g. Google, Meta",
+        "jobTitleLabel": "Job Title *",
+        "jobTitlePlaceholder": "e.g. Senior Frontend Engineer",
         "neuralEngine": {
             "title": "Neural Engine",
             "subtitle": "Multi-Agent Collaboration • Real-time Optimization",
@@ -215,6 +231,30 @@
                 "title": "Neural Optimization in Progress",
                 "description": "The AI agents are restructuring your resume content in the background.",
                 "showButton": "Show Neural Engine"
+            },
+            "console": {
+                "initiating": "> Deconstructing task logic...",
+                "analyzing": "> Agent {{id}} is analyzing data...",
+                "system": "System:",
+                "validating": "Running semantic validation...",
+                "success": "> Operation succeeded. Data buffered.",
+                "waiting": "> Waiting for trigger signal...",
+                "standby": "Standby",
+                "process_locus": "Process::Core",
+                "execution_time": "Execution Time",
+                "status_ok": "OK",
+                "status_active": "Active"
+            },
+            "nodeInspector": {
+                "unknown_agent": "Unknown Agent",
+                "agent_status": "Agent Status",
+                "idle": "Idle",
+                "execution_log": "Execution Log",
+                "no_logs": "No logs yet...",
+                "payload_data": "Payload Data",
+                "realtime_link": "Realtime Link",
+                "active": "Active",
+                "nodes": "Nodes"
             }
           },
           "steps": {
@@ -299,6 +339,51 @@
             "title": "Recruiter Critique",
             "in_progress": "Recruiter AI is evaluating your resume...",
             "completed": "Evaluation complete."
+          },
+          "resume_analyzer": {
+            "title": "Resume Feature Extractor",
+            "in_progress": "Evaluating resume strengths and weaknesses...",
+            "completed": "Resume evaluation complete."
+          },
+          "resume_web_search": {
+            "title": "Resume Market Research",
+            "in_progress": "Researching similar candidates in the market...",
+            "completed": "Market research complete."
+          },
+          "jd_web_search": {
+            "title": "Job Market Research",
+            "in_progress": "Analyzing hiring trends for this position...",
+            "completed": "Trend analysis complete."
+          },
+          "company_interview_search": {
+            "title": "Interview Intel Collector",
+            "in_progress": "Collecting company interview questions and intel...",
+            "completed": "Intel collection complete."
+          },
+          "research_combiner": {
+            "title": "Multi-Source Aggregator",
+            "in_progress": "Synthesizing all research intelligence...",
+            "completed": "Strategy formulation complete."
+          },
+          "rewrite_sections_parent": {
+            "title": "Optimization Orchestrator",
+            "in_progress": "Orchestrating parallel section optimization...",
+            "completed": "All sections optimized in parallel."
+          },
+          "route_next_rewrite": {
+            "title": "Rewrite Planner",
+            "in_progress": "Planning the next section to optimize...",
+            "completed": "Planning complete."
+          },
+          "combine_sections": {
+            "title": "Content Assembler",
+            "in_progress": "Reassembling optimized sections...",
+            "completed": "Resume assembly complete."
+          },
+          "strategic_analyzer": {
+            "title": "Strategy Engine",
+            "in_progress": "Analyzing strategic gaps between resume and job...",
+            "completed": "Gap analysis complete."
           }
         },
         "optimizationProgress": {
@@ -690,7 +775,7 @@
     },
     "importResumeCard": {
       "title": "Import an existing resume",
-      "description": "Currently only supports Magic Resume JSON files"
+      "description": "Supports JSON files and PDF resumes"
     },
     "resumeCard": {
       "lastUpdated": "Last updated {{time}}",
@@ -707,23 +792,31 @@
     "close": "Close sidebar"
   },
   "importDialog": {
-    "title": "Import Resume from JSON",
-    "description": "Select or drop a JSON file below to create a new resume.",
+    "title": "Import Resume",
+    "description": "Select or drop a JSON or PDF file below to create a new resume.",
     "dropzone": {
       "active": "Drop the file here...",
-      "default": "Drag 'n' drop a JSON file here, or click to select file",
+      "default": "Drag 'n' drop a file here, or click to select",
       "jsonOnly": "(.json file only)"
     },
     "errors": {
       "fileReadAborted": "File reading was aborted.",
       "fileReadFailed": "File reading has failed.",
-      "invalidFormat": "Invalid resume JSON format.",
-      "parseFailed": "Failed to parse JSON file."
+      "invalidFormat": "Invalid resume format.",
+      "parseFailed": "Failed to parse file.",
+      "unsupportedFormat": "Please upload a PDF or JSON file.",
+      "noApiKey": "Please configure your AI model API key in Settings before importing PDF files."
     },
     "success": "Resume imported successfully!",
     "cancel": "Cancel",
     "importing": "Importing and syncing...",
-    "defaultName": "Imported Resume"
+    "defaultName": "Imported Resume",
+    "pdf": {
+      "extracting": "Extracting text from PDF...",
+      "analyzing": "AI is analyzing your resume...",
+      "success": "PDF resume imported successfully!",
+      "hint": "PDF files will be parsed with AI"
+    }
   },
   "dynamicForm": {
     "fields": {

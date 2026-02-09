@@ -203,10 +203,25 @@
         "optimizingButton": "优化中...",
         "previewButton": "预览",
       "diffButton": "前后对比",
+        "companyNameLabel": "公司名称 *",
+        "companyNamePlaceholder": "例如: Google, 阿里巴巴",
+        "jobTitleLabel": "岗位名称 *",
+        "jobTitlePlaceholder": "例如: 高级前端工程师, Senior Software Engineer",
         "rawJsonButton": "查看原始 JSON",
         "applyChangesButton": "应用更改",
         "revertChangesButton": "还原更改",
         "jsonButton": "JSON",
+        "nodeInspector": {
+          "unknown_agent": "未知智能体",
+          "agent_status": "智能体状态",
+          "idle": "空闲",
+          "execution_log": "执行日志",
+          "no_logs": "暂无日志...",
+          "payload_data": "负载数据",
+          "realtime_link": "实时链路",
+          "active": "活跃",
+          "nodes": "节点数"
+        },
         "neuralEngine": {
           "title": "神经网络引擎",
           "subtitle": "多智能体协同 • 实时优化中",
@@ -787,11 +802,11 @@
     "title": "简历",
     "newResumeCard": {
       "title": "创建新简历",
-      "description": "从头开始构建"
+      "description": "使用模板快速创建专业简历"
     },
     "importResumeCard": {
       "title": "导入现有简历",
-      "description": "目前仅支持导入Magic Resume导出的JSON文件"
+      "description": "支持导入 JSON 文件或 PDF 简历"
     },
     "resumeCard": {
       "lastUpdated": "最后更新于 {{time}}",
@@ -808,23 +823,31 @@
     "close": "关闭侧边栏"
   },
   "importDialog": {
-    "title": "从 JSON 导入简历",
-    "description": "在下方选择或拖放一个 JSON 文件以创建新简历。",
+    "title": "导入简历",
+    "description": "在下方选择或拖放 JSON / PDF 文件以创建新简历。",
     "dropzone": {
       "active": "在此处放下文件...",
-      "default": "将 JSON 文件拖放到此处，或点击选择文件",
+      "default": "将文件拖放到此处，或点击选择文件",
       "jsonOnly": "（仅限 .json 文件）"
     },
     "errors": {
       "fileReadAborted": "文件读取已中止。",
       "fileReadFailed": "文件读取失败。",
-      "invalidFormat": "无效的简历 JSON 格式。",
-      "parseFailed": "解析 JSON 文件失败。"
+      "invalidFormat": "无效的简历格式。",
+      "parseFailed": "解析文件失败。",
+      "unsupportedFormat": "请上传 PDF 或 JSON 文件。",
+      "noApiKey": "请先在「设置」中配置 AI 模型的 API Key，才能导入 PDF 简历。"
     },
     "success": "简历导入成功！",
     "cancel": "取消",
     "importing": "正在导入并同步...",
-    "defaultName": "导入的简历"
+    "defaultName": "导入的简历",
+    "pdf": {
+      "extracting": "正在从 PDF 中提取文本...",
+      "analyzing": "AI 正在分析您的简历...",
+      "success": "PDF 简历导入成功！",
+      "hint": "PDF 文件将通过 AI 智能解析"
+    }
   },
   "dynamicForm": {
     "fields": {

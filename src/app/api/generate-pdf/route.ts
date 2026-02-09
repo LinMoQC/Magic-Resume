@@ -1,14 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
 
 export const maxDuration = 60; // Set max duration to 60 seconds (or more if needed)
 
 export async function POST(request: NextRequest) {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
     
     // 获取后端地址，优先使用环境变量，否则回退到本地默认
-    // 注意: process.env.BACKEND_URL 在 .env.local 中配置
-    // 如果是开发环境，可能需要确保指向 localhost:8000
     const backendUrl = process.env.BACKEND_URL;
 
     if (!backendUrl) {

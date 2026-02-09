@@ -238,7 +238,7 @@ const ResumeList = React.memo(({ resumes, onAdd, onImport, onDelete, onDuplicate
                   <FaPlus className="text-xl text-neutral-400 group-hover:text-blue-500 transition-colors" />
                 </div>
                 <div className="text-lg font-semibold text-neutral-200 group-hover:text-white transition-colors">{t('dashboard.newResumeCard.title')}</div>
-                <div className="text-xs text-neutral-500 mt-1">{t('dashboard.newResumeCard.description')}</div>
+                <div className="text-sm text-neutral-500 mt-1">{t('dashboard.newResumeCard.description')}</div>
               </CardContent>
             </Card>
           </motion.div>

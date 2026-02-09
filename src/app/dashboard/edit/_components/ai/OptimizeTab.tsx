@@ -131,7 +131,7 @@ const {
               <div className="w-5 h-5 bg-neutral-800 rounded-md flex items-center justify-center mr-2">
                 <Brain size={12} className="text-white" />
               </div>
-              公司名称 *
+              {t('modals.aiModal.optimizeTab.companyNameLabel')}
             </label>
             <input
               type="text"
@@ -139,7 +139,7 @@ const {
               disabled={isAiJobRunning}
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
-              placeholder="例如: Google, 阿里巴巴"
+              placeholder={t('modals.aiModal.optimizeTab.companyNamePlaceholder')}
               className="h-10 px-3 bg-neutral-900/70 border border-neutral-700/50 rounded-lg focus:ring-2 focus:ring-purple-500/40 focus:border-purple-500/40 text-sm text-neutral-100 placeholder:text-neutral-500 shadow-inner transition-all duration-200 hover:border-neutral-600/50"
               required
             />
@@ -151,7 +151,7 @@ const {
               <div className="w-5 h-5 bg-neutral-800 rounded-md flex items-center justify-center mr-2">
                 <Zap size={12} className="text-white" />
               </div>
-              岗位名称 *
+              {t('modals.aiModal.optimizeTab.jobTitleLabel')}
             </label>
             <input
               type="text"
@@ -159,7 +159,7 @@ const {
               disabled={isAiJobRunning}
               value={jobTitle}
               onChange={(e) => setJobTitle(e.target.value)}
-              placeholder="例如: 高级前端工程师, Senior Software Engineer"
+              placeholder={t('modals.aiModal.optimizeTab.jobTitlePlaceholder')}
               className="h-10 px-3 bg-neutral-900/70 border border-neutral-700/50 rounded-lg focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500/40 text-sm text-neutral-100 placeholder:text-neutral-500 shadow-inner transition-all duration-200 hover:border-neutral-600/50"
               required
             />

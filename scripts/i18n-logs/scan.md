@@ -1,6 +1,6 @@
-# i18n Scan Report (2026/2/5 12:29:50)
+# i18n Scan Report (2026/2/10 00:11:05)
 
-Found 63 issues in 19 files.
+Found 60 issues in 21 files.
 
 ## 📄 src/app/page.tsx
 
@@ -51,6 +51,11 @@ Found 63 issues in 19 files.
 - L50: **[HARDCODED_TEXT]** Hardcoded attribute alt: "Profile"
 - L92: **[HARDCODED_TEXT]** Hardcoded attribute alt: "Profile"
 
+## 📄 src/app/dashboard/_components/ImportResumeDialog.tsx
+
+- L278: **[HARDCODED_TEXT]** Hardcoded JSX text: "JSON"
+- L281: **[HARDCODED_TEXT]** Hardcoded JSX text: "PDF"
+
 ## 📄 src/app/dashboard/settings/page.tsx
 
 - L156: **[HARDCODED_TEXT]** Hardcoded JSX text: "You have the option to"
@@ -73,8 +78,8 @@ Found 63 issues in 19 files.
 - L62: **[HARDCODED_TEXT]** Hardcoded JSX text: "H1"
 - L63: **[HARDCODED_TEXT]** Hardcoded JSX text: "H2"
 - L64: **[HARDCODED_TEXT]** Hardcoded JSX text: "H3"
-- L314: **[HARDCODED_TEXT]** Hardcoded JSX text: "H1"
-- L315: **[HARDCODED_TEXT]** Hardcoded JSX text: "H2"
+- L388: **[HARDCODED_TEXT]** Hardcoded JSX text: "H1"
+- L389: **[HARDCODED_TEXT]** Hardcoded JSX text: "H2"
 
 ## 📄 src/app/dashboard/notifications/_components/NotificationItem.tsx
 
@@ -101,24 +106,22 @@ Found 63 issues in 19 files.
 
 ## 📄 src/app/dashboard/edit/_components/ai/InterviewTab.tsx
 
-- L459: **[HARDCODED_TEXT]** Hardcoded JSX text: "&quot;"
-- L459: **[HARDCODED_TEXT]** Hardcoded JSX text: "&quot;"
+- L465: **[HARDCODED_TEXT]** Hardcoded JSX text: "&quot;"
+- L465: **[HARDCODED_TEXT]** Hardcoded JSX text: "&quot;"
 
 ## 📄 src/app/dashboard/edit/_components/ai/Live2DAvatar.tsx
 
 - L179: **[HARDCODED_TEXT]** Hardcoded JSX text: "Loading Avatar..."
 
+## 📄 src/app/dashboard/edit/_components/ai/NeuralNode.tsx
+
+- L175: **[HARDCODED_TEXT]** Hardcoded JSX text: "::EXECUTING"
+
+## 📄 src/app/dashboard/edit/_components/ai/NodeInspector.tsx
+
+- L103: **[HARDCODED_TEXT]** Hardcoded JSX text: "ID:"
+
 ## 📄 src/app/dashboard/edit/_components/layout/SidebarNav.tsx
 
 - L31: **[HARDCODED_TEXT]** Hardcoded attribute alt: "simple-logo"
-
-## 📄 src/app/dashboard/edit/[id]/multi-persona-demo/page.tsx
-
-- L47: **[HARDCODED_TEXT]** Hardcoded JSX text: "Multi-Persona Resume Analysis"
-- L49: **[HARDCODED_TEXT]** Hardcoded JSX text: "Get comprehensive feedback from ATS Bot, Hiring Manager, and HR Specialist perspectives"
-- L63: **[HARDCODED_TEXT]** Hardcoded JSX text: "English"
-- L73: **[HARDCODED_TEXT]** Hardcoded JSX text: "简体中文"
-- L81: **[HARDCODED_TEXT]** Hardcoded JSX text: "Please load a resume first. Go to the editor and load or create a resume."
-- L95: **[HARDCODED_TEXT]** Hardcoded JSX text: "Analyzing..."
-- L107: **[HARDCODED_TEXT]** Hardcoded JSX text: "Reset"
 

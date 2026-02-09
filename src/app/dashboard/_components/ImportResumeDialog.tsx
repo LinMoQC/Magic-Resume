@@ -1,14 +1,74 @@
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '@clerk/nextjs';
-import { Loader2, X } from 'lucide-react';
+import { Loader2, X, FileText, FileJson } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Resume } from '@/types/frontend/resume';
 import { useResumeStore } from '@/store/useResumeStore';
+import { useSettingStore } from '@/store/useSettingStore';
 import { toast } from 'sonner';
 import { FaFileUpload } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
+import { z } from 'zod';
+
+// ─── Zod 校验 Schema ───
+
+const InfoSchema = z.object({
+  fullName: z.string().default(''),
+  headline: z.string().default(''),
+  email: z.string().default(''),
+  phoneNumber: z.string().default(''),
+  address: z.string().default(''),
+  website: z.string().default(''),
+  avatar: z.string().default(''),
+});
+
+// 统一的 SectionItem schema — 所有字段都是 string | null, id 和 visible 必须
+const SectionItemSchema = z.object({
+  id: z.string(),
+  visible: z.boolean().default(true),
+  company: z.string().nullable().default(null),
+  position: z.string().nullable().default(null),
+  date: z.string().nullable().default(null),
+  location: z.string().nullable().default(null),
+  website: z.string().nullable().default(null),
+  summary: z.string().nullable().default(null),
+  name: z.string().nullable().default(null),
+  role: z.string().nullable().default(null),
+  link: z.string().nullable().default(null),
+  school: z.string().nullable().default(null),
+  degree: z.string().nullable().default(null),
+  major: z.string().nullable().default(null),
+  level: z.string().nullable().default(null),
+  language: z.string().nullable().default(null),
+  issuer: z.string().nullable().default(null),
+  platform: z.string().nullable().default(null),
+  url: z.string().nullable().default(null),
+  description: z.string().nullable().default(null),
+}).passthrough(); // 允许额外字段
+
+const SectionOrderItemSchema = z.object({
+  key: z.string(),
+  label: z.string(),
+});
+
+// 标准 sections — 每个 key 都必须是数组（可以为空）
+const SectionsSchema = z.object({
+  experience: z.array(SectionItemSchema).default([]),
+  education: z.array(SectionItemSchema).default([]),
+  projects: z.array(SectionItemSchema).default([]),
+  skills: z.array(SectionItemSchema).default([]),
+  languages: z.array(SectionItemSchema).default([]),
+  certificates: z.array(SectionItemSchema).default([]),
+}).passthrough(); // 允许额外的自定义 section
+
+// 完整的解析结果 schema
+const ParsedResumeSchema = z.object({
+  info: InfoSchema,
+  sections: SectionsSchema,
+  sectionOrder: z.array(SectionOrderItemSchema).min(1),
+});
 
 type ImportResumeDialogProps = {
   open: boolean;
@@ -17,19 +77,35 @@ type ImportResumeDialogProps = {
 
 export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeDialogProps) {
   const { importResume } = useResumeStore();
+  const { apiKey, baseUrl, model, maxTokens } = useSettingStore();
   const { getToken } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isImporting, setIsImporting] = useState(false);
+  const [importStatus, setImportStatus] = useState<string>('');
   const { t } = useTranslation();
 
-  const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    setError(null);
-    const file = acceptedFiles[acceptedFiles.length - 1];
-    if (!file) return;
+  // ─── 校验并规范化简历数据 ───
+  const validateAndNormalize = useCallback((data: unknown) => {
+    const parsed = ParsedResumeSchema.parse(data);
 
-    setIsImporting(true);
+    // 移除后端专属字段
+    const raw = { ...(data as Record<string, unknown>) };
+    delete raw.isPublic;
+    delete raw.shareId;
+    delete raw.shareRole;
+
+    return {
+      ...raw,
+      info: parsed.info,
+      sections: parsed.sections,
+      sectionOrder: parsed.sectionOrder,
+    };
+  }, []);
+
+  // ─── JSON 文件处理 ───
+  const handleJsonFile = useCallback(async (file: File) => {
     const reader = new FileReader();
-    
+
     const readFile = () => new Promise<string>((resolve, reject) => {
       reader.onabort = () => reject(new Error(t('importDialog.errors.fileReadAborted')));
       reader.onerror = () => reject(new Error(t('importDialog.errors.fileReadFailed')));
@@ -37,39 +113,113 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
       reader.readAsText(file);
     });
 
-    try {
-      const content = await readFile();
-      const result = JSON.parse(content);
+    const content = await readFile();
+    const result = JSON.parse(content);
+    return validateAndNormalize(result);
+  }, [t, validateAndNormalize]);
 
-      // Basic validation
-      if (typeof result === 'object' && result !== null && 'info' in result && 'sections' in result) {
-        const newResume: Resume = {
-          ...result,
-          id: Date.now().toString(),
-          name: result.name || t('importDialog.defaultName'),
-          updatedAt: Date.now(),
-        };
-        
-        const token = await getToken();
-        await importResume(newResume, token || undefined);
-        
-        toast.success(t('importDialog.success'));
-        onOpenChange(false);
-      } else {
-        throw new Error(t('importDialog.errors.invalidFormat'));
-      }
+  // ─── PDF 文件处理（前端传递 LLM 配置）───
+  const handlePdfFile = useCallback(async (file: File) => {
+    setImportStatus(t('importDialog.pdf.extracting', { defaultValue: 'Extracting text from PDF...' }));
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    // 传递用户的 LLM 配置
+    const llmConfig = { apiKey, baseUrl, modelName: model, maxTokens };
+    formData.append('config', JSON.stringify(llmConfig));
+
+    setImportStatus(t('importDialog.pdf.analyzing', { defaultValue: 'AI is analyzing your resume...' }));
+
+    const response = await fetch('/api/pdf/parse', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+      const detail = errorData.detail || errorData.error || `Server error: ${response.status}`;
+      throw new Error(detail);
+    }
+
+    const result = await response.json();
+    return validateAndNormalize(result);
+  }, [apiKey, baseUrl, model, maxTokens, t, validateAndNormalize]);
+
+  // ─── 统一文件处理 ───
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    setError(null);
+    setImportStatus('');
+    const file = acceptedFiles[acceptedFiles.length - 1];
+    if (!file) return;
+
+    const isPdf = file.name.toLowerCase().endsWith('.pdf');
+    const isJson = file.name.toLowerCase().endsWith('.json');
+
+    if (!isPdf && !isJson) {
+      setError(t('importDialog.errors.unsupportedFormat', { defaultValue: 'Please upload a PDF or JSON file.' }));
+      return;
+    }
+
+    // PDF 需要大模型解析，检查是否已配置 API Key
+    if (isPdf && !apiKey) {
+      setError(t('importDialog.errors.noApiKey', { defaultValue: 'Please configure your AI model API key in Settings before importing PDF files.' }));
+      return;
+    }
+
+    setIsImporting(true);
+
+    try {
+      const result = isPdf
+        ? await handlePdfFile(file)
+        : await handleJsonFile(file);
+
+      const resumeName = result.info?.fullName
+        ? `${result.info.fullName}'s Resume`
+        : (result as Record<string, unknown>).name as string || t('importDialog.defaultName');
+
+      const newResume: Resume = {
+        ...(result as Record<string, unknown>),
+        id: Date.now().toString(),
+        name: resumeName,
+        updatedAt: Date.now(),
+        template: ((result as Record<string, unknown>).template as string) || 'classic',
+        themeColor: ((result as Record<string, unknown>).themeColor as string) || '#f97316',
+        typography: ((result as Record<string, unknown>).typography as string) || 'inter',
+        customTemplate: ((result as Record<string, unknown>).customTemplate as Resume['customTemplate']) || {},
+      } as Resume;
+
+      const token = await getToken();
+      await importResume(newResume, token || undefined);
+
+      toast.success(
+        isPdf
+          ? t('importDialog.pdf.success', { defaultValue: 'PDF resume imported successfully!' })
+          : t('importDialog.success')
+      );
+      onOpenChange(false);
     } catch (e) {
-      const message = e instanceof Error ? e.message : t('importDialog.errors.parseFailed');
+      let message: string;
+      if (e instanceof z.ZodError) {
+        const issues = e.issues.map(i => `${i.path.join('.')}: ${i.message}`).join('; ');
+        message = `Invalid resume format: ${issues}`;
+      } else {
+        message = e instanceof Error ? e.message : t('importDialog.errors.parseFailed');
+      }
       toast.error(message);
       setError(message);
     } finally {
       setIsImporting(false);
+      setImportStatus('');
     }
-  }, [importResume, getToken, onOpenChange, t]);
+  }, [importResume, getToken, onOpenChange, t, handleJsonFile, handlePdfFile]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: { 'application/json': ['.json'] },
+    accept: {
+      'application/json': ['.json'],
+      'application/pdf': ['.pdf'],
+    },
     multiple: false,
     disabled: isImporting,
   });
@@ -117,7 +267,7 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
                 {isImporting ? (
                   <div className="flex flex-col items-center justify-center text-sky-500">
                     <Loader2 className="w-12 h-12 mb-4 animate-spin" />
-                    <p className="font-medium">{t('importDialog.importing')}</p>
+                    <p className="font-medium">{importStatus || t('importDialog.importing')}</p>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center">
@@ -129,7 +279,17 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
                     ) : (
                       <p className="text-neutral-300 font-medium">{t('importDialog.dropzone.default')}</p>
                     )}
-                    <p className="text-xs text-neutral-500 mt-2">{t('importDialog.dropzone.jsonOnly')}</p>
+                    <div className="flex items-center gap-3 mt-3">
+                      <span className="inline-flex items-center gap-1 text-xs text-neutral-500 bg-neutral-800/60 px-2.5 py-1 rounded-full">
+                        <FileJson size={12} /> JSON
+                      </span>
+                      <span className="inline-flex items-center gap-1 text-xs text-neutral-500 bg-neutral-800/60 px-2.5 py-1 rounded-full">
+                        <FileText size={12} /> PDF
+                      </span>
+                    </div>
+                    <p className="text-xs text-neutral-600 mt-2">
+                      {t('importDialog.pdf.hint', { defaultValue: 'PDF files will be parsed with AI' })}
+                    </p>
                   </div>
                 )}
               </div>
@@ -153,4 +313,3 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
     </AnimatePresence>
   );
 }
- 
