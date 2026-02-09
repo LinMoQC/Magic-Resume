@@ -804,7 +804,8 @@
       "fileReadFailed": "File reading has failed.",
       "invalidFormat": "Invalid resume format.",
       "parseFailed": "Failed to parse file.",
-      "unsupportedFormat": "Please upload a PDF or JSON file."
+      "unsupportedFormat": "Please upload a PDF or JSON file.",
+      "noApiKey": "Please configure your AI model API key in Settings before importing PDF files."
     },
     "success": "Resume imported successfully!",
     "cancel": "Cancel",

@@ -835,7 +835,8 @@
       "fileReadFailed": "文件读取失败。",
       "invalidFormat": "无效的简历格式。",
       "parseFailed": "解析文件失败。",
-      "unsupportedFormat": "请上传 PDF 或 JSON 文件。"
+      "unsupportedFormat": "请上传 PDF 或 JSON 文件。",
+      "noApiKey": "请先在「设置」中配置 AI 模型的 API Key，才能导入 PDF 简历。"
     },
     "success": "简历导入成功！",
     "cancel": "取消",

@@ -161,6 +161,12 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
       return;
     }
 
+    // PDF 需要大模型解析，检查是否已配置 API Key
+    if (isPdf && !apiKey) {
+      setError(t('importDialog.errors.noApiKey', { defaultValue: 'Please configure your AI model API key in Settings before importing PDF files.' }));
+      return;
+    }
+
     setIsImporting(true);
 
     try {
