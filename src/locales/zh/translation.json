@@ -194,20 +194,63 @@
       "optimizeTab": {
         "jdLabel": "目标职位描述 (JD)",
         "jdPlaceholder": "在此粘贴目标职位的 JD，AI 将根据其对简历进行针对性优化...",
+        "outputTitle": "优化结果",
+        "emptyState": "在此粘贴职位描述并点击开始优化，AI 将为您生成针对性的简历优化建议。",
         "optimizedCount": "优化完成，共处理 {{count}} 个章节",
         "resultsReady": "优化结果已准备就绪",
         "applyHint": "点击应用将更新您的简历",
         "optimizeButton": "开始 AI 优化",
         "optimizingButton": "优化中...",
         "previewButton": "预览",
+      "diffButton": "前后对比",
         "rawJsonButton": "查看原始 JSON",
         "applyChangesButton": "应用更改",
         "revertChangesButton": "还原更改",
         "jsonButton": "JSON",
-        "outputTitle": "优化结果",
+        "neuralEngine": {
+          "title": "神经网络引擎",
+          "subtitle": "多智能体协同 • 实时优化中",
+          "minimize": "最小化",
+          "progress": {
+              "title": "智能优化进行中",
+              "description": "AI 智能体正在后台重构您的简历内容。",
+              "showButton": "显示"
+          },
+          "processing": "实时处理流",
+          "stats": {
+            "coreStatus": "核心状态",
+            "agentCount": "智能体活跃数",
+            "activeChannels": "活跃通道"
+          },
+          "console": {
+            "initiating": "> 正在解构任务逻辑...",
+            "analyzing": "> 智能体 {{id}} 正在分析数据...",
+            "system": "系统:",
+            "validating": "运行语义验证中...",
+            "success": "> 操作成功。数据已缓冲。",
+            "waiting": "> 等待触发信号...",
+            "standby": "待机",
+            "process_locus": "进程::思维核心",
+            "execution_time": "执行时间",
+            "status_ok": "正常",
+            "status_active": "活跃"
+          },
+          "nodeInspector": {
+            "unknown_agent": "未知智能体",
+            "agent_status": "智能体状态",
+            "idle": "空闲",
+            "execution_log": "执行日志",
+            "no_logs": "暂无日志...",
+            "payload_data": "负载数据",
+            "realtime_link": "实时链路",
+            "active": "活跃",
+            "nodes": "节点数"
+          }
+        },
         "steps": {
           "preparer": {
-            "title": "准备输入数据",
+            "title": "输入预处理器",
+            "personality": "输入预处理器",
             "in_progress": "正在准备您的简历和职位描述...",
             "completed": "输入数据已就绪。"
           },
@@ -222,36 +265,79 @@
           },
           "combiner": {
             "title": "合并分析报告",
+            "personality": "合并器",
             "in_progress": "正在生成综合分析报告...",
             "completed": "分析报告已生成。"
           },
           "jd_analyzer": {
-            "title": "分析职位描述",
+            "title": "岗位特征提取器",
+            "personality": "岗位特征提取器",
             "in_progress": "正在分析职位描述...",
             "completed": "职位描述分析完成。"
           },
+          "resume_analyzer": {
+            "title": "简历特征提取器",
+            "personality": "简历特征提取器",
+            "in_progress": "正在全方位评估简历优势与不足...",
+            "completed": "简历评估完成。"
+          },
+          "resume_web_search": {
+            "title": "简历市场检索",
+            "personality": "简历市场检索",
+            "in_progress": "正在调研同类候选人市场情况...",
+            "completed": "市场调研完成。"
+          },
+          "jd_web_search": {
+            "title": "岗位市场检索",
+            "personality": "岗位市场检索",
+            "in_progress": "正在分析该职位的市场招聘趋势...",
+            "completed": "趋势分析完成。"
+          },
+          "company_interview_search": {
+            "title": "面试情报采集器",
+            "personality": "面试情报采集器",
+            "in_progress": "正在搜集公司面试题与内部情报...",
+            "completed": "情报搜集完成。"
+          },
+          "research_combiner": {
+            "title": "多源聚合器",
+            "personality": "多源聚合器",
+            "in_progress": "正在综合所有研究情报...",
+            "completed": "战略制定完成。"
+          },
+          "strategic_analyzer": {
+            "title": "优化策略引擎",
+            "personality": "优化策略引擎",
+            "in_progress": "正在对比简历与职位的战略差距...",
+            "completed": "差异分析完成。"
+          },
           "prepare_research": {
             "title": "准备研究",
+            "personality": "研究规划师",
             "in_progress": "正在根据职位描述准备网络研究...",
             "completed": "研究计划已就绪。"
           },
           "query_writer": {
             "title": "生成搜索查询",
+            "personality": "查询生成",
             "in_progress": "正在生成智能搜索查询...",
             "completed": "搜索查询已生成。"
           },
           "web_searcher": {
             "title": "执行网络研究",
+            "personality": "深度爬虫",
             "in_progress": "正在网络上搜索关键信息...",
             "completed": "网络研究完成。"
           },
           "reflection": {
             "title": "反思搜索结果",
+            "personality": "批评与修正",
             "in_progress": "正在分析搜索结果并识别信息差距...",
             "completed": "反思完成，规划下一步。"
           },
           "final_answer": {
             "title": "综合研究发现",
+            "personality": "最终输出",
             "in_progress": "正在将研究发现整合成摘要...",
             "completed": "研究摘要完成。"
           },
@@ -262,13 +348,33 @@
           },
           "prepare_rewriter": {
             "title": "准备重写任务",
+            "personality": "策略规划师",
             "in_progress": "正在准备按章节重写...",
             "completed": "已切换到分步优化模式。"
           },
           "rewrite_section": {
-            "title": "分步优化",
+            "title": "分段重写器",
+            "personality": "分段重写器",
             "in_progress": "正在优化中...",
             "completed": "所有章节均已优化！"
+          },
+          "rewrite_sections_parent": {
+            "title": "优化编排器",
+            "personality": "智能编排",
+            "in_progress": "正在编排各个章节的并行优化...",
+            "completed": "所有章节并行优化完成。"
+          },
+          "route_next_rewrite": {
+            "title": "重写规划器",
+            "personality": "任务路由",
+            "in_progress": "正在规划下一个优化章节...",
+            "completed": "规划完成。"
+          },
+          "combine_sections": {
+            "title": "内容组装器",
+            "personality": "内容组装器",
+            "in_progress": "正在将优化后的章节重新组装...",
+            "completed": "简历组装完成。"
           },
           "rewriting_section": {
             "in_progress": "正在优化 {{section}}...",
@@ -279,14 +385,21 @@
             "completed": "{{category}} 分析完毕。"
           },
           "company_analysis": {
-            "title": "公司深度背景调查",
+            "title": "公司知识图谱",
+            "personality": "公司知识图谱",
             "in_progress": "正在分析目标公司的文化和技术栈...",
             "completed": "公司背景调查完成。"
           },
           "adversarial_critique": {
-            "title": "招聘官模拟面试",
+            "title": "对抗评估器",
+            "personality": "对抗评估器",
             "in_progress": "AI 招聘官正在评估您的简历...",
             "completed": "招聘官评估完成。"
+          },
+          "microEvents": {
+            "thinking": "正在构思优化策略...",
+            "searching": "正在执行深度搜索: {{tool}}...",
+            "tool_complete": "搜索完成，正在整理数据..."
           }
         },
         "optimizationProgress": {

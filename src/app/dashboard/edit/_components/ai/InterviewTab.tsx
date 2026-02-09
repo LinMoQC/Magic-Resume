@@ -50,7 +50,7 @@ const VOICE_OPTIONS = [
 const ANIME_VOICE_IDS = ['paimon', 'furina', 'yaemiko', 'kokomi'];
 
 
-export default function InterviewTab({ resumeData }: InterviewTabProps) {
+export default function InterviewTab({ resumeData, setIsAiJobRunning }: InterviewTabProps) {
     const { t } = useTranslation();
     const { apiKey, baseUrl, model } = useSettingStore();
 
@@ -72,6 +72,12 @@ export default function InterviewTab({ resumeData }: InterviewTabProps) {
             // Handle error state
         }
     }, [status]);
+
+    // Sync running state with parent to lock tabs
+    useEffect(() => {
+        const isRunning = !!sessionId || status === 'connecting' || status === 'connected';
+        setIsAiJobRunning(isRunning);
+    }, [sessionId, status, setIsAiJobRunning]);
 
     // Cleanup on unmount
     useEffect(() => {

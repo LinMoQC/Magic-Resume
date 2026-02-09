@@ -80,7 +80,7 @@ export default function AIModal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => !isAiJobRunning && onClose()}
+            onClick={onClose}
             className="fixed inset-0 bg-black/60 z-100 backdrop-blur-md"
           />
           <div className="fixed inset-0 z-101 flex items-center justify-center p-4 pointer-events-none">
@@ -104,7 +104,6 @@ export default function AIModal({
                   onClick={onClose}
                   className="p-2 rounded-full hover:bg-neutral-800 text-neutral-500 hover:text-white transition-all active:scale-90"
                   type="button"
-                  disabled={isAiJobRunning}
                 >
                   <X size={22} />
                 </button>
