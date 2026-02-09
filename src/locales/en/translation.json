@@ -205,8 +205,19 @@
         "applyChangesButton": "Apply Changes",
         "revertChangesButton": "Revert Changes",
         "outputTitle": "Optimization Result",
+        "emptyState": "Paste the job description and click Start Optimization to get targeted resume suggestions.",
         "jsonButton": "JSON",
-        "steps": {
+        "neuralEngine": {
+            "title": "Neural Engine",
+            "subtitle": "Multi-Agent Collaboration • Real-time Optimization",
+            "minimize": "Minimize",
+            "progress": {
+                "title": "Neural Optimization in Progress",
+                "description": "The AI agents are restructuring your resume content in the background.",
+                "showButton": "Show Neural Engine"
+            }
+          },
+          "steps": {
           "preparer": {
             "title": "Preparing Inputs",
             "in_progress": "Preparing your resume and job description...",

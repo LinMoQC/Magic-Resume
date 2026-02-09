@@ -1,5 +1,5 @@
 import React from 'react';
-import { Loader2, CheckCircle, ChevronRight } from 'lucide-react';
+import { Loader2, CheckCircle, ChevronRight, XCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
@@ -94,9 +94,12 @@ export const LogItem: React.FC<LogItemProps> = ({ log, isLast, onToggleExpand, e
           }`}>
             {log.status === 'in_progress' && <Loader2 size={18} className="animate-spin" />}
             {log.status === 'completed' && <CheckCircle size={18} />}
+            {log.status === 'failed' && <XCircle size={18} />}
             {log.status === 'pending' && <div className="w-3 h-3 bg-neutral-300 rounded-full opacity-60" />}
           </div>
-          {!isLast && <div className="w-0.5 grow bg-linear-to-b from-neutral-600 to-neutral-700 rounded-full mt-2" />}
+          {!isLast && <div className={`w-0.5 grow rounded-full mt-2 ${
+            log.status === 'completed' ? 'bg-linear-to-b from-green-500/30 to-neutral-700' : 'bg-linear-to-b from-neutral-600 to-neutral-700'
+          }`} />}
         </div>
         <div className="flex-1 pt-1 pb-4 min-w-0 overflow-hidden">
           <div className="flex items-center min-w-0">

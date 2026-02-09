@@ -106,6 +106,10 @@ export interface GraphState {
   error?: string;
   taskCompleted?: string;
   is_graph_complete?: boolean;
+  
+  // V7: New Fields
+  companyName?: string;
+  jobTitle?: string;
 }
 
 const analysisCategories = Object.keys(ANALYSIS_CATEGORIES);

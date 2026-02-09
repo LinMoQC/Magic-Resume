@@ -52,6 +52,8 @@
     "@types/dompurify": "^3.0.5",
     "@types/lodash": "^4.17.23",
     "@types/lodash.get": "^4.4.9",
+    "@xyflow/react": "^12.10.0",
+    "@xyflow/system": "^0.0.74",
     "class-variance-authority": "^0.7.1",
     "date-fns": "^4.1.0",
     "dompurify": "^3.2.6",
