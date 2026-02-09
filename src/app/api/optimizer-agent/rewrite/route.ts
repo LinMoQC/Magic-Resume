@@ -1,15 +1,17 @@
+import { auth } from '@clerk/nextjs/server';
+
 export async function POST(request: Request) {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+    }
+
     const { state, config } = await request.json();
 
     if (!state || !config) {
       return new Response(JSON.stringify({ error: "Missing state or config" }), { status: 400 });
     }
-
-    // const graph = createRewriteGraph(config);
-    // const stream = await graph.stream(state, { recursionLimit: 25 });
-
-    // return streamResponse(stream);
 
     const backendUrl = process.env.BACKEND_URL;
     const backendResponse = await fetch(`${backendUrl}/api/graph/rewrite`, {

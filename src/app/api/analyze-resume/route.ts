@@ -1,5 +1,12 @@
+import { auth } from '@clerk/nextjs/server';
+
 export async function POST(request: Request) {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+    }
+
     const { resumeData, config } = await request.json();
 
     if (!resumeData || !config) {

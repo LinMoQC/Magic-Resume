@@ -1,6 +1,17 @@
+import { auth } from '@clerk/nextjs/server';
+
 export async function POST(request: Request) {
   try {
-    // 直接透传前端的 FormData（包含 file + config）给 Python 后端
+    // 验证用户身份 — 未登录直接拒绝
+    const { userId } = await auth();
+    if (!userId) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // 透传前端的 FormData（包含 file + config）给 Python 后端
     const formData = await request.formData();
 
     const backendUrl = process.env.BACKEND_URL || 'http://localhost:8000';

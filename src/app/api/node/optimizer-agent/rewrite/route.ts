@@ -1,3 +1,4 @@
+import { auth } from '@clerk/nextjs/server';
 import { createRewriteGraph } from "@/lib/aiLab/graphs";
 
 function streamResponse(iterator: AsyncGenerator<Record<string, unknown>>) {
@@ -24,6 +25,11 @@ function streamResponse(iterator: AsyncGenerator<Record<string, unknown>>) {
 
 export async function POST(request: Request) {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+    }
+
     const { state, config } = await request.json();
 
     if (!state || !config) {

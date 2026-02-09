@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
 import { initialResume } from '@/store/useResumeStore';
 import { createResumeChatAgent } from '@/lib/aiLab/agents';
 import { AIMessage, HumanMessage } from '@langchain/core/messages';
 
 export async function POST(req: NextRequest) {
     try {
+        const { userId } = await auth();
+        if (!userId) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
         const { messages, config } = await req.json();
 
         const chatAgent = createResumeChatAgent(config);
