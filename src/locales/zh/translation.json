@@ -186,6 +186,7 @@
         "create": "引导创建",
         "optimize": "智能优化",
         "analyze": "简历分析",
+        "translate": "一键翻译",
         "interview": "模拟面试"
       },
       "title": "AI 实验室",
@@ -462,6 +463,57 @@
         "errorReply": "我似乎遇到了一个问题。请尝试重新发送您的消息。",
         "retryNotification": "请求失败，正在重试...",
         "retryFailed": "多次重试后请求失败，请稍后再试。"
+      },
+      "translateTab": {
+        "inputTitle": "翻译配置",
+        "inputDescription": "请选择目标语言，并可选填写自定义提示词。",
+        "resumeSourceHint": "将直接使用当前简历内容进行翻译。",
+        "targetLanguage": {
+          "label": "目标语言",
+          "placeholder": "请选择目标语言",
+          "options": {
+            "zh": "中文",
+            "en": "英文 (English)",
+            "ja": "日语 (日本語)",
+            "ko": "韩语 (한국어)",
+            "fr": "法语 (Français)",
+            "de": "德语 (Deutsch)",
+            "es": "西班牙语 (Español)",
+            "pt": "葡萄牙语 (Português)",
+            "it": "意大利语 (Italiano)",
+            "ru": "俄语 (Русский)",
+            "ar": "阿拉伯语 (العربية)",
+            "hi": "印地语 (हिन्दी)"
+          }
+        },
+        "customPrompt": {
+          "label": "自定义提示词（可选）",
+          "placeholder": "例如：更口语化 / 保留术语 / 强调量化成果..."
+        },
+        "translateButton": "一键翻译",
+        "translateButtonLoading": "翻译中...",
+        "outputTitle": "翻译结果",
+        "outputDescription": "右侧展示生成的简历 JSON，并支持预览渲染。",
+        "translatedTextPlaceholder": "翻译文本将显示在这里...",
+        "emptyJsonState": "翻译完成后会在这里显示生成的 JSON。",
+        "invalidPreviewData": "当前 JSON 结构不足以渲染简历预览。",
+        "viewModes": {
+          "json": "JSON",
+          "preview": "预览"
+        },
+        "applyButton": "应用翻译结果",
+        "loading": {
+          "translating": "正在翻译中，请稍候...",
+          "generatingJson": "翻译完成，正在生成简历 JSON..."
+        },
+        "copyButton": "复制",
+        "notifications": {
+          "success": "翻译完成",
+          "failed": "翻译失败: {{message}}",
+          "targetLanguageRequired": "请先选择目标语言。",
+          "noResultToApply": "暂无可应用的翻译结果。",
+          "applySuccess": "已应用翻译后的简历。"
+        }
       },
       "notifications": {
         "apiKeyMissing": "未找到 API 密钥。请在设置页面中设置。",
@@ -966,9 +1018,13 @@
     "notifications": {
       "polishingInProgress": "AI 已经在润色中，请等待完成。",
       "polishFailed": "润色文本失败: {{message}}",
+      "translationInProgress": "翻译进行中，请稍候。",
+      "translateSuccess": "翻译完成",
+      "translateFailed": "翻译失败: {{message}}",
       "changesAccepted": "AI优化已应用",
       "changesReverted": "已回退到原始文本"
     },
+    "translate": "一键翻译",
     "acceptChanges": "接受更改",
     "accept": "接受",
     "rejectChanges": "回退更改",

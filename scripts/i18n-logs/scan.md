@@ -1,4 +1,4 @@
-# i18n Scan Report (2026/2/10 00:11:05)
+# i18n Scan Report (2/11/2026, 11:42:55 AM)
 
 Found 60 issues in 21 files.
 
@@ -53,8 +53,8 @@ Found 60 issues in 21 files.
 
 ## 📄 src/app/dashboard/_components/ImportResumeDialog.tsx
 
-- L278: **[HARDCODED_TEXT]** Hardcoded JSX text: "JSON"
-- L281: **[HARDCODED_TEXT]** Hardcoded JSX text: "PDF"
+- L284: **[HARDCODED_TEXT]** Hardcoded JSX text: "JSON"
+- L287: **[HARDCODED_TEXT]** Hardcoded JSX text: "PDF"
 
 ## 📄 src/app/dashboard/settings/page.tsx
 
@@ -75,11 +75,11 @@ Found 60 issues in 21 files.
 
 ## 📄 src/components/features/resume/TiptapEditor.tsx
 
-- L62: **[HARDCODED_TEXT]** Hardcoded JSX text: "H1"
-- L63: **[HARDCODED_TEXT]** Hardcoded JSX text: "H2"
-- L64: **[HARDCODED_TEXT]** Hardcoded JSX text: "H3"
-- L388: **[HARDCODED_TEXT]** Hardcoded JSX text: "H1"
-- L389: **[HARDCODED_TEXT]** Hardcoded JSX text: "H2"
+- L63: **[HARDCODED_TEXT]** Hardcoded JSX text: "H1"
+- L64: **[HARDCODED_TEXT]** Hardcoded JSX text: "H2"
+- L65: **[HARDCODED_TEXT]** Hardcoded JSX text: "H3"
+- L450: **[HARDCODED_TEXT]** Hardcoded JSX text: "H1"
+- L451: **[HARDCODED_TEXT]** Hardcoded JSX text: "H2"
 
 ## 📄 src/app/dashboard/notifications/_components/NotificationItem.tsx
 

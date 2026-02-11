@@ -187,6 +187,7 @@
         "create": " Guided Create",
         "optimize": "Smart Optimize",
         "analyze": "Resume Analysis",
+        "translate": "One-click Translate",
         "interview": "Mock Interview"
       },
       "title": "AI Lab",
@@ -431,6 +432,57 @@
         "errorReply": "I seem to have encountered an issue. Please try sending your message again.",
         "retryNotification": "Request failed, retrying...",
         "retryFailed": "Request failed after multiple retries. Please try again later."
+      },
+      "translateTab": {
+        "inputTitle": "Source Text",
+        "inputDescription": "Please choose target language, custom prompt is optional.",
+        "resumeSourceHint": "Current resume content will be translated directly.",
+        "targetLanguage": {
+          "label": "Target Language",
+          "placeholder": "Please choose target language",
+          "options": {
+            "zh": "Chinese",
+            "en": "English",
+            "ja": "Japanese",
+            "ko": "Korean",
+            "fr": "French",
+            "de": "German",
+            "es": "Spanish",
+            "pt": "Portuguese",
+            "it": "Italian",
+            "ru": "Russian",
+            "ar": "Arabic",
+            "hi": "Hindi"
+          }
+        },
+        "customPrompt": {
+          "label": "Custom Prompt (Optional)",
+          "placeholder": "e.g. Keep technical terms, make tone concise..."
+        },
+        "translateButton": "One-click Translate",
+        "translateButtonLoading": "Translating...",
+        "outputTitle": "Translation Result",
+        "outputDescription": "Generated resume JSON is shown on the right with preview rendering.",
+        "translatedTextPlaceholder": "Translated text will appear here...",
+        "emptyJsonState": "Generated JSON will appear here after translation.",
+        "invalidPreviewData": "Current JSON structure cannot be rendered as a resume preview.",
+        "viewModes": {
+          "json": "JSON",
+          "preview": "Preview"
+        },
+        "applyButton": "Apply Translated Resume",
+        "loading": {
+          "translating": "Streaming translation in progress...",
+          "generatingJson": "Translation complete, generating resume JSON..."
+        },
+        "copyButton": "Copy",
+        "notifications": {
+          "success": "Translation completed",
+          "failed": "Translation failed: {{message}}",
+          "targetLanguageRequired": "Please select a target language first.",
+          "noResultToApply": "No translated resume is available to apply.",
+          "applySuccess": "Translated resume applied."
+        }
       },
       "notifications": {
         "apiKeyMissing": "API key not found. Please set it up in the settings page.",
@@ -866,9 +918,13 @@
     "notifications": {
       "polishingInProgress": "AI is already polishing. Please wait for it to finish.",
       "polishFailed": "Failed to polish text: {{message}}",
+      "translationInProgress": "Translation is in progress. Please wait.",
+      "translateSuccess": "Translation completed",
+      "translateFailed": "Failed to translate text: {{message}}",
       "changesAccepted": "AI optimization applied",
       "changesReverted": "Reverted to original text"
     },
+    "translate": "One-click translate",
     "acceptChanges": "Accept Changes",
     "accept": "Accept",
     "rejectChanges": "Reject Changes",

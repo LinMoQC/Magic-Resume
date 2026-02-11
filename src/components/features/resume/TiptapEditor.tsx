@@ -10,10 +10,11 @@ import Underline from '@tiptap/extension-underline'
 import Link from '@tiptap/extension-link'
 import TextAlign from '@tiptap/extension-text-align'
 import { useCallback, useState, useEffect } from 'react';
-import { Wand2 } from 'lucide-react';
+import { Wand2, Languages } from 'lucide-react';
 import { LoadingMark } from '@/components/shared/LoadingMark';
 import { useSettingStore } from '@/store/useSettingStore';
 import { createPolishTextChain } from '@/lib/aiLab/chains';
+import { translateApi } from '@/lib/api/translate';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
@@ -88,6 +89,7 @@ interface TiptapEditorProps {
 
 const TiptapEditor = ({ content, onChange, placeholder, isPolishing, setIsPolishing, themeColor = '#38bdf8' }: TiptapEditorProps) => {
   const { apiKey, baseUrl, model, maxTokens } = useSettingStore();
+  const [isTranslating, setIsTranslating] = useState(false);
   const [lastPolished, setLastPolished] = useState<LastPolishedState | null>(null);
   const [autoHideTimer, setAutoHideTimer] = useState<NodeJS.Timeout | null>(null);
   const [countdown, setCountdown] = useState<number>(15);
@@ -338,6 +340,60 @@ const TiptapEditor = ({ content, onChange, placeholder, isPolishing, setIsPolish
     }
   };
 
+  const handleTranslateClick = async () => {
+    if (!editor || editor.state.selection.empty || isPolishing || isTranslating) {
+      if (isTranslating) {
+        toast.error(t('tiptap.notifications.translationInProgress', '翻译进行中，请稍候'));
+      }
+      return;
+    }
+
+    const { from, to } = editor.state.selection;
+    const selectedText = editor.state.doc.textBetween(from, to, '\n');
+    if (!selectedText.trim()) return;
+
+    if (!apiKey) {
+      toast.error(t('modals.aiModal.notifications.apiKeyMissing'));
+      return;
+    }
+
+    setIsTranslating(true);
+    editor.chain().focus().setTextSelection({ from, to }).toggleMark('loading').run();
+
+    try {
+      const result = await translateApi.translateText({
+        text: selectedText,
+        config: {
+          apiKey,
+          baseUrl,
+          modelName: model,
+          maxTokens,
+        },
+      });
+
+      const translatedText = result.translated_text?.trim();
+      if (!translatedText) {
+        throw new Error('Empty translation result');
+      }
+
+      editor
+        .chain()
+        .focus()
+        .setTextSelection({ from, to })
+        .unsetMark('loading')
+        .insertContent(translatedText)
+        .run();
+
+      toast.success(t('tiptap.notifications.translateSuccess', '翻译完成'));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : t('modals.aiModal.notifications.unknownError');
+      toast.error(t('tiptap.notifications.translateFailed', { message }));
+      editor.chain().focus().setTextSelection({ from, to }).unsetMark('loading').run();
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
 
 
   const buttonClass = (active: boolean) => `p-2 rounded text-sm flex items-center justify-center ${active ? 'bg-neutral-600' : 'hover:bg-neutral-700'}`;
@@ -370,6 +426,12 @@ const TiptapEditor = ({ content, onChange, placeholder, isPolishing, setIsPolish
           className={isPolishing ? disabledButtonClass : buttonClass(false)}
           aria-label="AI Polish"
         ><Wand2 size={16} /></button>}
+        {!lastPolished && <button
+          onClick={handleTranslateClick}
+          className={isTranslating ? disabledButtonClass : buttonClass(false)}
+          aria-label={t('tiptap.translate', 'Translate')}
+          title={t('tiptap.translate', 'Translate')}
+        ><Languages size={16} /></button>}
         {lastPolished && <button onClick={createRejectPolishHandler(editor)} className={buttonClass(false)} aria-label="Reject Polish"><FaHistory size={16} /></button>}
       </BubbleMenu>}
 

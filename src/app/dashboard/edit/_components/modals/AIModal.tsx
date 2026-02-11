@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FlaskConical, Wand2, BarChart3, BotMessageSquare, Mic, X } from 'lucide-react';
+import { FlaskConical, Wand2, BarChart3, BotMessageSquare, Mic, Languages, X } from 'lucide-react';
 import { Resume, Section } from '@/types/frontend/resume';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -7,6 +7,7 @@ import OptimizeTab from '../ai/OptimizeTab';
 import AnalyzeTab from '../ai/AnalyzeTab';
 import CreateTab from '../ai/CreateTab';
 import InterviewTab from '../ai/InterviewTab';
+import TranslateTab from '../ai/TranslateTab';
 import { useTrace } from '@/hooks/useTrace';
 
 type AIModalProps = {
@@ -24,6 +25,7 @@ const TABS_CONFIG = [
   { key: 'create', name: 'modals.aiModal.tabs.create', icon: <BotMessageSquare size={18} /> },
   { key: 'optimize', name: 'modals.aiModal.tabs.optimize', icon: <Wand2 size={18} /> },
   { key: 'analyze', name: 'modals.aiModal.tabs.analyze', icon: <BarChart3 size={18} /> },
+  { key: 'translate', name: 'modals.aiModal.tabs.translate', icon: <Languages size={18} /> },
   { key: 'interview', name: 'modals.aiModal.tabs.interview', icon: <Mic size={18} /> },
 ];
 
@@ -141,7 +143,7 @@ export default function AIModal({
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -10 }}
                       transition={{ duration: 0.25, ease: "easeInOut" }}
-                      className="h-full px-8 pb-8"
+                      className="h-full px-8"
                     >
                       {activeTabKey === 'create' && (
                         <CreateTab
@@ -163,6 +165,13 @@ export default function AIModal({
                         <AnalyzeTab
                           resumeData={resumeData}
                           isAiJobRunning={isAiJobRunning}
+                          setIsAiJobRunning={setIsAiJobRunning}
+                        />
+                      )}
+                      {activeTabKey === 'translate' && (
+                        <TranslateTab
+                          resumeData={resumeData}
+                          onApplyResume={handleApplyFullResumeAndClose}
                           setIsAiJobRunning={setIsAiJobRunning}
                         />
                       )}
