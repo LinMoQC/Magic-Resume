@@ -84,21 +84,21 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
   const [importStatus, setImportStatus] = useState<string>('');
   const { t } = useTranslation();
 
-  // ─── 校验并规范化简历数据 ───
+  // ─── 校验并规范化简历数据（只返回已验证字段，不透传未知属性）───
   const validateAndNormalize = useCallback((data: unknown) => {
     const parsed = ParsedResumeSchema.parse(data);
+    const raw = data as Record<string, unknown>;
 
-    // 移除后端专属字段
-    const raw = { ...(data as Record<string, unknown>) };
-    delete raw.isPublic;
-    delete raw.shareId;
-    delete raw.shareRole;
-
+    // 只提取已知的可选字段，不盲目 spread 原始对象
     return {
-      ...raw,
       info: parsed.info,
       sections: parsed.sections,
       sectionOrder: parsed.sectionOrder,
+      // 显式提取允许的额外字段（有默认值兜底）
+      template: (typeof raw.template === 'string' ? raw.template : 'classic'),
+      themeColor: (typeof raw.themeColor === 'string' ? raw.themeColor : '#f97316'),
+      typography: (typeof raw.typography === 'string' ? raw.typography : 'inter'),
+      customTemplate: (raw.customTemplate && typeof raw.customTemplate === 'object' ? raw.customTemplate : {}),
     };
   }, []);
 
@@ -176,17 +176,19 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
 
       const resumeName = result.info?.fullName
         ? `${result.info.fullName}'s Resume`
-        : (result as Record<string, unknown>).name as string || t('importDialog.defaultName');
+        : t('importDialog.defaultName');
 
       const newResume: Resume = {
-        ...(result as Record<string, unknown>),
         id: Date.now().toString(),
         name: resumeName,
         updatedAt: Date.now(),
-        template: ((result as Record<string, unknown>).template as string) || 'classic',
-        themeColor: ((result as Record<string, unknown>).themeColor as string) || '#f97316',
-        typography: ((result as Record<string, unknown>).typography as string) || 'inter',
-        customTemplate: ((result as Record<string, unknown>).customTemplate as Resume['customTemplate']) || {},
+        info: result.info,
+        sections: result.sections,
+        sectionOrder: result.sectionOrder,
+        template: result.template,
+        themeColor: result.themeColor,
+        typography: result.typography,
+        customTemplate: result.customTemplate as Resume['customTemplate'],
       } as Resume;
 
       const token = await getToken();
@@ -212,7 +214,7 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
       setIsImporting(false);
       setImportStatus('');
     }
-  }, [importResume, getToken, onOpenChange, t, handleJsonFile, handlePdfFile]);
+  }, [importResume, getToken, onOpenChange, t, handleJsonFile, handlePdfFile, apiKey]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
