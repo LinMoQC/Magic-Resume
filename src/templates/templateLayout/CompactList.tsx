@@ -1,5 +1,5 @@
 import React from 'react';
-import get from 'lodash.get';
+import { getFieldValue } from './utils';
 
 interface Item {
   [key: string]: unknown;
@@ -13,27 +13,16 @@ interface Props {
   position?: {
     area?: 'main' | 'sidebar' | 'header' | 'footer';
   };
+  titleIcon?: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
 }
 
-const getFieldValue = (item: Item, field: string | string[] | undefined) => {
-  if (!field) return null;
-  const fields = Array.isArray(field) ? field : [field];
-  for (const f of fields) {
-    const value = get(item, f);
-    if (value) return String(value);
-  }
-  return null;
-};
-
-export function CompactList({ title, items, fieldMap = {}, style, position }: Props) {
+export const CompactList = React.memo(function CompactList({ title, items, fieldMap = {}, style, position, titleIcon: TitleIcon }: Props) {
   if (!items || items.length === 0) return null;
 
-  // 判断是否在侧边栏使用（双栏布局）还是主区域使用（单栏布局）
   const isInSidebar = position?.area === 'sidebar';
   
-  // 根据位置和style选择颜色主题
-  const textColor = style?.color || (isInSidebar ? '#ffffff' : '#000000');
-  const secondaryColor = style?.color ? `${style.color}cc` : (isInSidebar ? '#dbeafe' : '#6b7280');
+  const textColor = style?.color || (isInSidebar ? 'var(--color-background)' : 'var(--color-text)');
+  const secondaryColor = style?.color ? `${style.color}cc` : 'var(--color-text-secondary)';
 
   return (
     <div 
@@ -47,12 +36,21 @@ export function CompactList({ title, items, fieldMap = {}, style, position }: Pr
       }}
     >
       <h3 
-        className="text-sm font-bold uppercase tracking-wide" 
+        className="font-bold uppercase tracking-wide" 
         style={{ 
           color: textColor,
-          marginBottom: 'var(--paragraph-spacing)',
+          fontSize: 'var(--font-size-title)',
+          paddingBottom: 'var(--section-title-spacing)',
+          borderBottomWidth: 'var(--title-divider-width)',
+          borderBottomStyle: 'solid',
+          borderBottomColor: textColor,
+          marginBottom: 'var(--section-title-spacing)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.4em',
         }}
       >
+        {TitleIcon && <TitleIcon size={14} style={{ display: 'var(--title-icon-display)', flexShrink: 0 }} />}
         {title}
       </h3>
       
@@ -70,11 +68,11 @@ export function CompactList({ title, items, fieldMap = {}, style, position }: Pr
           
           return (
             <li key={idx} style={{ color: textColor }}>
-              <div className="text-xs font-medium">
+              <div className="font-medium" style={{ fontSize: 'var(--font-size-body)' }}>
                 {name}
               </div>
               {level && (
-                <div className="text-xs mt-1" style={{ color: secondaryColor }}>
+                <div className="mt-1" style={{ color: secondaryColor, fontSize: 'var(--font-size-body)' }}>
                   {level}
                 </div>
               )}
@@ -84,4 +82,4 @@ export function CompactList({ title, items, fieldMap = {}, style, position }: Pr
       </ul>
     </div>
   );
-} 
+});

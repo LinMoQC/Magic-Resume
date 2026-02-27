@@ -82,7 +82,7 @@ export default function VersionHistoryDialog({ isOpen, onClose, onRestore, onDel
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="fixed inset-0 bg-black/60 z-100 backdrop-blur-md"
+                        className="fixed inset-0 bg-black/60 z-100 backdrop-blur-md cursor-pointer"
                     />
                     <div className="fixed inset-0 z-101 flex items-center justify-center p-4 pointer-events-none">
                     <motion.div
@@ -103,7 +103,7 @@ export default function VersionHistoryDialog({ isOpen, onClose, onRestore, onDel
                             </div>
                             <button
                                 onClick={onClose}
-                                className="p-2 rounded-full hover:bg-neutral-800 text-neutral-500 hover:text-white transition-all active:scale-95"
+                                className="p-2 rounded-full hover:bg-neutral-800 text-neutral-500 hover:text-white transition-all active:scale-95 cursor-pointer"
                                 type="button"
                             >
                                 <X size={22} />

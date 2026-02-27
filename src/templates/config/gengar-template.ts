@@ -37,7 +37,9 @@ export const gengarTemplate: MagicTemplateDSL = {
         normal: 400,
         medium: 500,
         bold: 700
-      }
+      },
+      lineHeight: 1.5,
+      letterSpacing: "0px"
     },
     spacing: {
       xs: "0.25rem",

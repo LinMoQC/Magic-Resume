@@ -814,20 +814,26 @@
       "fontSettings": "字体设置",
       "primaryFont": "主字体",
       "secondaryFont": "次要字体",
-      "fontSize": "字体大小"
+      "fontSize": "字体大小",
+      "titleSize": "模块标题",
+      "bodySize": "正文内容"
     },
     "layout": {
       "layoutSettings": "布局设置",
       "containerSettings": "容器设置",
       "containerWidth": "容器宽度",
       "padding": "内边距",
-      "gap": "组件间距",
+      "gap": "模块间距",
       "textSettings": "文本设置",
       "lineHeight": "行高倍数",
       "letterSpacing": "字符间距",
       "spacingSettings": "边距设置",
       "paragraphSpacing": "段落间距",
-      "sectionSpacing": "大段落间距"
+      "sectionSpacing": "大段落间距",
+      "titleDivider": "标题分隔线",
+      "titleDividerDesc": "在章节标题下方显示横线",
+      "titleIcon": "标题图标",
+      "titleIconDesc": "在章节标题前显示图标"
     },
     "buttons": {
       "backToTemplates": "返回模板列表"
@@ -1207,5 +1213,19 @@
       "subtitle": "文化价值观 / 软技能",
       "short": "HRBP"
     }
+  },
+  "sectionTitles": {
+    "experience": "工作经历",
+    "education": "教育经历",
+    "projects": "项目经历",
+    "skills": "专业技能",
+    "languages": "语言能力",
+    "certificates": "证书资质",
+    "profiles": "个人主页",
+    "header": "基本信息",
+    "summary": "个人总结",
+    "profile": "个人信息",
+    "contact": "联系方式",
+    "awards": "奖项"
   }
 }

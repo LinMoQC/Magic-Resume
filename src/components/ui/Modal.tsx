@@ -27,7 +27,7 @@ const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-70 z-50 flex justify-center items-start overflow-y-auto p-4"
+      className="fixed inset-0 bg-black bg-opacity-70 z-50 flex justify-center items-start overflow-y-auto p-4 cursor-pointer"
       onClick={onClose}
     >
       <div
@@ -38,7 +38,7 @@ const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
           <h2 className="text-xl font-bold">{title}</h2>
           <button
             onClick={onClose}
-            className="text-neutral-400 hover:text-white transition-colors"
+            className="text-neutral-400 hover:text-white transition-colors cursor-pointer"
           >
             &times;
           </button>

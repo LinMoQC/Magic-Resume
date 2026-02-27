@@ -15,43 +15,33 @@ interface FontSelectorProps {
 }
 
 const defaultFonts = [
-  // 经典专业字体
-  { name: 'Inter', value: 'Inter, sans-serif', preview: 'Aa' },
-  { name: 'Roboto', value: 'Roboto, sans-serif', preview: 'Aa' },
-  { name: 'Open Sans', value: 'Open Sans, sans-serif', preview: 'Aa' },
-  { name: 'Lato', value: 'Lato, sans-serif', preview: 'Aa' },
-  { name: 'Montserrat', value: 'Montserrat, sans-serif', preview: 'Aa' },
-  { name: 'Poppins', value: 'Poppins, sans-serif', preview: 'Aa' },
-  
-  // 年轻现代字体
-  { name: 'Nunito', value: 'Nunito, sans-serif', preview: 'Aa' },
-  { name: 'Quicksand', value: 'Quicksand, sans-serif', preview: 'Aa' },
-  { name: 'Comfortaa', value: 'Comfortaa, sans-serif', preview: 'Aa' },
-  { name: 'Raleway', value: 'Raleway, sans-serif', preview: 'Aa' },
-  { name: 'Righteous', value: 'Righteous, sans-serif', preview: 'Aa' },
-  
-  // 手写风格字体
-  { name: 'Pacifico', value: 'Pacifico, cursive', preview: 'Aa' },
-  { name: 'Caveat', value: 'Caveat, cursive', preview: 'Aa' },
-  { name: 'Dancing Script', value: 'Dancing Script, cursive', preview: 'Aa' },
-  
-  // 装饰性字体
-  { name: 'Lobster', value: 'Lobster, cursive', preview: 'Aa' },
-  
-  // 科技感字体
-  { name: 'Orbitron', value: 'Orbitron, sans-serif', preview: 'Aa' },
-  { name: 'Space Mono', value: 'Space Mono, monospace', preview: 'Aa' },
-  
-  // 经典衬线字体
-  { name: 'PT Serif', value: 'PT Serif, serif', preview: 'Aa' },
-  { name: 'Playfair Display', value: 'Playfair Display, serif', preview: 'Aa' },
-  
-  // 等宽字体
-  { name: 'JetBrains Mono', value: 'JetBrains Mono, monospace', preview: 'Aa' },
-  { name: 'Source Code Pro', value: 'Source Code Pro, monospace', preview: 'Aa' },
+  // 系统可用中文字体
+  { name: '苹方', value: '"PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif', preview: '字Aa' },
+  { name: '微软雅黑', value: '"Microsoft YaHei", "PingFang SC", sans-serif', preview: '字Aa' },
+  { name: '思源黑体', value: '"Noto Sans CJK SC", "Source Han Sans SC", "PingFang SC", sans-serif', preview: '字Aa' },
+  { name: '宋体', value: '"Songti SC", "SimSun", serif', preview: '字Aa' },
+  { name: '楷体', value: '"Kaiti SC", "KaiTi", serif', preview: '字Aa' },
+
+  // 系统可用西文字体
+  { name: 'Inter', value: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif', preview: 'Aa' },
+  { name: 'Helvetica', value: '"Helvetica Neue", Helvetica, Arial, sans-serif', preview: 'Aa' },
+  { name: 'Arial', value: 'Arial, "Helvetica Neue", sans-serif', preview: 'Aa' },
+  { name: 'Georgia', value: 'Georgia, "Times New Roman", serif', preview: 'Aa' },
+  { name: 'Times New Roman', value: '"Times New Roman", Georgia, serif', preview: 'Aa' },
+  { name: 'Courier New', value: '"Courier New", monospace', preview: 'Aa' },
+  { name: 'Menlo', value: 'Menlo, Monaco, "Courier New", monospace', preview: 'Aa' },
+
+  // 常见系统自带无衬线
+  { name: 'System UI', value: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif', preview: 'Aa' },
+  { name: 'Segoe UI', value: '"Segoe UI", system-ui, sans-serif', preview: 'Aa' },
+  { name: 'Roboto', value: 'Roboto, "Helvetica Neue", Arial, sans-serif', preview: 'Aa' },
+
+  // 衬线 + 经典
+  { name: 'Palatino', value: '"Palatino Linotype", Palatino, "Book Antiqua", serif', preview: 'Aa' },
+  { name: 'IBM Plex Serif', value: '"IBM Plex Serif", Georgia, serif', preview: 'Aa' },
 ];
 
-export default function FontSelector({ label, value, onChange, fonts = defaultFonts }: FontSelectorProps) {
+export default React.memo(function FontSelector({ label, value, onChange, fonts = defaultFonts }: FontSelectorProps) {
   const selectedFont = fonts.find(font => font.value === value) || fonts[0];
 
   return (
@@ -94,4 +84,4 @@ export default function FontSelector({ label, value, onChange, fonts = defaultFo
       </Select>
     </div>
   );
-} 
+});

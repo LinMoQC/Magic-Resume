@@ -32,9 +32,9 @@ const RenameResumeDialog = React.memo(({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => onOpenChange(false)}
-            className="fixed inset-0 bg-black/50 z-[100] backdrop-blur-sm"
+            className="fixed inset-0 bg-black/50 z-100 backdrop-blur-sm cursor-pointer"
           />
-          <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none">
+          <div className="fixed inset-0 z-101 flex items-center justify-center p-4 pointer-events-none">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -45,7 +45,7 @@ const RenameResumeDialog = React.memo(({
               <h2 className="text-xl font-bold text-white">{t('renameDialog.title')}</h2>
               <button
                 onClick={() => onOpenChange(false)}
-                className="text-neutral-500 hover:text-white transition-colors"
+                className="text-neutral-500 hover:text-white transition-colors cursor-pointer"
                 type="button"
               >
                 <X size={20} />

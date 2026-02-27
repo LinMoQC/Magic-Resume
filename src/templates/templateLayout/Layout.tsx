@@ -22,6 +22,7 @@ export function Layout({ children, layout, designTokens, style }: Props) {
     fontFamily: designTokens.typography.fontFamily.primary,
     lineHeight: typography.lineHeight?.toString() || '1.5',
     letterSpacing: typography.letterSpacing || '0px',
+    borderRadius: '0.375rem',
     ...style,
   };
 
@@ -35,7 +36,7 @@ export function Layout({ children, layout, designTokens, style }: Props) {
   return (
     <div
       id="resume-to-export"
-      className="mx-auto bg-white text-black rounded-md shadow-2xl relative"
+      className="mx-auto shadow-2xl relative"
       style={containerStyle}
     >
       <div className="flex flex-col" style={innerStyle}>

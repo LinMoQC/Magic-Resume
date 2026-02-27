@@ -53,7 +53,7 @@ export default function ColorPicker({ label, value, onChange, presetColors = def
                 value.toLowerCase() === color.toLowerCase()
                   ? 'border-white ring-2 ring-white scale-110' 
                   : 'border-neutral-700 hover:border-neutral-400 hover:scale-105'
-              }`}
+              } cursor-pointer`}
               style={{ backgroundColor: color }}
               onClick={() => onChange(color)}
               title={color}

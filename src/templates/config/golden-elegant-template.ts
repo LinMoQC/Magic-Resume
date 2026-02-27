@@ -37,7 +37,9 @@ export const goldenElegantTemplate: MagicTemplateDSL = {
         normal: 400,
         medium: 500,
         bold: 700
-      }
+      },
+      lineHeight: 1.5,
+      letterSpacing: "0px"
     },
     spacing: {
       xs: "0.25rem",
@@ -61,7 +63,7 @@ export const goldenElegantTemplate: MagicTemplateDSL = {
     gap: "0",
     twoColumn: {
       leftWidth: "280px",
-      rightWidth: "514px", 
+      rightWidth: "1fr", 
       gap: "0"
     }
   },

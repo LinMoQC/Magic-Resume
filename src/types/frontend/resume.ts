@@ -62,6 +62,8 @@ export type CustomTemplateConfig = {
       width?: string;
       gap?: string;
     };
+    showTitleDivider?: boolean;
+    showTitleIcon?: boolean;
   };
 };
 

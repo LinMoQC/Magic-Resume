@@ -83,10 +83,11 @@ const ResumeCard = React.memo(({
           <div className="relative w-full h-full p-2 bg-neutral-800">
             {template ? (
               <ResumeMiniPreview 
-                template={template} 
+                template={template}
+                resumeName={resume.info?.fullName || resume.name}
                 className={cn(
-                  "scale-[0.8] origin-top transition-opacity duration-300",
-                  isMenuOpen ? "opacity-100" : "opacity-60 group-hover:opacity-100"
+                  "transition-opacity duration-300",
+                  isMenuOpen ? "opacity-100" : "opacity-80 group-hover:opacity-100"
                 )} 
               />
             ) : (
@@ -120,7 +121,7 @@ const ResumeCard = React.memo(({
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 className={cn(
-                  "p-2.5 rounded-xl backdrop-blur-md shadow-lg shadow-black/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-sky-500/20",
+                  "p-2.5 rounded-xl backdrop-blur-md shadow-lg shadow-black/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-sky-500/20 cursor-pointer",
                   isMenuOpen 
                     ? "bg-neutral-800/90 text-white border-neutral-700" 
                     : "bg-neutral-900/80 text-neutral-400 hover:text-white border-neutral-800/50 hover:border-neutral-700"
@@ -167,7 +168,7 @@ function CloudSyncBanner() {
       className="mb-8"
     >
       <Link href="/dashboard/settings">
-        <div className="relative group overflow-hidden rounded-2xl p-4 bg-linear-to-r from-blue-600/20 to-indigo-600/10 border border-blue-500/30 hover:border-blue-400/50 transition-all duration-300">
+        <div className="relative group overflow-hidden rounded-2xl p-4 bg-linear-to-r from-blue-600/20 to-indigo-600/10 border border-blue-500/30 hover:border-blue-400/50 transition-all duration-300 cursor-pointer">
           {/* Animated background glow */}
           <div className="absolute inset-0 bg-blue-500/5 group-hover:bg-blue-500/10 transition-colors" />
           
@@ -229,7 +230,10 @@ const ResumeList = React.memo(({ resumes, onAdd, onImport, onDelete, onDuplicate
 
       <div className="px-12 py-8 space-y-8 pb-32">
         <CloudSyncBanner />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <div
+          className="grid gap-5"
+          style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))' }}
+        >
           {/* 新建简历卡片 */}
           <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.98 }}>
             <Card className="group cursor-pointer h-64 flex flex-col items-center relative overflow-hidden bg-neutral-900 border border-neutral-800 hover:border-blue-500/50 transition-colors" onClick={onAdd}>

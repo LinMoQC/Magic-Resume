@@ -26,9 +26,9 @@ export default function JsonModal({ isJsonModalOpen, closeJsonModal, handleDownl
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={closeJsonModal}
-                        className="fixed inset-0 bg-black/80 z-[100]"
+                        className="fixed inset-0 bg-black/80 z-100 cursor-pointer"
                     />
-                    <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none">
+                    <div className="fixed inset-0 z-101 flex items-center justify-center p-4 pointer-events-none">
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -44,7 +44,7 @@ export default function JsonModal({ isJsonModalOpen, closeJsonModal, handleDownl
                             </div>
                             <button
                                 onClick={closeJsonModal}
-                                className="p-2 rounded-full hover:bg-neutral-800 text-neutral-500 hover:text-white transition-all active:scale-95"
+                                className="p-2 rounded-full hover:bg-neutral-800 text-neutral-500 hover:text-white transition-all active:scale-95 cursor-pointer"
                                 type="button"
                             >
                                 <X size={22} />
@@ -54,7 +54,7 @@ export default function JsonModal({ isJsonModalOpen, closeJsonModal, handleDownl
                         <div className="flex-1 overflow-hidden relative">
                             <button
                                 onClick={handleDownloadJson}
-                                className="absolute top-6 right-8 p-3 bg-neutral-800/80 hover:bg-sky-600 text-neutral-400 hover:text-white rounded-xl transition-all duration-200 z-10 border border-neutral-700/50"
+                                className="absolute top-6 right-8 p-3 bg-neutral-800/80 hover:bg-sky-600 text-neutral-400 hover:text-white rounded-xl transition-all duration-200 z-10 border border-neutral-700/50 cursor-pointer"
                                 aria-label={t('common.ui.downloadJson')}
                                 title={t('common.ui.downloadJson')}
                             >
@@ -77,7 +77,7 @@ export default function JsonModal({ isJsonModalOpen, closeJsonModal, handleDownl
                         <div className="p-6 border-t border-neutral-800 bg-neutral-900/10 flex justify-end">
                             <button 
                                 onClick={closeJsonModal}
-                                className="px-6 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl text-sm font-semibold transition-all active:scale-95"
+                                className="px-6 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl text-sm font-semibold transition-all active:scale-95 cursor-pointer"
                             >
                                 {t('common.done')}
                             </button>

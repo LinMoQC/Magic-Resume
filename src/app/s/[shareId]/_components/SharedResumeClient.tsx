@@ -15,7 +15,7 @@ import { CommentSidebar } from './CommentSidebar';
 
 export default function SharedResumeClient() {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [countdown, setCountdown] = useState(5);
   const {
     resume,
@@ -203,6 +203,7 @@ export default function SharedResumeClient() {
                 handleResumeMouseUp={handleResumeMouseUp}
                 template={template}
                 resume={resume}
+                locale={i18n.resolvedLanguage || i18n.language}
             >
                 <CommentLayer 
                     comments={comments}

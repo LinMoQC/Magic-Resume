@@ -36,7 +36,9 @@ export const cleanMinimalTemplate: MagicTemplateDSL = {
         normal: 400,
         medium: 500,
         bold: 700
-      }
+      },
+      lineHeight: 1.5,
+      letterSpacing: "0px"
     },
     spacing: {
       xs: "0.25rem",
@@ -69,8 +71,7 @@ export const cleanMinimalTemplate: MagicTemplateDSL = {
         area: "main"
       },
       props: {
-        title: "Header",
-        iconType: "svg"
+        title: "Header"
       },
       style: {
         textAlign: "center",
@@ -87,7 +88,7 @@ export const cleanMinimalTemplate: MagicTemplateDSL = {
       },
       props: {
         title: "Profiles",
-        titleClassName: "font-bold text-[1.1em] text-black border-b border-gray-200 pb-2 mb-4",
+        titleClassName: "text-[1.1em] border-b pb-2 mb-4",
         containerClassName: "grid grid-cols-3 gap-4"
       },
       fieldMap: {
@@ -106,7 +107,7 @@ export const cleanMinimalTemplate: MagicTemplateDSL = {
       },
       props: {
         title: "Summary",
-        titleClassName: "font-bold text-[1.1em] text-black border-b border-gray-200 pb-2 mb-4",
+        titleClassName: "text-[1.1em] border-b pb-2 mb-4",
         containerClassName: "space-y-2"
       },
       fieldMap: {
@@ -122,7 +123,7 @@ export const cleanMinimalTemplate: MagicTemplateDSL = {
       },
       props: {
         title: "Experience",
-        titleClassName: "font-bold text-[1.1em] text-black border-b border-gray-200 pb-2 mb-4",
+        titleClassName: "text-[1.1em] border-b pb-2 mb-4",
         containerClassName: "space-y-4"
       },
       fieldMap: {
@@ -144,7 +145,7 @@ export const cleanMinimalTemplate: MagicTemplateDSL = {
       },
       props: {
         title: "Education",
-        titleClassName: "font-bold text-[1.1em] text-black border-b border-gray-200 pb-2 mb-4",
+        titleClassName: "text-[1.1em] border-b pb-2 mb-4",
         containerClassName: "space-y-4"
       },
       fieldMap: {
@@ -166,7 +167,7 @@ export const cleanMinimalTemplate: MagicTemplateDSL = {
       },
       props: {
         title: "Projects",
-        titleClassName: "font-bold text-[1.1em] text-black border-b border-gray-200 pb-2 mb-4",
+        titleClassName: "text-[1.1em] border-b pb-2 mb-4",
         containerClassName: "grid grid-cols-2 gap-6"
       },
       fieldMap: {
@@ -188,7 +189,7 @@ export const cleanMinimalTemplate: MagicTemplateDSL = {
       },
       props: {
         title: "Skills",
-        titleClassName: "font-bold text-[1.1em] text-black border-b border-gray-200 pb-2 mb-4",
+        titleClassName: "text-[1.1em] border-b pb-2 mb-4",
         containerClassName: "grid grid-cols-3 gap-4"
       },
       fieldMap: {
@@ -207,7 +208,7 @@ export const cleanMinimalTemplate: MagicTemplateDSL = {
       },
       props: {
         title: "Certifications",
-        titleClassName: "font-bold text-[1.1em] text-black border-b border-gray-200 pb-2 mb-4",
+        titleClassName: "text-[1.1em] border-b pb-2 mb-4",
         containerClassName: "grid grid-cols-2 gap-6"
       },
       fieldMap: {
@@ -226,7 +227,7 @@ export const cleanMinimalTemplate: MagicTemplateDSL = {
       },
       props: {
         title: "Languages",
-        titleClassName: "font-bold text-[1.1em] text-black border-b border-gray-200 pb-2 mb-4",
+        titleClassName: "text-[1.1em] border-b pb-2 mb-4",
         containerClassName: "grid grid-cols-2 gap-4"
       },
       fieldMap: {

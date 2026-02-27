@@ -13,6 +13,7 @@ interface ResumeTransformViewProps {
     handleResumeMouseUp: (e: React.MouseEvent<HTMLDivElement>) => void;
     template: any; // eslint-disable-line @typescript-eslint/no-explicit-any
     resume: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    locale?: string;
     children?: React.ReactNode;
 }
 
@@ -24,6 +25,7 @@ export const ResumeTransformView = React.memo(({
     handleResumeMouseUp,
     template,
     resume,
+    locale,
     children
 }: ResumeTransformViewProps) => {
     return (
@@ -60,7 +62,7 @@ export const ResumeTransformView = React.memo(({
                             style={{ minHeight: '297mm' }}
                             onMouseUp={handleResumeMouseUp}
                         >
-                            <MagicResumeRenderer template={template} data={resume} />
+                            <MagicResumeRenderer template={template} data={resume} locale={locale} />
                             {children}
                         </div>
                     </TransformComponent>

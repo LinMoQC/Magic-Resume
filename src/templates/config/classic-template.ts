@@ -71,8 +71,7 @@ export const classicTemplate: MagicTemplateDSL = {
         area: "main"
       },
       props: {
-        title: "Header",
-        iconType: "svg"
+        title: "Header"
       },
       style: {
         textAlign: "left",
@@ -89,7 +88,6 @@ export const classicTemplate: MagicTemplateDSL = {
       },
       props: {
         title: "Experience",
-        titleClassName: "font-bold text-primary text-[1.2em] text-blue-500",
         containerClassName: "grid gap-x-6 gap-y-3"
       },
       fieldMap: {
@@ -111,7 +109,6 @@ export const classicTemplate: MagicTemplateDSL = {
       },
       props: {
         title: "Education",
-        titleClassName: "font-bold text-primary text-[1.2em] text-blue-500",
         containerClassName: "grid gap-x-6 gap-y-3"
       },
       fieldMap: {
@@ -133,7 +130,6 @@ export const classicTemplate: MagicTemplateDSL = {
       },
       props: {
         title: "Languages",
-        titleClassName: "font-bold text-primary text-[1.2em] text-blue-500",
         containerClassName: "grid gap-x-6 gap-y-1"
       },
       fieldMap: {
@@ -152,7 +148,6 @@ export const classicTemplate: MagicTemplateDSL = {
       },
       props: {
         title: "Certificates",
-        titleClassName: "font-bold text-primary text-[1.2em] text-blue-500",
         containerClassName: "grid gap-x-6 gap-y-1"
       },
       fieldMap: {
@@ -171,7 +166,6 @@ export const classicTemplate: MagicTemplateDSL = {
       },
       props: {
         title: "Projects",
-        titleClassName: "font-bold text-primary text-[1.2em] text-blue-500",
         containerClassName: "grid gap-x-6 gap-y-3"
       },
       fieldMap: {
@@ -193,7 +187,6 @@ export const classicTemplate: MagicTemplateDSL = {
       },
       props: {
         title: "Profiles",
-        titleClassName: "font-bold text-primary text-[1.2em] text-blue-500",
         containerClassName: "grid gap-x-6 gap-y-1"
       },
       fieldMap: {
@@ -212,7 +205,6 @@ export const classicTemplate: MagicTemplateDSL = {
       },
       props: {
         title: "Skills",
-        titleClassName: "font-bold text-primary text-[1.2em] text-blue-500",
         containerClassName: "grid gap-x-6 gap-y-1"
       },
       fieldMap: {
@@ -231,7 +223,6 @@ export const classicTemplate: MagicTemplateDSL = {
       },
       props: {
         title: "Awards",
-        titleClassName: "font-bold text-primary text-[1.2em] text-blue-500",
         containerClassName: "grid gap-x-6 gap-y-1"
       },
       fieldMap: {

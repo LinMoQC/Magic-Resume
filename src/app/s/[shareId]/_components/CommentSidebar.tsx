@@ -242,7 +242,7 @@ export const CommentSidebar = React.memo(({
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden cursor-pointer"
                     />
 
                     {/* Sidebar / Drawer */}
@@ -273,7 +273,7 @@ export const CommentSidebar = React.memo(({
                             </div>
                             <button 
                                 onClick={onClose}
-                                className="p-2 rounded-lg hover:bg-white/5 text-neutral-500 hover:text-white transition-all"
+                                className="p-2 rounded-lg hover:bg-white/5 text-neutral-500 hover:text-white transition-all cursor-pointer"
                             >
                                 <X size={20} />
                             </button>

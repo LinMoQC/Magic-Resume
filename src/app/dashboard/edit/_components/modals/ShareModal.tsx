@@ -93,9 +93,9 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/50 z-[100] backdrop-blur-sm"
+            className="fixed inset-0 bg-black/50 z-100 backdrop-blur-sm cursor-pointer"
           />
-          <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none">
+          <div className="fixed inset-0 z-101 flex items-center justify-center p-4 pointer-events-none">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -114,7 +114,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
               </div>
               <button
                 onClick={onClose}
-                className="text-neutral-500 hover:text-white transition-colors"
+                className="text-neutral-500 hover:text-white transition-colors cursor-pointer"
                 type="button"
               >
                 <X size={20} />
@@ -206,7 +206,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
                             />
                         </div>
                         <button
-                            className="absolute right-1 top-1 h-8 w-8 flex items-center justify-center rounded hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors"
+                            className="absolute right-1 top-1 h-8 w-8 flex items-center justify-center rounded hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors cursor-pointer"
                             onClick={copyToClipboard}
                         >
                             {copied ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
@@ -218,7 +218,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
             </div>
             
             <div className="mt-6 pt-4 border-t border-neutral-800 flex justify-end">
-                <button onClick={onClose} className="px-4 py-2 text-sm text-neutral-400 hover:text-white transition-colors">
+                <button onClick={onClose} className="px-4 py-2 text-sm text-neutral-400 hover:text-white transition-colors cursor-pointer">
                     {t('common.done')}
                 </button>
             </div>
