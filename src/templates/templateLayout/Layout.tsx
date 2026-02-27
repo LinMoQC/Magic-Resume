@@ -22,7 +22,7 @@ export function Layout({ children, layout, designTokens, style }: Props) {
     fontFamily: designTokens.typography.fontFamily.primary,
     lineHeight: typography.lineHeight?.toString() || '1.5',
     letterSpacing: typography.letterSpacing || '0px',
-    borderRadius: 'var(--radius-md)',
+    borderRadius: '0.375rem',
     ...style,
   };
 

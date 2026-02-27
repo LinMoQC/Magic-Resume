@@ -783,7 +783,9 @@
       "fontSettings": "Font Settings",
       "primaryFont": "Primary Font",
       "secondaryFont": "Secondary Font",
-      "fontSize": "Font Size"
+      "fontSize": "Font Size",
+      "titleSize": "Section Title",
+      "bodySize": "Body Text"
     },
     "layout": {
       "layoutSettings": "Layout Settings",
@@ -796,7 +798,11 @@
       "letterSpacing": "Letter Spacing",
       "spacingSettings": "Spacing Settings",
       "paragraphSpacing": "Paragraph Spacing",
-      "sectionSpacing": "Section Spacing"
+      "sectionSpacing": "Section Spacing",
+      "titleDivider": "Title Divider",
+      "titleDividerDesc": "Show a line below section titles",
+      "titleIcon": "Title Icon",
+      "titleIconDesc": "Show icon before section titles"
     },
     "buttons": {
       "backToTemplates": "Back to Templates"
@@ -1104,5 +1110,19 @@
       "subtitle": "CULTURE / SOFT SKILLS",
       "short": "HRBP"
     }
+  },
+  "sectionTitles": {
+    "experience": "Experience",
+    "education": "Education",
+    "projects": "Projects",
+    "skills": "Skills",
+    "languages": "Languages",
+    "certificates": "Certificates",
+    "profiles": "Profiles",
+    "header": "Header",
+    "summary": "Summary",
+    "profile": "Profile",
+    "contact": "Contact",
+    "awards": "Awards"
   }
 }

@@ -83,10 +83,11 @@ const ResumeCard = React.memo(({
           <div className="relative w-full h-full p-2 bg-neutral-800">
             {template ? (
               <ResumeMiniPreview 
-                template={template} 
+                template={template}
+                resumeName={resume.info?.fullName || resume.name}
                 className={cn(
-                  "scale-[0.8] origin-top transition-opacity duration-300",
-                  isMenuOpen ? "opacity-100" : "opacity-60 group-hover:opacity-100"
+                  "transition-opacity duration-300",
+                  isMenuOpen ? "opacity-100" : "opacity-80 group-hover:opacity-100"
                 )} 
               />
             ) : (
@@ -230,8 +231,8 @@ const ResumeList = React.memo(({ resumes, onAdd, onImport, onDelete, onDuplicate
       <div className="px-12 py-8 space-y-8 pb-32">
         <CloudSyncBanner />
         <div
-          className="grid gap-8 justify-center"
-          style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 320px))' }}
+          className="grid gap-5"
+          style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))' }}
         >
           {/* 新建简历卡片 */}
           <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.98 }}>

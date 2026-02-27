@@ -11,26 +11,21 @@ interface Props {
   };
 }
 
-export function ProfileCard({ data: info, style, position }: Props) {
-  // 判断是否在侧边栏使用（双栏布局）还是主区域使用（单栏布局）
+const LucideIcons = {
+  location: <MapPin className="w-2.5 h-2.5" style={{ color: 'var(--color-primary)', strokeWidth: 2.5 }} />,
+  phone: <Phone className="w-2.5 h-2.5" style={{ color: 'var(--color-primary)', strokeWidth: 2.5 }} />,
+  email: <Mail className="w-2.5 h-2.5" style={{ color: 'var(--color-primary)', strokeWidth: 2.5 }} />,
+  website: <Globe className="w-2.5 h-2.5" style={{ color: 'var(--color-primary)', strokeWidth: 2.5 }} />
+};
+
+export const ProfileCard = React.memo(function ProfileCard({ data: info, style, position }: Props) {
   const isInSidebar = position?.area === 'sidebar';
 
-  // Lucide图标组件
-  const LucideIcons = {
-    location: <MapPin className="w-2.5 h-2.5" style={{ color: 'var(--color-primary)', strokeWidth: 2.5 }} />,
-    phone: <Phone className="w-2.5 h-2.5" style={{ color: 'var(--color-primary)', strokeWidth: 2.5 }} />,
-    email: <Mail className="w-2.5 h-2.5" style={{ color: 'var(--color-primary)', strokeWidth: 2.5 }} />,
-    website: <Globe className="w-2.5 h-2.5" style={{ color: 'var(--color-primary)', strokeWidth: 2.5 }} />
-  };
-
-  
-  // 根据style和位置计算颜色
   const textColor = style?.color || (isInSidebar ? 'var(--color-background)' : 'var(--color-text)');
   const subtitleColor = style?.color ? `${style.color}cc` : 'var(--color-text-secondary)';
   const borderColor = style?.color || 'var(--color-border)';
-  
+
   if (isInSidebar) {
-    // 侧边栏布局 - 紧凑的垂直设计
     return (
       <div 
         className="text-center"
@@ -72,7 +67,6 @@ export function ProfileCard({ data: info, style, position }: Props) {
     );
   }
 
-  // 主区域布局 - 更适合单栏的设计
   return (
     <div 
       className="text-center py-8"
@@ -110,7 +104,6 @@ export function ProfileCard({ data: info, style, position }: Props) {
           </p>
         )}
         
-        {/* 基本联系信息 - 水平排列 */}
         <div className="text-sm flex flex-wrap justify-center gap-6 mt-6" style={{ color: subtitleColor }}>
           {info.email && (
             <div className="flex items-baseline gap-2">
@@ -148,4 +141,4 @@ export function ProfileCard({ data: info, style, position }: Props) {
       </div>
     </div>
   );
-} 
+});

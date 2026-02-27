@@ -5,7 +5,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 import { Globe, Check, ChevronDown } from "lucide-react";
 
-export default function LanguageSwitcher() {
+interface LanguageSwitcherProps {
+  compact?: boolean;
+  iconOnly?: boolean;
+}
+
+export default function LanguageSwitcher({ compact = false, iconOnly = false }: LanguageSwitcherProps) {
   const { i18n } = useTranslation();
   const [isMounted, setIsMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -45,16 +50,42 @@ export default function LanguageSwitcher() {
         onClick={() => setIsOpen(!isOpen)}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors backdrop-blur-md"
+        className={
+          iconOnly
+            ? "inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors backdrop-blur-md"
+            :
+          compact
+            ? "w-42 flex items-center justify-between px-3 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors backdrop-blur-md"
+            : "flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors backdrop-blur-md"
+        }
       >
-        <Globe size={16} className="text-neutral-400 group-hover:text-white transition-colors" />
-        <span className="text-sm font-medium text-neutral-200">
-          {currentLang === "en" ? "English" : "中文"}
-        </span>
-        <ChevronDown 
-          size={14} 
-          className={`text-neutral-500 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} 
-        />
+        {iconOnly ? (
+          <Globe size={16} className="text-neutral-400 group-hover:text-white transition-colors" />
+        ) : compact ? (
+          <>
+            <div className="flex items-center gap-2">
+              <Globe size={16} className="text-neutral-400 group-hover:text-white transition-colors" />
+              <span className="text-sm font-medium text-neutral-200">
+                {currentLang === "en" ? "EN" : "中文"}
+              </span>
+            </div>
+            <ChevronDown
+              size={14}
+              className={`text-neutral-500 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
+            />
+          </>
+        ) : (
+          <>
+            <Globe size={16} className="text-neutral-400 group-hover:text-white transition-colors" />
+            <span className="text-sm font-medium text-neutral-200">
+              {currentLang === "en" ? "English" : "中文"}
+            </span>
+            <ChevronDown 
+              size={14} 
+              className={`text-neutral-500 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} 
+            />
+          </>
+        )}
       </motion.button>
 
       <AnimatePresence>
@@ -64,7 +95,14 @@ export default function LanguageSwitcher() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.95 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="absolute right-0 top-full mt-2 w-32 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-xl overflow-hidden backdrop-blur-xl"
+            className={
+              iconOnly
+                ? "absolute left-full ml-2 bottom-0 w-32 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-xl overflow-hidden backdrop-blur-xl"
+                :
+              compact
+                ? "absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-32 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-xl overflow-hidden backdrop-blur-xl"
+                : "absolute right-0 top-full mt-2 w-32 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-xl overflow-hidden backdrop-blur-xl"
+            }
           >
             <div className="p-1 flex flex-col gap-0.5">
               {languages.map((lang) => (

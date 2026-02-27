@@ -63,7 +63,7 @@ export const orangeModernTemplate: MagicTemplateDSL = {
     gap: "0",
     twoColumn: {
       leftWidth: "280px",
-      rightWidth: "514px", 
+      rightWidth: "1fr", 
       gap: "0"
     }
   },

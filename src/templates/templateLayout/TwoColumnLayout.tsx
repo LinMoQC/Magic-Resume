@@ -43,7 +43,7 @@ export function TwoColumnLayout({ children, layout }: Props) {
     fontFamily: 'var(--font-family-primary)',
     lineHeight: 'var(--line-height)',
     letterSpacing: 'var(--letter-spacing)',
-    borderRadius: 'var(--radius-md)',
+    borderRadius: '0.375rem',
   };
 
   const sidebarStyle: React.CSSProperties = {
@@ -54,8 +54,8 @@ export function TwoColumnLayout({ children, layout }: Props) {
     gap: 'var(--container-gap)',
     lineHeight: 'inherit',
     letterSpacing: 'inherit',
-    borderTopLeftRadius: 'var(--radius-md)', 
-    borderBottomLeftRadius: 'var(--radius-md)', 
+    borderTopLeftRadius: '0.375rem', 
+    borderBottomLeftRadius: '0.375rem', 
   };
 
   const mainStyle: React.CSSProperties = {
@@ -65,8 +65,8 @@ export function TwoColumnLayout({ children, layout }: Props) {
     gap: 'var(--container-gap)',
     lineHeight: 'inherit',
     letterSpacing: 'inherit',
-    borderTopRightRadius: 'var(--radius-md)',
-    borderBottomRightRadius: 'var(--radius-md)',
+    borderTopRightRadius: '0.375rem',
+    borderBottomRightRadius: '0.375rem',
   };
 
   return (

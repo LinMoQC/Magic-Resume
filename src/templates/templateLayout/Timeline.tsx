@@ -1,5 +1,5 @@
 import React from 'react';
-import get from 'lodash.get';
+import { getFieldValue } from './utils';
 import { WysiwygContent } from './WysiwygContent';
 
 interface Item {
@@ -11,30 +11,20 @@ interface Props {
   items: Item[];
   fieldMap?: Record<string, string | string[]>;
   style?: React.CSSProperties;
+  titleIcon?: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
 }
 
-const getFieldValue = (item: Item, field: string | string[] | undefined) => {
-  if (!field) return null;
-  const fields = Array.isArray(field) ? field : [field];
-  for (const f of fields) {
-    const value = get(item, f);
-    if (value) return String(value);
-  }
-  return null;
-};
-
-export function Timeline({ title, items, fieldMap = {}, style }: Props) {
+export const Timeline = React.memo(function Timeline({ title, items, fieldMap = {}, style, titleIcon: TitleIcon }: Props) {
   if (!items || items.length === 0) return null;
 
-  // 从style中提取颜色，如果没有则使用CSS变量
   const textColor = style?.color || 'var(--color-text)';
-  const primaryColor = 'var(--color-primary)'; // 使用主色调
-  const secondaryColor = style?.color ? `${style.color}80` : 'var(--color-text-secondary)'; // 半透明版本
+  const primaryColor = 'var(--color-primary)';
+  const secondaryColor = style?.color ? `${style.color}80` : 'var(--color-text-secondary)';
   const timelineLineColor = 'var(--color-border)';
 
   return (
     <section 
-      className="space-y-6" 
+      className="space-y-6"
       style={{
         ...style,
         lineHeight: 'var(--line-height)',
@@ -43,13 +33,21 @@ export function Timeline({ title, items, fieldMap = {}, style }: Props) {
       }}
     >
       <h2 
-        className="text-lg font-bold pb-2" 
+        className="font-bold" 
         style={{ 
-          color: textColor, 
-          borderBottom: `2px solid ${primaryColor}`,
+          color: textColor,
+          fontSize: 'var(--font-size-title)',
+          paddingBottom: 'var(--section-title-spacing)',
+          borderBottomWidth: 'var(--title-divider-width)',
+          borderBottomStyle: 'solid',
+          borderBottomColor: primaryColor,
           marginBottom: 'var(--section-title-spacing)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.4em',
         }}
       >
+        {TitleIcon && <TitleIcon size={16} style={{ display: 'var(--title-icon-display)', flexShrink: 0 }} />}
         {title}
       </h2>
       
@@ -63,9 +61,7 @@ export function Timeline({ title, items, fieldMap = {}, style }: Props) {
           
           return (
             <div key={idx} className="relative pl-6">
-              {/* Timeline dot */}
               <div 
-                className="absolute left-0 top-2 w-3 h-3 bg-blue-500 rounded-full border-2 border-white shadow-md timeline-dot"
                 style={{
                   position: 'absolute',
                   left: '0px',
@@ -77,12 +73,10 @@ export function Timeline({ title, items, fieldMap = {}, style }: Props) {
                   border: '2px solid var(--color-background)',
                   boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
                 }}
-              ></div>
+              />
               
-              {/* Timeline line */}
               {idx < items.length - 1 && (
                 <div 
-                  className="absolute left-[5px] top-6 w-0.5 h-full bg-gray-200 timeline-line"
                   style={{
                     position: 'absolute',
                     left: '5px',
@@ -91,36 +85,36 @@ export function Timeline({ title, items, fieldMap = {}, style }: Props) {
                     height: '100%',
                     backgroundColor: timelineLineColor
                   }}
-                ></div>
+                />
               )}
               
               <div className="space-y-2">
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start">
                   <div>
-                    <h3 className="font-bold text-base" style={{ color: textColor }}>
+                    <h3 className="font-bold" style={{ color: textColor, fontSize: 'var(--font-size-body)' }}>
                       {company}
                     </h3>
                     {position && (
-                      <p className="font-medium text-sm" style={{ color: primaryColor }}>
+                      <p className="font-medium" style={{ color: primaryColor, fontSize: 'var(--font-size-body)' }}>
                         {position}
                       </p>
                     )}
                     {location && (
-                      <p className="text-sm" style={{ color: secondaryColor }}>
+                      <p style={{ color: secondaryColor, fontSize: 'var(--font-size-body)' }}>
                         {location}
                       </p>
                     )}
                   </div>
                   
                   {date && (
-                    <div className="text-sm font-medium mt-1 sm:mt-0" style={{ color: secondaryColor }}>
+                    <div className="font-medium mt-1 sm:mt-0" style={{ color: secondaryColor, fontSize: 'var(--font-size-body)' }}>
                       {date}
                     </div>
                   )}
                 </div>
                 
                 {description && (
-                  <div className="text-sm" style={{ color: textColor }}>
+                  <div style={{ color: textColor, fontSize: 'var(--font-size-body)' }}>
                     <WysiwygContent dirtyHtml={description} />
                   </div>
                 )}
@@ -131,4 +125,4 @@ export function Timeline({ title, items, fieldMap = {}, style }: Props) {
       </div>
     </section>
   );
-} 
+});

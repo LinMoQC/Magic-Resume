@@ -36,7 +36,9 @@ export const redAccentTemplate: MagicTemplateDSL = {
         normal: 400,
         medium: 500,
         bold: 700
-      }
+      },
+      lineHeight: 1.5,
+      letterSpacing: "0px"
     },
     spacing: {
       xs: "0.25rem",
@@ -69,8 +71,7 @@ export const redAccentTemplate: MagicTemplateDSL = {
         area: "main"
       },
       props: {
-        title: "Header",
-        iconType: "svg"
+        title: "Header"
       },
       style: {
         textAlign: "left",
@@ -87,7 +88,7 @@ export const redAccentTemplate: MagicTemplateDSL = {
       },
       props: {
         title: "Summary",
-        titleClassName: "font-bold text-[1.1em] text-red-600 border-l-4 border-red-600 pl-3 mb-4",
+        titleClassName: "text-[1.1em] border-l-4 pl-3 mb-4",
         containerClassName: "ml-4"
       },
       fieldMap: {
@@ -103,7 +104,7 @@ export const redAccentTemplate: MagicTemplateDSL = {
       },
       props: {
         title: "Experience",
-        titleClassName: "font-bold text-[1.1em] text-red-600 border-l-4 border-red-600 pl-3 mb-4",
+        titleClassName: "text-[1.1em] border-l-4 pl-3 mb-4",
         containerClassName: "ml-4 space-y-4"
       },
       fieldMap: {
@@ -125,7 +126,7 @@ export const redAccentTemplate: MagicTemplateDSL = {
       },
       props: {
         title: "Education",
-        titleClassName: "font-bold text-[1.1em] text-red-600 border-l-4 border-red-600 pl-3 mb-4",
+        titleClassName: "text-[1.1em] border-l-4 pl-3 mb-4",
         containerClassName: "ml-4 space-y-4"
       },
       fieldMap: {
@@ -147,7 +148,7 @@ export const redAccentTemplate: MagicTemplateDSL = {
       },
       props: {
         title: "Projects",
-        titleClassName: "font-bold text-[1.1em] text-red-600 border-l-4 border-red-600 pl-3 mb-4",
+        titleClassName: "text-[1.1em] border-l-4 pl-3 mb-4",
         containerClassName: "ml-4 space-y-4"
       },
       fieldMap: {
@@ -169,7 +170,7 @@ export const redAccentTemplate: MagicTemplateDSL = {
       },
       props: {
         title: "Skills",
-        titleClassName: "font-bold text-[1.1em] text-red-600 border-l-4 border-red-600 pl-3 mb-4",
+        titleClassName: "text-[1.1em] border-l-4 pl-3 mb-4",
         containerClassName: "ml-4 grid grid-cols-3 gap-4"
       },
       fieldMap: {
@@ -188,7 +189,7 @@ export const redAccentTemplate: MagicTemplateDSL = {
       },
       props: {
         title: "Certifications",
-        titleClassName: "font-bold text-[1.1em] text-red-600 border-l-4 border-red-600 pl-3 mb-4",
+        titleClassName: "text-[1.1em] border-l-4 pl-3 mb-4",
         containerClassName: "ml-4 grid grid-cols-2 gap-6"
       },
       fieldMap: {
@@ -207,7 +208,7 @@ export const redAccentTemplate: MagicTemplateDSL = {
       },
       props: {
         title: "Languages",
-        titleClassName: "font-bold text-[1.1em] text-red-600 border-l-4 border-red-600 pl-3 mb-4",
+        titleClassName: "text-[1.1em] border-l-4 pl-3 mb-4",
         containerClassName: "ml-4 grid grid-cols-2 gap-4"
       },
       fieldMap: {

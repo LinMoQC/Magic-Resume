@@ -35,7 +35,11 @@ export async function exportOriginalStyle(info: InfoType, templateId?: string, c
     let colorText = '#1f2937';
     let colorTextSecondary = '#6b7280';
     let colorBackground = '#ffffff';
-    let colorSidebar = null;
+    let colorSidebar: string | null = null;
+    let exportFontFamily = 'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+    let exportDesignTokens: typeof import('@/templates/config/defaults').DEFAULT_DESIGN_TOKENS | null = null;
+    let exportShowTitleDivider = true;
+    let exportShowTitleIcon = true;
     
     try {
       // 如果提供了模板配置，则使用模板配置中的颜色
@@ -53,13 +57,18 @@ export async function exportOriginalStyle(info: InfoType, templateId?: string, c
         
         // 合并自定义配置
         const finalTemplate = mergeTemplateConfig(baseTemplate, customTemplate);
-        colorPrimary = finalTemplate.designTokens.colors.primary;
-        colorText = finalTemplate.designTokens.colors.text;
-        colorTextSecondary = finalTemplate.designTokens.colors.textSecondary;
-        colorBackground = finalTemplate.designTokens.colors.background;
-        if (finalTemplate.designTokens.colors.sidebar) {
-          colorSidebar = finalTemplate.designTokens.colors.sidebar;
+        const dt = finalTemplate.designTokens;
+        colorPrimary = dt.colors.primary;
+        colorText = dt.colors.text;
+        colorTextSecondary = dt.colors.textSecondary;
+        colorBackground = dt.colors.background;
+        if (dt.colors.sidebar) {
+          colorSidebar = dt.colors.sidebar;
         }
+        exportFontFamily = dt.typography.fontFamily.primary;
+        exportDesignTokens = dt;
+        exportShowTitleDivider = finalTemplate.layout.showTitleDivider !== false;
+        exportShowTitleIcon = finalTemplate.layout.showTitleIcon !== false;
       } else {
         // 回退到从DOM获取CSS变量值
         const rootElement = document.documentElement;
@@ -94,11 +103,37 @@ export async function exportOriginalStyle(info: InfoType, templateId?: string, c
               --color-primary: ${colorPrimary};
               --color-text-secondary: ${colorTextSecondary};
               --color-background: ${colorBackground};
+              --color-secondary: ${exportDesignTokens?.colors.secondary || '#1e40af'};
+              --color-border: ${exportDesignTokens?.colors.border || '#d1d5db'};
               ${colorSidebar ? `--color-sidebar: ${colorSidebar};` : ''}
-              --line-height: 1.6;
-              --letter-spacing: normal;
-              --section-spacing: 2rem;
-              --paragraph-spacing: 1rem;
+              --font-family-primary: ${exportFontFamily};
+              --font-size-xs: ${exportDesignTokens?.typography.fontSize.xs || '10px'};
+              --font-size-sm: ${exportDesignTokens?.typography.fontSize.sm || '12px'};
+              --font-size-md: ${exportDesignTokens?.typography.fontSize.md || '14px'};
+              --font-size-lg: ${exportDesignTokens?.typography.fontSize.lg || '16px'};
+              --font-size-xl: ${exportDesignTokens?.typography.fontSize.xl || '20px'};
+              --font-size-xxl: ${exportDesignTokens?.typography.fontSize.xxl || '24px'};
+              --font-weight-normal: ${exportDesignTokens?.typography.fontWeight.normal || 400};
+              --font-weight-medium: ${exportDesignTokens?.typography.fontWeight.medium || 500};
+              --font-weight-bold: ${exportDesignTokens?.typography.fontWeight.bold || 700};
+              --spacing-xs: ${exportDesignTokens?.spacing.xs || '0.25rem'};
+              --spacing-sm: ${exportDesignTokens?.spacing.sm || '0.5rem'};
+              --spacing-md: ${exportDesignTokens?.spacing.md || '1rem'};
+              --spacing-lg: ${exportDesignTokens?.spacing.lg || '1.5rem'};
+              --spacing-xl: ${exportDesignTokens?.spacing.xl || '2rem'};
+              --radius-none: ${exportDesignTokens?.borderRadius.none || '0'};
+              --radius-sm: ${exportDesignTokens?.borderRadius.sm || '0.125rem'};
+              --radius-md: ${exportDesignTokens?.borderRadius.md || '0.375rem'};
+              --radius-lg: ${exportDesignTokens?.borderRadius.lg || '0.5rem'};
+              --line-height: ${(exportDesignTokens?.typography as { lineHeight?: number })?.lineHeight || 1.5};
+              --letter-spacing: ${(exportDesignTokens?.typography as { letterSpacing?: string })?.letterSpacing || '0px'};
+              --section-spacing: ${exportDesignTokens?.spacing.lg || '1.5rem'};
+              --section-title-spacing: ${exportDesignTokens?.spacing.sm || '0.5rem'};
+              --paragraph-spacing: ${exportDesignTokens?.spacing.md || '1rem'};
+              --title-divider-width: ${exportShowTitleDivider ? '1px' : '0'};
+              --title-icon-display: ${exportShowTitleIcon ? 'inline-block' : 'none'};
+              --font-size-title: ${exportDesignTokens?.typography.fontSize.lg || '16px'};
+              --font-size-body: ${exportDesignTokens?.typography.fontSize.sm || '12px'};
             }
             
             /* Timeline组件完整Tailwind CSS样式补充 */
@@ -263,7 +298,7 @@ export async function exportOriginalStyle(info: InfoType, templateId?: string, c
             html, body {
               margin: 0;
               padding: 0;
-              font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+              font-family: ${exportFontFamily};
               background: white;
               overflow: visible !important;
               height: auto !important;

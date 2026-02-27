@@ -107,6 +107,14 @@ export function mergeTemplateConfig(
         mergedTemplate.layout.sidebar.gap = customConfig.layout.sidebar.gap;
       }
     }
+
+    if (customConfig.layout.showTitleDivider !== undefined) {
+      mergedTemplate.layout.showTitleDivider = customConfig.layout.showTitleDivider;
+    }
+
+    if (customConfig.layout.showTitleIcon !== undefined) {
+      mergedTemplate.layout.showTitleIcon = customConfig.layout.showTitleIcon;
+    }
   }
 
   // 如果有自定义配置，更新模板ID和名称以标识为自定义版本

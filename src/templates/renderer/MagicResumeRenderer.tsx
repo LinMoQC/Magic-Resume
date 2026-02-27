@@ -1,9 +1,8 @@
-import React from 'react';
-import { MagicTemplateDSL, ComponentDefinition } from '../types/magic-dsl';
+import React, { useMemo } from 'react';
+import { MagicTemplateDSL } from '../types/magic-dsl';
 import { Resume } from '@/types/frontend/resume';
 import get from 'lodash.get';
 
-// 导入所有组件
 import { Header } from '../templateLayout/Header';
 import { DefaultSection } from '../templateLayout/DefaultSection';
 import { ListSection } from '../templateLayout/ListSection';
@@ -13,8 +12,8 @@ import { CompactList } from '../templateLayout/CompactList';
 import { Timeline } from '../templateLayout/Timeline';
 import { Layout } from '../templateLayout/Layout';
 import { TwoColumnLayout } from '../templateLayout/TwoColumnLayout';
+import { getSectionIcon } from '../templateLayout/utils';
 
-// 组件注册表
 const componentRegistry = {
   Header,
   DefaultSection,
@@ -35,13 +34,13 @@ interface Props {
 }
 
 const ZH_TITLE_BY_SECTION_KEY: Record<string, string> = {
-  experience: '经历',
-  education: '教育',
-  projects: '项目',
-  skills: '技能',
-  languages: '语言',
-  certificates: '证书',
-  profiles: '个人资料',
+  experience: '工作经历',
+  education: '教育经历',
+  projects: '项目经历',
+  skills: '专业技能',
+  languages: '语言能力',
+  certificates: '证书资质',
+  profiles: '个人主页',
 };
 
 const ZH_TITLE_BY_ENGLISH: Record<string, string> = {
@@ -49,17 +48,17 @@ const ZH_TITLE_BY_ENGLISH: Record<string, string> = {
   summary: '个人总结',
   profile: '个人信息',
   contact: '联系方式',
-  experience: '经历',
+  experience: '工作经历',
   'work experience': '工作经历',
   'professional experience': '专业经历',
-  education: '教育',
-  projects: '项目',
-  skills: '技能',
+  education: '教育经历',
+  projects: '项目经历',
+  skills: '专业技能',
   'technical skills': '技术技能',
-  languages: '语言',
-  certificates: '证书',
-  certifications: '证书',
-  profiles: '个人资料',
+  languages: '语言能力',
+  certificates: '证书资质',
+  certifications: '证书资质',
+  profiles: '个人主页',
   awards: '奖项',
 };
 
@@ -77,7 +76,6 @@ function getSectionData(data: Resume, dataBinding: string) {
   if (dataBinding.startsWith('sections.')) {
     const sectionKey = dataBinding.replace('sections.', '');
     const sectionItems = data.sections[sectionKey as keyof typeof data.sections];
-    // Filter out items that are not visible
     if (Array.isArray(sectionItems)) {
       return sectionItems.filter(isVisible);
     }
@@ -106,6 +104,8 @@ function generateCSSVariables(designTokens: MagicTemplateDSL['designTokens'], la
     '--font-size-lg': designTokens.typography.fontSize.lg,
     '--font-size-xl': designTokens.typography.fontSize.xl,
     '--font-size-xxl': designTokens.typography.fontSize.xxl,
+    '--font-size-title': designTokens.typography.fontSize.lg,
+    '--font-size-body': designTokens.typography.fontSize.sm,
     '--font-weight-normal': designTokens.typography.fontWeight.normal.toString(),
     '--font-weight-medium': designTokens.typography.fontWeight.medium.toString(),
     '--font-weight-bold': designTokens.typography.fontWeight.bold.toString(),
@@ -126,9 +126,10 @@ function generateCSSVariables(designTokens: MagicTemplateDSL['designTokens'], la
     '--paragraph-spacing': designTokens.spacing.md,
     '--section-spacing': designTokens.spacing.lg,
     '--section-title-spacing': designTokens.spacing.sm,
+    '--title-divider-width': layout.showTitleDivider === false ? '0' : '1px',
+    '--title-icon-display': layout.showTitleIcon === false ? 'none' : 'inline-block',
   };
 
-  // 只有在有值时才设置可选的CSS变量
   if (designTokens.colors.sidebar) {
     cssVars['--color-sidebar'] = designTokens.colors.sidebar;
   }
@@ -155,43 +156,26 @@ function getLayoutComponent(layoutType: string) {
   }
 }
 
-function ComponentWrapper({ 
-  children
-}: { 
-  children: React.ReactNode;
-  position?: ComponentDefinition['position'];
-  style?: ComponentDefinition['style'];
-}) {
-  return (
-    <div className="component-wrapper">
-      {children}
-    </div>
-  );
-}
-
 export const MagicResumeRenderer = React.memo(({ template, data, locale }: Props) => {
   const { layout, designTokens, components } = template;
   const isChineseLocale = (locale || '').toLowerCase().startsWith('zh');
   
-  // 生成CSS变量
-  const cssVariables = generateCSSVariables(designTokens, layout);
+  const cssVariables = useMemo(
+    () => generateCSSVariables(designTokens, layout),
+    [designTokens, layout]
+  );
   
-  // 获取布局组件
   const LayoutContainer = getLayoutComponent(layout.type);
   
-  // 根据 sectionOrder 动态排序组件
-  const sortedComponents = (() => {
-    // 按area分组组件
+  const sortedComponents = useMemo(() => {
     const sidebarComponents = components.filter(comp => comp.position?.area === 'sidebar');
     const mainComponents = components.filter(comp => comp.position?.area !== 'sidebar');
     
-    // 对于主区域组件，进行动态排序
     const headerComponents = mainComponents.filter(comp => comp.dataBinding === 'info');
     const sectionComponents = mainComponents.filter(comp => comp.dataBinding.startsWith('sections.'));
     
-    const sortedMainSections: ComponentDefinition[] = [];
+    const sortedMainSections = [] as typeof components;
     
-    // 根据 sectionOrder 排序主区域的section组件
     if (data.sectionOrder && Array.isArray(data.sectionOrder)) {
       data.sectionOrder.forEach(sectionOrderItem => {
         const matchingComponent = sectionComponents.find(comp => 
@@ -203,19 +187,16 @@ export const MagicResumeRenderer = React.memo(({ template, data, locale }: Props
       });
     }
     
-    // 添加任何在sectionOrder中没有的主区域section组件
     const remainingMainSections = sectionComponents.filter(comp => 
       !sortedMainSections.includes(comp)
     );
     
-    // 侧边栏组件保持原有顺序（或者也可以按sectionOrder排序）
-    const sortedSidebarComponents = sidebarComponents.sort(
+    const sortedSidebarComponents = [...sidebarComponents].sort(
       (a, b) => (a.position?.order || 0) - (b.position?.order || 0)
     );
     
-    // 合并所有组件
     return [...sortedSidebarComponents, ...headerComponents, ...sortedMainSections, ...remainingMainSections];
-  })();
+  }, [components, data.sectionOrder]);
 
   return (
     <div style={cssVariables}>
@@ -229,12 +210,10 @@ export const MagicResumeRenderer = React.memo(({ template, data, locale }: Props
 
           const sectionData = getSectionData(data, component.dataBinding);
           
-          // 如果数据不存在，跳过渲染
           if (!sectionData) {
             return null;
           }
 
-          // 对于需要数组数据的组件，确保数据是数组且非空
           const needsArrayData = ['DefaultSection', 'ListSection', 'Timeline', 'CompactList'];
           if (needsArrayData.includes(component.type)) {
             if (!Array.isArray(sectionData) || sectionData.length === 0) {
@@ -242,37 +221,35 @@ export const MagicResumeRenderer = React.memo(({ template, data, locale }: Props
             }
           }
 
+          const sectionKey = component.dataBinding.startsWith('sections.')
+            ? component.dataBinding.replace('sections.', '')
+            : undefined;
+
+          const rawTitle = (component.props?.title as string) || 'Section';
+          const resolvedTitle = (() => {
+            if (!isChineseLocale) return rawTitle;
+            if (sectionKey) {
+              const mappedByKey = ZH_TITLE_BY_SECTION_KEY[sectionKey];
+              if (mappedByKey) return mappedByKey;
+            }
+            const normalizedTitle = rawTitle.trim().toLowerCase();
+            return ZH_TITLE_BY_ENGLISH[normalizedTitle] || rawTitle;
+          })();
+
           const props = {
             data: sectionData,
             items: Array.isArray(sectionData) ? sectionData : [],
             fieldMap: component.fieldMap,
             style: component.style,
             position: component.position,
-            title: (() => {
-              const rawTitle = (component.props?.title as string) || 'Section';
-              if (!isChineseLocale) return rawTitle;
-
-              if (component.dataBinding.startsWith('sections.')) {
-                const sectionKey = component.dataBinding.replace('sections.', '');
-                const mappedByKey = ZH_TITLE_BY_SECTION_KEY[sectionKey];
-                if (mappedByKey) return mappedByKey;
-              }
-
-              const normalizedTitle = rawTitle.trim().toLowerCase();
-              return ZH_TITLE_BY_ENGLISH[normalizedTitle] || rawTitle;
-            })(),
             ...component.props,
+            title: resolvedTitle,
+            titleIcon: getSectionIcon(sectionKey, rawTitle),
           };
 
           return (
-            <ComponentWrapper 
-              key={component.id}
-              position={component.position}
-              style={component.style}
-            >
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              <Component key={component.id} {...(props as any)} />
-            </ComponentWrapper>
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            <Component key={component.id} {...(props as any)} />
           );
         })}
       </LayoutContainer>

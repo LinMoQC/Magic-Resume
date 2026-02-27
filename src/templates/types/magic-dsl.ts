@@ -80,6 +80,9 @@ export interface MagicTemplateDSL {
       width: string;
       gap: string;
     };
+
+    showTitleDivider?: boolean;
+    showTitleIcon?: boolean;
   };
   
   // 组件定义

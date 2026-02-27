@@ -16,6 +16,7 @@ import sidebarMenu from '@/lib/constants/sidebarMenu';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
 import { SectionOrder } from '@/types/frontend/resume';
+import LanguageSwitcher from '@/components/shared/LanguageSwitcher';
 
 export default function DashboardSidebar() {
   const { t } = useTranslation();
@@ -69,8 +70,12 @@ export default function DashboardSidebar() {
         ))}
       </nav>
 
+      <div className="px-6 pt-4 border-t border-neutral-800 bg-black shrink-0">
+        <LanguageSwitcher compact />
+      </div>
+
       {/* Profile Placeholder */}
-      <div className="px-6 pt-6 pb-4 border-t border-neutral-800 bg-black shrink-0 flex items-center gap-3">
+      <div className="px-6 pt-4 pb-4 bg-black shrink-0 flex items-center gap-3">
         <div className="relative w-8 h-8 shrink-0">
           <div className="absolute inset-0 bg-neutral-800 rounded-full animate-pulse z-0" />
           <div className="relative z-10 w-8 h-8 flex items-center justify-center">
@@ -135,6 +140,10 @@ export default function DashboardSidebar() {
             );
           })}
         </nav>
+
+        <div className="w-full pb-3 shrink-0 flex justify-center">
+          <LanguageSwitcher iconOnly />
+        </div>
 
         {/* Profile Placeholder */}
         <div className="pt-4 pb-4 shrink-0">
