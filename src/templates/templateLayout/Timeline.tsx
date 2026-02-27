@@ -30,7 +30,7 @@ export function Timeline({ title, items, fieldMap = {}, style }: Props) {
   const textColor = style?.color || 'var(--color-text)';
   const primaryColor = 'var(--color-primary)'; // 使用主色调
   const secondaryColor = style?.color ? `${style.color}80` : 'var(--color-text-secondary)'; // 半透明版本
-  const timelineLineColor = '#e5e7eb'; // 统一的灰色线条
+  const timelineLineColor = 'var(--color-border)';
 
   return (
     <section 
@@ -47,7 +47,7 @@ export function Timeline({ title, items, fieldMap = {}, style }: Props) {
         style={{ 
           color: textColor, 
           borderBottom: `2px solid ${primaryColor}`,
-          marginBottom: 'var(--paragraph-spacing)',
+          marginBottom: 'var(--section-title-spacing)',
         }}
       >
         {title}
@@ -74,7 +74,7 @@ export function Timeline({ title, items, fieldMap = {}, style }: Props) {
                   height: '0.75rem',
                   backgroundColor: primaryColor,
                   borderRadius: '9999px',
-                  border: '2px solid #ffffff',
+                  border: '2px solid var(--color-background)',
                   boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
                 }}
               ></div>

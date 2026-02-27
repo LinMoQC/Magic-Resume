@@ -233,9 +233,9 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => !isImporting && onOpenChange(false)}
-            className="fixed inset-0 bg-black/50 z-[100] backdrop-blur-sm"
+            className="fixed inset-0 bg-black/50 z-100 backdrop-blur-sm cursor-pointer"
           />
-          <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none">
+          <div className="fixed inset-0 z-101 flex items-center justify-center p-4 pointer-events-none">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -246,7 +246,7 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
                 <h2 className="text-xl font-bold text-white">{t('importDialog.title')}</h2>
                 <button
                   onClick={() => !isImporting && onOpenChange(false)}
-                  className="text-neutral-500 hover:text-white transition-colors"
+                  className="text-neutral-500 hover:text-white transition-colors cursor-pointer"
                   type="button"
                   disabled={isImporting}
                 >

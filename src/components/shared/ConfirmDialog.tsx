@@ -40,7 +40,7 @@ export default function ConfirmDialog({
     <AlertDialog open={isOpen} onOpenChange={onClose}>
       {/* Add overlay with higher z-index */}
       <div className={`fixed inset-0 z-150 ${isOpen ? 'block' : 'hidden'}`}>
-        <div className="fixed inset-0 bg-black/50" onClick={onClose} />
+        <div className="fixed inset-0 bg-black/50 cursor-pointer" onClick={onClose} />
         <AlertDialogContent className="bg-neutral-950 border-neutral-800 text-white fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-150">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-xl font-bold">{title}</AlertDialogTitle>

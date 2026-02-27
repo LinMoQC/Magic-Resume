@@ -25,9 +25,9 @@ export function ProfileCard({ data: info, style, position }: Props) {
 
   
   // 根据style和位置计算颜色
-  const textColor = style?.color || (isInSidebar ? '#ffffff' : '#000000');
-  const subtitleColor = style?.color ? `${style.color}cc` : (isInSidebar ? '#dbeafe' : '#6b7280');
-  const borderColor = style?.color || (isInSidebar ? '#ffffff' : '#d1d5db');
+  const textColor = style?.color || (isInSidebar ? 'var(--color-background)' : 'var(--color-text)');
+  const subtitleColor = style?.color ? `${style.color}cc` : 'var(--color-text-secondary)';
+  const borderColor = style?.color || 'var(--color-border)';
   
   if (isInSidebar) {
     // 侧边栏布局 - 紧凑的垂直设计

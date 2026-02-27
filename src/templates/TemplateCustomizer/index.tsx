@@ -61,6 +61,27 @@ const TemplateCustomizer = React.memo(({
     onTemplateChange(updatedTemplate);
   }, [template, onTemplateChange]);
 
+  const updateSpacingScale = useCallback((baseSpacingRem: number) => {
+    const clampedBase = Math.min(3, Math.max(0.5, baseSpacingRem));
+    const sm = Math.max(0.25, Number((clampedBase * 0.67).toFixed(2)));
+    const md = Number(clampedBase.toFixed(2));
+    const lg = Math.max(md + 0.25, Number((md * 1.33).toFixed(2)));
+
+    const updatedTemplate = {
+      ...template,
+      designTokens: {
+        ...template.designTokens,
+        spacing: {
+          ...template.designTokens.spacing,
+          sm: `${sm}rem`,
+          md: `${md}rem`,
+          lg: `${lg}rem`,
+        }
+      }
+    };
+    onTemplateChange(updatedTemplate);
+  }, [template, onTemplateChange]);
+
   // 应用预设主题
   const applyColorTheme = useCallback((theme: 'blue' | 'green' | 'purple' | 'orange' | 'red') => {
     const themes = {
@@ -111,7 +132,7 @@ const TemplateCustomizer = React.memo(({
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 flex items-center justify-center gap-2 px-3 py-3 text-sm font-medium transition-colors duration-200 ${
+                className={`flex-1 flex items-center justify-center gap-2 px-3 py-3 text-sm font-medium transition-colors duration-200 cursor-pointer ${
                   activeTab === tab.id
                     ? 'text-blue-400 border-b-2 border-blue-400'
                     : 'text-neutral-400 hover:text-neutral-200'
@@ -137,7 +158,7 @@ const TemplateCustomizer = React.memo(({
                   <button
                     key={theme}
                     onClick={() => applyColorTheme(theme)}
-                    className="aspect-square rounded-lg border-2 border-neutral-600 hover:border-neutral-400 transition-colors duration-200"
+                    className="aspect-square rounded-lg border-2 border-neutral-600 hover:border-neutral-400 transition-colors duration-200 cursor-pointer"
                     style={{
                       background: `linear-gradient(135deg, ${
                         theme === 'blue' ? '#3B82F6' :
@@ -376,7 +397,7 @@ const TemplateCustomizer = React.memo(({
             <div className="space-y-4">
               <h4 className="text-sm font-medium text-neutral-300">{t('templateCustomizer.layout.spacingSettings')}</h4>
               
-              {/* 段落间距 */}
+              {/* 基础内容间距（自动联动标题与分节间距） */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="text-sm text-neutral-400 font-medium">{t('templateCustomizer.layout.paragraphSpacing')}</label>
@@ -390,50 +411,7 @@ const TemplateCustomizer = React.memo(({
                   max="3"
                   step="0.25"
                   value={parseFloat(template.designTokens.spacing.md)}
-                  onChange={(e) => {
-                    const updatedTemplate = {
-                      ...template,
-                      designTokens: {
-                        ...template.designTokens,
-                        spacing: {
-                          ...template.designTokens.spacing,
-                          md: `${e.target.value}rem`
-                        }
-                      }
-                    };
-                    onTemplateChange(updatedTemplate);
-                  }}
-                  className="w-full h-2 bg-neutral-700 rounded-lg appearance-none cursor-pointer slider"
-                />
-              </div>
-
-              {/* 大段落间距 */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-sm text-neutral-400 font-medium">{t('templateCustomizer.layout.sectionSpacing')}</label>
-                  <span className="text-sm text-neutral-300 font-mono bg-neutral-800 px-2 py-1 rounded">
-                    {template.designTokens.spacing.lg}
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="1"
-                  max="4"
-                  step="0.25"
-                  value={parseFloat(template.designTokens.spacing.lg)}
-                  onChange={(e) => {
-                    const updatedTemplate = {
-                      ...template,
-                      designTokens: {
-                        ...template.designTokens,
-                        spacing: {
-                          ...template.designTokens.spacing,
-                          lg: `${e.target.value}rem`
-                        }
-                      }
-                    };
-                    onTemplateChange(updatedTemplate);
-                  }}
+                  onChange={(e) => updateSpacingScale(parseFloat(e.target.value))}
                   className="w-full h-2 bg-neutral-700 rounded-lg appearance-none cursor-pointer slider"
                 />
               </div>
@@ -447,7 +425,7 @@ const TemplateCustomizer = React.memo(({
         <div className="border-t border-neutral-800 p-4">
           <button
             onClick={onBack}
-            className="w-full bg-neutral-700 hover:bg-neutral-600 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200"
+            className="w-full bg-neutral-700 hover:bg-neutral-600 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200 cursor-pointer"
           >
             {t('templateCustomizer.buttons.backToTemplates')}
           </button>

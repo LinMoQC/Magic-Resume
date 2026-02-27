@@ -35,9 +35,9 @@ export function ContactInfo({ data: info, style }: Props) {
 
   if (contactItems.length === 0) return null;
 
-  // 从style中获取颜色，如果没有则使用默认的白色（适合侧边栏）
-  const textColor = style?.color || '#ffffff';
-  const iconColor = style?.color ? `${style.color}cc` : '#dbeafe';
+  // 从style中获取颜色，没有时回退到设计令牌
+  const textColor = style?.color || 'var(--color-text)';
+  const iconColor = style?.color ? `${style.color}cc` : 'var(--color-secondary)';
 
   return (
     <div 
@@ -54,7 +54,7 @@ export function ContactInfo({ data: info, style }: Props) {
         className="text-sm font-bold uppercase tracking-wide" 
         style={{ 
           color: textColor,
-          marginBottom: 'var(--paragraph-spacing)',
+          marginBottom: 'var(--section-title-spacing)',
         }}
       >
         {t('common.info.contact')}

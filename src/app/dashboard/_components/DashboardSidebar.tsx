@@ -179,7 +179,7 @@ export default function DashboardSidebar() {
       <>
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed top-4 right-4 z-5 p-2 bg-neutral-800 rounded-md z-[99]"
+          className="fixed top-4 right-4 p-2 bg-neutral-800 rounded-md z-99 cursor-pointer"
           aria-label={t('sidebar.open')}
         >
           <FiMenu className="h-6 w-6 text-white" />
@@ -192,7 +192,7 @@ export default function DashboardSidebar() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="fixed inset-0 bg-black/50 z-40"
+                className="fixed inset-0 bg-black/50 z-40 cursor-pointer"
                 onClick={() => setIsOpen(false)}
               />
               <motion.aside
@@ -204,7 +204,7 @@ export default function DashboardSidebar() {
               >
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="absolute top-4 right-4 p-2"
+                  className="absolute top-4 right-4 p-2 cursor-pointer"
                   aria-label={t('sidebar.close')}
                 >
                   <FiX className="h-6 w-6 text-neutral-400 z-5" />

@@ -9,6 +9,7 @@ import { getMagicTemplateById, getDefaultMagicTemplate } from '@/templates/confi
 import { MagicTemplateDSL } from '@/templates/types/magic-dsl';
 
 import { mergeTemplateConfig } from '@/lib/utils/templateUtils';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   info: InfoType;
@@ -20,6 +21,7 @@ interface Props {
 }
 
 function ResumePreview({ info, sections, sectionOrder, templateId, customTemplate }: Props) {
+  const { i18n } = useTranslation();
   const [template, setTemplate] = useState<MagicTemplateDSL | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -97,7 +99,7 @@ function ResumePreview({ info, sections, sectionOrder, templateId, customTemplat
       </div>
     );
   }
-  return <MagicResumeRenderer template={template} data={resumeData} />;
+  return <MagicResumeRenderer template={template} data={resumeData} locale={i18n.resolvedLanguage || i18n.language} />;
 }
 
 // 导出 memo 化的预览组件，避开非核心数据导致的重渲染

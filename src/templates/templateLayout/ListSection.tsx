@@ -31,7 +31,15 @@ export function ListSection({ title, items, fieldMap, className, style, titleCla
 
   return (
     <section className={`grid text-[12px] ${className || ''}`} style={style}>
-      <h4 className={titleClassName || "font-bold text-primary text-[1.2em] text-blue-500"}>{title}</h4>
+      <h4
+        className={titleClassName || "font-bold text-[1.2em]"}
+        style={{
+          color: 'var(--color-primary)',
+          marginBottom: 'var(--section-title-spacing)',
+        }}
+      >
+        {title}
+      </h4>
       <ul className={`list-none ${containerClassName || "grid gap-x-6 gap-y-1"}`}>
         {items.map((item, idx) => (
           <li className="space-y-2" key={idx}>

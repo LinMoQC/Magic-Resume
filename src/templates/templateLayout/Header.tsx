@@ -55,8 +55,8 @@ export function Header({ data: info, iconType = 'svg', style, className }: Props
           alt="avatar"
           width={40}
           height={40}
-          className="w-10 h-10 rounded-full object-cover border border-neutral-300"
-          style={{ background: '#f3f3f3' }}
+          className="w-10 h-10 rounded-full object-cover border"
+          style={{ background: 'var(--color-background)', borderColor: 'var(--color-border)' }}
           unoptimized
         />
       )}

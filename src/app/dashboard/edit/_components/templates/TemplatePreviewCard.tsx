@@ -116,7 +116,7 @@ const TemplatePreviewCard = React.memo(({ template, isSelected, onSelect, onCust
               e.stopPropagation();
               onCustomize();
             }}
-            className="absolute top-2 left-2 w-6 h-6 bg-neutral-700/80 hover:bg-neutral-600 border border-neutral-600 rounded-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            className="absolute top-2 left-2 w-6 h-6 bg-neutral-700/80 hover:bg-neutral-600 border border-neutral-600 rounded-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"
             title={t('templatePanel.customize')}
           >
             <Settings size={12} className="text-neutral-300" />

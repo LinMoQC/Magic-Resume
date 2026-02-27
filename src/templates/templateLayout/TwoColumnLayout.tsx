@@ -43,7 +43,7 @@ export function TwoColumnLayout({ children, layout }: Props) {
     fontFamily: 'var(--font-family-primary)',
     lineHeight: 'var(--line-height)',
     letterSpacing: 'var(--letter-spacing)',
-    borderRadius: '6px',
+    borderRadius: 'var(--radius-md)',
   };
 
   const sidebarStyle: React.CSSProperties = {
@@ -54,8 +54,8 @@ export function TwoColumnLayout({ children, layout }: Props) {
     gap: 'var(--container-gap)',
     lineHeight: 'inherit',
     letterSpacing: 'inherit',
-    borderTopLeftRadius: '6px', 
-    borderBottomLeftRadius: '6px', 
+    borderTopLeftRadius: 'var(--radius-md)', 
+    borderBottomLeftRadius: 'var(--radius-md)', 
   };
 
   const mainStyle: React.CSSProperties = {
@@ -65,14 +65,14 @@ export function TwoColumnLayout({ children, layout }: Props) {
     gap: 'var(--container-gap)',
     lineHeight: 'inherit',
     letterSpacing: 'inherit',
-    borderTopRightRadius: '6px',
-    borderBottomRightRadius: '6px',
+    borderTopRightRadius: 'var(--radius-md)',
+    borderBottomRightRadius: 'var(--radius-md)',
   };
 
   return (
     <div
       id="resume-to-export"
-      className="mx-auto bg-white text-black shadow-2xl relative"
+      className="mx-auto shadow-2xl relative"
       style={containerStyle}
     >
       <div 

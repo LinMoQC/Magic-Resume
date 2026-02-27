@@ -43,7 +43,7 @@ export function DefaultSection({ title, items, fieldMap, className, style, title
         className={titleClassName || "font-bold text-[1.2em]"}
         style={{ 
           color: 'var(--color-primary)',
-          marginBottom: 'var(--paragraph-spacing)',
+          marginBottom: 'var(--section-title-spacing)',
         }}
       >
         {title}

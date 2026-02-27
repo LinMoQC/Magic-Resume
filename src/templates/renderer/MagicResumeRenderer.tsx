@@ -31,7 +31,37 @@ const componentRegistry = {
 interface Props {
   template: MagicTemplateDSL;
   data: Resume;
+  locale?: string;
 }
+
+const ZH_TITLE_BY_SECTION_KEY: Record<string, string> = {
+  experience: '经历',
+  education: '教育',
+  projects: '项目',
+  skills: '技能',
+  languages: '语言',
+  certificates: '证书',
+  profiles: '个人资料',
+};
+
+const ZH_TITLE_BY_ENGLISH: Record<string, string> = {
+  header: '基本信息',
+  summary: '个人总结',
+  profile: '个人信息',
+  contact: '联系方式',
+  experience: '经历',
+  'work experience': '工作经历',
+  'professional experience': '专业经历',
+  education: '教育',
+  projects: '项目',
+  skills: '技能',
+  'technical skills': '技术技能',
+  languages: '语言',
+  certificates: '证书',
+  certifications: '证书',
+  profiles: '个人资料',
+  awards: '奖项',
+};
 
 function getSectionData(data: Resume, dataBinding: string) {
   if (dataBinding === 'info') {
@@ -75,11 +105,19 @@ function generateCSSVariables(designTokens: MagicTemplateDSL['designTokens'], la
     '--font-size-md': designTokens.typography.fontSize.md,
     '--font-size-lg': designTokens.typography.fontSize.lg,
     '--font-size-xl': designTokens.typography.fontSize.xl,
+    '--font-size-xxl': designTokens.typography.fontSize.xxl,
+    '--font-weight-normal': designTokens.typography.fontWeight.normal.toString(),
+    '--font-weight-medium': designTokens.typography.fontWeight.medium.toString(),
+    '--font-weight-bold': designTokens.typography.fontWeight.bold.toString(),
     '--spacing-xs': designTokens.spacing.xs,
     '--spacing-sm': designTokens.spacing.sm,
     '--spacing-md': designTokens.spacing.md,
     '--spacing-lg': designTokens.spacing.lg,
     '--spacing-xl': designTokens.spacing.xl,
+    '--radius-none': designTokens.borderRadius.none,
+    '--radius-sm': designTokens.borderRadius.sm,
+    '--radius-md': designTokens.borderRadius.md,
+    '--radius-lg': designTokens.borderRadius.lg,
     '--line-height': (designTokens.typography as { lineHeight?: number }).lineHeight?.toString() || '1.5',
     '--letter-spacing': (designTokens.typography as { letterSpacing?: string }).letterSpacing || '0px',
     '--container-width': layout.containerWidth,
@@ -87,6 +125,7 @@ function generateCSSVariables(designTokens: MagicTemplateDSL['designTokens'], la
     '--container-gap': layout.gap,
     '--paragraph-spacing': designTokens.spacing.md,
     '--section-spacing': designTokens.spacing.lg,
+    '--section-title-spacing': designTokens.spacing.sm,
   };
 
   // 只有在有值时才设置可选的CSS变量
@@ -130,8 +169,9 @@ function ComponentWrapper({
   );
 }
 
-export const MagicResumeRenderer = React.memo(({ template, data }: Props) => {
+export const MagicResumeRenderer = React.memo(({ template, data, locale }: Props) => {
   const { layout, designTokens, components } = template;
+  const isChineseLocale = (locale || '').toLowerCase().startsWith('zh');
   
   // 生成CSS变量
   const cssVariables = generateCSSVariables(designTokens, layout);
@@ -208,7 +248,19 @@ export const MagicResumeRenderer = React.memo(({ template, data }: Props) => {
             fieldMap: component.fieldMap,
             style: component.style,
             position: component.position,
-            title: component.props?.title || 'Section',
+            title: (() => {
+              const rawTitle = (component.props?.title as string) || 'Section';
+              if (!isChineseLocale) return rawTitle;
+
+              if (component.dataBinding.startsWith('sections.')) {
+                const sectionKey = component.dataBinding.replace('sections.', '');
+                const mappedByKey = ZH_TITLE_BY_SECTION_KEY[sectionKey];
+                if (mappedByKey) return mappedByKey;
+              }
+
+              const normalizedTitle = rawTitle.trim().toLowerCase();
+              return ZH_TITLE_BY_ENGLISH[normalizedTitle] || rawTitle;
+            })(),
             ...component.props,
           };
 

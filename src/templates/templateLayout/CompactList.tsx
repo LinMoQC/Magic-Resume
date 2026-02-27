@@ -32,8 +32,8 @@ export function CompactList({ title, items, fieldMap = {}, style, position }: Pr
   const isInSidebar = position?.area === 'sidebar';
   
   // 根据位置和style选择颜色主题
-  const textColor = style?.color || (isInSidebar ? '#ffffff' : '#000000');
-  const secondaryColor = style?.color ? `${style.color}cc` : (isInSidebar ? '#dbeafe' : '#6b7280');
+  const textColor = style?.color || (isInSidebar ? 'var(--color-background)' : 'var(--color-text)');
+  const secondaryColor = style?.color ? `${style.color}cc` : 'var(--color-text-secondary)';
 
   return (
     <div 
@@ -50,7 +50,7 @@ export function CompactList({ title, items, fieldMap = {}, style, position }: Pr
         className="text-sm font-bold uppercase tracking-wide" 
         style={{ 
           color: textColor,
-          marginBottom: 'var(--paragraph-spacing)',
+          marginBottom: 'var(--section-title-spacing)',
         }}
       >
         {title}
