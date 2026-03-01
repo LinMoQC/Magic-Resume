@@ -6,10 +6,14 @@ import { useTranslation } from 'react-i18next';
 interface Props {
   data: InfoType;
   style?: React.CSSProperties;
+  position?: {
+    area?: 'main' | 'sidebar' | 'header' | 'footer';
+  };
 }
 
-export const ContactInfo = React.memo(function ContactInfo({ data: info, style }: Props) {
+export const ContactInfo = React.memo(function ContactInfo({ data: info, style, position }: Props) {
   const { t } = useTranslation();
+  const isInSidebar = position?.area === 'sidebar';
   const contactItems = [
     { icon: MapPin, value: info.address, href: null },
     { icon: Phone, value: info.phoneNumber, href: `tel:${info.phoneNumber}` },
@@ -19,8 +23,10 @@ export const ContactInfo = React.memo(function ContactInfo({ data: info, style }
 
   if (contactItems.length === 0) return null;
 
-  const textColor = style?.color || 'var(--color-text)';
-  const iconColor = style?.color ? `${style.color}cc` : 'var(--color-primary)';
+  const textColor = style?.color || (isInSidebar ? 'var(--color-background)' : 'var(--color-text)');
+  const iconColor = style?.color
+    ? `${style.color}cc`
+    : (isInSidebar ? 'var(--color-background)' : 'var(--color-primary)');
 
   return (
     <div 

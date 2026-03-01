@@ -123,6 +123,10 @@ export interface ComponentStyle {
   color?: string;
   padding?: string;
   margin?: string;
+  marginTop?: string;
+  marginRight?: string;
+  marginBottom?: string;
+  marginLeft?: string;
   borderRadius?: string;
   fontSize?: string;
   fontWeight?: string;

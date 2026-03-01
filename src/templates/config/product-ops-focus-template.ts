@@ -86,6 +86,7 @@ export const productOpsFocusTemplate: MagicTemplateDSL = {
         textAlign: "left",
         backgroundColor: "transparent",
         color: "#111827",
+        marginBottom: "10px",
       },
     },
     {

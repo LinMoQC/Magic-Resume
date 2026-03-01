@@ -22,7 +22,9 @@ export const ProfileCard = React.memo(function ProfileCard({ data: info, style, 
   const isInSidebar = position?.area === 'sidebar';
 
   const textColor = style?.color || (isInSidebar ? 'var(--color-background)' : 'var(--color-text)');
-  const subtitleColor = style?.color ? `${style.color}cc` : 'var(--color-text-secondary)';
+  const subtitleColor = style?.color
+    ? `${style.color}cc`
+    : (isInSidebar ? 'rgba(255, 255, 255, 0.85)' : 'var(--color-text-secondary)');
   const borderColor = style?.color || 'var(--color-border)';
 
   if (isInSidebar) {
