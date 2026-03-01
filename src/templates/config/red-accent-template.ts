@@ -76,7 +76,8 @@ export const redAccentTemplate: MagicTemplateDSL = {
       style: {
         textAlign: "left",
         backgroundColor: "transparent",
-        color: "#1f2937"
+        color: "#1f2937",
+        marginBottom: "10px"
       }
     },
     {

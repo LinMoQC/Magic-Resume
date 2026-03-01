@@ -76,7 +76,8 @@ export const classicTemplate: MagicTemplateDSL = {
       style: {
         textAlign: "left",
         backgroundColor: "transparent",
-        color: "#000000"
+        color: "#000000",
+        marginBottom: "8px"
       }
     },
     {

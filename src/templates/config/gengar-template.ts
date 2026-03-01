@@ -78,6 +78,9 @@ export const gengarTemplate: MagicTemplateDSL = {
       },
       props: {
         title: "Profile"
+      },
+      style: {
+        color: "#f9fafb"
       }
     },
     {
@@ -89,6 +92,9 @@ export const gengarTemplate: MagicTemplateDSL = {
       },
       props: {
         title: "Contact"
+      },
+      style: {
+        color: "#f9fafb"
       }
     },
     {
@@ -100,6 +106,9 @@ export const gengarTemplate: MagicTemplateDSL = {
       },
       props: {
         title: "Skills"
+      },
+      style: {
+        color: "#f9fafb"
       },
       fieldMap: {
         title: ["name", "skill"]
@@ -114,6 +123,9 @@ export const gengarTemplate: MagicTemplateDSL = {
       },
       props: {
         title: "Languages"
+      },
+      style: {
+        color: "#f9fafb"
       },
       fieldMap: {
         title: ["language", "name"],

@@ -76,7 +76,8 @@ export const cleanMinimalTemplate: MagicTemplateDSL = {
       style: {
         textAlign: "center",
         backgroundColor: "transparent",
-        color: "#000000"
+        color: "#000000",
+        marginBottom: "10px"
       }
     },
     {
