@@ -75,6 +75,13 @@ export type InfoType = {
   address: string;
   website: string;
   avatar: string;
+  customFields?: CustomInfoField[];
+};
+
+export type CustomInfoField = {
+  id: string;
+  name: string;
+  value: string;
 };
 
 export type SectionItem = {

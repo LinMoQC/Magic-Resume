@@ -70,6 +70,7 @@ export const initialResume: Omit<Resume, 'id' | 'updatedAt' | 'name'> = {
     address: '',
     website: '',
     avatar: '',
+    customFields: [],
   },
   sections: Object.fromEntries(sidebarMenu.map(item => [item.key, []])),
   sectionOrder: [

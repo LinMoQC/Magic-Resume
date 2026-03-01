@@ -5,6 +5,7 @@ export { chikoritaTemplate } from './chikorita-template'
 export { dittoTemplate } from './ditto-template'
 export { gengarTemplate } from './gengar-template'
 export { classicTemplate } from './classic-template'
+export { productOpsFocusTemplate } from './product-ops-focus-template'
 
 import { azurillTemplate } from './azurill-template'
 import { bronzorTemplate } from './bronzor-template'
@@ -12,6 +13,7 @@ import { chikoritaTemplate } from './chikorita-template'
 import { dittoTemplate } from './ditto-template'
 import { gengarTemplate } from './gengar-template'
 import { classicTemplate } from './classic-template'
+import { productOpsFocusTemplate } from './product-ops-focus-template'
 import { MagicTemplateDSL } from '../types/magic-dsl'
 
 export const ALL_MAGIC_TEMPLATES: MagicTemplateDSL[] = [
@@ -20,7 +22,8 @@ export const ALL_MAGIC_TEMPLATES: MagicTemplateDSL[] = [
   bronzorTemplate,
   chikoritaTemplate,
   dittoTemplate,
-  gengarTemplate
+  gengarTemplate,
+  productOpsFocusTemplate
 ]
 
 // 根据ID获取Magic模板

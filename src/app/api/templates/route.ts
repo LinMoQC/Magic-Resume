@@ -10,6 +10,7 @@ import { cleanMinimalTemplate } from '@/templates/config/clean-minimal-template'
 import { tealProfessionalTemplate } from '@/templates/config/teal-professional-template';
 import { redAccentTemplate } from '@/templates/config/red-accent-template';
 import { goldenElegantTemplate } from '@/templates/config/golden-elegant-template';
+import { productOpsFocusTemplate } from '@/templates/config/product-ops-focus-template';
 import { MagicTemplateDSL } from '@/templates/types/magic-dsl';
 
 // 模板数据映射
@@ -25,6 +26,7 @@ const templatesData: Record<string, MagicTemplateDSL> = {
   'teal-professional': tealProfessionalTemplate,
   'red-accent': redAccentTemplate,
   'golden-elegant': goldenElegantTemplate,
+  'product-ops-focus': productOpsFocusTemplate,
 };
 
 export async function GET(request: Request) {

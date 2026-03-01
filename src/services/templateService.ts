@@ -8,6 +8,7 @@ interface TemplateResponse {
 
 class TemplateService {
   private baseUrl = '/api/templates';
+  private readonly enableCache = process.env.NODE_ENV === 'production';
   
   // 缓存
   private cache: {
@@ -18,7 +19,7 @@ class TemplateService {
 
   // 获取所有模板
   async getAllTemplates(): Promise<TemplateResponse> {
-    if (this.cache.templates && this.cache.templateList && this.cache.defaultTemplate) {
+    if (this.enableCache && this.cache.templates && this.cache.templateList && this.cache.defaultTemplate) {
       return {
         templates: this.cache.templates,
         templateList: this.cache.templateList,
@@ -34,10 +35,12 @@ class TemplateService {
       
       const data: TemplateResponse = await response.json();
       
-      // 缓存数据
-      this.cache.templates = data.templates;
-      this.cache.templateList = data.templateList;
-      this.cache.defaultTemplate = data.defaultTemplate;
+      // 仅在生产环境缓存，开发环境便于实时调样式
+      if (this.enableCache) {
+        this.cache.templates = data.templates;
+        this.cache.templateList = data.templateList;
+        this.cache.defaultTemplate = data.defaultTemplate;
+      }
       
       return data;
     } catch (error) {
@@ -49,7 +52,7 @@ class TemplateService {
   // 获取特定模板
   async getTemplateById(id: string): Promise<MagicTemplateDSL> {
     // 先尝试从缓存获取
-    if (this.cache.templates && this.cache.templates[id]) {
+    if (this.enableCache && this.cache.templates && this.cache.templates[id]) {
       return this.cache.templates[id];
     }
 
@@ -61,11 +64,13 @@ class TemplateService {
       
       const template: MagicTemplateDSL = await response.json();
       
-      // 更新缓存
-      if (!this.cache.templates) {
-        this.cache.templates = {};
+      // 仅在生产环境更新缓存
+      if (this.enableCache) {
+        if (!this.cache.templates) {
+          this.cache.templates = {};
+        }
+        this.cache.templates[id] = template;
       }
-      this.cache.templates[id] = template;
       
       return template;
     } catch (error) {
@@ -76,7 +81,7 @@ class TemplateService {
 
   // 获取默认模板
   async getDefaultTemplate(): Promise<MagicTemplateDSL> {
-    if (this.cache.defaultTemplate && this.cache.templates?.[this.cache.defaultTemplate]) {
+    if (this.enableCache && this.cache.defaultTemplate && this.cache.templates?.[this.cache.defaultTemplate]) {
       return this.cache.templates[this.cache.defaultTemplate];
     }
 

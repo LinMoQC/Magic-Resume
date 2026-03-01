@@ -370,6 +370,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
                     <BasicForm
                       info={info!}
                       updateInfo={updateInfo}
+                      enableCustomFields={activeResume?.template === 'product-ops-focus'}
                     />
                   </div>
                 )}
