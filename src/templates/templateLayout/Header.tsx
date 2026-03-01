@@ -120,7 +120,6 @@ export const Header = React.memo(function Header({
         external: Boolean(href),
       };
     });
-
   return (
     <div 
       className={`flex items-start justify-between gap-4 ${className || ''}`} 
