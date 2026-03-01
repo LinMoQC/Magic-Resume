@@ -50,7 +50,7 @@ export const CompactList = React.memo(function CompactList({ title, items, field
           gap: '0.4em',
         }}
       >
-        {TitleIcon && <TitleIcon size={14} style={{ display: 'var(--title-icon-display)', flexShrink: 0 }} />}
+        {TitleIcon && <TitleIcon style={{ display: 'var(--title-icon-display)', flexShrink: 0, width: '1em', height: '1em' }} />}
         {title}
       </h3>
       

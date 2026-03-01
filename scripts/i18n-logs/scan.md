@@ -1,4 +1,4 @@
-# i18n Scan Report (2/11/2026, 11:42:55 AM)
+# i18n Scan Report (2026/3/1 17:32:47)
 
 Found 60 issues in 21 files.
 
@@ -44,12 +44,12 @@ Found 60 issues in 21 files.
 
 ## 📄 src/templates/templateLayout/Header.tsx
 
-- L55: **[HARDCODED_TEXT]** Hardcoded attribute alt: "avatar"
+- L45: **[HARDCODED_TEXT]** Hardcoded attribute alt: "avatar"
 
 ## 📄 src/templates/templateLayout/ProfileCard.tsx
 
-- L50: **[HARDCODED_TEXT]** Hardcoded attribute alt: "Profile"
-- L92: **[HARDCODED_TEXT]** Hardcoded attribute alt: "Profile"
+- L45: **[HARDCODED_TEXT]** Hardcoded attribute alt: "Profile"
+- L86: **[HARDCODED_TEXT]** Hardcoded attribute alt: "Profile"
 
 ## 📄 src/app/dashboard/_components/ImportResumeDialog.tsx
 

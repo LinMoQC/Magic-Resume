@@ -45,7 +45,7 @@ export const ListSection = React.memo(function ListSection({ title, items, field
           gap: '0.4em',
         }}
       >
-        {TitleIcon && <TitleIcon size={16} style={{ display: 'var(--title-icon-display)', flexShrink: 0 }} />}
+        {TitleIcon && <TitleIcon style={{ display: 'var(--title-icon-display)', flexShrink: 0, width: '1em', height: '1em' }} />}
         {title}
       </h4>
       <ul className={`list-none ${containerClassName || "grid gap-x-6 gap-y-1"}`}>

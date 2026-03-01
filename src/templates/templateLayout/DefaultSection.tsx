@@ -46,7 +46,7 @@ export const DefaultSection = React.memo(function DefaultSection({ title, items,
           gap: '0.4em',
         }}
       >
-        {TitleIcon && <TitleIcon size={16} style={{ display: 'var(--title-icon-display)', flexShrink: 0 }} />}
+        {TitleIcon && <TitleIcon style={{ display: 'var(--title-icon-display)', flexShrink: 0, width: '1em', height: '1em' }} />}
         {title}
       </h4>
       <div 
