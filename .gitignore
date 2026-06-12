@@ -32,6 +32,8 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+!apps/web/.env.example
 
 # vercel
 .vercel
@@ -43,3 +45,11 @@ next-env.d.ts
 # clerk configuration (can include secrets)
 /.clerk/
 .env.local
+
+.playwright-mcp
+docs
+.turbo
+dist
+node_modules
+.next
+.superpowers
