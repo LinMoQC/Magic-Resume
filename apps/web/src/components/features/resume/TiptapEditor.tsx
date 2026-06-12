@@ -13,7 +13,6 @@ import { useCallback, useState, useEffect } from 'react';
 import { Wand2, Languages } from 'lucide-react';
 import { LoadingMark } from '@/components/shared/LoadingMark';
 import { useSettingStore } from '@/store/useSettingStore';
-import { createPolishTextChain } from '@/lib/aiLab/chains';
 import { translateApi } from '@/lib/api/translate';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -309,8 +308,13 @@ const TiptapEditor = ({ content, onChange, placeholder, isPolishing, setIsPolish
         toast.error(t('modals.aiModal.notifications.apiKeyMissing'));
         throw new Error('API Key not found');
       }
-      const chain = createPolishTextChain({ apiKey, baseUrl, modelName: model, maxTokens });
-      const polishedText = await chain.invoke({ text: selectedText });
+      const response = await fetch('/api/polish-text', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: selectedText, config: { apiKey, baseUrl, modelName: model, maxTokens } }),
+      });
+      if (!response.ok) throw new Error(`Server error: ${response.status}`);
+      const { polishedText } = await response.json();
       
       // 移除 emoji（包括可能的 span 包装）
       const emojiSpan = editor.view.dom.querySelector('[data-ai-emoji="true"]');

@@ -7,7 +7,7 @@ import { useResumeDraftStore } from '@/store/useResumeDraftStore';
 import { useMessageStore, Message } from '@/store/useMessageStore';
 import { Resume } from '@/types/frontend/resume';
 
-const nextUrl = process.env.NEXT_PUBLIC_IF_USE_BACKEND === 'true' ? '/api' : '/api/node';
+const nextUrl = '/api';
 
 export const useResumeCreator = () => {
   const { t } = useTranslation();

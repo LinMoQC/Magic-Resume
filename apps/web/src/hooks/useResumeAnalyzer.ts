@@ -32,12 +32,7 @@ export const useResumeAnalyzer = () => {
       const config = { apiKey, baseUrl, modelName: model, maxTokens: 4096 };
       
       // 调用流式 API
-      const apiEndpoint = process.env.NEXT_PUBLIC_IF_USE_BACKEND === 'true'
-        ? '/api/analyze-resume'
-        : '/api/node/analyze-resume';
-
-      console.log('[ANALYSIS] Calling API endpoint:', apiEndpoint);
-      console.log('[ANALYSIS] NEXT_PUBLIC_IF_USE_BACKEND:', process.env.NEXT_PUBLIC_IF_USE_BACKEND);
+      const apiEndpoint = '/api/analyze-resume';
 
       const response = await fetch(apiEndpoint, {
         method: 'POST',

@@ -4,9 +4,8 @@ import { Resume } from '@/types/frontend/resume';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { useResumeOptimizerStore, LogEntry, StreamData, NodeState } from '@/store/useResumeOptimizerStore';
-import { GraphState } from '@/lib/aiLab/graphs';
 
-const nextUrl = process.env.NEXT_PUBLIC_IF_USE_BACKEND === 'true' ? '/api' : '/api/node';
+const nextUrl = '/api';
 
 export const useResumeOptimizer = () => {
   const { t } = useTranslation();
@@ -41,9 +40,9 @@ export const useResumeOptimizer = () => {
 
   const processStream = async (
     reader: ReadableStreamDefaultReader<Uint8Array>,
-    initialState: Partial<GraphState>
-  ): Promise<Partial<GraphState>> => {
-    const finalState: Partial<GraphState> = { ...initialState };
+    initialState: Record<string, unknown>
+  ): Promise<Record<string, unknown>> => {
+    const finalState: Record<string, unknown> = { ...initialState };
     const decoder = new TextDecoder();
     let buffer = '';
 
@@ -304,7 +303,7 @@ export const useResumeOptimizer = () => {
       });
 
       if (finalState.optimizedResume) {
-        setOptimizedResume(finalState.optimizedResume);
+        setOptimizedResume(finalState.optimizedResume as Resume);
         toast.success(t('modals.aiModal.notifications.optimizationComplete'));
       }
     } catch (error: unknown) {
