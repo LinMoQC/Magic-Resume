@@ -1,4 +1,5 @@
 import { ApiResponse, httpClient, withAuth } from './httpClient';
+import { API_ROUTES } from './routes';
 
 export type PersonalAccessToken = {
   id: string;
@@ -25,7 +26,7 @@ export type CreatePersonalAccessTokenRequest = {
 export const mcpApi = {
   createPersonalAccessToken: async (payload: CreatePersonalAccessTokenRequest, token: string) => {
     const response = await httpClient.api.post<ApiResponse<CreatedPersonalAccessToken>>(
-      '/api/users/me/personal-access-tokens',
+      API_ROUTES.users.pats,
       payload,
       withAuth(token),
     );
@@ -35,7 +36,7 @@ export const mcpApi = {
 
   listPersonalAccessTokens: async (token: string) => {
     const response = await httpClient.api.get<ApiResponse<PersonalAccessToken[]>>(
-      '/api/users/me/personal-access-tokens',
+      API_ROUTES.users.pats,
       withAuth(token),
     );
 
@@ -44,7 +45,7 @@ export const mcpApi = {
 
   revokePersonalAccessToken: async (tokenId: string, token: string) => {
     const response = await httpClient.api.patch<ApiResponse<PersonalAccessToken>>(
-      `/api/users/me/personal-access-tokens/${tokenId}/revoke`,
+      API_ROUTES.users.patRevoke(tokenId),
       {},
       withAuth(token),
     );

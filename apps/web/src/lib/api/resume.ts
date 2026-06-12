@@ -1,4 +1,5 @@
 import { httpClient, withAuth, ApiResponse } from './httpClient';
+import { API_ROUTES } from './routes';
 import { Resume } from '@/types/frontend/resume';
 import { 
   SyncResumeRequest, 
@@ -32,15 +33,15 @@ export const resumeApi = {
 
       if (isLocalId) {
         const response = await httpClient.api.post<ApiResponse<CloudResumeResponse>>(
-          '/api/resumes', 
-          payload, 
+          API_ROUTES.resumes.create,
+          payload,
           withAuth(token)
         );
         return response.data.data;
       } else {
         const response = await httpClient.api.patch<ApiResponse<CloudResumeResponse>>(
-          `/api/resumes/${resume.id}`, 
-          payload, 
+          API_ROUTES.resumes.byId(resume.id),
+          payload,
           withAuth(token)
         );
         return response.data.data;
@@ -68,8 +69,8 @@ export const resumeApi = {
       };
 
       const response = await httpClient.api.post<ApiResponse<CloudVersionResponse>>(
-        `/api/resumes/${resumeId}/versions`, 
-        payload, 
+        API_ROUTES.resumes.versions(resumeId),
+        payload,
         withAuth(token)
       );
       return response.data.data;
@@ -84,7 +85,7 @@ export const resumeApi = {
    */
   fetchCloudResumes: async (token: string) => {
     try {
-      const response = await httpClient.api.get('/api/resumes/mine', withAuth(token));
+      const response = await httpClient.api.get(API_ROUTES.resumes.list, withAuth(token));
       return response.data.data;
     } catch (error) {
       console.error('Failed to fetch cloud resumes:', error);
@@ -97,7 +98,7 @@ export const resumeApi = {
    */
   fetchCloudResumeById: async (id: string, token: string) => {
     try {
-      const response = await httpClient.api.get(`/api/resumes/${id}`, withAuth(token));
+      const response = await httpClient.api.get(API_ROUTES.resumes.byId(id), withAuth(token));
       return response.data.data;
     } catch (error) {
       console.error(`Failed to fetch cloud resume ${id}:`, error);
@@ -110,7 +111,7 @@ export const resumeApi = {
    */
   duplicateResume: async (id: string, token: string) => {
     try {
-      const response = await httpClient.api.post(`/api/resumes/${id}/duplicate`, {}, withAuth(token));
+      const response = await httpClient.api.post(API_ROUTES.resumes.duplicate(id), {}, withAuth(token));
       return response.data.data;
     } catch (error) {
       console.error(`Failed to duplicate cloud resume ${id}:`, error);
@@ -123,7 +124,7 @@ export const resumeApi = {
    */
   deleteResume: async (id: string, token: string) => {
     try {
-      await httpClient.api.delete(`/api/resumes/${id}`, withAuth(token));
+      await httpClient.api.delete(API_ROUTES.resumes.byId(id), withAuth(token));
     } catch (error) {
       console.error(`Failed to delete cloud resume ${id}:`, error);
       throw error;
@@ -135,7 +136,7 @@ export const resumeApi = {
    */
   fetchVersions: async (resumeId: string, token: string) => {
     try {
-      const response = await httpClient.api.get(`/api/resumes/${resumeId}/versions`, withAuth(token));
+      const response = await httpClient.api.get(API_ROUTES.resumes.versions(resumeId), withAuth(token));
       return response.data.data;
     } catch (error) {
       console.error(`Failed to fetch versions for resume ${resumeId}:`, error);
@@ -149,7 +150,7 @@ export const resumeApi = {
   fetchVersionById: async (resumeId: string, versionId: string, token: string) => {
     try {
       const response = await httpClient.api.get(
-        `/api/resumes/${resumeId}/versions/${versionId}`, 
+        API_ROUTES.resumes.versionById(resumeId, versionId),
         withAuth(token)
       );
       return response.data.data;
@@ -165,7 +166,7 @@ export const resumeApi = {
   deleteVersion: async (resumeId: string, versionId: string, token: string) => {
     try {
       await httpClient.api.delete(
-        `/api/resumes/${resumeId}/versions/${versionId}`, 
+        API_ROUTES.resumes.versionById(resumeId, versionId),
         withAuth(token)
       );
     } catch (error) {
@@ -181,8 +182,8 @@ export const resumeApi = {
     try {
       // Sharing is updated through the main PATCH endpoint
       const response = await httpClient.api.patch(
-        `/api/resumes/${resumeId}`, 
-        payload, 
+        API_ROUTES.resumes.byId(resumeId),
+        payload,
         withAuth(token)
       );
       return response.data.data;
@@ -197,7 +198,7 @@ export const resumeApi = {
    */
   fetchSharedResume: async (shareId: string) => {
     try {
-      const response = await httpClient.api.get(`/api/resumes/shared/${shareId}`);
+      const response = await httpClient.api.get(API_ROUTES.resumes.shared(shareId));
       return response.data.data;
     } catch (error) {
       console.error(`Failed to fetch shared resume ${shareId}:`, error);
@@ -212,8 +213,8 @@ export const resumeApi = {
     try {
       const config = token ? withAuth(token) : {};
       const response = await httpClient.api.post(
-        `/api/resumes/shared/${shareId}/comments`, 
-        payload, 
+        API_ROUTES.resumes.sharedComments(shareId),
+        payload,
         config
       );
       return response.data.data;
@@ -230,8 +231,8 @@ export const resumeApi = {
     try {
       const config = token ? withAuth(token) : {};
       const response = await httpClient.api.post(
-        `/api/resumes/shared/${shareId}/comments/${commentId}/replies`, 
-        payload, 
+        API_ROUTES.resumes.sharedReplies(shareId, commentId),
+        payload,
         config
       );
       return response.data.data;
@@ -247,7 +248,7 @@ export const resumeApi = {
   deleteComment: async (shareId: string, commentId: string, token: string) => {
     try {
       await httpClient.api.delete(
-        `/api/resumes/shared/${shareId}/comments/${commentId}`, 
+        API_ROUTES.resumes.sharedComment(shareId, commentId),
         withAuth(token)
       );
     } catch (error) {
@@ -262,7 +263,7 @@ export const resumeApi = {
   deleteReply: async (shareId: string, commentId: string, replyId: string, token: string) => {
     try {
       await httpClient.api.delete(
-        `/api/resumes/shared/${shareId}/comments/${commentId}/replies/${replyId}`, 
+        API_ROUTES.resumes.sharedReply(shareId, commentId, replyId),
         withAuth(token)
       );
     } catch (error) {

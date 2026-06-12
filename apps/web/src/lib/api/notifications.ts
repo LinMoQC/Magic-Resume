@@ -1,4 +1,5 @@
 import { httpClient, withAuth } from './httpClient';
+import { API_ROUTES } from './routes';
 
 export interface Notification {
   id: string;
@@ -29,7 +30,7 @@ export const notificationsApi = {
    */
   fetchAll: async (token: string): Promise<Notification[]> => {
     try {
-      const response = await httpClient.api.get('/api/notifications', withAuth(token));
+      const response = await httpClient.api.get(API_ROUTES.notifications.list, withAuth(token));
       return response.data.data;
     } catch (error) {
       console.error('Failed to fetch notifications:', error);
@@ -43,8 +44,8 @@ export const notificationsApi = {
   markAsRead: async (id: string, token: string): Promise<Notification> => {
     try {
       const response = await httpClient.api.patch(
-        `/api/notifications/${id}/read`, 
-        {}, 
+        API_ROUTES.notifications.markRead(id),
+        {},
         withAuth(token)
       );
       return response.data.data;

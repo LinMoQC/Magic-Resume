@@ -1,4 +1,5 @@
 import { httpClient } from './httpClient';
+import { AGENT_ROUTES } from './routes';
 
 export interface TranslateTextParams {
   text: string;
@@ -38,7 +39,7 @@ const parseHttpError = async (response: Response): Promise<string> => {
 
 export const translateApi = {
   translateText: async (params: TranslateTextParams): Promise<TranslateTextResponse> => {
-    const response = await httpClient.agent.post('/api/translate/text', params);
+    const response = await httpClient.agent.post(AGENT_ROUTES.translate.text, params);
     return response.data;
   },
 
@@ -47,7 +48,7 @@ export const translateApi = {
     onEvent: (event: TranslateStreamEvent) => void
   ): Promise<void> => {
     const baseURL = httpClient.agent.defaults.baseURL || 'http://localhost:8000';
-    const endpoint = `${baseURL.replace(/\/$/, '')}/api/translate/stream`;
+    const endpoint = `${baseURL.replace(/\/$/, '')}${AGENT_ROUTES.translate.stream}`;
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 300000);
