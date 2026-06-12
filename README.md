@@ -1,179 +1,121 @@
-<div align="center">
-  <a href="https://magic-resume.cn">
-    <img width="160" alt="Magic Resume Logo" src="./public/simple-logo.png">
-  </a>
+# Magic Resume
 
-  <h1>Magic Resume</h1>
+Magic Resume is an AI-assisted resume editor built with Next.js, Turborepo, shared resume schemas, reusable templates, and a local stdio MCP package for AI coding tools.
 
-  <p><strong>The next-gen AI-powered resume platform that makes hiring simple.</strong></p>
+The current open-source repository focuses on the frontend monorepo and MCP integration. Cloud resume storage, Clerk authentication, personal access tokens, and sync behavior continue to run through the existing Magic Resume Core API.
 
-**English** · [简体中文](./README.zh-CN.md) · [Official Site][official-site] · [Feedback][github-issues-link]
+## Monorepo Structure
 
-  <!-- SHIELD GROUP -->
-
-[![][vercel-shield]][vercel-link]
-[![][github-contributors-shield]][github-contributors-link]
-[![][github-forks-shield]][github-forks-link]
-[![][github-stars-shield]][github-stars-link]
-[![][github-issues-shield]][github-issues-link]
-[![][github-license-shield]][github-license-link]
-
-</div>
-
-<details>
-<summary><kbd>Table of contents</kbd></summary>
-
-#### TOC
-
-- [👋� Getting Started](#-getting-started)
-- [✨ Features](#-features)
-  - [Build: Visual Template Customization](#build-visual-template-customization)
-  - [Analyze: Lighthouse-style Reports](#analyze-lighthouse-style-reports)
-  - [Optimize: AInd intelligent JD Matching](#optimize-intelligent-jd-matching)
-  - [Privacy: Local-First Data Security](#privacy-local-first-data-security)
-- [🛳 Self Hosting](#-self-hosting)
-  - [Deploying with Vercel](#deploying-with-vercel)
-- [📦 Ecosystem](#-ecosystem)
-- [⌨️ Local Development](#️-local-development)
-- [🤝 Contributing](#-contributing)
-- [📈 Star History](#-star-history)
-
-####
-
-<br/>
-
-</details>
-
-<br/>
-
-![Banner](./public/magic-resume-preview.png)
-
-## 👋🏻 Getting Started
-
-**Magic Resume** is a modern, AI-powered resume builder designed to help job seekers craft professional, high-impact resumes with ease. Built with Next.js 15, it combines a sleek user interface with powerful AI capabilities to streamline your job search journey.
-
-## ✨ Features
-
-### Build: Visual Template Customization
-
-Create a professional resume in minutes with our intuitive visual editor.
-
-- **Real-time Preview**: See your changes instantly as you type.
-- **Flexible Templates**: Choose from professional, ATS-friendly templates.
-- **Rich Customization**: Adjust colors, fonts (22+ styles), spacing, and layouts with ease.
-
-### Analyze: Lighthouse-style Reports
-
-Get professional feedback on your resume's health.
-
-- **Overall Score**: A comprehensive rating of your resume's impact.
-- **Detailed Analysis**: Insights into keyword matching, actionability, and readability.
-- **Actionable Suggestions**: Specific advice to make your resume stand out.
-
-### Optimize: Intelligent JD Matching
-
-Tailor your resume to specific job descriptions with AI.
-
-- **Smart Alignment**: AI analyzes the Job Description (JD) and suggests content optimizations.
-- **Role-based Suggestions**: Get advice tailored to specific industries and roles.
-
-### Privacy: Local-First Data Security
-
-Your data stays with you.
-
-- **Local Storage**: All resume data is stored locally in your browser by default.
-- **Optional Cloud Sync**: Securely sync your data across devices if you choose.
-- **Multi-format Export**: Export your resume to high-quality PDF or structured JSON.
-
----
-
-## 🛠 Tech Stack
-
-- **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **AI / LLM**: [LangChain](https://www.langchain.com/), [LangGraph](https://www.langchain.com/langgraph), [Google GenAI](https://ai.google.dev/), [Anthropic](https://www.anthropic.com/)
-- **Authentication**: [Clerk](https://clerk.com/)
-- **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
-- **UI Components**: [Radix UI](https://www.radix-ui.com/), [Lucide Icons](https://lucide.dev/)
-- **Animations**: [Framer Motion](https://www.framer.com/motion/), [GSAP](https://gsap.com/)
-- **State Management**: [Zustand](https://zustand-demo.pmnd.rs/)
-- **Database / Storage**: [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) (Local-first)
-- **Rich Text Editor**: [Tiptap](https://tiptap.dev/), [Monaco Editor](https://microsoft.github.io/monaco-editor/)
-- **Internationalization**: [i18next](https://www.i18next.com/)
-- **Analytics**: [PostHog](https://posthog.com/)
-
----
-
-## 🛳 Self Hosting
-
-Deploy your own instance of Magic Resume in minutes.
-
-### Deploying with Vercel
-
-Click the button below to deploy to Vercel:
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FLinMoQC%2FMagic-Resume)
-
-> [!TIP]
->
-> Remember to configure your `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` in the Vercel dashboard.
-
----
-
-## 📦 Ecosystem
-
-- **Magic Resume Core**: The primary resume builder and AI engine.
-- **i18n Scanner**: A custom tool to ensure full localization coverage.
-
----
-
-## ⌨️ Local Development
-
-Clone the repository and start the development server:
-
-```bash
-$ git clone https://github.com/LinMoQC/Magic-Resume.git
-$ cd Magic-Resume
-$ npm install
-$ npm run dev
+```text
+Magic-Resume/
+├── apps/
+│   └── web/                  # Next.js app and resume editor
+├── packages/
+│   ├── mcp/                  # @magic-resume/mcp CLI and stdio MCP server
+│   ├── resume-schema/        # shared Zod schema, sample resume, JSON schema
+│   ├── resume-templates/     # template DSL, renderer, registry, manifests
+│   └── tsconfig/             # shared TypeScript configs
+├── docs/                     # architecture and contributor docs
+├── turbo.json
+├── pnpm-workspace.yaml
+└── package.json
 ```
 
-For more details, check our [Development Guide](./docs/development.md) (coming soon).
+## Local Development
 
----
+Use pnpm from the repository root:
 
-## 🤝 Contributing
+```bash
+pnpm install
+pnpm run dev
+```
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Run a single workspace when needed:
 
-<a href="https://github.com/LinMoQC/Magic-Resume/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=LinMoQC/Magic-Resume" alt="contributors" />
-</a>
+```bash
+pnpm --filter @magic-resume/web dev
+pnpm --filter @magic-resume/mcp build
+pnpm --filter @magic-resume/resume-schema test
+pnpm --filter @magic-resume/resume-templates build
+```
 
----
+Root scripts are Turborepo orchestrators:
 
-## 📈 Star History
+```bash
+pnpm run dev
+pnpm run build
+pnpm run lint
+pnpm run test
+```
 
-[![Star History Chart](https://api.star-history.com/svg?repos=LinMoQC/Magic-Resume&type=Date)](https://star-history.com/#LinMoQC/Magic-Resume&Date)
+## Core API Dependency
 
----
+The web app still expects the existing Magic Resume Core API for cloud features, Clerk-authenticated routes, PAT creation, and resume sync. Configure environment variables from `.env.example`.
 
-Copyright © 2026 [Magic Resume Team](https://github.com/LinMoQC). <br />
-This project is [MIT](./LICENSE) licensed.
+Important values:
 
-<!-- LINK GROUP -->
+- `NEXT_PUBLIC_CLOUD_API_URL`: browser-facing Core API URL.
+- `BACKEND_URL`: server-side Core API URL.
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`: Clerk browser key.
+- `CLERK_SECRET_KEY`: Clerk server key.
+- `NEXT_PUBLIC_IF_USE_BACKEND`: preserves the current backend API routing behavior.
 
-[official-site]: https://magic-resume.cn
-[github-issues-link]: https://github.com/LinMoQC/Magic-Resume/issues
-[vercel-shield]: https://img.shields.io/badge/vercel-online-55b467?labelColor=black&logo=vercel&style=flat-square
-[vercel-link]: https://magic-resume.cn
-[github-contributors-shield]: https://img.shields.io/github/contributors/LinMoQC/Magic-Resume?color=c4f042&labelColor=black&style=flat-square
-[github-contributors-link]: https://github.com/LinMoQC/Magic-Resume/graphs/contributors
-[github-forks-shield]: https://img.shields.io/github/forks/LinMoQC/Magic-Resume?color=8ae8ff&labelColor=black&style=flat-square
-[github-forks-link]: https://github.com/LinMoQC/Magic-Resume/network/members
-[github-stars-shield]: https://img.shields.io/github/stars/LinMoQC/Magic-Resume?color=ffcb47&labelColor=black&style=flat-square
-[github-stars-link]: https://github.com/LinMoQC/Magic-Resume/stargazers
-[github-issues-shield]: https://img.shields.io/github/issues/LinMoQC/Magic-Resume?color=ff80eb&labelColor=black&style=flat-square
-[github-license-shield]: https://img.shields.io/badge/license-MIT-white?labelColor=black&style=flat-square
-[github-license-link]: https://github.com/LinMoQC/Magic-Resume/blob/master/LICENSE
-[image-star]: https://github.com/user-attachments/assets/3216e25b-186f-4a54-9cb4-2f124aec0471
+This round does not introduce a local/cloud deployment switch.
+
+## MCP Usage
+
+`@magic-resume/mcp` runs as a local stdio MCP server. It does not open an independent production server port.
+
+Configure it with a Magic Resume personal access token:
+
+```bash
+npx -y @magic-resume/mcp config set --api-url "https://your-core.example.com/api" --pat "mr_pat_xxx"
+claude mcp add magic-resume -- npx -y @magic-resume/mcp mcp
+```
+
+The MCP exposes agent-ready tools for safe resume editing:
+
+- `list_resumes`
+- `get_resume`
+- `get_resume_schema`
+- `get_resume_editing_guide`
+- `preview_resume_patch`
+- `update_resume_content`
+
+It also exposes resources and prompts so AI tools know how to edit resumes without guessing the JSON shape. See [docs/mcp.md](./docs/mcp.md).
+
+## Template System
+
+Templates live in `packages/resume-templates` and are registered through a single `templateRegistry`. The web app and API route derive template lists from that registry.
+
+Preview assets follow this convention:
+
+```text
+apps/web/public/templates/jpg/{templateId}.jpg
+```
+
+See [docs/template-system.md](./docs/template-system.md) for the template contribution flow.
+
+## Schema
+
+`packages/resume-schema` is the shared source of truth for resume content. It exports:
+
+- `resumeSchema`
+- `templateSchema`
+- `templateIds`
+- `defaultResume`
+- `sampleResume`
+- generated `dist/schema.json`
+
+See [docs/schema.md](./docs/schema.md).
+
+## Architecture Docs
+
+- [Monorepo & MCP Architecture](./docs/monorepo-mcp-architecture.md)
+- [Template System](./docs/template-system.md)
+- [MCP](./docs/mcp.md)
+- [Schema](./docs/schema.md)
+
+## License
+
+MIT

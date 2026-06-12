@@ -1,0 +1,1262 @@
+{
+  "notificationsPage": {
+    "title": "通知中心",
+    "unread": "{{count}} 条未读",
+    "empty": {
+      "title": "暂无通知",
+      "description": "当有人评论或回复您的简历时，通知将显示在这里。"
+    },
+    "type": {
+      "comment": "评论了",
+      "reply": "回复了"
+    },
+    "action": {
+      "view": "查看详情",
+      "markRead": "标记为已读"
+    },
+    "someone": "某人"
+  },
+  "settings": {
+    "title": "设置",
+    "llm": {
+      "title": "OpenAI/Ollama 集成",
+      "description1": "您可以利用 OpenAI API 来帮助您生成内容，或在撰写简历时改进您的写作。",
+      "description2": "您可以选择<1>获取您自己的 OpenAI API 密钥</1>。此密钥使您能够根据需要利用 API。或者，如果您希望完全禁用 Reactive Resume 中的 AI 功能，您可以从设置中删除该密钥。",
+      "description3": "您还可以通过将 API 密钥设置为 `sk-1234567890abcdef` 并将 Base URL 设置为您的 Ollama URL（即 `http://localhost:11434/v1`）来与 Ollama 集成。您还可以根据自己的喜好选择模型并设置最大令牌数。",
+      "apiKeyLabel": "OpenAI/Ollama API 密钥",
+      "baseUrlLabel": "基础 URL",
+      "modelLabel": "模型",
+      "maxTokensLabel": "最大令牌数",
+      "modelPlaceholder": "选择一个模型"
+    },
+    "cloudSync": {
+      "title": "云端同步",
+      "description": "在不同设备间同步您的简历数据。您的数据将安全地存储在云端。",
+      "toggleLabel": "启用云端同步",
+      "disclaimer": {
+        "title": "云端同步免责声明",
+        "description": "在开启云端同步前，请阅读并同意以下条款：",
+        "content": "开启云端同步后，您的简历数据（包括个人信息、工作经历等）将被上传到我们的服务器。这将允许您在任何设备上访问您的简历。我们使用行业标准加密技术保护您的数据。但请知悉，这意味着您的数据将不再仅存储在您的本地设备上。",
+        "agree": "我已阅读并同意",
+        "cancel": "取消"
+      }
+    },
+    "mcp": {
+      "title": "MCP 接入",
+      "accessTitle": "AI 编程工具接入",
+      "description": "创建个人访问令牌，把 Magic Resume 连接到 Claude Code、Codex 或其他兼容 MCP 的 AI 工具。完整令牌只显示一次。",
+      "refresh": "刷新",
+      "tokenNamePlaceholder": "令牌名称",
+      "defaultResumePlaceholder": "默认简历",
+      "enable": "开启 MCP",
+      "tokenCreatedTitle": "个人访问令牌已创建",
+      "tokenCreatedDescription": "请现在复制此令牌。出于安全考虑，Magic Resume 不会再次显示完整令牌。",
+      "copyToken": "复制令牌",
+      "commandTitle": "MCP 接入命令",
+      "copyCommand": "复制命令",
+      "commandEmpty": "创建令牌后会生成 Claude Code / Codex 接入命令。",
+      "activeTokens": "个人访问令牌",
+      "emptyTokens": "暂无 MCP 令牌。",
+      "active": "启用中",
+      "revoked": "已撤销",
+      "neverUsed": "从未使用",
+      "lastUsed": "上次使用 {{date}}",
+      "revoke": "撤销令牌",
+      "notifications": {
+        "loadFailed": "加载 MCP 接入信息失败。",
+        "created": "MCP 已开启。",
+        "createFailed": "创建 MCP 令牌失败。",
+        "revoked": "MCP 令牌已撤销。",
+        "revokeFailed": "撤销 MCP 令牌失败。",
+        "copied": "已复制。",
+        "signInRequired": "请先登录再开启 MCP 接入。"
+      }
+    },
+    "notifications": {
+      "unsavedChanges": "未保存的更改",
+      "settingsSaved": "设置已保存！",
+      "changesReset": "更改已重置。"
+    },
+    "buttons": {
+      "reset": "重置",
+      "save": "保存"
+    },
+    "goToApp": "进入应用",
+    "starOnGithub": "在 GitHub 上点赞"
+  },
+  "landing": {
+    "nav": {
+      "goToApp": "进入应用",
+      "starOnGithub": "在 GitHub 上点赞"
+    },
+    "tags": {
+      "aiSmart": "AI 智能",
+      "freeForever": "完全免费",
+      "dataSecurity": "数据安全",
+      "aiEnhancement": "AI 智能加持",
+      "dataSecurityGuarantee": "隐私数据安全保证"
+    },
+    "buttons": {
+      "learnMore": "了解更多",
+      "experienceAI": "体验 AI 加持",
+      "experienceNow": "立即体验",
+      "starOnGithub": "在 GitHub 上点赞"
+    },
+    "hero": {
+      "brandName": "Magic Resume",
+      "title": "Magic Resume 是一款为您提供 AI 加持的简历构建工具",
+      "subtitle": "用 AI 的力量打造完美的简历。简单、智能、安全。",
+      "previewAlt": "Magic Resume 预览",
+      "getStarted": "开始使用",
+      "browseTemplates": "浏览模板",
+      "tag": "Magic Resume V1.0",
+      "texts": [
+        "AI 驱动的简历优化与建议",
+        "专业精美的模板，即开即用",
+        "100% 免费开源，注重隐私，数据本地存储",
+        "一键导出 PDF，ATS 友好"
+      ],
+      "featureTags": {
+        "ai": "AI 驱动",
+        "local": "隐私优先",
+        "openSource": "开源项目"
+      },
+      "macbookSubtitle": "AI 驱动的简历生成器",
+      "badge": "由 AI 驱动的求职神器",
+      "primaryButton": "立即开始免费体验",
+      "secondaryButton": "在 GitHub 上关注我们"
+    },
+    "morphingTexts": {
+      "simpleAndSmart": "简单 & 智能",
+      "aiPowered": "AI 驱动",
+      "beautifulTemplates": "精美模板",
+      "freeAndSecure": "免费 & 安全",
+      "modernResume": "现代简历",
+      "getStarted": "立即开始",
+      "standOut": "脱颖而出"
+    },
+    "features": {
+      "main": {
+        "title": "为什么选择 Magic Resume？",
+        "subtitle": "我们提供一站式简历解决方案，让您的求职之旅更顺畅"
+      },
+      "ai": {
+        "tag": {
+          "name": "AI",
+          "description": "智能润色"
+        },
+        "title": "智能检测，专业建议",
+        "description": "内置智能语法检查，自动识别不当表述，提供专业修改建议，让您的简历更出色。",
+        "benefit1": "智能增强",
+        "benefit2": "语法检查",
+        "alt": "AI 增强预览"
+      },
+      "export": {
+        "tag": "导出多种格式",
+        "description": "支持多种格式导出，方便分享和备份。",
+        "alt": "导出格式示例"
+      },
+      "privacy": {
+        "tag": {
+          "name": "安全",
+          "description": "数据安全，隐私至上"
+        },
+        "description": "所有简历数据完全本地存储，无需担心隐私泄露。支持数据导出备份，确保您的简历数据永远可用。",
+        "benefit1": "本地文件存储",
+        "benefit2": "多种导出格式"
+      },
+      "preview": {
+        "title": "实时预览",
+        "description": "在您输入时实时查看更改效果。不再需要猜测最终简历的外观。"
+      },
+      "dnd": {
+        "title": "拖拽界面",
+        "description": "通过直观的拖拽界面轻松重新排序章节，突出您的优势。"
+      }
+    },
+    "contact": {
+      "title": "联系我们",
+      "subtitle": "有任何问题或反馈吗？我们很乐意倾听您的声音。请联系我们，我们会尽快给您回复。",
+      "button": "发送消息",
+      "form": {
+        "name": {
+          "label": "姓名",
+          "placeholder": "您的真实姓名"
+        },
+        "email": {
+          "label": "邮箱",
+          "placeholder": "您的电子邮箱地址"
+        },
+        "content": {
+          "label": "留言内容",
+          "placeholder": "请输入您想对我们说的话..."
+        }
+      }
+    },
+    "footer": {
+      "brandSubtitle": "下一代 AI 简历平台，让招聘变得简单。",
+      "product": "产品",
+      "builder": "在线制作",
+      "project": "项目",
+      "github": "GitHub",
+      "issues": "问题反馈",
+      "contributors": "贡献者",
+      "copyright": "© {{year}} Magic Resume. 保留所有权利。"
+    }
+  },
+  "modals": {
+    "dynamicForm": {
+      "editTitle": "编辑项目",
+      "addTitle": "添加新项目",
+      "descriptionLabel": "描述",
+      "cancelButton": "取消",
+      "saveButton": "保存"
+    },
+    "aiModal": {
+      "tabs": {
+        "create": "引导创建",
+        "optimize": "智能优化",
+        "analyze": "简历分析",
+        "translate": "一键翻译",
+        "interview": "模拟面试"
+      },
+      "title": "AI 实验室",
+      "subtitle": "分析和优化您的简历以匹配目标工作要求，或通过 lighthouse 风格报告获取专业建议。",
+      "description": "分析和优化您的简历以匹配目标工作要求，或获取专业的Lighthouse式分析报告。",
+      "optimizeTab": {
+        "jdLabel": "目标职位描述 (JD)",
+        "jdPlaceholder": "在此粘贴目标职位的 JD，AI 将根据其对简历进行针对性优化...",
+        "outputTitle": "优化结果",
+        "emptyState": "在此粘贴职位描述并点击开始优化，AI 将为您生成针对性的简历优化建议。",
+        "optimizedCount": "优化完成，共处理 {{count}} 个章节",
+        "resultsReady": "优化结果已准备就绪",
+        "applyHint": "点击应用将更新您的简历",
+        "optimizeButton": "开始 AI 优化",
+        "optimizingButton": "优化中...",
+        "previewButton": "预览",
+      "diffButton": "前后对比",
+        "companyNameLabel": "公司名称 *",
+        "companyNamePlaceholder": "例如: Google, 阿里巴巴",
+        "jobTitleLabel": "岗位名称 *",
+        "jobTitlePlaceholder": "例如: 高级前端工程师, Senior Software Engineer",
+        "rawJsonButton": "查看原始 JSON",
+        "applyChangesButton": "应用更改",
+        "revertChangesButton": "还原更改",
+        "jsonButton": "JSON",
+        "nodeInspector": {
+          "unknown_agent": "未知智能体",
+          "agent_status": "智能体状态",
+          "idle": "空闲",
+          "execution_log": "执行日志",
+          "no_logs": "暂无日志...",
+          "payload_data": "负载数据",
+          "realtime_link": "实时链路",
+          "active": "活跃",
+          "nodes": "节点数"
+        },
+        "neuralEngine": {
+          "title": "神经网络引擎",
+          "subtitle": "多智能体协同 • 实时优化中",
+          "minimize": "最小化",
+          "progress": {
+              "title": "智能优化进行中",
+              "description": "AI 智能体正在后台重构您的简历内容。",
+              "showButton": "显示"
+          },
+          "processing": "实时处理流",
+          "stats": {
+            "coreStatus": "核心状态",
+            "agentCount": "智能体活跃数",
+            "activeChannels": "活跃通道"
+          },
+          "console": {
+            "initiating": "> 正在解构任务逻辑...",
+            "analyzing": "> 智能体 {{id}} 正在分析数据...",
+            "system": "系统:",
+            "validating": "运行语义验证中...",
+            "success": "> 操作成功。数据已缓冲。",
+            "waiting": "> 等待触发信号...",
+            "standby": "待机",
+            "process_locus": "进程::思维核心",
+            "execution_time": "执行时间",
+            "status_ok": "正常",
+            "status_active": "活跃"
+          },
+          "nodeInspector": {
+            "unknown_agent": "未知智能体",
+            "agent_status": "智能体状态",
+            "idle": "空闲",
+            "execution_log": "执行日志",
+            "no_logs": "暂无日志...",
+            "payload_data": "负载数据",
+            "realtime_link": "实时链路",
+            "active": "活跃",
+            "nodes": "节点数"
+          }
+        },
+        "steps": {
+          "preparer": {
+            "title": "输入预处理器",
+            "personality": "输入预处理器",
+            "in_progress": "正在准备您的简历和职位描述...",
+            "completed": "输入数据已就绪。"
+          },
+          "parallel_analyzer": {
+            "title": "并行分析",
+            "in_progress": "正在从多个维度分析您的简历...",
+            "completed": "所有分析已完成！"
+          },
+          "analysis_parent": {
+            "in_progress": "正在从多个维度分析您的简历...",
+            "completed": "所有分析已完成！"
+          },
+          "combiner": {
+            "title": "合并分析报告",
+            "personality": "合并器",
+            "in_progress": "正在生成综合分析报告...",
+            "completed": "分析报告已生成。"
+          },
+          "jd_analyzer": {
+            "title": "岗位特征提取器",
+            "personality": "岗位特征提取器",
+            "in_progress": "正在分析职位描述...",
+            "completed": "职位描述分析完成。"
+          },
+          "resume_analyzer": {
+            "title": "简历特征提取器",
+            "personality": "简历特征提取器",
+            "in_progress": "正在全方位评估简历优势与不足...",
+            "completed": "简历评估完成。"
+          },
+          "resume_web_search": {
+            "title": "简历市场检索",
+            "personality": "简历市场检索",
+            "in_progress": "正在调研同类候选人市场情况...",
+            "completed": "市场调研完成。"
+          },
+          "jd_web_search": {
+            "title": "岗位市场检索",
+            "personality": "岗位市场检索",
+            "in_progress": "正在分析该职位的市场招聘趋势...",
+            "completed": "趋势分析完成。"
+          },
+          "company_interview_search": {
+            "title": "面试情报采集器",
+            "personality": "面试情报采集器",
+            "in_progress": "正在搜集公司面试题与内部情报...",
+            "completed": "情报搜集完成。"
+          },
+          "research_combiner": {
+            "title": "多源聚合器",
+            "personality": "多源聚合器",
+            "in_progress": "正在综合所有研究情报...",
+            "completed": "战略制定完成。"
+          },
+          "strategic_analyzer": {
+            "title": "优化策略引擎",
+            "personality": "优化策略引擎",
+            "in_progress": "正在对比简历与职位的战略差距...",
+            "completed": "差异分析完成。"
+          },
+          "prepare_research": {
+            "title": "准备研究",
+            "personality": "研究规划师",
+            "in_progress": "正在根据职位描述准备网络研究...",
+            "completed": "研究计划已就绪。"
+          },
+          "query_writer": {
+            "title": "生成搜索查询",
+            "personality": "查询生成",
+            "in_progress": "正在生成智能搜索查询...",
+            "completed": "搜索查询已生成。"
+          },
+          "web_searcher": {
+            "title": "执行网络研究",
+            "personality": "深度爬虫",
+            "in_progress": "正在网络上搜索关键信息...",
+            "completed": "网络研究完成。"
+          },
+          "reflection": {
+            "title": "反思搜索结果",
+            "personality": "批评与修正",
+            "in_progress": "正在分析搜索结果并识别信息差距...",
+            "completed": "反思完成，规划下一步。"
+          },
+          "final_answer": {
+            "title": "综合研究发现",
+            "personality": "最终输出",
+            "in_progress": "正在将研究发现整合成摘要...",
+            "completed": "研究摘要完成。"
+          },
+          "rewriter": {
+            "title": "简历改写与增强",
+            "in_progress": "正在根据分析报告重写简历...",
+            "completed": "简历已成功优化！"
+          },
+          "prepare_rewriter": {
+            "title": "准备重写任务",
+            "personality": "策略规划师",
+            "in_progress": "正在准备按章节重写...",
+            "completed": "已切换到分步优化模式。"
+          },
+          "rewrite_section": {
+            "title": "分段重写器",
+            "personality": "分段重写器",
+            "in_progress": "正在优化中...",
+            "completed": "所有章节均已优化！"
+          },
+          "rewrite_sections_parent": {
+            "title": "优化编排器",
+            "personality": "智能编排",
+            "in_progress": "正在编排各个章节的并行优化...",
+            "completed": "所有章节并行优化完成。"
+          },
+          "route_next_rewrite": {
+            "title": "重写规划器",
+            "personality": "任务路由",
+            "in_progress": "正在规划下一个优化章节...",
+            "completed": "规划完成。"
+          },
+          "combine_sections": {
+            "title": "内容组装器",
+            "personality": "内容组装器",
+            "in_progress": "正在将优化后的章节重新组装...",
+            "completed": "简历组装完成。"
+          },
+          "rewriting_section": {
+            "in_progress": "正在优化 {{section}}...",
+            "completed": "{{section}} 已优化完毕。"
+          },
+          "analyzing_category": {
+            "in_progress": "正在分析 {{category}}...",
+            "completed": "{{category}} 分析完毕。"
+          },
+          "company_analysis": {
+            "title": "公司知识图谱",
+            "personality": "公司知识图谱",
+            "in_progress": "正在分析目标公司的文化和技术栈...",
+            "completed": "公司背景调查完成。"
+          },
+          "adversarial_critique": {
+            "title": "对抗评估器",
+            "personality": "对抗评估器",
+            "in_progress": "AI 招聘官正在评估您的简历...",
+            "completed": "招聘官评估完成。"
+          },
+          "microEvents": {
+            "thinking": "正在构思优化策略...",
+            "searching": "正在执行深度搜索: {{tool}}...",
+            "tool_complete": "搜索完成，正在整理数据..."
+          }
+        },
+        "optimizationProgress": {
+          "analyzingJD": "正在分析职位描述...",
+          "optimizing": "正在为您优化简历，请稍候...",
+          "preparing": "正在准备优化 {{count}} 个项目...",
+          "optimizingItem": "已优化 {{sectionKey}} 第 {{completed}} 项，共 {{total}} 项...",
+          "done": "完成！"
+        }
+      },
+      "analysisTab": {
+        "title": "简历健康分析",
+        "analyzeButton": "分析简历",
+        "analyzingButton": "分析中...",
+        "viewReportButton": "查看报告",
+        "reAnalyzeButton": "重新分析",
+        "analysisProgress": {
+          "start": "正在启动分析引擎...",
+          "impact": "正在评估简历的'影响力与行动'...",
+          "quantification": "正在检查'可量化成就'的使用情况...",
+          "clarity": "正在分析'清晰度与可读性'...",
+          "completeness": "正在审查'完整性与结构'...",
+          "summary": "正在评估'专业摘要'的质量...",
+          "finalizing": "正在编译分数并生成报告...",
+          "done": "分析完成！"
+        },
+        "multiSteps": {
+          "peer": "Peer Developer 正在检查代码质量...",
+          "lead": "Tech Lead 正在评估架构影响力...",
+          "hrbp": "HRBP 正在评估软技能和一致性...",
+          "finalizing": "正在整理最终的面试官综合分析报告..."
+        },
+        "placeholder": {
+          "title": "获取专业分析",
+          "description": "我们的 AI 将对您的简历进行详细分析，提供关于影响力、清晰度和关键词优化等方面的分数和可操作反馈。"
+        }
+      },
+      "createTab": {
+        "chatTitle": "AI 助手",
+        "previewTitle": "简历实时预览",
+        "inputPlaceholder": "请描述您的技能或经历...",
+        "initialMessage": "你好！我是 ResuMate，你的个人简历构建助手。首先，请告诉我你的目标工作或行业是什么？",
+        "applyButton": "应用并保存简历",
+        "defaultReply": "抱歉，我现在遇到一点麻烦。你能换个说法吗？",
+        "errorReply": "我似乎遇到了一个问题。请尝试重新发送您的消息。",
+        "retryNotification": "请求失败，正在重试...",
+        "retryFailed": "多次重试后请求失败，请稍后再试。"
+      },
+      "translateTab": {
+        "inputTitle": "翻译配置",
+        "inputDescription": "请选择目标语言，并可选填写自定义提示词。",
+        "resumeSourceHint": "将直接使用当前简历内容进行翻译。",
+        "targetLanguage": {
+          "label": "目标语言",
+          "placeholder": "请选择目标语言",
+          "options": {
+            "zh": "中文",
+            "en": "英文 (English)",
+            "ja": "日语 (日本語)",
+            "ko": "韩语 (한국어)",
+            "fr": "法语 (Français)",
+            "de": "德语 (Deutsch)",
+            "es": "西班牙语 (Español)",
+            "pt": "葡萄牙语 (Português)",
+            "it": "意大利语 (Italiano)",
+            "ru": "俄语 (Русский)",
+            "ar": "阿拉伯语 (العربية)",
+            "hi": "印地语 (हिन्दी)"
+          }
+        },
+        "customPrompt": {
+          "label": "自定义提示词（可选）",
+          "placeholder": "例如：更口语化 / 保留术语 / 强调量化成果..."
+        },
+        "translateButton": "一键翻译",
+        "translateButtonLoading": "翻译中...",
+        "outputTitle": "翻译结果",
+        "outputDescription": "右侧展示生成的简历 JSON，并支持预览渲染。",
+        "translatedTextPlaceholder": "翻译文本将显示在这里...",
+        "emptyJsonState": "翻译完成后会在这里显示生成的 JSON。",
+        "invalidPreviewData": "当前 JSON 结构不足以渲染简历预览。",
+        "viewModes": {
+          "json": "JSON",
+          "preview": "预览"
+        },
+        "applyButton": "应用翻译结果",
+        "loading": {
+          "translating": "正在翻译中，请稍候...",
+          "generatingJson": "翻译完成，正在生成简历 JSON..."
+        },
+        "copyButton": "复制",
+        "notifications": {
+          "success": "翻译完成",
+          "failed": "翻译失败: {{message}}",
+          "targetLanguageRequired": "请先选择目标语言。",
+          "noResultToApply": "暂无可应用的翻译结果。",
+          "applySuccess": "已应用翻译后的简历。"
+        }
+      },
+      "notifications": {
+        "apiKeyMissing": "未找到 API 密钥。请在设置页面中设置。",
+        "jdMissing": "请提供职位描述。",
+        "optimizationComplete": "AI 优化完成！",
+        "optimizationFailed": "优化失败：{{error}}",
+        "analysisComplete": "分析报告已生成！",
+        "analysisFailed": "分析失败：{{error}}",
+        "unknownError": "发生未知错误。",
+        "creationFailed": "简历创建失败：{{error}}"
+      },
+      "optimizePlaceholder": {
+        "title": "准备好提升您的简历了吗？",
+        "description": "粘贴职位描述并点击\"开始优化\"，让 AI 为您的梦想工作量身定制简历。"
+      },
+      "interviewTab": {
+        "back": "返回",
+        "exit": "退出面试",
+        "config": {
+          "voiceStep": {
+            "title": "声音与节奏",
+            "description": "配置面试官的语音风格和思考时间"
+          },
+          "avatarStep": {
+            "title": "面试官形象",
+            "description": "选择一位让您感到舒适的面试官"
+          },
+          "thinkingTime": {
+            "label": "思考时间",
+            "instant": "即时",
+            "prepare": "准备"
+          },
+          "voice": {
+            "label": "面试官声音"
+          },
+          "nextStep": "下一步",
+          "startInterview": "开始面试"
+        },
+        "controls": {
+          "consoleTitle": "终端控制台",
+          "stopRecording": "停止录音",
+          "startRecording": "开始录音",
+          "clickToSpeak": "点击说话",
+          "console": "实时控制台"
+        },
+        "status": {
+          "waitingConnection": "正在等待连接...",
+          "connecting": "正在连接面试官...",
+          "readingResume": "正在阅读您的简历...",
+          "isListening": "AI 面试官正在聆听...",
+          "isSpeaking": "AI 正在回答...",
+          "thinking": "正在组织语言 / 生成语音...",
+          "preAnswer": "思考时间",
+          "answerHint": "点击麦克风提前回答"
+        },
+        "voices": {
+          "shimmer": "原生 (Native) - Shimmer (快)",
+          "paimon": "派蒙 (Paimon - 原神)",
+          "furina": "芙宁娜 (Furina - 原神)",
+          "yaemiko": "八重神子 (Yae Miko - 原神)",
+          "kokomi": "珊瑚宫心海 (Kokomi - 原神)"
+        },
+        "roles": {
+          "title": "选择你的面试官",
+          "frontend": {
+            "name": "前端专家",
+            "description": "专注于 React, Vue, CSS 和前端工程化"
+          },
+          "backend": {
+            "name": "后端架构师",
+            "description": "专注于系统设计, 数据库, API 和微服务"
+          },
+          "fullstack": {
+            "name": "全栈负责人",
+            "description": "关注端到端交付、系统集成和业务理解"
+          },
+          "hr": {
+            "name": "HRBP",
+            "description": "关注软技能、职业规划和文化匹配"
+          }
+        }
+      },
+      "progressText": "AI 正在努力进行分析和创作..."
+    },
+    "share": {
+      "title": "发布在线简历",
+      "subtitle": "生成专属链接，让您的简历在线可访问。",
+      "publicAccess": "公开访问",
+      "publicAccessDesc": "任何拥有链接的人都可以查看",
+      "privateAccessDesc": "仅自己可见",
+      "syncing": "正在同步到云端...",
+      "readOnly": "只读",
+      "allowComments": "允许评论",
+      "copySuccess": "链接已复制到剪贴板！",
+      "pleaseLogin": "请先登录"
+    },
+    "versionHistory": {
+      "title": "版本记录",
+      "subtitle": "恢复您简历之前的版本",
+      "restore": "恢复",
+      "loading": "加载中..."
+    }
+  },
+  "sharedPage": {
+    "header": {
+      "createResume": "创建我的简历",
+      "create": "创建"
+    },
+    "titleSuffix": "的简历",
+    "toolbar": {
+      "zoomOut": "缩小",
+      "resetZoom": "重置",
+      "zoomIn": "放大",
+      "feedbackList": "评论列表",
+      "returnToView": "返回预览",
+      "commentMode": "评论模式"
+    },
+    "templates": {
+      "title": "模板",
+      "error": "获取模板失败",
+      "retry": "重试",
+      "none": "暂无可用的模板"
+    },
+    "comments": {
+      "title": "评论",
+      "noComments": "暂无评论",
+      "markersHint": "点击画布任意位置添加评论",
+      "anonymous": "匿名用户",
+      "owner": "发布者",
+      "justNow": "刚刚",
+      "replyPlaceholder": "回复...",
+      "writeCommentPlaceholder": "写下你的评论...",
+      "cancel": "取消",
+      "post": "发布"
+    },
+    "error": {
+      "resumeNotFound": "无法找到简历或访问被拒绝",
+      "redirectingPre": "",
+      "redirectingPost": " 秒后返回首页...",
+      "returnNow": "立即返回",
+      "failedToLoad": "加载简历失败，请检查网络或链接。"
+    },
+    "notifications": {
+      "resumeNotFound": "此简历不存在或尚未公开。",
+      "syncing": "简历正在同步到云端，请稍候。",
+      "loginToComment": "请登录后发表评论",
+      "commentAdded": "评论已添加",
+      "commentSaveFailed": "保存评论失败",
+      "loginToReply": "请登录后回复",
+      "replyAdded": "回复已添加",
+      "replySaveFailed": "保存回复失败",
+      "loginToDelete": "请登录后删除",
+      "commentDeleted": "评论已删除",
+      "commentDeleteFailed": "删除评论失败"
+    }
+  },
+  "resumePreview": {
+    "yourName": "你的名字"
+  },
+  "tools": {
+    "aiAssistant": "AI 助手",
+    "share": "分享",
+    "feedback": "反馈",
+    "exportPDF": "导出 PDF",
+    "zoomIn": "放大",
+    "zoomOut": "缩小",
+    "resetZoom": "重置缩放",
+    "bugReport": "反馈建议",
+    "collapse": "收起",
+    "expand": "展开"
+  },
+  "feedback": {
+    "title": "反馈",
+    "description": "帮助我们改进 Magic Resume。欢迎分享想法或反馈问题。",
+    "thankYou": "感谢反馈！",
+    "received": "我们已收到你的反馈。",
+    "label": "你的反馈",
+    "placeholder": "告诉我们你喜欢的地方或可以改进的地方...",
+    "submit": "提交反馈",
+    "close": "关闭",
+    "characters": "字符",
+    "readyToSubmit": "准备提交",
+    "typeFeedback": "请输入您的反馈",
+    "error": {
+      "tooManyRequests": "请求过于频繁。请稍后再试。",
+      "generic": "提交反馈失败。请稍后重试。"
+    }
+  },
+  "sections": {
+    "projects": "项目",
+    "education": "教育",
+    "skills": "技能",
+    "languages": "语言",
+    "certificates": "证书",
+    "experience": "经历",
+    "profiles": "个人资料",
+    "shared": {
+      "untitled": "无标题",
+      "visible": "可见",
+      "show": "显示",
+      "hide": "隐藏",
+      "edit": "编辑",
+      "copy": "复制",
+      "remove": "移除",
+      "addItem": "新增",
+      "openMenu": "打开菜单",
+      "editTitle": "编辑 {{label}}",
+      "addTitle": "添加新的 {{label}}",
+      "shown": "已显示",
+      "hidden": "已隐藏"
+    },
+    "notifications": {
+      "requiredFields": "请填写以下必填字段：{{fields}}",
+      "sectionUpdated": "{{label}} 部分已成功更新。",
+      "sectionAdded": "{{label}} 部分已成功添加。",
+      "itemRemoved": "项目已成功移除。",
+      "itemCopied": "项目已成功复制。",
+      "visibilityToggled": "项目可见性 {{status}}。"
+    }
+  },
+  "basicForm": {
+    "fields": {
+      "avatar": "头像",
+      "fullName": "名称",
+      "headline": "标题",
+      "email": "电子邮件",
+      "website": "网站",
+      "phoneNumber": "电话",
+      "address": "地点",
+      "link": "链接"
+    },
+    "customFields": {
+      "title": "自定义字段",
+      "namePlaceholder": "字段名称（例如，LinkedIn）",
+      "valuePlaceholder": "值（例如，your-linkedin-url）",
+      "addButton": "添加自定义字段"
+    },
+    "avatarAlt": "头像"
+  },
+  "header": {
+    "version": "版本管理",
+    "versionHistory": "历史版本",
+    "synced": "已同步云端",
+    "syncing": "同步中...",
+    "localOnly": "本地模式",
+    "syncError": "同步失败",
+    "lastUpdated": "最后更新于",
+    "noHistory": "暂无历史版本"
+  },
+  "mobileEdit": {
+    "jsonData": "简历 JSON 数据",
+    "copyJson": "将 JSON 复制到剪贴板"
+  },
+  "editPage": {
+    "sections": {
+      "basics": "基本信息"
+    },
+    "notifications": {
+      "jsonDownloadStarted": "JSON 文件下载已开始！"
+    },
+    "ai": {
+      "generatingSuggestion": "正在为您生成专属优化建议..."
+    },
+    "errors": {
+      "resumeNotFound": "简历未找到",
+      "resumeNotFoundDescription": "ID为 {{id}} 的简历不存在，可能已被删除或ID错误。",
+      "goBack": "返回"
+    }
+  },
+  "templatePanel": {
+    "title": "选择模板",
+    "placeholder": "模板 {{index}}",
+    "layoutTwoColumn": "双栏",
+    "layoutSingleColumn": "单栏",
+    "customize": "自定义模板",
+    "error": "加载模板失败",
+    "retry": "重试",
+    "none": "未找到模板"
+  },
+  "templateCustomizer": {
+    "title": "自定义模板",
+    "tabs": {
+      "colors": "颜色",
+      "typography": "字体",
+      "layout": "布局"
+    },
+    "colors": {
+      "quickThemes": "快速主题",
+      "customColors": "自定义颜色",
+      "primary": "主色调",
+      "secondary": "次色调",
+      "text": "文本颜色",
+      "textSecondary": "次要文本颜色",
+      "background": "背景颜色",
+      "sidebar": "侧边栏颜色"
+    },
+    "typography": {
+      "fontSettings": "字体设置",
+      "primaryFont": "主字体",
+      "secondaryFont": "次要字体",
+      "fontSize": "字体大小",
+      "titleSize": "模块标题",
+      "bodySize": "正文内容"
+    },
+    "layout": {
+      "layoutSettings": "布局设置",
+      "containerSettings": "容器设置",
+      "containerWidth": "容器宽度",
+      "padding": "内边距",
+      "gap": "模块间距",
+      "textSettings": "文本设置",
+      "lineHeight": "行高倍数",
+      "letterSpacing": "字符间距",
+      "spacingSettings": "边距设置",
+      "paragraphSpacing": "段落间距",
+      "sectionSpacing": "大段落间距",
+      "titleDivider": "标题分隔线",
+      "titleDividerDesc": "在章节标题下方显示横线",
+      "titleIcon": "标题图标",
+      "titleIconDesc": "在章节标题前显示图标"
+    },
+    "buttons": {
+      "backToTemplates": "返回模板列表"
+    }
+  },
+  "resumeContent": {
+    "viewJson": "查看 JSON",
+    "save": "保存"
+  },
+  "renameDialog": {
+    "title": "重命名简历",
+    "placeholder": "输入新的简历名称",
+    "cancel": "取消",
+    "rename": "重命名"
+  },
+  "newResumeDialog": {
+    "title": "新建简历",
+    "description": "请输入新简历的名称。",
+    "placeholder": "简历名称",
+    "cancel": "取消",
+    "create": "创建"
+  },
+  "dashboard": {
+    "title": "简历",
+    "newResumeCard": {
+      "title": "创建新简历",
+      "description": "使用模板快速创建专业简历"
+    },
+    "importResumeCard": {
+      "title": "导入现有简历",
+      "description": "支持导入 JSON 文件或 PDF 简历"
+    },
+    "resumeCard": {
+      "lastUpdated": "最后更新于 {{time}}",
+      "rename": "重命名",
+      "duplicate": "复制",
+      "delete": "删除"
+    }
+  },
+  "sidebar": {
+    "resumes": "简历",
+    "notifications": "通知中心",
+    "settings": "设置",
+    "open": "打开侧边栏",
+    "close": "关闭侧边栏"
+  },
+  "importDialog": {
+    "title": "导入简历",
+    "description": "在下方选择或拖放 JSON / PDF 文件以创建新简历。",
+    "dropzone": {
+      "active": "在此处放下文件...",
+      "default": "将文件拖放到此处，或点击选择文件",
+      "jsonOnly": "（仅限 .json 文件）"
+    },
+    "errors": {
+      "fileReadAborted": "文件读取已中止。",
+      "fileReadFailed": "文件读取失败。",
+      "invalidFormat": "无效的简历格式。",
+      "parseFailed": "解析文件失败。",
+      "unsupportedFormat": "请上传 PDF 或 JSON 文件。",
+      "noApiKey": "请先在「设置」中配置 AI 模型的 API Key，才能导入 PDF 简历。"
+    },
+    "success": "简历导入成功！",
+    "cancel": "取消",
+    "importing": "正在导入并同步...",
+    "defaultName": "导入的简历",
+    "pdf": {
+      "extracting": "正在从 PDF 中提取文本...",
+      "analyzing": "AI 正在分析您的简历...",
+      "success": "PDF 简历导入成功！",
+      "hint": "PDF 文件将通过 AI 智能解析"
+    }
+  },
+  "dynamicForm": {
+    "fields": {
+      "education": {
+        "school": {
+          "label": "学校",
+          "placeholder": "学校名称"
+        },
+        "degree": {
+          "label": "学位",
+          "placeholder": "学位"
+        },
+        "major": {
+          "label": "专业",
+          "placeholder": "专业"
+        },
+        "date": {
+          "label": "日期或日期范围",
+          "placeholder": "2019-2023"
+        },
+        "location": {
+          "label": "地点",
+          "placeholder": "城市"
+        }
+      },
+      "experience": {
+        "company": {
+          "label": "公司",
+          "placeholder": "公司名称"
+        },
+        "position": {
+          "label": "职位",
+          "placeholder": "职位"
+        },
+        "date": {
+          "label": "日期或日期范围",
+          "placeholder": "2023年3月至今"
+        },
+        "location": {
+          "label": "地点",
+          "placeholder": "城市"
+        },
+        "website": {
+          "label": "网站",
+          "placeholder": "公司网址"
+        }
+      },
+      "profiles": {
+        "platform": {
+          "label": "平台",
+          "placeholder": "如 领英, GitHub"
+        },
+        "url": {
+          "label": "网址",
+          "placeholder": "链接地址"
+        }
+      },
+      "skills": {
+        "name": {
+          "label": "技能名称",
+          "placeholder": "技能名称"
+        },
+        "level": {
+          "label": "熟练度",
+          "placeholder": "如 精通, 熟练, 初级"
+        }
+      },
+      "projects": {
+        "name": {
+          "label": "项目名称",
+          "placeholder": "项目名称"
+        },
+        "role": {
+          "label": "角色",
+          "placeholder": "担任角色"
+        },
+        "date": {
+          "label": "日期或日期范围",
+          "placeholder": "2022.01-2022.12"
+        },
+        "link": {
+          "label": "链接",
+          "placeholder": "项目链接"
+        }
+      },
+      "languages": {
+        "language": {
+          "label": "语言",
+          "placeholder": "语言"
+        },
+        "level": {
+          "label": "熟练度",
+          "placeholder": "如 母语, 流利, 中级"
+        }
+      },
+      "certificates": {
+        "name": {
+          "label": "证书名称",
+          "placeholder": "证书名称"
+        },
+        "issuer": {
+          "label": "颁发机构",
+          "placeholder": "颁发机构"
+        },
+        "date": {
+          "label": "获得时间",
+          "placeholder": "获得时间"
+        }
+      }
+    }
+  },
+  "tiptap": {
+    "prompt": {
+      "url": "网址"
+    },
+    "notifications": {
+      "polishingInProgress": "AI 已经在润色中，请等待完成。",
+      "polishFailed": "润色文本失败: {{message}}",
+      "translationInProgress": "翻译进行中，请稍候。",
+      "translateSuccess": "翻译完成",
+      "translateFailed": "翻译失败: {{message}}",
+      "changesAccepted": "AI优化已应用",
+      "changesReverted": "已回退到原始文本"
+    },
+    "translate": "一键翻译",
+    "acceptChanges": "接受更改",
+    "accept": "接受",
+    "rejectChanges": "回退更改",
+    "reject": "回退"
+  },
+  "export": {
+    "notifications": {
+      "success": "简历导出成功！",
+      "error": "导出简历失败。",
+      "imageError": "加载用于导出的图片失败。",
+      "elementNotFound": "找不到简历元素",
+      "generating": "正在生成PDF...",
+      "unknownError": "未知错误",
+      "pdfGenerationFailed": "PDF生成失败"
+    }
+  },
+  "store": {
+    "notifications": {
+      "resumeCreated": "简历 \"{{name}}\" 已创建。",
+      "resumeNotFound": "未找到要复制的简历。",
+      "resumeDuplicated": "简历 \"{{name}}\" 已成功复制。",
+      "resumeDeleted": "简历 \"{{name}}\" 已删除。",
+      "resumeSaved": "简历已保存！",
+      "createCloudFailed": "在云端创建失败。改为在本地创建。",
+      "importCloudFailed": "导入简历到云端失败。改为在本地导入。",
+      "resumeDuplicatedLocally": "简历 \"{{name}}\" 已在本地复制。",
+      "renameSuccess": "重命名成功",
+      "renameCloudFailed": "本地重命名成功，但同步到云端失败",
+      "deleteCloudFailed": "从云端删除失败，但已在本地删除。",
+      "versionDeleted": "版本已删除",
+      "versionDeleteFailed": "删除版本失败",
+      "resumeSavedCloud": "简历已保存到云端！",
+      "resumeSavedLocally": "简历已保存到本地！",
+      "versionNotFound": "未找到版本",
+      "versionRestored": "版本已还原！",
+      "loginToShare": "请登录后分享简历",
+      "resumePublished": "简历已发布！",
+      "resumeUnpublished": "简历已取消发布",
+      "sharingUpdateFailed": "更新分享设置失败",
+      "cloudSyncFailed": "云端同步失败。请检查您的网络连接。",
+      "duplicatingInCloud": "正在云端复制...",
+      "duplicateCloudSuccess": "简历已在云端复制",
+      "duplicateCloudError": "在云端复制失败"
+    }
+  },
+  "common": {
+    "loading": "加载中...",
+    "logoAlt": "Magic Resume 徽标",
+    "userAvatarAlt": "用户头像",
+    "manualSave": "主动保存",
+    "info": {
+      "title": "基本信息",
+      "contact": "联系方式"
+    },
+    "autoSave": "自动保存",
+    "expand": "展开",
+    "collapse": "收起",
+    "notifications": {
+      "copySuccess": "JSON数据已复制到剪贴板",
+      "copyFailed": "复制失败，请重试",
+      "draftGenerated": "简历草稿已生成！现在您可以点击右上角的预览按钮查看。",
+      "dataApplied": "简历数据已应用到预览中！",
+      "resumeApplied": "简历已应用！",
+      "generatingDraft": "好的，我将根据我们的对话为您生成一份简历草稿...",
+      "generationError": "抱歉，生成简历时遇到问题，请稍后再试。",
+      "generatingResume": "正在生成简历中..."
+    },
+    "ui": {
+      "hide": "隐藏",
+      "view": "查看",
+      "parseResumeData": "解析的简历数据",
+      "closePreview": "关闭",
+      "previewResume": "预览",
+      "json": "JSON",
+      "downloadJson": "下载 JSON"
+    },
+    "confirmDeleteVersion": "确定要删除此历史记录吗？",
+    "confirmDeleteResume": "确定要删除这份简历吗？",
+    "deleteDescription": "此操作无法撤销。这将从云端和所有本地设备上永久删除该内容。",
+    "deleteDescriptionCloud": "此操作无法撤销。这将从云端和所有本地设备上永久删除该内容。",
+    "deleteDescriptionLocal": "此操作无法撤销。这将从您的设备上永久删除该内容。",
+    "delete": "删除",
+    "done": "完成",
+    "cancel": "取消",
+    "confirm": "确定"
+  },
+  "report": {
+    "title": "简历分析报告",
+    "subtitle": "由 AI 驱动，灵感源自 Lighthouse",
+    "overallScore": "综合得分",
+    "detailedAnalysis": "详细分析",
+    "suggestions": "改进建议:",
+    "categories": {
+      "KeySkillsMatch": "核心技能匹配度",
+      "ImpactAndActionability": "影响力与行动性",
+      "QuantifiableAchievements": "可量化成就",
+      "ClarityAndReadability": "清晰度与可读性",
+      "ProfessionalSummary": "专业摘要",
+      "impact": "影响力",
+      "metrics": "量化结果",
+      "clarity": "清晰度",
+      "summary": "专业总结"
+    },
+    "strengths": "核心优势",
+    "improvements": "改进建议",
+    "overallRating": "综合评分",
+    "attributeMatrix": "能力矩阵图",
+    "status": {
+      "critical": "风险",
+      "normal": "正常",
+      "good": "优秀"
+    },
+    "optimizationRoadmap": "优化路线图",
+    "roadmapSubtitle": "来自专家面板的核心洞察"
+  },
+  "errorPage": {
+    "title": "出了点问题！",
+    "description": "抱歉，发生了意外错误。您可以尝试刷新页面或返回首页。",
+    "buttons": {
+      "tryAgain": "重试",
+      "backHome": "返回首页"
+    }
+  },
+  "notFoundPage": {
+    "title": "页面未找到",
+    "description": "抱歉，我们找不到您要查找的页面。它可能已被移动或删除。",
+    "buttons": {
+      "backHome": "返回首页",
+      "goBack": "返回上一页"
+    }
+  },
+  "loading": {
+    "common": "加载中...",
+    "aiThinking": "AI 思考中...",
+    "aiLab": {
+      "start": "正在启动 AI 实验室...",
+      "preparing": "正在准备智能面试官与分析工具..."
+    },
+    "history": {
+      "title": "正在加载历史版本...",
+      "description": "正在获取您的简历修改记录..."
+    },
+    "json": {
+      "title": "正在生成 JSON 数据...",
+      "description": "正在准备简历的结构化预览..."
+    },
+    "share": {
+      "title": "正在准备分享配置...",
+      "description": "正在加载权限与链接选项..."
+    }
+  },
+  "dashboardPage": {
+    "cloudSyncBanner": {
+      "title": "云端同步功能现已上线！",
+      "description": "开启后可多端同步并自动备份所有简历版本，数据安全无忧。目前您处于本地存储模式。",
+      "button": "前往设置开启"
+    }
+  },
+  "hero": {
+    "title": "使用 AI 打造您的简历",
+    "subtitle": "专业的模板、AI 驱动的写作和实时预览。",
+    "macbookTitle": "这台苹果电脑是用 Tailwindcss 做的。<br />真的，没开玩笑。"
+  },
+  "persona": {
+    "peer": {
+      "title": "Peer Developer",
+      "subtitle": "同行 / 协作者",
+      "short": "同行"
+    },
+    "lead": {
+      "title": "Tech Lead / Leader",
+      "subtitle": "主管 / +1",
+      "short": "主管"
+    },
+    "leader": {
+      "short": "主管"
+    },
+    "hrbp": {
+      "title": "HRBP",
+      "subtitle": "文化价值观 / 软技能",
+      "short": "HRBP"
+    }
+  },
+  "sectionTitles": {
+    "experience": "工作经历",
+    "education": "教育经历",
+    "projects": "项目经历",
+    "skills": "专业技能",
+    "languages": "语言能力",
+    "certificates": "证书资质",
+    "profiles": "个人主页",
+    "header": "基本信息",
+    "summary": "个人总结",
+    "profile": "个人信息",
+    "contact": "联系方式",
+    "awards": "奖项"
+  }
+}
