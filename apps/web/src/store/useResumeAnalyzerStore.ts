@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { ResumeAnalysis } from '@/lib/types/analysis';
+import { ResumeAnalysis } from '@/types/analysis';
 
 interface ResumeAnalyzerState {
   isAnalyzing: boolean;

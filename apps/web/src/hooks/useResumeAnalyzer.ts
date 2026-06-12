@@ -1,6 +1,6 @@
 import { useSettingStore } from '@/store/useSettingStore';
 import { Resume } from '@/types/frontend/resume';
-import { ResumeAnalysis } from '@/lib/types/analysis';
+import { ResumeAnalysis } from '@/types/analysis';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { useResumeAnalyzerStore } from '@/store/useResumeAnalyzerStore';

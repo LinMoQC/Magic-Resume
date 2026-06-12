@@ -1,6 +1,6 @@
 'use client';
 
-import { ResumeAnalysis } from '@/lib/types/analysis';
+import { ResumeAnalysis } from '@/types/analysis';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import { Lightbulb, Target, CheckCircle, BarChart2, UserCheck, GraduationCap } from 'lucide-react';

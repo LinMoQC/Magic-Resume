@@ -3,7 +3,7 @@ import { Resume } from '@/types/frontend/resume';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Sparkles, BarChart3, RotateCw, Code2, Briefcase, Users, Cpu } from 'lucide-react';
-import MultiPersonaAnalysisReport from '@/components/MultiPersonaAnalysisReport';
+import MultiPersonaAnalysisReport from '@/components/features/resume/MultiPersonaAnalysisReport';
 import { useMultiPersonaAnalyzer } from '@/hooks/useMultiPersonaAnalyzer';
 import { useTrace } from '@/hooks/useTrace';
 import { motion, AnimatePresence } from 'framer-motion';
