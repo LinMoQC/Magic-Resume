@@ -21,7 +21,6 @@ export interface InterviewResponse {
 }
 
 export const interviewApi = {
-  
   start: async (params: StartInterviewParams): Promise<InterviewResponse> => {
     const response = await httpClient.agent.post(AGENT_ROUTES.interview.start, params);
     return response.data;
@@ -34,5 +33,5 @@ export const interviewApi = {
 
   deleteSession: async (sessionId: string): Promise<void> => {
     await httpClient.agent.delete(AGENT_ROUTES.interview.session(sessionId));
-  }
+  },
 };

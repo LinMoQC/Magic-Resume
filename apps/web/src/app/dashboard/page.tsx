@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { Resume } from '@/types/frontend/resume';
 import { useResumeStore } from '@/store/useResumeStore';
 import { useSettingStore } from '@/store/useSettingStore';
-import { useAuth } from '@clerk/nextjs';
 import ResumeList from './_components/ResumeList';
 import RenameResumeDialog from './_components/RenameResumeDialog';
 import { useTrace } from '@/hooks/useTrace';
@@ -14,7 +13,6 @@ export default function Dashboard() {
   const router = useRouter();
   const { resumes, deleteResume, duplicateResume, loadResumes, renameResume } = useResumeStore();
   const { loadSettings } = useSettingStore();
-  const { getToken } = useAuth();
   const { traceDashboardViewed, traceCreateResume, traceImportResume } = useTrace();
 
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
@@ -22,23 +20,16 @@ export default function Dashboard() {
   const [newName, setNewName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Dashboard initialization
   const initialized = React.useRef(false);
 
   useEffect(() => {
-    // Prevent double invocation in React Strict Mode
     if (initialized.current) return;
     initialized.current = true;
 
     const initializeDashboard = async () => {
       try {
         setIsLoading(true);
-        const token = await getToken();
-        await Promise.all([
-          loadResumes(token || undefined),
-          loadSettings()
-        ]);
-        // 追踪 Dashboard 查看，使用 store 中的最新状态
+        await Promise.all([loadResumes(), loadSettings()]);
         const currentResumes = useResumeStore.getState().resumes;
         traceDashboardViewed(currentResumes.length);
       } catch (error) {
@@ -49,7 +40,7 @@ export default function Dashboard() {
     };
 
     initializeDashboard();
-  }, [loadResumes, loadSettings, traceDashboardViewed, getToken]);
+  }, [loadResumes, loadSettings, traceDashboardViewed]);
 
   const handleOpenRenameDialog = useCallback((resume: Resume) => {
     setResumeToRename(resume);
@@ -59,12 +50,11 @@ export default function Dashboard() {
 
   const handleRename = useCallback(async () => {
     if (resumeToRename && newName.trim()) {
-      const token = await getToken();
-      await renameResume(resumeToRename.id, newName, token || undefined);
+      await renameResume(resumeToRename.id, newName);
       setRenameDialogOpen(false);
       setResumeToRename(null);
     }
-  }, [resumeToRename, newName, getToken, renameResume]);
+  }, [resumeToRename, newName, renameResume]);
 
   const handleAdd = useCallback(() => {
     traceCreateResume();
@@ -77,14 +67,12 @@ export default function Dashboard() {
   }, [traceImportResume, router]);
 
   const handleResumeDelete = useCallback(async (id: string) => {
-    const token = await getToken();
-    await deleteResume(id, token || undefined);
-  }, [getToken, deleteResume]);
+    await deleteResume(id);
+  }, [deleteResume]);
 
   const handleDuplicate = useCallback(async (id: string) => {
-    const token = await getToken();
-    duplicateResume(id, token || undefined);
-  }, [getToken, duplicateResume]);
+    duplicateResume(id);
+  }, [duplicateResume]);
 
   return (
     <main className="flex flex-col h-full">
@@ -107,4 +95,3 @@ export default function Dashboard() {
     </main>
   );
 }
- 

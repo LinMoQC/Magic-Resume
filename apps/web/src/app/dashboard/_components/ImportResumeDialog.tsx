@@ -1,6 +1,5 @@
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { useAuth } from '@clerk/nextjs';
 import { Loader2, X, FileText, FileJson, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -88,7 +87,6 @@ type ImportResumeDialogProps = {
 export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeDialogProps) {
   const { importResume } = useResumeStore();
   const { apiKey, baseUrl, model, maxTokens } = useSettingStore();
-  const { getToken } = useAuth();
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [llmConfigMissing, setLlmConfigMissing] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
@@ -219,8 +217,7 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
         customTemplate: ((result as Record<string, unknown>).customTemplate as Resume['customTemplate']) || {},
       } as Resume;
 
-      const token = await getToken();
-      await importResume(newResume, token || undefined);
+      await importResume(newResume);
 
       toast.success(
         fileType === 'pdf'
@@ -242,7 +239,7 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
       setIsImporting(false);
       setImportStatus('');
     }
-  }, [fileType, hasLlmConfig, importResume, getToken, handleClose, t, handleJsonFile, handlePdfFile]);
+  }, [fileType, hasLlmConfig, importResume, handleClose, t, handleJsonFile, handlePdfFile]);
 
   const dropzoneAccept: Record<string, string[]> = fileType === 'pdf'
     ? { 'application/pdf': ['.pdf'] }

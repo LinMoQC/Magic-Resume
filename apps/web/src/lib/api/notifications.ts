@@ -1,4 +1,4 @@
-import { httpClient, withAuth } from './httpClient';
+import { httpClient } from './httpClient';
 import { API_ROUTES } from './routes';
 
 export interface Notification {
@@ -25,33 +25,13 @@ export interface Notification {
 }
 
 export const notificationsApi = {
-  /**
-   * Fetch all notifications for the current user
-   */
-  fetchAll: async (token: string): Promise<Notification[]> => {
-    try {
-      const response = await httpClient.api.get(API_ROUTES.notifications.list, withAuth(token));
-      return response.data.data;
-    } catch (error) {
-      console.error('Failed to fetch notifications:', error);
-      throw error;
-    }
+  fetchAll: async (): Promise<Notification[]> => {
+    const response = await httpClient.api.get(API_ROUTES.notifications.list);
+    return response.data.data;
   },
 
-  /**
-   * Mark a notification as read
-   */
-  markAsRead: async (id: string, token: string): Promise<Notification> => {
-    try {
-      const response = await httpClient.api.patch(
-        API_ROUTES.notifications.markRead(id),
-        {},
-        withAuth(token)
-      );
-      return response.data.data;
-    } catch (error) {
-      console.error(`Failed to mark notification ${id} as read:`, error);
-      throw error;
-    }
-  }
+  markAsRead: async (id: string): Promise<Notification> => {
+    const response = await httpClient.api.patch(API_ROUTES.notifications.markRead(id), {});
+    return response.data.data;
+  },
 };

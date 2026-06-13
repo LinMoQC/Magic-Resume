@@ -52,7 +52,7 @@ export function useSharedResume() {
     const [activeCommentId, setActiveCommentId] = useState<string | null>(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    const { getToken, userId: currentUserId } = useAuth();
+    const { userId: currentUserId } = useAuth();
     const { redirectToSignIn } = useClerk();
     const isDraggingMarkerRef = useRef(false);
 
@@ -252,19 +252,13 @@ export function useSharedResume() {
                 return;
             }
 
-            const token = await getToken();
-            if (!token) {
-                toast.error(t('sharedPage.notifications.loginToComment'));
-                return;
-            }
-
             setIsSaving(true);
             const newComment = await resumeApi.addComment(shareId, {
                 content,
                 position: { x: draftComment.x, y: draftComment.y, highlightRects: draftComment.highlightRects },
                 color: color,
                 selectedText: draftComment.selectedText
-            }, token);
+            });
             
             setComments(prev => [...prev, mapBackendComment(newComment, resume.userId)]);
             setDraftComment(null);
@@ -276,7 +270,7 @@ export function useSharedResume() {
         } finally {
             setIsSaving(false);
         }
-    }, [draftComment, resume, shareId, t, currentUserId, getToken, redirectToSignIn]);
+    }, [draftComment, resume, shareId, t, currentUserId, redirectToSignIn]);
 
     const handleReply = useCallback(async (commentId: string, content: string) => {
         if (!resume?.id) return;
@@ -288,13 +282,7 @@ export function useSharedResume() {
                 return;
             }
 
-            const token = await getToken();
-            if (!token) {
-                toast.error(t('sharedPage.notifications.loginToReply'));
-                return;
-            }
-
-            const reply = await resumeApi.addReply(shareId, commentId, { content }, token);
+            const reply = await resumeApi.addReply(shareId, commentId, { content });
             
             // Update comments tree
             setComments(prev => prev.map(c => {
@@ -308,7 +296,7 @@ export function useSharedResume() {
             console.error("Failed to save reply", e);
             toast.error(t('sharedPage.notifications.replySaveFailed'));
         }
-    }, [resume, shareId, t, currentUserId, getToken, redirectToSignIn]);
+    }, [resume, shareId, t, currentUserId, redirectToSignIn]);
 
     const handleDeleteComment = useCallback(async (commentId: string) => {
         if (!resume?.id) return;
@@ -319,14 +307,7 @@ export function useSharedResume() {
                 return;
             }
 
-            const token = await getToken();
-            if (!token) {
-                toast.error(t('sharedPage.notifications.loginToDelete'));
-                return;
-            }
-
-            // Validated on backend, but good to check here too or just let backend fail
-            await resumeApi.deleteComment(resume.id, commentId, token);
+            await resumeApi.deleteComment(resume.id, commentId);
 
             setComments(prev => prev.filter(c => c.id !== commentId));
             if (activeCommentId === commentId) {
@@ -337,7 +318,7 @@ export function useSharedResume() {
             console.error("Failed to delete comment", e);
             toast.error(t('sharedPage.notifications.commentDeleteFailed'));
         }
-    }, [resume, t, currentUserId, getToken, activeCommentId]);
+    }, [resume, t, currentUserId, activeCommentId]);
 
     const toggleCommentMode = useCallback(() => {
         if (isCommentMode) {

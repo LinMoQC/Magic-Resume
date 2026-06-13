@@ -1,4 +1,4 @@
-import { httpClient } from './httpClient';
+import { httpClient, getAuthToken } from './httpClient';
 import { AGENT_ROUTES } from './routes';
 
 export interface TranslateTextParams {
@@ -54,10 +54,12 @@ export const translateApi = {
     const timeoutId = setTimeout(() => controller.abort(), 300000);
 
     try {
+      const token = await getAuthToken();
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify(params),
         signal: controller.signal,

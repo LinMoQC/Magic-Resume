@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Section, SectionItem } from '@/types/frontend/resume';
 import { useResumeStore, getSanitizedResume } from '@/store/useResumeStore';
-import { useAuth } from '@clerk/nextjs';
 import { useSettingStore } from '@/store/useSettingStore';
 import debounce from 'lodash/debounce';
 import { FaUser } from 'react-icons/fa';
@@ -87,7 +86,6 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
 
   const router = useRouter();
 
-  const { getToken } = useAuth();
   const cloudSync = useSettingStore(state => state.cloudSync);
 
   const { traceEditorViewed, traceResumeSaved, traceDownloadJson, traceTemplateChanged } = useTrace();
@@ -184,19 +182,16 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
       }
 
       // 2. 触发加载 (数据逻辑)
-      const token = await getToken();
-      
-      // 避免重复加载：如果当前已经是这个 id 且不是在加载状态，可以跳过
       const { activeResume, isSyncing } = useResumeStore.getState();
       if (activeResume?.id === id && !isStoreLoading && !isSyncing) {
           return;
       }
 
-      loadResumeForEdit(id, token || undefined);
+      loadResumeForEdit(id);
     };
 
     setupEditor();
-  }, [id, loadResumeForEdit, isStoreLoading, resumes, router, getToken]); // resumes 依然保留，但靠内部 activeResume?.id === id 熔断
+  }, [id, loadResumeForEdit, isStoreLoading, resumes, router]); // resumes 依然保留，但靠内部 activeResume?.id === id 熔断
 
   // 追踪编辑器查看事件
   useEffect(() => {
@@ -232,12 +227,8 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
       
       console.log('[Save] Calling store saveResume...');
       
-      const token = cloudSync ? await getToken() : undefined;
-      
       console.log('[Save] Calling store saveResume...');
-      // Let the store handle the full manual save process (metadata, cloud sync, and versioning)
-      // Pass activeResume explicitly to avoid stale state in async save
-      await saveActiveResumeToResumes(token as string | undefined, 'manual', activeResume || undefined);
+      await saveActiveResumeToResumes('manual', activeResume || undefined);
       console.log('[Save] Store saveResume completed.');
       
       // Update ref to prevent the auto-sync useEffect from thinking this is a fresh unsynced change
@@ -255,8 +246,8 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
 
   // 自动同步逻辑 - 10000ms (10s) 防抖
   const debouncedSync = useMemo(
-    () => debounce(async (token: string) => {
-      await syncToCloud(token);
+    () => debounce(async () => {
+      await syncToCloud();
     }, 10000),
     [syncToCloud]
   );
@@ -283,12 +274,8 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
           return;
         }
 
-        const token = await getToken();
-        if (token) {
-          debouncedSync(token);
-          // Update ref to prevent re-triggering for same update
-          lastUpdatedAtRef.current = activeResume.updatedAt;
-        }
+        debouncedSync();
+        lastUpdatedAtRef.current = activeResume.updatedAt;
       }
     };
     
@@ -297,7 +284,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     return () => {
       debouncedSync.cancel();
     };
-  }, [activeResume, cloudSync, isStoreLoading, getToken, debouncedSync]);
+  }, [activeResume, cloudSync, isStoreLoading, debouncedSync]);
 
   // 选择模板
   const handleSelectTemplate = useCallback((templateId: string) => {

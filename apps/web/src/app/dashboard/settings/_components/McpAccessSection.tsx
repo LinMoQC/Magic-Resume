@@ -25,7 +25,7 @@ type CloudResumeOption = {
 
 export function McpAccessSection() {
   const { t } = useTranslation();
-  const { getToken, isSignedIn } = useAuth();
+  const { isSignedIn } = useAuth();
   const [tokens, setTokens] = useState<PersonalAccessToken[]>([]);
   const [resumes, setResumes] = useState<CloudResumeOption[]>([]);
   const [selectedResumeId, setSelectedResumeId] = useState('');
@@ -45,17 +45,11 @@ export function McpAccessSection() {
   const loadMcpAccess = useCallback(async () => {
     if (!isSignedIn) return;
 
-    const clerkToken = await getToken();
-    if (!clerkToken) {
-      toast.error(t('settings.mcp.notifications.signInRequired'));
-      return;
-    }
-
     setIsLoading(true);
     try {
       const [nextTokens, cloudResult] = await Promise.all([
-        mcpApi.listPersonalAccessTokens(clerkToken),
-        resumeApi.fetchCloudResumes(clerkToken),
+        mcpApi.listPersonalAccessTokens(),
+        resumeApi.fetchCloudResumes(),
       ]);
       const cloudResumes = normalizeCloudResumes(cloudResult);
       setTokens(nextTokens);
@@ -67,7 +61,7 @@ export function McpAccessSection() {
     } finally {
       setIsLoading(false);
     }
-  }, [getToken, isSignedIn, t]);
+  }, [isSignedIn, t]);
 
   useEffect(() => {
     loadMcpAccess();
@@ -79,17 +73,11 @@ export function McpAccessSection() {
       return;
     }
 
-    const clerkToken = await getToken();
-    if (!clerkToken) {
-      toast.error(t('settings.mcp.notifications.signInRequired'));
-      return;
-    }
-
     setIsCreating(true);
     try {
       const created = await mcpApi.createPersonalAccessToken({
         name: newTokenName.trim() || 'Magic Resume MCP',
-      }, clerkToken);
+      });
       setPlainToken(created.token);
       setTokens((current) => [created, ...current]);
       toast.success(t('settings.mcp.notifications.created'));
@@ -107,14 +95,8 @@ export function McpAccessSection() {
       return;
     }
 
-    const clerkToken = await getToken();
-    if (!clerkToken) {
-      toast.error(t('settings.mcp.notifications.signInRequired'));
-      return;
-    }
-
     try {
-      const revoked = await mcpApi.revokePersonalAccessToken(tokenId, clerkToken);
+      const revoked = await mcpApi.revokePersonalAccessToken(tokenId);
       setTokens((current) => current.map((item) => (item.id === tokenId ? revoked : item)));
       toast.success(t('settings.mcp.notifications.revoked'));
     } catch (error) {

@@ -7,6 +7,7 @@ import { MagicDebugger } from '@/lib/utils/debuggger';
 import { toast } from "sonner";
 import { useSettingStore } from './useSettingStore';
 import { resumeApi } from '@/lib/api/resume';
+import { getAuthToken } from '@/lib/api/httpClient';
 import debounce from 'lodash/debounce';
 import isEqual from 'lodash/isEqual';
 import { 
@@ -28,21 +29,21 @@ type ResumeState = {
   activeSection: string;
   syncStatus: 'saved' | 'syncing' | 'modified' | 'local' | 'error';
   isSyncing: boolean;
-  loadResumes: (token?: string) => Promise<void>;
-  createResume: (name: string, token?: string) => Promise<string>;
-  importResume: (resume: Resume, token?: string) => Promise<string>;
+  loadResumes: () => Promise<void>;
+  createResume: (name: string) => Promise<string>;
+  importResume: (resume: Resume) => Promise<string>;
   addResume: (resume: Resume) => void;
   updateResume: (id: string, updates: Partial<Resume>) => void;
-  duplicateResume: (id: string, token?: string) => Promise<void>;
-  renameResume: (id: string, newName: string, token?: string) => Promise<void>;
-  deleteResume: (id: string, token?: string) => Promise<void>;
-  deleteVersion: (resumeId: string, versionId: string, token?: string) => Promise<void>;
-  loadResumeForEdit: (id: string, token?: string) => void;
-  saveResume: (token?: string, type?: 'auto' | 'manual', resumeData?: Resume) => Promise<void>;
-  createVersion: (type: 'auto' | 'manual', name?: string, token?: string, resumeData?: Resume) => Promise<void>;
+  duplicateResume: (id: string) => Promise<void>;
+  renameResume: (id: string, newName: string) => Promise<void>;
+  deleteResume: (id: string) => Promise<void>;
+  deleteVersion: (resumeId: string, versionId: string) => Promise<void>;
+  loadResumeForEdit: (id: string) => void;
+  saveResume: (type?: 'auto' | 'manual', resumeData?: Resume) => Promise<void>;
+  createVersion: (type: 'auto' | 'manual', name?: string, resumeData?: Resume) => Promise<void>;
   restoreVersion: (versionId: string) => void;
-  syncToCloud: (token: string, options?: { skipVersioning?: boolean }) => Promise<void>;
-  fetchCloudResume: (id: string, token: string) => Promise<void>;
+  syncToCloud: (options?: { skipVersioning?: boolean }) => Promise<void>;
+  fetchCloudResume: (id: string) => Promise<void>;
   updateInfo: (info: Partial<InfoType>) => void;
   setSectionOrder: (sectionOrder: SectionOrder[]) => void;
   updateSectionItems: (key: string, items: SectionItem[]) => void;
@@ -53,7 +54,7 @@ type ResumeState = {
   updateTypography: (typography: string) => void;
   setRightCollapsed: (collapsed: boolean) => void;
   setActiveSection: (section: string) => void;
-  updateSharing: (isPublic: boolean, shareRole: 'VIEWER' | 'COMMENTER' | 'EDITOR' | undefined, token: string) => Promise<void>;
+  updateSharing: (isPublic: boolean, shareRole: 'VIEWER' | 'COMMENTER' | 'EDITOR' | undefined) => Promise<void>;
   
   // AI State
   isAiGenerating: boolean;
@@ -136,7 +137,7 @@ const useResumeStore = create<ResumeState>()(
     }
   },
 
-  loadResumes: async (token) => {
+  loadResumes: async () => {
     if (!get().isStoreLoading) {
       set({ isStoreLoading: true });
     }
@@ -158,9 +159,9 @@ const useResumeStore = create<ResumeState>()(
       localResumes.forEach(r => mergedMap.set(r.id, r));
 
       const isCloudSyncOn = useSettingStore.getState().cloudSync;
-      if (isCloudSyncOn && token) {
+      if (isCloudSyncOn && await getAuthToken()) {
         try {
-          const cloudResult = await resumeApi.fetchCloudResumes(token);
+          const cloudResult = await resumeApi.fetchCloudResumes();
           if (cloudResult && cloudResult.data) {
             // The response is wrapped by TransformInterceptor: { code: 200, data: { data: [...] }, ... }
             // So cloudResult.data is the { data: [...], total } object
@@ -239,7 +240,7 @@ const useResumeStore = create<ResumeState>()(
     }
   },
   
-  createResume: async (name, token) => {
+  createResume: async (name) => {
     const isCloudSyncOn = useSettingStore.getState().cloudSync;
     const { addResume } = get();
     
@@ -251,9 +252,9 @@ const useResumeStore = create<ResumeState>()(
       updatedAt: Date.now(),
     };
 
-    if (isCloudSyncOn && token) {
+    if (isCloudSyncOn) {
       try {
-        const result = await resumeApi.syncResume(newResume, token);
+        const result = await resumeApi.syncResume(newResume);
         if (result && result.id) {
           const cloudResume: Resume = {
             ...newResume,
@@ -273,13 +274,13 @@ const useResumeStore = create<ResumeState>()(
     return newId;
   },
 
-  importResume: async (resume, token) => {
+  importResume: async (resume) => {
     const isCloudSyncOn = useSettingStore.getState().cloudSync;
     const { addResume } = get();
 
-    if (isCloudSyncOn && token) {
+    if (isCloudSyncOn) {
       try {
-        const result = await resumeApi.syncResume(resume, token);
+        const result = await resumeApi.syncResume(resume);
         if (result && result.id) {
           const cloudResume: Resume = {
             ...resume,
@@ -332,7 +333,7 @@ const useResumeStore = create<ResumeState>()(
     // We can't easily wait for DB here in a sync function, but subscribe handles it now
   },
 
-  duplicateResume: async (id, token) => {
+  duplicateResume: async (id) => {
     const isCloudSyncOn = useSettingStore.getState().cloudSync;
     const resumeToDuplicate = get().resumes.find(r => r.id === id);
     if (!resumeToDuplicate) {
@@ -342,11 +343,11 @@ const useResumeStore = create<ResumeState>()(
 
     // Cloud Duplicate
     const isLocalId = !isNaN(Number(id)) && id.length > 10;
-    if (isCloudSyncOn && !isLocalId && token) {
+    if (isCloudSyncOn && !isLocalId) {
       try {
         toast.promise(
           async () => {
-             const newResume = await resumeApi.duplicateResume(id, token);
+             const newResume = await resumeApi.duplicateResume(id);
              if (newResume) {
                // Add directly to store
                // Backend returns decrypted object similar to fetchOne
@@ -403,7 +404,7 @@ const useResumeStore = create<ResumeState>()(
     toast.success(i18next.t('store.notifications.resumeDuplicatedLocally', { name: resumeToDuplicate.name }));
   },
 
-  renameResume: async (id, newName, token) => {
+  renameResume: async (id, newName) => {
     const isCloudSyncOn = useSettingStore.getState().cloudSync;
     const now = Date.now();
     const { resumes } = get();
@@ -434,9 +435,9 @@ const useResumeStore = create<ResumeState>()(
 
     // 3. Sync to Cloud
     const isLocalId = !isNaN(Number(id)) && id.length > 10;
-    if (isCloudSyncOn && !isLocalId && token) {
+    if (isCloudSyncOn && !isLocalId) {
         try {
-            await resumeApi.syncResume(updatedResume, token);
+            await resumeApi.syncResume(updatedResume);
             toast.success(i18next.t('store.notifications.renameSuccess'));
         } catch (error) {
             console.error("Failed to rename in cloud", error);
@@ -445,15 +446,15 @@ const useResumeStore = create<ResumeState>()(
     }
   },
 
-  deleteResume: async (id, token) => {
+  deleteResume: async (id) => {
     const isCloudSyncOn = useSettingStore.getState().cloudSync;
     const resumeToDelete = get().resumes.find(r => r.id === id);
 
-    // If cloud sync is on, it's not a local ID, and we have a token, delete from cloud
+    // If cloud sync is on and it's not a local ID, delete from cloud
     const isLocalId = !isNaN(Number(id)) && id.length > 10;
-    if (isCloudSyncOn && !isLocalId && token) {
+    if (isCloudSyncOn && !isLocalId) {
       try {
-        await resumeApi.deleteResume(id, token);
+        await resumeApi.deleteResume(id);
       } catch (error) {
         console.error('Failed to delete cloud resume:', error);
         toast.error(i18next.t('store.notifications.deleteCloudFailed'));
@@ -466,8 +467,8 @@ const useResumeStore = create<ResumeState>()(
     toast.success(i18next.t('store.notifications.resumeDeleted', { name: resumeToDelete?.name || '' }));
   },
 
-  deleteVersion: async (resumeId, versionId, token) => {
-    // 1. If token and cloud sync enabled, try cloud delete first
+  deleteVersion: async (resumeId, versionId) => {
+    // 1. If cloud sync enabled, try cloud delete first
     const isCloudSyncOn = useSettingStore.getState().cloudSync;
     const isLocalId = !isNaN(Number(resumeId)) && resumeId.length > 10;
     
@@ -476,14 +477,13 @@ const useResumeStore = create<ResumeState>()(
       versionId,
       isCloudSyncOn,
       isLocalId,
-      hasToken: !!token,
-      willCallAPI: isCloudSyncOn && !isLocalId && !!token
+      willCallAPI: isCloudSyncOn && !isLocalId
     });
     
-    if (isCloudSyncOn && !isLocalId && token) {
+    if (isCloudSyncOn && !isLocalId) {
       try {
         console.log('[deleteVersion] Calling API to delete version...');
-        await resumeApi.deleteVersion(resumeId, versionId, token);
+        await resumeApi.deleteVersion(resumeId, versionId);
         console.log('[deleteVersion] API call successful');
       } catch (error) {
         console.error('Failed to delete version from cloud:', error);
@@ -522,24 +522,22 @@ const useResumeStore = create<ResumeState>()(
     toast.success(i18next.t('store.notifications.versionDeleted'));
   },
 
-  loadResumeForEdit: (id, token) => {
+  loadResumeForEdit: (id) => {
     const { resumes, isStoreLoading, loadResumes, fetchCloudResume } = get();
     const isCloudSyncOn = useSettingStore.getState().cloudSync;
     
     // 如果开启了云端同步且有 Token，主动拉取一次云端数据以保证最新
     // 增加：如果当前 activeResume 已经是这个 id 且刚刚同步过，或者正在通过 fetchCloudResume 同步，则跳过
     const { isSyncing, activeResume: currentActive } = get();
-    if (isCloudSyncOn && token && !isSyncing) {
-        // 如果本地还没有或者 id 不匹配，或者明确需要更新
+    if (isCloudSyncOn && !isSyncing) {
         if (!currentActive || currentActive.id !== id) {
             console.log('[Store] Cloud sync is ON, fetching latest resume data for edit:', id);
-            fetchCloudResume(id, token);
+            fetchCloudResume(id);
         }
     }
 
-    // 如果还在加载中，等待加载完成后再尝试
     if (isStoreLoading) {
-      loadResumes(token).then(() => {
+      loadResumes().then(() => {
         const updatedResumes = get().resumes;
         const resume = updatedResumes.find(r => r.id === id);
         if (resume) {
@@ -592,7 +590,7 @@ const useResumeStore = create<ResumeState>()(
     }
   },
 
-  saveResume: async (token, type = 'auto', resumeData) => {
+  saveResume: async (type = 'auto', resumeData) => {
     const isCloudSyncOn = useSettingStore.getState().cloudSync;
     const now = Date.now();
 
@@ -619,16 +617,14 @@ const useResumeStore = create<ResumeState>()(
     });
 
     // 2. If manual, trigger cloud sync and versioning immediately
-    if (isCloudSyncOn && token) {
+    if (isCloudSyncOn) {
       if (type === 'manual') {
         // Create manual version using the EXPLICIT targetResume to ensure consistency
-        await get().createVersion('manual', undefined, token, targetResume);
-        // Manual save implies immediate cloud sync, skip the auto-versioning check
-        await get().syncToCloud(token, { skipVersioning: true });
+        await get().createVersion('manual', undefined, targetResume);
+        await get().syncToCloud({ skipVersioning: true });
         toast.success(i18next.t('store.notifications.resumeSavedCloud'));
       } else {
-        // Auto-save: just trigger syncToCloud
-        get().syncToCloud(token);
+        get().syncToCloud();
       }
     } else {
         set({ syncStatus: 'local' });
@@ -636,20 +632,20 @@ const useResumeStore = create<ResumeState>()(
     }
   },
 
-  createVersion: async (type, name, token, resumeData) => {
+  createVersion: async (type, name, resumeData) => {
     const isCloudSyncOn = useSettingStore.getState().cloudSync;
     const targetResume = resumeData || get().activeResume;
     
     if (!targetResume) return;
     
     const isLocalId = !isNaN(Number(targetResume.id));
-    if (isCloudSyncOn && token && !isLocalId) {
+    if (isCloudSyncOn && !isLocalId) {
       try {
         const changelog = name || (type === 'manual' ? 'Manual Save' : 'Auto Save');
         // Push the version to cloud using the targetResume (latest data)
-        await resumeApi.createCloudVersion(targetResume.id, targetResume, token, changelog);
+        await resumeApi.createCloudVersion(targetResume.id, targetResume, changelog);
         // Refresh cloud versions after creation to stay in sync
-        get().fetchCloudResume(targetResume.id, token);
+        get().fetchCloudResume(targetResume.id);
       } catch (error) {
         console.error('Failed to create cloud version:', error);
       }
@@ -862,16 +858,16 @@ const useResumeStore = create<ResumeState>()(
   
   setActiveSection: (section) => set({ activeSection: section }),
 
-  updateSharing: async (isPublic, shareRole, token) => {
+  updateSharing: async (isPublic, shareRole) => {
     const { activeResume } = get();
     
-    if (!activeResume || !token) {
+    if (!activeResume) {
       toast.error(i18next.t('store.notifications.loginToShare'));
       return;
     }
 
     try {
-        const result = await resumeApi.updateSharing(activeResume.id, { isPublic, shareRole }, token);
+        const result = await resumeApi.updateSharing(activeResume.id, { isPublic, shareRole });
         
         // Update local state
         set(state => {
@@ -906,9 +902,10 @@ const useResumeStore = create<ResumeState>()(
     }
   },
 
-  syncToCloud: async (token: string, options?: { skipVersioning?: boolean }) => {
+  syncToCloud: async (options?: { skipVersioning?: boolean }) => {
     const { activeResume, isSyncing } = get();
-    if (!activeResume || !useSettingStore.getState().cloudSync || !token) return;
+    if (!activeResume || !useSettingStore.getState().cloudSync) return;
+    if (!await getAuthToken()) return;
     
     // Prevent concurrent syncs (LOCK)
     if (isSyncing) {
@@ -920,7 +917,7 @@ const useResumeStore = create<ResumeState>()(
       set({ isSyncing: true, syncStatus: 'syncing' });
       
       console.log('[Sync] Starting sync for resume:', activeResume.id, 'Is Local:', !isNaN(Number(activeResume.id)));
-      const result = await resumeApi.syncResume(activeResume, token);
+      const result = await resumeApi.syncResume(activeResume);
       console.log('[Sync] Cloud returned:', result?.id, result?.updatedAt);
       
       // Update local resume ID if backend returned a different one (e.g. converting temp ID to CUID)
@@ -979,7 +976,7 @@ const useResumeStore = create<ResumeState>()(
           
           if (now - lastVersionTime > cooldownMs) {
             console.log('[Sync] Cooldown expired, creating auto-version...');
-            get().createVersion('auto', undefined, token);
+            get().createVersion('auto', undefined);
           } else {
             console.log('[Sync] Skipping auto-version (cooldown active). Last version at:', new Date(lastVersionTime).toLocaleTimeString());
           }
@@ -999,12 +996,12 @@ const useResumeStore = create<ResumeState>()(
     }
   },
 
-  fetchCloudResume: async (id: string, token: string) => {
+  fetchCloudResume: async (id: string) => {
     if (get().isSyncing) return;
     
     try {
       set({ isSyncing: true, syncStatus: 'syncing' });
-      const cloudResume = (await resumeApi.fetchCloudResumeById(id, token)) as CloudResume;
+      const cloudResume = (await resumeApi.fetchCloudResumeById(id)) as CloudResume;
       if (cloudResume) {
           const { content: rawContent } = cloudResume;
           

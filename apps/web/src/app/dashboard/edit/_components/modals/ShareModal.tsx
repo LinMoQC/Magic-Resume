@@ -4,7 +4,6 @@ import { X, Globe, Link, Copy, Check, Lock } from "lucide-react";
 
 import { useResumeStore } from "@/store/useResumeStore";
 
-import { useAuth } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
@@ -17,7 +16,6 @@ interface ShareModalProps {
 export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
   const { t } = useTranslation();
   const { activeResume, updateSharing, saveResume, syncStatus } = useResumeStore();
-  const { getToken } = useAuth();
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -26,14 +24,10 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
     if (isOpen && activeResume) {
         const isLocalId = !isNaN(Number(activeResume.id)) && activeResume.id.length > 10;
         if (isLocalId && syncStatus !== 'syncing') {
-            getToken().then(token => {
-                if (token) {
-                    saveResume(token, 'manual');
-                }
-            });
+            saveResume('manual');
         }
     }
-  }, [isOpen, activeResume, syncStatus, getToken, saveResume]); 
+  }, [isOpen, activeResume, syncStatus, saveResume]);
 
   const isSyncing = syncStatus === 'syncing';
 
@@ -50,31 +44,21 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
   const handleTogglePublic = useCallback(async (checked: boolean) => {
     setLoading(true);
     try {
-        const token = await getToken();
-        if (!token) {
-            toast.error(t('modals.share.pleaseLogin'));
-            return;
-        }
-        await updateSharing(checked, shareRole, token);
+        await updateSharing(checked, shareRole);
     } finally {
         setLoading(false);
     }
-  }, [getToken, shareRole, updateSharing, t]);
+  }, [shareRole, updateSharing]);
 
   const handleRoleChange = useCallback(async (role: 'VIEWER' | 'COMMENTER') => {
     if (!isPublic) return;
     setLoading(true);
     try {
-        const token = await getToken();
-        if (!token) {
-            toast.error(t('modals.share.pleaseLogin'));
-            return;
-        }
-        await updateSharing(true, role, token);
+        await updateSharing(true, role);
     } finally {
         setLoading(false);
     }
-  }, [isPublic, getToken, updateSharing, t]);
+  }, [isPublic, updateSharing]);
 
   const copyToClipboard = useCallback(() => {
     if (!shareUrl) return;

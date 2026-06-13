@@ -9,13 +9,14 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@clerk/nextjs";
 import { feedbackApi } from "@/lib/api/feedback";
 
+
 interface FeedbackModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
 export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
-  const { getToken, userId } = useAuth();
+  const { userId } = useAuth();
   const { t } = useTranslation(); // Note: keys might be missing for error messages
   const [feedback, setFeedback] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -30,8 +31,7 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
     setErrorMessage(null);
 
     try {
-      const token = await getToken();
-      await feedbackApi.submitFeedback(feedback, userId || undefined, token);
+      await feedbackApi.submitFeedback(feedback, userId || undefined);
       
       console.log("Feedback submitted successfully");
       setIsSubmitting(false);
@@ -57,7 +57,7 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
         setErrorMessage(t('feedback.error.generic') || 'Failed to submit feedback. Please try again.');
       }
     }
-  }, [feedback, getToken, userId, onOpenChange, t]);
+  }, [feedback, userId, onOpenChange, t]);
 
   const handleClose = useCallback(() => {
     if (isSubmitting) return; // Prevent closing during submission
