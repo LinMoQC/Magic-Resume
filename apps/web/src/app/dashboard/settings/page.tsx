@@ -29,6 +29,7 @@ import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { useTranslation, Trans } from 'react-i18next';
 import { useTrace } from '@/hooks/useTrace';
 import { McpAccessSection } from './_components/McpAccessSection';
+import { isCloudMode } from '@/lib/config/app';
 
 export default function Settings() {
   const { t } = useTranslation();
@@ -118,28 +119,31 @@ export default function Settings() {
         className="max-w-4xl px-12 py-8"
       >
         <div className="space-y-8 pb-32">
-          {/* Cloud Sync Section */}
-          <section id="cloud-sync">
-            <Card className="overflow-hidden border-neutral-800/50 bg-neutral-900/50 backdrop-blur-sm">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                <div className="flex items-center gap-2">
-                  <Cloud className="w-5 h-5 text-sky-400" />
-                  <h2 className="text-xl font-semibold">{t('settings.cloudSync.title')}</h2>
-                </div>
-                <Switch
-                  checked={cloudSync}
-                  onCheckedChange={handleCloudSyncToggle}
-                />
-              </CardHeader>
-              <CardContent>
-                <p className="text-neutral-400 text-sm leading-relaxed">
-                  {t('settings.cloudSync.description')}
-                </p>
-              </CardContent>
-            </Card>
-          </section>
-
-          <McpAccessSection />
+          {/* Cloud Sync + MCP — cloud mode only */}
+          {isCloudMode && (
+            <>
+              <section id="cloud-sync">
+                <Card className="overflow-hidden border-neutral-800/50 bg-neutral-900/50 backdrop-blur-sm">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                    <div className="flex items-center gap-2">
+                      <Cloud className="w-5 h-5 text-sky-400" />
+                      <h2 className="text-xl font-semibold">{t('settings.cloudSync.title')}</h2>
+                    </div>
+                    <Switch
+                      checked={cloudSync}
+                      onCheckedChange={handleCloudSyncToggle}
+                    />
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-neutral-400 text-sm leading-relaxed">
+                      {t('settings.cloudSync.description')}
+                    </p>
+                  </CardContent>
+                </Card>
+              </section>
+              <McpAccessSection />
+            </>
+          )}
 
           {/* LLM Settings Section */}
           <section id="llm-settings">

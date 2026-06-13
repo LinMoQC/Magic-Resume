@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { UserButton, useUser } from '@clerk/nextjs';
+import { useAppUser, AppUserButton } from '@/lib/auth';
 import { motion, AnimatePresence } from 'framer-motion';
 import useMobile from '@/hooks/useMobile';
 import { FiMenu, FiX } from 'react-icons/fi';
@@ -29,7 +29,7 @@ export default function DashboardSidebar() {
 
   const { isMobile } = useMobile();
   const [isOpen, setIsOpen] = useState(false);
-  const { user } = useUser();
+  const { user } = useAppUser();
   const pathname = usePathname();
   const [hasMounted, setHasMounted] = useState(false);
   const { activeResume, setActiveSection } = useResumeStore();
@@ -79,7 +79,7 @@ export default function DashboardSidebar() {
         <div className="relative w-8 h-8 shrink-0">
           <div className="absolute inset-0 bg-neutral-800 rounded-full animate-pulse z-0" />
           <div className="relative z-10 w-8 h-8 flex items-center justify-center">
-            <UserButton afterSignOutUrl="/" />
+            <AppUserButton afterSignOutUrl="/" />
           </div>
         </div>
         <div className='flex flex-col overflow-hidden'>
@@ -150,7 +150,7 @@ export default function DashboardSidebar() {
           <div className="relative w-8 h-8">
             <div className="absolute inset-0 bg-neutral-800 rounded-full animate-pulse z-0" />
             <div className="relative z-10 w-8 h-8 flex items-center justify-center">
-              <UserButton afterSignOutUrl="/" />
+              <AppUserButton afterSignOutUrl="/" />
             </div>
           </div>
         </div>

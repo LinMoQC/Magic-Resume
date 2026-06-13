@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useAuth } from '@clerk/nextjs';
+import { useAppAuth } from '@/lib/auth';
 import { Check, Copy, KeyRound, Plus, RefreshCw, Terminal, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -25,7 +25,7 @@ type CloudResumeOption = {
 
 export function McpAccessSection() {
   const { t } = useTranslation();
-  const { isSignedIn } = useAuth();
+  const { isSignedIn } = useAppAuth();
   const [tokens, setTokens] = useState<PersonalAccessToken[]>([]);
   const [resumes, setResumes] = useState<CloudResumeOption[]>([]);
   const [selectedResumeId, setSelectedResumeId] = useState('');

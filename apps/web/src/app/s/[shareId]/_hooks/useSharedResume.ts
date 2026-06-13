@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams } from 'next/navigation';
-import { useAuth, useClerk } from '@clerk/nextjs';
+import { useAppAuth } from '@/lib/auth';
 import { resumeApi } from '@/lib/api/resume';
 import { getMagicTemplateById } from '@magic-resume/resume-templates/config/magic-templates';
 import { mergeTemplateConfig } from '@/lib/utils/templateUtils';
@@ -52,8 +52,7 @@ export function useSharedResume() {
     const [activeCommentId, setActiveCommentId] = useState<string | null>(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    const { userId: currentUserId } = useAuth();
-    const { redirectToSignIn } = useClerk();
+    const { userId: currentUserId, redirectToSignIn } = useAppAuth();
     const isDraggingMarkerRef = useRef(false);
 
     const resumeContainerRef = useRef<HTMLDivElement>(null);

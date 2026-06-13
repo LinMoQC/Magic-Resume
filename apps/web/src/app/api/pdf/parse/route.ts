@@ -1,9 +1,9 @@
-import { auth } from '@clerk/nextjs/server';
+import { getServerUserId } from '@/lib/auth/server';
 
 export async function POST(request: Request) {
   try {
     // 验证用户身份 — 未登录直接拒绝
-    const { userId } = await auth();
+    const userId = await getServerUserId();
     if (!userId) {
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),

@@ -3,14 +3,14 @@
 import { usePathname, useSearchParams } from "next/navigation"
 import { useEffect, Suspense } from "react"
 import { usePostHog } from 'posthog-js/react'
-import { useUser } from '@clerk/nextjs'
+import { useAppUser } from '@/lib/auth'
 import { captureCoreAnalyticsEvent } from '@/lib/analytics/core-events'
 
 function PostHogPageViewContent() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const posthog = usePostHog()
-  const { user } = useUser()
+  const { user } = useAppUser()
 
   useEffect(() => {
     // Track pageview
@@ -28,10 +28,10 @@ function PostHogPageViewContent() {
       captureCoreAnalyticsEvent({
         type: 'page_view',
         path: `${pathname}${searchParams?.toString() ? `?${searchParams.toString()}` : ''}`,
-        userId: user?.id,
+        userId: undefined,
       })
     }
-  }, [pathname, searchParams, posthog, user?.id])
+  }, [pathname, searchParams, posthog, user])
 
   return null
 }

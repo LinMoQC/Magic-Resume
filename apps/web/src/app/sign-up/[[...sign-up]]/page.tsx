@@ -1,9 +1,12 @@
-import { SignUp } from "@clerk/nextjs";
+import { redirect } from 'next/navigation';
+import { isCloudMode } from '@/lib/config/app';
+import { SignUp } from '@clerk/nextjs';
 
 export default function Page() {
+  if (!isCloudMode) redirect('/dashboard');
   return (
     <div className="flex justify-center items-center h-screen">
       <SignUp />
     </div>
   );
-} 
+}

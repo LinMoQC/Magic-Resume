@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronUp, User, Bot, FileText, Copy } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
-import { useUser } from '@clerk/nextjs';
+import { useAppUser } from '@/lib/auth';
 import Image from 'next/image';
 import { EditorComponents } from '@/lib/utils/componentOptimization';
 import { useTranslation } from 'react-i18next';
@@ -26,7 +26,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
   const [showJson, setShowJson] = useState(false);
   const isUser = message.role === 'user';
   const hasJsonData = message.jsonData && typeof message.jsonData === 'object';
-  const { user } = useUser();
+  const { user } = useAppUser();
   const { t } = useTranslation();
 
   const copyJsonToClipboard = async () => {

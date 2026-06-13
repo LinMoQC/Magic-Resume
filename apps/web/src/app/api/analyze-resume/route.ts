@@ -1,8 +1,8 @@
-import { auth } from '@clerk/nextjs/server';
+import { getServerUserId } from '@/lib/auth/server';
 
 export async function POST(request: Request) {
   try {
-    const { userId } = await auth();
+    const userId = await getServerUserId();
     if (!userId) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
     }

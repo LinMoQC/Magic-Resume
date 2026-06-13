@@ -1,16 +1,16 @@
 import { usePostHog } from 'posthog-js/react';
-import { useUser } from '@clerk/nextjs';
+import { useAppUser } from '@/lib/auth';
 import { useCallback } from 'react';
 import { captureCoreAnalyticsEvent } from '@/lib/analytics/core-events';
 
 export const useTrace = () => {
   const posthog = usePostHog();
-  const { user } = useUser();
+  const { user } = useAppUser();
 
   // 获取公共属性 (用户名等)
   const getCommonProps = useCallback(() => {
     return {
-      username: user?.username || user?.fullName || user?.primaryEmailAddress?.emailAddress || 'anonymous',
+      username: user?.fullName || user?.primaryEmailAddress?.emailAddress || 'anonymous',
     };
   }, [user]);
 
@@ -18,12 +18,12 @@ export const useTrace = () => {
     const resumeId = properties?.resume_id || properties?.resumeId;
     captureCoreAnalyticsEvent({
       type,
-      userId: user?.id,
+      userId: undefined,
       source: 'web',
       resumeId: typeof resumeId === 'string' ? resumeId : undefined,
       properties,
     });
-  }, [user?.id]);
+  }, [user]);
 
   // Landing Page - 追踪点击 "Get Started" 按钮
   const traceGetStarted = useCallback(() => {

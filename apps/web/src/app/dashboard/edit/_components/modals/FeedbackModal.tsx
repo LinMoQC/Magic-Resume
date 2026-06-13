@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useTranslation } from "react-i18next";
 import { Loader2, MessageCircle, X, CheckCircle2, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@clerk/nextjs";
+import { useAppAuth } from "@/lib/auth";
 import { feedbackApi } from "@/lib/api/feedback";
 
 
@@ -16,7 +16,7 @@ interface FeedbackModalProps {
 }
 
 export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
-  const { userId } = useAuth();
+  const { userId } = useAppAuth();
   const { t } = useTranslation(); // Note: keys might be missing for error messages
   const [feedback, setFeedback] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);

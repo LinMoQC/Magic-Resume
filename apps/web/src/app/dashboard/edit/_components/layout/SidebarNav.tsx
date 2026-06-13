@@ -1,9 +1,6 @@
 import Link from 'next/link';
 import React from 'react';
-import {
-  UserButton,
-  ClerkLoaded,
-} from "@clerk/nextjs";
+import { AppUserButton } from '@/lib/auth';
 import Image from 'next/image';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/button';
@@ -59,17 +56,7 @@ export default function SidebarNav({ sidebarMenu, handleSidebarClick }: SidebarN
             <Skeleton className="w-8 h-8 rounded-full bg-neutral-800" />
           </div>
           <div className="relative z-10 w-8 h-8 flex items-center justify-center">
-            <ClerkLoaded>
-              <UserButton 
-                afterSignOutUrl="/" 
-                appearance={{ 
-                  elements: { 
-                    rootBox: 'w-8 h-8', 
-                    avatarBox: 'w-8 h-8' 
-                  } 
-                }}
-              />
-            </ClerkLoaded>
+            <AppUserButton afterSignOutUrl="/" />
           </div>
         </div>
       </div>
