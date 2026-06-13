@@ -25,11 +25,13 @@ export interface Notification {
 }
 
 export const notificationsApi = {
+  /** 获取当前用户的所有通知 */
   fetchAll: async (): Promise<Notification[]> => {
     const response = await httpClient.api.get(API_ROUTES.notifications.list);
     return response.data.data;
   },
 
+  /** 将指定通知标记为已读 */
   markAsRead: async (id: string): Promise<Notification> => {
     const response = await httpClient.api.patch(API_ROUTES.notifications.markRead(id), {});
     return response.data.data;

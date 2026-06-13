@@ -38,11 +38,16 @@ const parseHttpError = async (response: Response): Promise<string> => {
 };
 
 export const translateApi = {
+  /** 一次性翻译文本，返回翻译结果及可选的简历 JSON */
   translateText: async (params: TranslateTextParams): Promise<TranslateTextResponse> => {
     const response = await httpClient.agent.post(AGENT_ROUTES.translate.text, params);
     return response.data;
   },
 
+  /**
+   * 流式翻译文本，通过 SSE 逐块回调事件。
+   * 超时限制 300 秒，超时后抛出错误。
+   */
   translateTextStream: async (
     params: TranslateTextParams,
     onEvent: (event: TranslateStreamEvent) => void
