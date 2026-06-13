@@ -31,13 +31,14 @@ export const metadata: Metadata = {
 const AuthWrapper = isCloudMode ? ClerkProvider : Fragment;
 const AuthBridge = isCloudMode ? CloudAuthBridge : Fragment;
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
-  params: { lang }
+  params,
 }: Readonly<{
   children: React.ReactNode;
-  params: { lang: string };
+  params: Promise<{ lang: string }>;
 }>) {
+  const { lang } = await params;
   return (
     <AuthWrapper>
       <AuthBridge>

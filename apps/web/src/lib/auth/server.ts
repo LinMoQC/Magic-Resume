@@ -1,3 +1,4 @@
+import { auth } from '@clerk/nextjs/server';
 import { APP_MODE } from '@/lib/config/app';
 
 /**
@@ -6,10 +7,7 @@ import { APP_MODE } from '@/lib/config/app';
  * Self-hosted mode: always returns 'local' (no auth required).
  */
 export async function getServerUserId(): Promise<string | null> {
-  if (APP_MODE !== 'cloud') {
-    return 'local';
-  }
-  const { auth } = await import('@clerk/nextjs/server');
+  if (APP_MODE !== 'cloud') return 'local';
   const { userId } = await auth();
   return userId ?? null;
 }
