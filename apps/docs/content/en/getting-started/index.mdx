@@ -1,0 +1,37 @@
+---
+title: Getting Started
+description: Pick a path — run locally with no backend, or deploy with Clerk auth and cloud sync.
+---
+
+import { Cards } from 'nextra/components'
+
+# Getting Started
+
+Magic Resume runs in two modes. Pick the one that matches what you want to do.
+
+<Cards>
+  <Cards.Card title="Self-Hosted — run locally, no backend" href="/getting-started/self-hosted" arrow />
+  <Cards.Card title="Cloud Mode — Clerk + sync + sharing" href="/getting-started/cloud" arrow />
+  <Cards.Card title="Deploy to Vercel" href="/getting-started/vercel" arrow />
+</Cards>
+
+## TL;DR
+
+```bash
+git clone https://github.com/LinMoQC/Magic-Resume.git
+cd Magic-Resume
+pnpm install
+cp apps/web/.env.example apps/web/.env.local
+pnpm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) for the app and [http://localhost:3001](http://localhost:3001) for these docs.
+
+## Which mode should I pick?
+
+| You want to… | Mode |
+|---|---|
+| Hack on the codebase | **Self-hosted** — fewer moving parts |
+| Deploy your own multi-tenant Magic Resume | **Cloud** — needs Clerk + the Core API |
+| Try out the MCP integration | Either, but cloud is easier (no need to host the Core API yourself) |
+| Just use the product | Use the hosted app at [magic-resume.cn](https://magic-resume.cn) |

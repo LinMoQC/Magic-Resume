@@ -1,0 +1,37 @@
+---
+title: 快速开始
+description: 选一条路径 —— 无后端本地运行，或部署带 Clerk 鉴权和云端同步的完整版。
+---
+
+import { Cards } from 'nextra/components'
+
+# 快速开始
+
+Magic Resume 有两种运行模式。根据你的目的选择：
+
+<Cards>
+  <Cards.Card title="自托管 —— 本地运行，无需后端" href="/zh/getting-started/self-hosted" arrow />
+  <Cards.Card title="云端模式 —— Clerk 鉴权 + 同步 + 分享" href="/zh/getting-started/cloud" arrow />
+  <Cards.Card title="部署到 Vercel" href="/zh/getting-started/vercel" arrow />
+</Cards>
+
+## 一句话上手
+
+```bash
+git clone https://github.com/LinMoQC/Magic-Resume.git
+cd Magic-Resume
+pnpm install
+cp apps/web/.env.example apps/web/.env.local
+pnpm run dev
+```
+
+打开 [http://localhost:3000](http://localhost:3000) 访问应用，[http://localhost:3001](http://localhost:3001) 访问文档（即本站）。
+
+## 我该选哪种模式？
+
+| 你想做的事 | 模式 |
+|---|---|
+| 改造代码本身 | **自托管** —— 依赖最少 |
+| 部署你自己的多租户 Magic Resume | **云端** —— 需要 Clerk 和 Core API |
+| 试用 MCP 集成 | 都行，但云端更省事（不用自己部署 Core API） |
+| 只是想用产品 | 直接访问托管版 [magic-resume.cn](https://magic-resume.cn) |

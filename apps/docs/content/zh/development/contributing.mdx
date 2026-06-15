@@ -1,0 +1,68 @@
+---
+title: 贡献指南
+description: 如何为 Magic Resume 贡献代码、文档或模板。
+---
+
+import { Callout } from 'nextra/components'
+
+# 贡献指南
+
+Magic Resume 是 MIT 许可的开源项目，欢迎贡献。带着复现、测试和明确"为什么"的 PR 通常会被很快合并。
+
+## 开始之前
+
+- 先在 [Issue 列表](https://github.com/LinMoQC/Magic-Resume/issues) 和 [PR 列表](https://github.com/LinMoQC/Magic-Resume/pulls) 搜一下，避免重复劳动。
+- 比小修小补更大的工作，请先开 Issue 描述方案。这样能省双方一个"谢谢但不收"的尴尬。
+- 新的部署模式、新的鉴权流程、新的本地/云端开关都需要 maintainer 先点头 —— 它们的边界是有意收窄的。
+
+## 工作流
+
+1. Fork 仓库并克隆 fork。
+2. 从 `master` 切一个分支：`git checkout -b feat/<short-name>`。
+3. 在仓库根目录跑 `pnpm install`。
+4. 改代码。保持 diff 聚焦 —— 一个 PR 只解决一件事。
+5. 过一遍质量门槛：`pnpm run lint && pnpm run test`。Husky 的 pre-commit hook 会跑一个子集，但完整扫一遍比拿到红色 CI 便宜。
+6. 提 PR，写清楚 *做了什么* 和 *为什么*。如果有相关 Issue，链上。
+
+## 硬性规则
+
+<Callout type="error">
+**没人让你改 Clerk 鉴权时不要主动改。** 包括 `clerkMiddleware`、`<ClerkProvider>`、`useAuth`，以及 `useResumeStore` 里的云端同步逻辑。云端/自托管的切分依赖它们行为可预测。
+</Callout>
+
+<Callout type="error">
+**不要新增本地/云端开关或部署模式。** 现在的 `NEXT_PUBLIC_APP_MODE` 切分是刻意的。如果你觉得需要第三种模式，先开 Issue 讨论。
+</Callout>
+
+<Callout type="error">
+**`@magic-resume/mcp` 必须保持无浏览器依赖。** 不能有 React、不能有 Next.js、不能有 `window`、不能有 IndexedDB。不小心 import 错了，`node --test` 会抓到你，但希望你自己先抓到。
+</Callout>
+
+## 改的东西归哪里
+
+| 你改的是… | 归哪里 |
+|---|---|
+| 简历数据形状 | `packages/resume-schema`，永远不要内联到 `apps/web` |
+| 一套新模板 | `packages/resume-templates` + 在 `packages/resume-schema` 加新 ID + 在 `apps/web/public/templates/jpg/` 加缩略图 |
+| MCP 工具 | `packages/mcp/src/server.ts`（注册）+ `resume-tools.ts`（逻辑）+ 一条 `node --test` 用例 |
+| API 路径 | `apps/web/src/lib/api/routes.ts` —— 功能代码里不要内联字符串 |
+| 共享工具 | 如果 2+ workspace 用到，放 `packages/utils`；否则就近放 |
+| 文档 | `apps/docs/content/` —— 面向开源开发者，用代码说话，少营销腔 |
+
+为什么是这样的边界，见 [架构总览](/zh/architecture)。
+
+## Commit 风格
+
+Conventional commit，现在时。`git log --oneline` 看一眼就知道：
+
+```
+feat: add JSON Patch preview for MCP
+fix: auto-detect cloud mode from Clerk key
+refactor: centralize API route paths in lib/api/routes.ts
+docs: add JSDoc signatures to all lib/api functions
+chore(deps): bump turbo to 2.5.4
+```
+
+## 许可
+
+提交 PR 即视为同意以 [MIT 协议](https://github.com/LinMoQC/Magic-Resume/blob/master/LICENSE) 提供你的贡献。

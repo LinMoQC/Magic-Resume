@@ -1,0 +1,38 @@
+---
+title: MCP server overview
+description: "@magic-resume/mcp is a native Model Context Protocol server that exposes your resumes to AI coding tools as typed, patch-editable resources."
+---
+
+import { Callout, Cards } from 'nextra/components'
+
+# MCP server
+
+`@magic-resume/mcp` is a [Model Context Protocol](https://modelcontextprotocol.io) server that exposes your resumes to AI coding tools — Claude Code, Cursor, Windsurf, anything that speaks MCP — as typed, patch-editable resources.
+
+Why this exists: pasting a resume JSON blob into an AI prompt is unreliable. The model has to guess the schema, doesn't know which fields are required, and can't validate its own edits. MCP gives the model **structured access** — schema, sample data, JSON Patch validation, atomic apply.
+
+## Design principles
+
+- **Patch-based, not rewrite-based.** Every mutation is a JSON Patch (RFC 6902) applied with `fast-json-patch`. Models don't echo the full resume back to apply a one-line change.
+- **Schema-aware.** Patches are validated against `@magic-resume/resume-schema` *before* they touch storage. Invalid patches are rejected with a structured error the model can read.
+- **No browser dependencies.** The package runs as a Node ESM process and talks to the Core API over HTTP. It has no React, no IndexedDB, no Next.js imports.
+- **PAT auth, not Clerk.** Users issue a Personal Access Token from the web app's Settings page; the MCP server presents that PAT to the Core API. Clerk's JWT flow is browser-only.
+
+<Cards>
+  <Cards.Card title="Setup" href="/mcp/setup" arrow />
+  <Cards.Card title="Tool reference" href="/mcp/tools" arrow />
+  <Cards.Card title="Internals" href="/mcp/internals" arrow />
+</Cards>
+
+## When to use it
+
+| Task | Use MCP? |
+|---|---|
+| "Tailor my resume to this JD" from inside Claude Code | ✅ — model reads the schema, drafts a patch, previews, applies |
+| Bulk-rename a company across multiple resumes | ✅ — `list_resumes` → `update_resume_content` per ID |
+| Build a custom dashboard on top of resume data | ❌ — call the Core API directly with a PAT, no MCP needed |
+| Generate a brand-new resume from scratch | ⚠️ — possible, but consider `defaultResume` + targeted patches instead of one giant patch |
+
+<Callout type="info">
+The MCP server requires a Magic Resume **cloud** account, since it round-trips through the Core API. Self-hosted users can run the Core API themselves to enable this.
+</Callout>

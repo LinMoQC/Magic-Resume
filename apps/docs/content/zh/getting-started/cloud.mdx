@@ -1,0 +1,55 @@
+---
+title: 云端模式
+description: 云端模式如何把 Clerk、Core API、Agent 后端串到 Magic Resume 里。
+---
+
+import { Callout } from 'nextra/components'
+
+# 云端模式
+
+云端模式打开了自托管模式下关闭的三件事：
+
+1. **Clerk 鉴权** —— 必须登录，每个 API 请求都带上 JWT。
+2. **云端同步** —— 简历经过一套 NestJS 写的 **Core API** 往返，附带版本历史和简历分享。
+3. **Python agent 后端** —— 面试、翻译、JD 优化等工具。
+
+## 模式判定逻辑
+
+`apps/web/src/lib/config/app.ts` 解析当前模式：
+
+```ts
+// 伪代码
+const explicit = process.env.NEXT_PUBLIC_APP_MODE
+const hasClerk = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+
+export const APP_MODE =
+  explicit ?? (hasClerk ? 'cloud' : 'self-hosted')
+```
+
+`src/middleware.ts` 在模块加载时根据 APP_MODE 切换 Clerk 的 `clerkMiddleware` 或一个 no-op handler。**没有运行时开关** —— 模式在构建时就定死了。
+
+<Callout type="warning">
+如果你设了 `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` 但忘了 Core API URL，应用仍然会以云端模式启动，所有鉴权请求都会 404。两个一起设，或者两个都别设。
+</Callout>
+
+## 环境变量
+
+| 变量 | 是否必需（云端） | 作用 |
+|---|---|---|
+| `NEXT_PUBLIC_APP_MODE` | 可选 | `cloud`。如果存在 Clerk Key，会自动判定为 `cloud`。 |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | 是 | Clerk 公钥。也是触发云端自动判定的标志。 |
+| `CLERK_SECRET_KEY` | 是 | Clerk 服务端密钥。 |
+| `NEXT_PUBLIC_CLOUD_API_URL` | 是 | NestJS Core API 基础 URL（默认 `http://localhost:3111`）。 |
+| `BACKEND_URL` | 可选 | Python agent 基础 URL（默认 `http://localhost:8000`）。 |
+
+## 后端服务
+
+Core API 和 Python agent 是 **单独的仓库**，不在本 monorepo 内。本地开发云端模式需要把它们也跑起来，一般指向 `localhost:3111` 和 `localhost:8000`。如果你只想改前端，自托管模式更快。
+
+## 鉴权流程
+
+- Clerk 在登录时签发一个 JWT。
+- `apps/web/src/lib/api/httpClient.ts` 在 Axios 请求拦截器里（`configureHttpClient`）把这个 JWT 作为 `Bearer` token 附上。
+- `httpClient.api`（Core API）和 `httpClient.agent`（Python 后端）共用同一个拦截器 —— 你不应该手动传 token。
+
+完整的请求路径见 [架构 → HTTP 客户端](/zh/architecture/http-clients)。

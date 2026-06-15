@@ -47,7 +47,6 @@ next-env.d.ts
 .env.local
 
 .playwright-mcp
-docs
 .turbo
 dist
 node_modules

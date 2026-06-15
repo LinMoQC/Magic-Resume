@@ -1,0 +1,82 @@
+---
+title: Tool reference
+description: Every MCP tool exposed by @magic-resume/mcp, what it does, and when to use it.
+---
+
+import { Callout } from 'nextra/components'
+
+# Tool reference
+
+All resume mutations are JSON Patch (RFC 6902) — surgical edits, never full rewrites. AI tools should typically `get_resume_schema` once per session, then `preview_resume_patch` before each `update_resume_content` to catch validation errors before they cost a retry.
+
+## Read
+
+### `list_resumes`
+
+Returns `{ id, title, updatedAt, templateId }` for every resume in the authenticated account.
+
+**Use when:** the user references "my resume" without specifying which one, and you need to disambiguate.
+
+### `get_resume`
+
+```ts
+get_resume({ id?: string, title?: string }) → Resume
+```
+
+Fetch one resume by `id` or by `title` (case-insensitive). Exactly one of the two is required.
+
+**Use when:** you need to read fields before patching, or to render context for the model.
+
+### `get_resume_schema`
+
+Returns the JSON Schema for the `Resume` shape (the same artifact `@magic-resume/resume-schema` emits to `dist/schema.json`).
+
+**Use when:** the model needs to know what fields exist, which are required, and what enums are valid. Cache it for the session.
+
+### `get_resume_editing_guide`
+
+Returns a natural-language guide describing how to construct valid patches — common pitfalls, field semantics, ordering rules.
+
+**Use when:** before the first mutation in a session. This is the difference between a model that drafts good patches and one that round-trips three times.
+
+## Patch
+
+### `preview_resume_patch`
+
+```ts
+preview_resume_patch({ resumeId, patch }) → {
+  ok: boolean,
+  result?: Resume,
+  errors?: ZodIssue[],
+}
+```
+
+Applies the patch in-memory and returns the resulting resume **without** persisting. Validates against the Zod schema.
+
+**Use when:** always, before `update_resume_content`. Cheap, no side effects.
+
+### `update_resume_content`
+
+```ts
+update_resume_content({ resumeId, patch }) → Resume
+```
+
+Applies the patch, validates it against the schema, and persists to the Core API. The new resume is returned. Failures throw with a structured error.
+
+<Callout type="warning">
+This is the only mutating tool. If a model asks to "rewrite" or "replace" a resume, that's still a patch — typically a `replace` op on the section root. There is no `set_resume_content` endpoint.
+</Callout>
+
+## Patch shape
+
+Patches follow [RFC 6902](https://www.rfc-editor.org/rfc/rfc6902):
+
+```json
+[
+  { "op": "replace", "path": "/basics/name", "value": "Ada Lovelace" },
+  { "op": "add",     "path": "/experience/-", "value": { /* ... */ } },
+  { "op": "remove",  "path": "/skills/2" }
+]
+```
+
+The patch is applied with `fast-json-patch` and then the **whole resulting document** is parsed with `resumeSchema`. A partially valid patch is rejected entirely — there's no "best effort" mode.

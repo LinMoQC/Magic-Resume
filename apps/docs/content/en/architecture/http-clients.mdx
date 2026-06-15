@@ -1,0 +1,81 @@
+---
+title: HTTP clients
+description: The two Axios instances, the shared auth interceptor, and where routes are centralized.
+---
+
+import { Callout } from 'nextra/components'
+
+# HTTP clients
+
+`apps/web/src/lib/api/httpClient.ts` exposes two Axios instances that share a single auth interceptor. All network calls from the web app go through one of these — never `fetch` directly, never a fresh Axios instance per feature.
+
+## The two clients
+
+```ts
+import { httpClient } from '@/lib/api/httpClient'
+
+httpClient.api      // → NestJS Core API   (default http://localhost:3111)
+httpClient.agent    // → Python agent      (default http://localhost:8000)
+```
+
+| Client | Base URL env | Used for |
+|---|---|---|
+| `httpClient.api` | `NEXT_PUBLIC_CLOUD_API_URL` | Resumes, version history, sharing, users |
+| `httpClient.agent` | `BACKEND_URL` | Interview, translate, JD-optimize, AI analyze |
+
+Both are plain Axios instances. The split exists because the two backends have **different auth contracts** (the Core API expects a Clerk JWT; the agent forwards it but also accepts BYOK headers) and different rate-limit and CORS profiles.
+
+## Auth interceptor
+
+`configureHttpClient(getToken)` registers a single request interceptor on both clients:
+
+```ts
+// pseudo-code
+configureHttpClient(async () => clerk.session?.getToken())
+```
+
+The interceptor:
+
+1. Calls the provided `getToken` (Clerk's `useAuth().getToken` in the app).
+2. Sets `Authorization: Bearer <jwt>` if a token came back.
+3. Lets the request through unchanged otherwise.
+
+<Callout type="warning">
+Don't pass tokens manually in feature code. If you find yourself writing `httpClient.api.get(url, { headers: { Authorization: ... } })`, the interceptor isn't wired in that context — fix the wiring, don't bypass it.
+</Callout>
+
+## Centralized routes
+
+API paths live in `src/lib/api/routes.ts`:
+
+```ts
+export const API_ROUTES = {
+  resume: {
+    list: '/v1/resumes',
+    detail: (id: string) => `/v1/resumes/${id}`,
+    patch: (id: string) => `/v1/resumes/${id}/patch`,
+    // ...
+  },
+  // ...
+}
+
+export const AGENT_ROUTES = {
+  interview: '/agent/interview',
+  translate: '/agent/translate',
+  // ...
+}
+```
+
+Two rules:
+
+1. **Every Core API path must live in `API_ROUTES`.** No inline strings.
+2. **Agent paths live in `AGENT_ROUTES`.** They're versioned separately from the Core API.
+
+This is what makes a backend route rename a one-file PR instead of a grep-and-pray.
+
+## Adding a new endpoint
+
+1. Add the path to `API_ROUTES` or `AGENT_ROUTES`.
+2. Add a typed wrapper in `src/lib/api/<feature>.ts` that returns a typed response.
+3. Use `httpClient.api` or `httpClient.agent` — never `axios.create()` a third client.
+4. If the feature is cloud-only, gate the caller on `APP_MODE === 'cloud'`.

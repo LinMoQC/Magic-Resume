@@ -1,0 +1,82 @@
+---
+title: 工具参考
+description: "@magic-resume/mcp 暴露的每一个工具，它们做什么、什么时候用。"
+---
+
+import { Callout } from 'nextra/components'
+
+# 工具参考
+
+所有简历 mutation 都是 JSON Patch（RFC 6902）—— 外科手术式编辑，绝不整片重写。AI 工具一般每会话调一次 `get_resume_schema`，每次 `update_resume_content` 之前先调 `preview_resume_patch` 校验，避免一次失败导致整轮重来。
+
+## 读
+
+### `list_resumes`
+
+返回当前账号下每份简历的 `{ id, title, updatedAt, templateId }`。
+
+**何时用：** 用户说"我的简历"但没指明哪一份，需要消歧时。
+
+### `get_resume`
+
+```ts
+get_resume({ id?: string, title?: string }) → Resume
+```
+
+按 `id` 或 `title`（不区分大小写）取一份简历。两者必须提供其一。
+
+**何时用：** 在 patch 之前要读字段，或要给模型展开上下文时。
+
+### `get_resume_schema`
+
+返回 `Resume` 形状的 JSON Schema（也就是 `@magic-resume/resume-schema` 输出到 `dist/schema.json` 的那份）。
+
+**何时用：** 模型需要知道有哪些字段、哪些是必填、哪些是 enum 时。每会话缓存即可。
+
+### `get_resume_editing_guide`
+
+返回一份自然语言指南，描述如何构造合法的 patch —— 常见坑、字段语义、顺序要求。
+
+**何时用：** 一个会话里第一次准备修改前。它直接决定模型是一次起草出好 patch，还是来回往返三次。
+
+## Patch
+
+### `preview_resume_patch`
+
+```ts
+preview_resume_patch({ resumeId, patch }) → {
+  ok: boolean,
+  result?: Resume,
+  errors?: ZodIssue[],
+}
+```
+
+在内存里应用 patch 并返回结果简历，**不会** 落地。会用 Zod Schema 校验。
+
+**何时用：** 永远。在 `update_resume_content` 之前调它。便宜，无副作用。
+
+### `update_resume_content`
+
+```ts
+update_resume_content({ resumeId, patch }) → Resume
+```
+
+应用 patch、用 Schema 校验、落地到 Core API。返回新的简历。失败时抛出结构化错误。
+
+<Callout type="warning">
+这是唯一会改数据的工具。如果模型说"重写"或"替换"一份简历，那也仍然是一个 patch —— 一般是在 section 根做一次 `replace`。没有 `set_resume_content` 这种接口。
+</Callout>
+
+## Patch 形状
+
+Patch 遵循 [RFC 6902](https://www.rfc-editor.org/rfc/rfc6902)：
+
+```json
+[
+  { "op": "replace", "path": "/basics/name", "value": "Ada Lovelace" },
+  { "op": "add",     "path": "/experience/-", "value": { /* ... */ } },
+  { "op": "remove",  "path": "/skills/2" }
+]
+```
+
+Patch 由 `fast-json-patch` 应用，然后整份结果文档被 `resumeSchema` 重新解析。"部分合法"的 patch 会被整片拒绝 —— 没有"尽力而为"模式。

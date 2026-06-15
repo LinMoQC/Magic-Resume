@@ -1,0 +1,59 @@
+---
+title: 部署模式
+description: NEXT_PUBLIC_APP_MODE 如何在自托管和云端之间切换应用。
+---
+
+import { Callout } from 'nextra/components'
+
+# 部署模式
+
+Web 应用通过 `NEXT_PUBLIC_APP_MODE` 选择两种模式之一。选择是 **构建时烤进去的** —— 没有运行时开关。
+
+| | `self-hosted` | `cloud` |
+|---|---|---|
+| 默认？ | 是 | 仅当存在 Clerk Key 时 |
+| 鉴权 | 无 | Clerk（middleware + `<ClerkProvider>`） |
+| 存储 | 仅 IndexedDB | IndexedDB + Core API |
+| AI Lab（面试/翻译/分析） | 除非接 `BACKEND_URL`，否则禁用 | 启用 |
+| 分享和版本历史 | 仅本地 | 服务端支撑 |
+| 同步状态指示 | `local` | `saved` / `syncing` / `modified` / `error` |
+
+## 判定方式
+
+`apps/web/src/lib/config/app.ts` 在模块加载时推导模式：
+
+- 如果显式设了 `NEXT_PUBLIC_APP_MODE` → 用它。
+- 否则，如果设了 `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` → `cloud`。
+- 否则 → `self-hosted`。
+
+`apps/web/src/middleware.ts` 在 import 时挑对应的 middleware：
+
+```ts
+// 伪代码，见 middleware.ts
+export default APP_MODE === 'cloud'
+  ? clerkMiddleware(/* ... */)
+  : () => NextResponse.next()
+```
+
+因为 Next.js middleware 是按构建打包的，**切换模式需要重新构建**，不能只是在运行中的服务器上改环境变量。
+
+## 为什么用 flag，而不是两套应用？
+
+两种模式下跑的是同一棵 React 树、同一个 store、同一组路由。再做一个独立应用只会让维护面翻倍，行为却不会增加。Flag 模式保住了：
+
+- 一个模板库
+- 一个编辑器状态机
+- 一套组件
+
+…而只在 **边缘** 做切换：鉴权 middleware、同步副作用、AI Lab 可见性。
+
+<Callout type="warning">
+没有充足理由，不要新增其他运行时模式开关或本地/云端分支。现在的边界是有意收窄的。详见 [贡献指南](/zh/development/contributing)。
+</Callout>
+
+## 加一个云端专属功能
+
+1. 在 UI 层用 `APP_MODE === 'cloud'` 做开关（如果只针对某些自带 Clerk 的用户，用更精确的 capability flag）。
+2. 网络调用走 `httpClient.api`，让鉴权拦截器处理 token。
+3. 自托管下要优雅降级 —— 空状态，不要崩溃。
+4. 如果需要新的配置项，在 [云端模式](/zh/getting-started/cloud) 的环境变量表里加一行。

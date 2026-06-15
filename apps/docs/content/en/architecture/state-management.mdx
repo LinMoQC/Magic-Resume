@@ -1,0 +1,59 @@
+---
+title: State management
+description: Zustand stores, Immer drafts, IndexedDB persistence, and how cloud sync ties in.
+---
+
+import { Callout } from 'nextra/components'
+
+# State management
+
+State lives in **Zustand** stores under `apps/web/src/store/`. Every store uses the Immer middleware so reducers read like mutation. IndexedDB is the persistence layer (`MagicResumeDB` via `src/lib/api/IndexDBClient.ts`).
+
+## Stores
+
+| Store | File | Responsibility |
+|---|---|---|
+| `useResumeStore` | `useResumeStore.ts` | The current resume, all CRUD, sync state. The big one. |
+| `useResumeDraftStore` | `useResumeDraftStore.ts` | Edit-time draft buffer separate from saved resume. |
+| `useSettingStore` | `useSettingStore.ts` | User settings, AI key (BYOK), `cloudSync` toggle. |
+| `useResumeAnalyzerStore` | `useResumeAnalyzerStore.ts` | State for the resume-analyze AI flow. |
+| `useResumeOptimizerStore` | `useResumeOptimizerStore.ts` | State for the JD-optimize AI flow. |
+| `useMessageStore` | `useMessageStore.ts` | UI toast/notification queue. |
+
+## The big store: `useResumeStore`
+
+This holds the active resume plus a `syncStatus` machine:
+
+```
+'local'     ← self-hosted, never tried to sync
+'modified'  ← edited since last successful sync
+'syncing'   ← request in flight
+'saved'     ← cloud + local are in agreement
+'error'     ← last sync failed; retried on next mutation
+```
+
+Reads always hit memory. Writes:
+
+1. Update the in-memory state (Immer).
+2. Persist to IndexedDB synchronously-after-render.
+3. If cloud mode **and** `useSettingStore.cloudSync` is on, schedule a debounced push to the Core API.
+
+The store does not maintain a separate "dirty fields" map — the sync diff is computed at push time. This keeps the store boring and makes undo/redo easier to reason about.
+
+<Callout type="info">
+The cloud sync side-effect runs only when both `APP_MODE === 'cloud'` and the user opted in via Settings. Self-hosted users never trigger a network request from the store.
+</Callout>
+
+## IndexedDB layer
+
+`src/lib/api/IndexDBClient.ts` is a thin wrapper around `idb-keyval`. Keys are namespaced per store (e.g. `resume:current`, `resume:history:<id>`).
+
+When you add a new persisted field, add a versioned migration if the shape changes. Silent shape drift will surface as runtime errors weeks later when an old browser tab opens.
+
+## Why Zustand?
+
+Three reasons:
+
+- **No provider boilerplate.** Stores are imported directly; no `<Provider>` chain.
+- **Selector subscriptions.** Components subscribe to slices, not the whole store, so editing one field doesn't re-render the whole tree.
+- **Easy to bridge to non-React.** The MCP package, e2e helpers, and AI flows reuse the same `Resume` type from `@magic-resume/resume-schema` without dragging React along.

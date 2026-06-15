@@ -1,0 +1,86 @@
+---
+title: 配置
+description: 配置 MCP 服务器，并把它注册到 Claude Code、Cursor 或任意 MCP 客户端。
+---
+
+import { Callout, Steps, Tabs } from 'nextra/components'
+
+# 配置
+
+MCP 服务器以 stdio 子进程形式由你的 AI 工具拉起。两步：先一次性配凭据，再把启动命令告诉每个 AI 工具。
+
+<Steps>
+
+### 签发个人访问令牌（PAT）
+
+在 Web 应用里：**设置 → 个人访问令牌 → 新建**。复制 `mr_pat_…` 的值 —— 只显示一次。请像对待密码一样对待它：它有读写你全部简历的权限。
+
+### 配置 MCP 服务器
+
+```bash
+npx -y @magic-resume/mcp config set \
+  --api-url "https://api.magic-resume.cn" \
+  --pat "mr_pat_xxx"
+```
+
+这会写入 `~/.magic-resume/mcp.json`。如果你本地跑 Core API，把 `--api-url` 指向它（默认开发地址 `http://localhost:3111`）。
+
+### 注册到你的 AI 工具
+
+<Tabs items={['Claude Code', 'Cursor', '手动 / Windsurf']}>
+<Tabs.Tab>
+```bash
+claude mcp add magic-resume -- npx -y @magic-resume/mcp mcp
+```
+这会把 Magic Resume 加进用户级 MCP 列表。重启 Claude Code 让它读到新服务器。
+</Tabs.Tab>
+<Tabs.Tab>
+打开 `~/.cursor/mcp.json`（没有就创建），加：
+
+```json
+{
+  "mcpServers": {
+    "magic-resume": {
+      "command": "npx",
+      "args": ["-y", "@magic-resume/mcp", "mcp"]
+    }
+  }
+}
+```
+</Tabs.Tab>
+<Tabs.Tab>
+任何支持 stdio MCP 服务器的客户端都可以拉起它：
+
+```bash
+npx -y @magic-resume/mcp mcp
+```
+
+服务器通过 stdin/stdout 说标准 MCP 协议 —— 不需要传任何标志。
+</Tabs.Tab>
+</Tabs>
+
+### 验证
+
+在 AI 工具里问一句：*"列一下我的 Magic Resume 简历。"* 模型应该调 `list_resumes` 并返回你的列表。如果报错，跑 `npx -y @magic-resume/mcp config print` 确认 API URL 和 PAT 没填错。
+
+</Steps>
+
+<Callout type="info">
+MCP 服务器通过 **stdio** 通信 —— 它不开端口、不监听 socket、不走 SSE。AI 工具把它作为子进程拉起，会话结束时关掉。
+</Callout>
+
+## 更新
+
+因为命令是 `npx -y @magic-resume/mcp mcp`，每次 AI 工具启动都会拉最新版。要钉死某个版本：
+
+```bash
+claude mcp add magic-resume -- npx -y @magic-resume/mcp@0.1.0 mcp
+```
+
+## 重置凭据
+
+```bash
+npx -y @magic-resume/mcp config clear
+```
+
+这会删掉 `~/.magic-resume/mcp.json`。如果 PAT 泄漏了，记得也在 Web 应用里吊销那个 PAT。

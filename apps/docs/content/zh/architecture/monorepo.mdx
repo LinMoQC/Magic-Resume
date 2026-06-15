@@ -1,0 +1,66 @@
+---
+title: 单仓结构
+description: Workspace、包之间的边界，以及谁能 import 谁。
+---
+
+import { Callout } from 'nextra/components'
+
+# 单仓结构
+
+Magic Resume 是一个 **pnpm + Turborepo** monorepo。包管理器在根 `package.json` 里钉死为 `pnpm@10.28.1`，这样 CI 和本地安装行为保持一致。
+
+## Workspace 列表
+
+| 路径 | 包名 | 角色 |
+|---|---|---|
+| `apps/web` | `@magic-resume/web` | Next.js 15 App Router 前端，实际产品。 |
+| `apps/docs` | `@magic-resume/docs` | 本站，Nextra 4 + Next.js 15。 |
+| `packages/mcp` | `@magic-resume/mcp` | stdio MCP 服务器 + CLI，Node ESM，发到 npm。 |
+| `packages/resume-schema` | `@magic-resume/resume-schema` | Zod Schema、类型、样例数据、JSON Schema 导出。 |
+| `packages/resume-templates` | `@magic-resume/resume-templates` | 模板 DSL、渲染器、注册表。 |
+| `packages/env` | `@magic-resume/env` | `APP_MODE` 判定辅助。 |
+| `packages/utils` | `@magic-resume/utils` | 跨 workspace 的工具函数（cn、color、logger、time）。 |
+| `packages/tsconfig` | `@magic-resume/tsconfig` | 共享 TypeScript 配置。 |
+
+## 包边界
+
+这些规则靠 code review 来执行，工具不强约束。请遵守：
+
+<Callout type="error">
+**`@magic-resume/mcp` 不能引入：**
+- Next.js 或任何 React 组件库
+- 浏览器 API（`window`、`localStorage`、`IndexedDB`）
+- `apps/web` 里的任何东西
+
+它是一个纯 Node ESM 库 + CLI。如果不小心引了浏览器侧的东西，`node --test` 会直接挂、`npm publish` 也会出问题。
+</Callout>
+
+- `apps/web` 可以依赖任意 `packages/*`。
+- `packages/resume-templates` 依赖 `packages/resume-schema`。反过来不行 —— Schema 是叶子节点。
+- `packages/mcp` 依赖 `packages/resume-schema` 和 `packages/resume-templates`，不依赖 `apps/*`。
+- 新的共享形状放进 `packages/resume-schema`，不要在 `apps/web` 里再复制一份。
+
+## Turborepo
+
+根 `package.json` 把所有命令都过一遍 Turbo：
+
+```bash
+pnpm run dev     # turbo dev    —— 并行跑所有 workspace 的 dev
+pnpm run build   # turbo build  —— 尊重任务依赖
+pnpm run lint    # turbo lint
+pnpm run test    # turbo test
+```
+
+只想跑单个 workspace 时，绕过 Turbo，用 pnpm filter：
+
+```bash
+pnpm --filter @magic-resume/web dev
+pnpm --filter @magic-resume/resume-schema test
+pnpm --filter @magic-resume/mcp build
+```
+
+## `workspace:*` 协议
+
+所有跨 workspace 依赖在 `package.json` 里都写成 `workspace:*`。这意味着 **必须从仓库根目录运行 `pnpm install`**，不能在 workspace 内部跑，否则 pnpm 解析不出 link。
+
+发布 `@magic-resume/mcp` 时，pnpm 会在打包时把 `workspace:*` 改写成真实的 semver 版本 —— 不用手动 bump。

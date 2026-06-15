@@ -1,0 +1,113 @@
+---
+title: 模板系统
+description: Magic Template DSL、注册表，以及如何添加一套新模板。
+---
+
+import { Callout, Steps } from 'nextra/components'
+
+# 模板系统
+
+模板住在 `packages/resume-templates` 里。一个模板是一个 `MagicTemplateDSL` 值 —— 描述 design token、布局、按 section 渲染规则的声明式数据。本包里的渲染器把"一个 DSL 值 + 一份 `Resume`"渲染成 JSX。
+
+也就是说，模板是 **数据**，不是组件。Web 应用和 PDF 导出共用一套渲染器。
+
+## 一个模板长什么样
+
+```ts
+import type { MagicTemplateDSL } from '@magic-resume/resume-templates'
+
+const myTemplate: MagicTemplateDSL = {
+  id: 'my-template',
+  name: 'My Template',
+  designTokens: {
+    fontFamily: '...',
+    colors: { primary: '...', text: '...', muted: '...' },
+    spacing: { /* ... */ },
+  },
+  layout: {
+    columns: 'single' | 'two',
+    headerStyle: 'inline' | 'stacked',
+  },
+  sections: {
+    basics: { /* 渲染配置 */ },
+    experience: { /* 渲染配置 */ },
+    // ...
+  },
+}
+```
+
+渲染器按 `sections` 的顺序遍历，查找 `Resume` 中对应的子值，然后渲染。没在 `sections` 里出现的 section 在这套模板下就不会渲染。
+
+## 注册表
+
+所有模板在 `packages/resume-templates/src/registry.ts` 里注册：
+
+```ts
+export const templateRegistry: Record<TemplateId, MagicTemplateDSL> = {
+  classic: classicTemplate,
+  modern:  modernTemplate,
+  // ...
+}
+```
+
+模板 ID **必须与** `packages/resume-schema` 中的 `templateIds` 完全一致。Schema 的 Zod enum 校验 `selectedTemplate` 字段 —— 漂移会让保存过的简历校验失败。
+
+## 加一套新模板
+
+<Steps>
+
+### 在 Schema 里加 ID
+
+在 `packages/resume-schema/src/` 里，把新 ID 追加到 `templateIds` 元组。
+
+### 写 DSL 配置
+
+在 `packages/resume-templates/src/config/` 下加一个新文件，导出 `MagicTemplateDSL`。从布局形状最接近的现有模板开始改。
+
+### 注册它
+
+```ts
+// packages/resume-templates/src/registry.ts
+import { myTemplate } from './config/myTemplate'
+
+export const templateRegistry = {
+  // ...existing,
+  'my-template': myTemplate,
+}
+```
+
+### 加缩略图
+
+把一张 JPEG 放在：
+
+```
+apps/web/public/templates/jpg/my-template.jpg
+```
+
+模板库按 ID 取图；文件名必须与模板 ID 完全相同。
+
+### 重新构建
+
+```bash
+pnpm --filter @magic-resume/resume-schema build
+pnpm --filter @magic-resume/resume-templates build
+```
+
+</Steps>
+
+<Callout type="warning">
+三个地方必须同步：Schema 里的 `templateIds`、resume-templates 里的 `templateRegistry`、`apps/web/public/templates/jpg/` 里的缩略图文件名。任何一个缺失都会以 404 或 Zod 校验错的形式浮出来。
+</Callout>
+
+## TemplateCustomizer
+
+`@magic-resume/resume-templates/TemplateCustomizer` 是一个子导出 —— Web 应用嵌入它，让用户在不 fork DSL 的前提下调整模板的 design token。如果你新增了 token，也要在这里加对应的控件。
+
+## 渲染流水线
+
+```
+Resume + TemplateDSL ─▶ renderer (React) ─▶ DOM（编辑器预览）
+                                         └─▶ html-to-pdf → PDF 导出
+```
+
+预览和 PDF 走同一个渲染器。预览能跑通的，导出也能跑通；预览挂的，导出也会挂。
