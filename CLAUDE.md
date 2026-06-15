@@ -105,6 +105,12 @@ Copy `apps/web/.env.example` to `apps/web/.env.local`.
 | `NEXT_PUBLIC_CLOUD_API_URL` | Cloud | Browser-facing NestJS Core API |
 | `BACKEND_URL` | AI features | Python agent server (interview, translate, AI optimize) |
 
+## Commit messages
+
+This repo enforces gitmoji + conventional-type commits via Husky `commit-msg` → `commitlint`.
+
+Format: `<emoji> <type>(<scope>?): <subject>` — e.g. `:sparkles: feat(web): add resume share link generator`. Type must be one of `build|ci|chore|docs|feat|fix|perf|refactor|revert|style|test|wip`. See `.claude/skills/commit/SKILL.md` for the emoji map, examples, and the dry-run command. **Do not use `--no-verify`** — fix the message instead.
+
 ## Guardrails
 
 - Do not modify Clerk auth (`clerkMiddleware`, `ClerkProvider`, `useAuth`, cloud sync) unless explicitly requested.
