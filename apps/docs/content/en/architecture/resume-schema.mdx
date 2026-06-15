@@ -1,0 +1,71 @@
+---
+title: Resume schema
+description: The Zod-typed source of truth for what a resume is.
+---
+
+import { Callout } from 'nextra/components'
+
+# Resume schema
+
+`@magic-resume/resume-schema` is the single source of truth for the resume data shape. The web app, the MCP server, every template, and every AI tool all conform to it. If a field isn't in the schema, it doesn't exist.
+
+## Exports
+
+```ts
+import {
+  resumeSchema,      // Zod schema (validate at runtime)
+  type Resume,       // inferred TS type
+  defaultResume,     // blank resume with required fields
+  sampleResume,      // populated example for screenshots / tests
+  templateIds,       // readonly tuple of valid template IDs
+  templateSchema,    // Zod enum derived from templateIds
+  resumeJsonSchema,  // JSON Schema (used by MCP resources)
+} from '@magic-resume/resume-schema'
+```
+
+All sub-schemas (`basicsSchema`, `experienceSchema`, etc.) are also exported individually so callers can validate one section in isolation.
+
+## Build output
+
+The build step does **two** things:
+
+1. `tsc` produces `dist/` with type declarations.
+2. `scripts/write-schema.mjs` emits `dist/schema.json` — a static JSON Schema artifact.
+
+`dist/schema.json` is what the MCP server serves as a resource, so AI tools can introspect the resume shape without a runtime call.
+
+## Patch flow
+
+Mutations are JSON Patch (RFC 6902) operations. The roundtrip:
+
+```
+   client patch ──▶ resumeSchema.safeParse(applyPatch(current, ops))
+                       │
+                       ▼
+                   ok? ──▶ commit to store / write to API
+                   no  ──▶ reject the patch, return validation error
+```
+
+This applies to **both** the web editor and MCP tools — the editor produces patches too, it's not a separate code path.
+
+<Callout type="info">
+The MCP server has `preview_resume_patch` for exactly this validation loop without mutating state. Use it from AI tools before applying anything destructive.
+</Callout>
+
+## Adding a new field
+
+1. Add it to the right sub-schema in `packages/resume-schema/src/`.
+2. Update `defaultResume` and `sampleResume` if it's required.
+3. Rebuild: `pnpm --filter @magic-resume/resume-schema build`.
+4. Update consuming templates in `packages/resume-templates` and the editor form in `apps/web/src/components/editor/`.
+5. If the field affects AI editing, add guidance to `get_resume_editing_guide` in `packages/mcp/src/resume-tools.ts`.
+
+## Adding a new template ID
+
+Template IDs are part of the schema (`templateSchema` is a Zod enum over `templateIds`). When you add a new one, three things must stay in lockstep:
+
+1. `templateIds` in `packages/resume-schema`
+2. `templateRegistry` in `packages/resume-templates/src/registry.ts`
+3. A thumbnail at `apps/web/public/templates/jpg/{id}.jpg`
+
+Missing any of these causes a runtime error somewhere downstream — the editor will offer a template that doesn't render, or the schema will reject a valid resume.

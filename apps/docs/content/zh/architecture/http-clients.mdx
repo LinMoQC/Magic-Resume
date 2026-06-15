@@ -1,0 +1,81 @@
+---
+title: HTTP 客户端
+description: 两个 Axios 实例、共享的鉴权拦截器，以及路由集中存放的位置。
+---
+
+import { Callout } from 'nextra/components'
+
+# HTTP 客户端
+
+`apps/web/src/lib/api/httpClient.ts` 暴露两个 Axios 实例，共享同一个鉴权拦截器。Web 应用所有网络调用都走它们 —— 不要直接 `fetch`，不要为某个功能再 `axios.create()` 一个。
+
+## 两个客户端
+
+```ts
+import { httpClient } from '@/lib/api/httpClient'
+
+httpClient.api      // → NestJS Core API   (默认 http://localhost:3111)
+httpClient.agent    // → Python agent      (默认 http://localhost:8000)
+```
+
+| 客户端 | Base URL 环境变量 | 用途 |
+|---|---|---|
+| `httpClient.api` | `NEXT_PUBLIC_CLOUD_API_URL` | 简历、版本历史、分享、用户 |
+| `httpClient.agent` | `BACKEND_URL` | 面试、翻译、JD 优化、AI 分析 |
+
+它们都是普通 Axios 实例。分成两个是因为两个后端 **鉴权契约不同**（Core API 期望 Clerk JWT；agent 会转发 JWT 但也接受自带 Key 头），并且限流和 CORS 策略也不同。
+
+## 鉴权拦截器
+
+`configureHttpClient(getToken)` 在两个客户端上注册同一个请求拦截器：
+
+```ts
+// 伪代码
+configureHttpClient(async () => clerk.session?.getToken())
+```
+
+拦截器：
+
+1. 调用传入的 `getToken`（应用里就是 Clerk 的 `useAuth().getToken`）。
+2. 如果拿到 token，设 `Authorization: Bearer <jwt>`。
+3. 否则原样放行。
+
+<Callout type="warning">
+功能代码里不要手动传 token。如果你发现自己在写 `httpClient.api.get(url, { headers: { Authorization: ... } })`，说明拦截器在这个上下文没接好 —— 去修接线，别绕过它。
+</Callout>
+
+## 集中存路由
+
+API 路径放在 `src/lib/api/routes.ts`：
+
+```ts
+export const API_ROUTES = {
+  resume: {
+    list: '/v1/resumes',
+    detail: (id: string) => `/v1/resumes/${id}`,
+    patch: (id: string) => `/v1/resumes/${id}/patch`,
+    // ...
+  },
+  // ...
+}
+
+export const AGENT_ROUTES = {
+  interview: '/agent/interview',
+  translate: '/agent/translate',
+  // ...
+}
+```
+
+两条规则：
+
+1. **每个 Core API 路径必须放在 `API_ROUTES` 里。** 不允许内联字符串。
+2. **Agent 路径放在 `AGENT_ROUTES` 里。** 它们独立于 Core API 演进。
+
+这让"后端改路由"从"全仓 grep + 祈祷"变成一份单文件 PR。
+
+## 加一个新接口
+
+1. 把路径加到 `API_ROUTES` 或 `AGENT_ROUTES`。
+2. 在 `src/lib/api/<feature>.ts` 里加一个带类型的封装，返回类型化响应。
+3. 用 `httpClient.api` 或 `httpClient.agent` —— 不要再 `axios.create()` 第三个客户端。
+4. 如果是云端专属功能，在调用侧用 `APP_MODE === 'cloud'` 做开关。

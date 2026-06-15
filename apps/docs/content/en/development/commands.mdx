@@ -1,0 +1,72 @@
+---
+title: Commands
+description: Every pnpm and turbo command worth remembering.
+---
+
+# Commands
+
+A reference of every command worth remembering. All paths are relative to the repo root.
+
+## Whole-repo (Turbo)
+
+```bash
+pnpm install      # install all deps, resolve workspace links
+pnpm run dev      # turbo dev — every workspace's dev script
+pnpm run build    # turbo build — respects task dependencies
+pnpm run lint     # turbo lint
+pnpm run test     # turbo test
+```
+
+## Single workspace (pnpm filter)
+
+```bash
+pnpm --filter @magic-resume/web dev
+pnpm --filter @magic-resume/web dev:turbo       # Turbopack variant
+pnpm --filter @magic-resume/web build
+pnpm --filter @magic-resume/web lint
+pnpm --filter @magic-resume/web i18n:check
+
+pnpm --filter @magic-resume/docs dev            # this site, port 3001
+pnpm --filter @magic-resume/docs build
+
+pnpm --filter @magic-resume/resume-schema build
+pnpm --filter @magic-resume/resume-schema test  # node --test
+
+pnpm --filter @magic-resume/resume-templates build
+
+pnpm --filter @magic-resume/mcp build
+pnpm --filter @magic-resume/mcp test
+pnpm --filter @magic-resume/mcp lint            # tsc --noEmit
+```
+
+## MCP CLI (after install)
+
+```bash
+npx -y @magic-resume/mcp config set --api-url <url> --pat <token>
+npx -y @magic-resume/mcp config print
+npx -y @magic-resume/mcp config clear
+npx -y @magic-resume/mcp mcp                    # boot stdio server
+```
+
+## Useful one-offs
+
+```bash
+# Rebuild the JSON Schema artifact only
+pnpm --filter @magic-resume/resume-schema build
+
+# Bundle analyzer for the web app
+pnpm --filter @magic-resume/web analyze
+
+# Production build of the web app
+pnpm --filter @magic-resume/web build:prod
+```
+
+## Husky and lint-staged
+
+These run automatically on `git commit`:
+
+- ESLint with `--fix` on staged `*.{js,jsx,ts,tsx}`
+- `i18n:check` on staged `apps/web` files
+- Prettier on staged JSON / Markdown / YAML
+
+To skip them in a true emergency: `git commit --no-verify`. But please don't.

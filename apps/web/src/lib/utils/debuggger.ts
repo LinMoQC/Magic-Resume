@@ -1,17 +1,1 @@
-class Debugger {
-  private prefix = '[Magic-Resume]';
-
-  log(...args: unknown[]) {
-    console.log(`%c${this.prefix}`, 'color: blue; font-weight: bold;', ...args);
-  }
-
-  warn(...args: unknown[]) {
-    console.warn(`%c${this.prefix}`, 'color: yellow; font-weight: bold;', ...args);
-  }
-
-  error(...args: unknown[]) {
-    console.error(`%c${this.prefix}`, 'color: red; font-weight: bold;', ...args);
-  }
-}
-
-export const MagicDebugger = new Debugger();
+export { MagicDebugger } from '@magic-resume/utils';

@@ -1,0 +1,113 @@
+---
+title: Template system
+description: The Magic Template DSL, the registry, and how to add a new template.
+---
+
+import { Callout, Steps } from 'nextra/components'
+
+# Template system
+
+Templates live in `packages/resume-templates`. A template is a `MagicTemplateDSL` value — a declarative description of design tokens, layout, and per-section rendering. The renderer in this package turns one DSL value plus one `Resume` into JSX.
+
+This means templates are **data**, not components. The web app and the PDF exporter share one renderer.
+
+## Anatomy of a template
+
+```ts
+import type { MagicTemplateDSL } from '@magic-resume/resume-templates'
+
+const myTemplate: MagicTemplateDSL = {
+  id: 'my-template',
+  name: 'My Template',
+  designTokens: {
+    fontFamily: '...',
+    colors: { primary: '...', text: '...', muted: '...' },
+    spacing: { /* ... */ },
+  },
+  layout: {
+    columns: 'single' | 'two',
+    headerStyle: 'inline' | 'stacked',
+  },
+  sections: {
+    basics: { /* render config */ },
+    experience: { /* render config */ },
+    // ...
+  },
+}
+```
+
+The renderer walks the `sections` map in order, looks up the `Resume` sub-value for each, and renders. Sections that don't appear in `sections` are simply not rendered for that template.
+
+## The registry
+
+All templates are registered in `packages/resume-templates/src/registry.ts`:
+
+```ts
+export const templateRegistry: Record<TemplateId, MagicTemplateDSL> = {
+  classic: classicTemplate,
+  modern:  modernTemplate,
+  // ...
+}
+```
+
+Template IDs **must match** `templateIds` in `packages/resume-schema` exactly. The schema's Zod enum is what validates the `selectedTemplate` field on a resume — drift will cause stored resumes to fail validation.
+
+## Adding a new template
+
+<Steps>
+
+### Add the ID to the schema
+
+In `packages/resume-schema/src/`, append your new ID to the `templateIds` tuple.
+
+### Create the DSL config
+
+In `packages/resume-templates/src/config/`, add a new file exporting your `MagicTemplateDSL`. Start from the closest existing template — pick one with the same layout shape.
+
+### Register it
+
+```ts
+// packages/resume-templates/src/registry.ts
+import { myTemplate } from './config/myTemplate'
+
+export const templateRegistry = {
+  // ...existing,
+  'my-template': myTemplate,
+}
+```
+
+### Add a thumbnail
+
+Drop a JPEG at:
+
+```
+apps/web/public/templates/jpg/my-template.jpg
+```
+
+The gallery picks it up by ID; the filename must match the template ID exactly.
+
+### Rebuild
+
+```bash
+pnpm --filter @magic-resume/resume-schema build
+pnpm --filter @magic-resume/resume-templates build
+```
+
+</Steps>
+
+<Callout type="warning">
+Three places must stay aligned: `templateIds` in the schema, `templateRegistry` in resume-templates, and the thumbnail filename in `apps/web/public/templates/jpg/`. Missing any one of these will surface as a 404 or a Zod validation error.
+</Callout>
+
+## TemplateCustomizer
+
+`@magic-resume/resume-templates/TemplateCustomizer` is a sub-export — a React component the web app embeds to let users tweak a template's design tokens without forking the DSL. If you're adding new tokens, also add a control for them here.
+
+## Rendering pipeline
+
+```
+Resume + TemplateDSL ─▶ renderer (React) ─▶ DOM (editor preview)
+                                          └─▶ html-to-pdf → PDF export
+```
+
+The same renderer drives both the live preview and the PDF. Anything that breaks in the preview will also break in export.

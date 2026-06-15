@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "packageManager": "pnpm@10.28.1",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=10.28.1"
+  },
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -22,6 +26,8 @@
     "*.{json,md,yml,yaml}": "prettier --write"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "commitlint-config-gitmoji": "^2.3.1",
     "husky": "^9.1.7",
     "turbo": "^2.5.4"
   }

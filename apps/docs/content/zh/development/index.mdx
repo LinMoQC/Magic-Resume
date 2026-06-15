@@ -1,0 +1,78 @@
+---
+title: 本地开发
+description: Magic Resume monorepo 的日常开发流程。
+---
+
+import { Callout } from 'nextra/components'
+
+# 本地开发
+
+仓库已经拉好、`pnpm install` 跑完之后的日常工作流。还没装好的话，从 [自托管](/zh/getting-started/self-hosted) 开始。
+
+## 仓库一瞥
+
+```
+Magic-Resume/
+├── apps/
+│   ├── web/         # @magic-resume/web   —— Next.js 15 前端
+│   └── docs/        # @magic-resume/docs  —— Nextra 文档站点（本站）
+├── packages/
+│   ├── mcp/             # @magic-resume/mcp
+│   ├── resume-schema/   # @magic-resume/resume-schema
+│   ├── resume-templates/# @magic-resume/resume-templates
+│   ├── env/             # @magic-resume/env
+│   ├── utils/           # @magic-resume/utils
+│   └── tsconfig/        # @magic-resume/tsconfig
+├── patches/         # pnpm patches
+├── turbo.json
+├── pnpm-workspace.yaml
+└── CLAUDE.md        # 给 AI 编程 agent 看的精简上下文
+```
+
+## 编辑器配置
+
+整个仓库是 TypeScript。推荐的编辑器组合：
+
+- VS Code + **ESLint** + **TypeScript Nightly**，或
+- Cursor / Windsurf / Claude Code —— 三者都会读取 `CLAUDE.md` 和 workspace 的 TS 配置。
+
+`pnpm-workspace.yaml` 和 `packages/tsconfig` 一起让跨 workspace 的类型推导开箱即用。如果编辑器找不到类型，重启 TS 服务器。
+
+## 跨 workspace 的热更新
+
+仓库根目录跑 `pnpm run dev` 会通过 Turbo 并行启动每个 workspace 的 `dev`。多数 workspace 用 watch 模式：
+
+| Workspace | `dev` 做什么 |
+|---|---|
+| `apps/web` | 在 `:3000` 跑 `next dev` |
+| `apps/docs` | 在 `:3001` 跑 `next dev` |
+| `packages/resume-schema` | `tsc --watch` |
+| `packages/resume-templates` | `tsc --watch` |
+| `packages/mcp` | `tsc --watch` |
+
+所以改 `packages/resume-schema/src/index.ts` 会触发一次重建，Web 应用通过 workspace link 自动拿到。
+
+<Callout type="info">
+Web 应用支持 Turbopack：`pnpm --filter @magic-resume/web dev:turbo`。更快，但偶尔比 Next.js minor 版本落后一拍 —— 撞上 Turbopack 特有的 bug 时回退到 `dev`。
+</Callout>
+
+## 提交前过 lint 和测试
+
+`lint-staged`（在根 `package.json` 配置，由 Husky 触发）会对暂存文件跑一部分检查。完整的扫一遍：
+
+```bash
+pnpm run lint    # turbo lint 跑所有 workspace
+pnpm run test    # turbo test
+```
+
+`apps/web` workspace 有个 i18n 检查会在暂存 `.tsx`/`.ts` 时触发：
+
+```bash
+pnpm --filter @magic-resume/web i18n:check
+```
+
+它确保每个新增的翻译 key 都同时存在于每种语言里。`en.json` 加了 key 但 `zh-CN.json` 没加，会让 pre-commit hook 失败。
+
+## 分支约定
+
+默认分支是 `master`。功能分支用 `<type>/<short-name>`（如 `feat/turborepo-mcp-migration-wip`）。Commit 遵循 conventional commits 风格 —— 看 `git log` 就能知道格式。

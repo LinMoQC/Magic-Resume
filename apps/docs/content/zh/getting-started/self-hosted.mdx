@@ -1,0 +1,88 @@
+---
+title: 自托管
+description: 不需要任何后端、数据库或账号，在自己机器上跑起 Magic Resume。
+---
+
+import { Callout, Steps } from 'nextra/components'
+
+# 自托管
+
+自托管模式下，Web 应用完全跑在浏览器里。简历数据持久化在名为 `MagicResumeDB` 的 IndexedDB 里。**没有鉴权、没有 Core API、没有 Python agent** —— 需要后端的 AI 功能在你配置之前是禁用的。
+
+这是改造代码本身时推荐的模式。
+
+## 前置条件
+
+- Node.js 20+
+- pnpm `10.28.1`（`packageManager` 里钉死的版本）。其他版本能跑，但 lockfile 漂移要你自己负责。
+
+<Steps>
+
+### 克隆仓库
+
+```bash
+git clone https://github.com/LinMoQC/Magic-Resume.git
+cd Magic-Resume
+```
+
+### 安装依赖
+
+```bash
+pnpm install
+```
+
+必须从 **仓库根目录** 运行 —— pnpm 需要看到 `pnpm-workspace.yaml` 才能解析 `workspace:*` 依赖。
+
+### 配置环境变量
+
+```bash
+cp apps/web/.env.example apps/web/.env.local
+```
+
+自托管模式的最小配置是：
+
+```env filename="apps/web/.env.local"
+NEXT_PUBLIC_APP_MODE=self-hosted
+```
+
+如果 `NEXT_PUBLIC_APP_MODE` 没设置，并且 `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` 也没设置，应用会自动判断为 `self-hosted`。显式设置一下只是更清楚。
+
+### 启动开发服务器
+
+```bash
+pnpm run dev
+```
+
+Turbo 会把每个有 `dev` 脚本的 workspace 都拉起来。Web 应用监听 [http://localhost:3000](http://localhost:3000)；文档站点（即本站）在 [http://localhost:3001](http://localhost:3001)。
+
+只跑 Web 应用：
+
+```bash
+pnpm --filter @magic-resume/web dev
+```
+
+</Steps>
+
+## 没有后端时能用什么
+
+| 功能 | 自托管 |
+|---|---|
+| 简历编辑器、12 套模板、导出 PDF | ✅ |
+| 本地 IndexedDB 存储 | ✅ |
+| 版本历史（仅本地） | ✅ |
+| 在 Settings 里自带 Key 的 AI | ✅ |
+| Clerk 鉴权、云端同步、分享 | ❌ |
+| 面试 / JD 分析 / 翻译（Python agent） | ❌ 除非你跑 `apps/agent` 或把 `BACKEND_URL` 指向某个地方 |
+
+<Callout type="info">
+要用"自带 Key"模式，打开 Web 应用的 **设置 → AI**，粘贴一个 OpenAI / Anthropic / Gemini 的 Key。Key 永远不会离开浏览器。
+</Callout>
+
+## 环境变量速查
+
+| 变量 | 是否必需 | 作用 |
+|---|---|---|
+| `NEXT_PUBLIC_APP_MODE` | 否 | `self-hosted` 或 `cloud`。会根据是否有 Clerk Key 自动判断。 |
+| `BACKEND_URL` | 否 | Python agent 的基础 URL。只在用 AI Lab 时才需要。 |
+
+完整的云端模式变量列表见 [云端模式](/zh/getting-started/cloud)。

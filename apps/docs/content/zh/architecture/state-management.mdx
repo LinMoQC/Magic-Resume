@@ -1,0 +1,59 @@
+---
+title: 状态管理
+description: Zustand store、Immer draft、IndexedDB 持久化，以及云端同步是如何接进来的。
+---
+
+import { Callout } from 'nextra/components'
+
+# 状态管理
+
+状态住在 `apps/web/src/store/` 里的 **Zustand** store 里。每个 store 都用 Immer middleware，写 reducer 时像直接 mutate 一样。IndexedDB 是持久化层（通过 `src/lib/api/IndexDBClient.ts` 访问 `MagicResumeDB`）。
+
+## Store 列表
+
+| Store | 文件 | 负责什么 |
+|---|---|---|
+| `useResumeStore` | `useResumeStore.ts` | 当前简历、所有 CRUD、同步状态。最大的一个。 |
+| `useResumeDraftStore` | `useResumeDraftStore.ts` | 与已保存简历分离的编辑期 draft 缓冲。 |
+| `useSettingStore` | `useSettingStore.ts` | 用户设置、AI Key（BYOK）、`cloudSync` 开关。 |
+| `useResumeAnalyzerStore` | `useResumeAnalyzerStore.ts` | 简历分析 AI 流程的状态。 |
+| `useResumeOptimizerStore` | `useResumeOptimizerStore.ts` | JD 优化 AI 流程的状态。 |
+| `useMessageStore` | `useMessageStore.ts` | UI toast / 通知队列。 |
+
+## 主角：`useResumeStore`
+
+它持有当前简历，并维护一个 `syncStatus` 状态机：
+
+```
+'local'     ← 自托管模式，从未尝试过同步
+'modified'  ← 上次成功同步后又被编辑了
+'syncing'   ← 请求正在飞
+'saved'     ← 云端和本地一致
+'error'     ← 上次同步失败；下次 mutation 时会重试
+```
+
+读永远命中内存。写：
+
+1. 更新内存中的状态（Immer）。
+2. 渲染后同步写入 IndexedDB。
+3. 如果是云端模式 **且** `useSettingStore.cloudSync` 打开，安排一次防抖的 push 到 Core API。
+
+Store 不维护单独的"脏字段"map —— 同步的 diff 在 push 时计算。这让 store 保持无聊，撤销重做也好推导。
+
+<Callout type="info">
+云端同步这条副作用只有同时满足 `APP_MODE === 'cloud'` 和用户在 Settings 里手动打开同步时才会触发。自托管用户永远不会因 store 操作发起网络请求。
+</Callout>
+
+## IndexedDB 层
+
+`src/lib/api/IndexDBClient.ts` 是 `idb-keyval` 上的薄包装。Key 按 store 命名（如 `resume:current`、`resume:history:<id>`）。
+
+新增持久化字段时，如果形状会变，记得加版本迁移。形状静默漂移会让旧浏览器 tab 在几周后突然报错。
+
+## 为什么是 Zustand？
+
+三个原因：
+
+- **没有 Provider 模板代码。** Store 直接 import，没有 `<Provider>` 链。
+- **Selector 订阅。** 组件订阅切片，不订阅整个 store，改一个字段不会让整棵树重渲染。
+- **方便连接非 React 代码。** MCP 包、e2e helper、AI 流程都重用 `@magic-resume/resume-schema` 里的 `Resume` 类型，不需要把 React 拉进来。

@@ -1,0 +1,66 @@
+---
+title: Monorepo layout
+description: Workspaces, package boundaries, and what is allowed to import what.
+---
+
+import { Callout } from 'nextra/components'
+
+# Monorepo layout
+
+Magic Resume is a **pnpm + Turborepo** monorepo. Package manager is pinned to `pnpm@10.28.1` in the root `package.json` so CI and local installs stay aligned.
+
+## Workspaces
+
+| Path | Package name | Role |
+|---|---|---|
+| `apps/web` | `@magic-resume/web` | Next.js 15 App Router frontend. The actual product. |
+| `apps/docs` | `@magic-resume/docs` | This site. Nextra 4 on Next.js 15. |
+| `packages/mcp` | `@magic-resume/mcp` | stdio MCP server + CLI. Node ESM, published to npm. |
+| `packages/resume-schema` | `@magic-resume/resume-schema` | Zod schema, types, sample data, JSON Schema export. |
+| `packages/resume-templates` | `@magic-resume/resume-templates` | Template DSL, renderer, registry. |
+| `packages/env` | `@magic-resume/env` | `APP_MODE` detection helper. |
+| `packages/utils` | `@magic-resume/utils` | Cross-workspace utilities (cn, color, logger, time). |
+| `packages/tsconfig` | `@magic-resume/tsconfig` | Shared TypeScript configs. |
+
+## Package boundaries
+
+These are enforced by code review rather than tooling. Keep them honest:
+
+<Callout type="error">
+**`@magic-resume/mcp` must not import from:**
+- Next.js or React component packages
+- Browser APIs (`window`, `localStorage`, `IndexedDB`)
+- Anything in `apps/web`
+
+It's a plain Node ESM library + CLI. Adding a browser import will break `node --test` and `npm publish`.
+</Callout>
+
+- `apps/web` may depend on any `packages/*` workspace.
+- `packages/resume-templates` depends on `packages/resume-schema`. The reverse must not happen — schema is the leaf.
+- `packages/mcp` depends on `packages/resume-schema` and `packages/resume-templates`. Not on `apps/*`.
+- New shared shapes belong in `packages/resume-schema`, not duplicated into `apps/web`.
+
+## Turborepo
+
+The root `package.json` runs everything through Turbo:
+
+```bash
+pnpm run dev     # turbo dev    — every workspace's dev script in parallel
+pnpm run build   # turbo build  — respects task dependencies
+pnpm run lint    # turbo lint
+pnpm run test    # turbo test
+```
+
+To target one workspace, skip Turbo and use a pnpm filter:
+
+```bash
+pnpm --filter @magic-resume/web dev
+pnpm --filter @magic-resume/resume-schema test
+pnpm --filter @magic-resume/mcp build
+```
+
+## Working with `workspace:*`
+
+All cross-workspace deps use the `workspace:*` protocol in `package.json`. This means **you must run `pnpm install` from the repo root**, not from inside a workspace, or pnpm can't resolve the link.
+
+When you publish `@magic-resume/mcp`, pnpm rewrites `workspace:*` to the real version at pack time — no manual bumping needed.

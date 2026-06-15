@@ -1,0 +1,71 @@
+---
+title: 简历 Schema
+description: 那份 Zod 定义的、"简历是什么"的唯一真源。
+---
+
+import { Callout } from 'nextra/components'
+
+# 简历 Schema
+
+`@magic-resume/resume-schema` 是"简历的形状"的唯一真源。Web 应用、MCP 服务器、每一套模板、每一个 AI 工具都遵循它。Schema 里没有的字段，就是不存在的字段。
+
+## 导出
+
+```ts
+import {
+  resumeSchema,      // Zod schema（运行时校验）
+  type Resume,       // 推导出的 TS 类型
+  defaultResume,     // 带必需字段的空白简历
+  sampleResume,      // 填充好的样例（用于截图/测试）
+  templateIds,       // 合法模板 ID 的只读元组
+  templateSchema,    // 由 templateIds 派生的 Zod enum
+  resumeJsonSchema,  // JSON Schema（MCP resource 用）
+} from '@magic-resume/resume-schema'
+```
+
+所有子 Schema（`basicsSchema`、`experienceSchema` 等）也单独导出，以便调用方单独校验某一节。
+
+## 构建产物
+
+构建步骤做 **两件事**：
+
+1. `tsc` 产生 `dist/` 和类型声明。
+2. `scripts/write-schema.mjs` 生成 `dist/schema.json` —— 一份静态的 JSON Schema 产物。
+
+`dist/schema.json` 就是 MCP 服务器作为 resource 暴露给 AI 工具的东西，让模型可以在运行时不再调用就能知道简历形状。
+
+## Patch 流程
+
+Mutation 都是 JSON Patch（RFC 6902）。一次往返：
+
+```
+   client 的 patch ──▶ resumeSchema.safeParse(applyPatch(current, ops))
+                          │
+                          ▼
+                       通过？ ──▶ 写入 store / 推送 API
+                       不通过 ──▶ 拒绝 patch，返回校验错误
+```
+
+这条路径对 **Web 编辑器和 MCP 工具都适用** —— 编辑器产生的也是 patch，不是另一条代码路径。
+
+<Callout type="info">
+MCP 服务器里有 `preview_resume_patch` 工具，就是给你做这种"校验但不动数据"的环节用的。在执行任何破坏性操作前，AI 工具应该先调它。
+</Callout>
+
+## 加一个新字段
+
+1. 把它加到 `packages/resume-schema/src/` 里合适的子 Schema。
+2. 如果是必需字段，更新 `defaultResume` 和 `sampleResume`。
+3. 重新构建：`pnpm --filter @magic-resume/resume-schema build`。
+4. 更新 `packages/resume-templates` 里使用该字段的模板，以及 `apps/web/src/components/editor/` 里的编辑表单。
+5. 如果字段影响 AI 编辑，在 `packages/mcp/src/resume-tools.ts` 的 `get_resume_editing_guide` 里加上对应指引。
+
+## 加一个新模板 ID
+
+模板 ID 是 Schema 的一部分（`templateSchema` 是基于 `templateIds` 的 Zod enum）。新增时，三个地方必须同步：
+
+1. `packages/resume-schema` 里的 `templateIds`
+2. `packages/resume-templates/src/registry.ts` 里的 `templateRegistry`
+3. `apps/web/public/templates/jpg/{id}.jpg` 处的缩略图
+
+任何一个缺失都会在下游某处运行时报错 —— 编辑器会显示一个不能渲染的模板，或者 Schema 会拒掉一份本来合法的简历。

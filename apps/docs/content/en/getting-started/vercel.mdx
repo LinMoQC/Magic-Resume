@@ -1,0 +1,54 @@
+---
+title: Deploy to Vercel
+description: One-click cloud-mode deployment using Vercel and Clerk.
+---
+
+import { Callout, Steps } from 'nextra/components'
+
+# Deploy to Vercel
+
+This deploys the **web app only** in [cloud mode](/getting-started/cloud). The NestJS Core API and Python agent are separate services — point `NEXT_PUBLIC_CLOUD_API_URL` and `BACKEND_URL` at wherever you're running them.
+
+<Steps>
+
+### Click deploy
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FLinMoQC%2FMagic-Resume)
+
+Vercel will detect this as a Turborepo monorepo. Set the root to `apps/web` if it isn't auto-detected.
+
+### Create a Clerk application
+
+Sign in at [clerk.com](https://clerk.com), create an application, and copy both API keys (publishable + secret).
+
+### Set environment variables
+
+In the Vercel project settings:
+
+```env
+NEXT_PUBLIC_APP_MODE=cloud
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_...
+CLERK_SECRET_KEY=sk_...
+NEXT_PUBLIC_CLOUD_API_URL=https://your-core-api.example.com
+BACKEND_URL=https://your-agent.example.com
+```
+
+### Redeploy
+
+Trigger a redeploy so the new env vars are baked into the build.
+
+</Steps>
+
+<Callout type="warning">
+The Core API and Python agent are not deployed by this button. You need to bring your own — either run them on the same Vercel project (not recommended for the agent), Fly, Railway, or self-hosted. Without them, cloud sync and AI Lab features won't work.
+</Callout>
+
+## Build settings
+
+Vercel should use:
+
+- **Install command:** `pnpm install`
+- **Build command:** `cd ../.. && pnpm turbo build --filter=@magic-resume/web`
+- **Output directory:** `apps/web/.next`
+
+If you forked the repo, double-check that `pnpm@10.28.1` is in `packageManager` so Vercel pins the correct version.

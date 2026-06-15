@@ -1,0 +1,54 @@
+---
+title: 部署到 Vercel
+description: 使用 Vercel + Clerk 一键部署云端模式。
+---
+
+import { Callout, Steps } from 'nextra/components'
+
+# 部署到 Vercel
+
+这一步只部署 **Web 应用** 的 [云端模式](/zh/getting-started/cloud)。NestJS Core API 和 Python agent 是单独的服务 —— 把 `NEXT_PUBLIC_CLOUD_API_URL` 和 `BACKEND_URL` 指向你部署它们的地方就行。
+
+<Steps>
+
+### 点击部署
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FLinMoQC%2FMagic-Resume)
+
+Vercel 会识别为 Turborepo 单仓。如果没自动识别 root，把它设为 `apps/web`。
+
+### 创建 Clerk 应用
+
+在 [clerk.com](https://clerk.com) 注册并创建一个应用，复制两个 API Key（公钥 + 私钥）。
+
+### 设置环境变量
+
+在 Vercel 项目设置里：
+
+```env
+NEXT_PUBLIC_APP_MODE=cloud
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_...
+CLERK_SECRET_KEY=sk_...
+NEXT_PUBLIC_CLOUD_API_URL=https://your-core-api.example.com
+BACKEND_URL=https://your-agent.example.com
+```
+
+### 重新部署
+
+触发一次重新部署，让新的环境变量在构建时被烤进去。
+
+</Steps>
+
+<Callout type="warning">
+点击部署按钮 **不会** 部署 Core API 和 Python agent。你需要自己准备 —— 跑在同一个 Vercel 项目（不推荐用于 agent）、Fly、Railway，或自己的服务器都行。没有它们，云端同步和 AI Lab 功能就用不了。
+</Callout>
+
+## 构建设置
+
+Vercel 应该使用：
+
+- **Install command:** `pnpm install`
+- **Build command:** `cd ../.. && pnpm turbo build --filter=@magic-resume/web`
+- **Output directory:** `apps/web/.next`
+
+如果你 fork 了仓库，再次确认 `packageManager` 里写的是 `pnpm@10.28.1`，这样 Vercel 才会用对版本。

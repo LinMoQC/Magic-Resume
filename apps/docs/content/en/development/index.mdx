@@ -1,0 +1,78 @@
+---
+title: Local development
+description: Day-to-day development workflow for the Magic Resume monorepo.
+---
+
+import { Callout } from 'nextra/components'
+
+# Local development
+
+Day-to-day workflow once you have the repo cloned and `pnpm install` done. If you don't yet, start at [Self-Hosted](/getting-started/self-hosted).
+
+## Repo at a glance
+
+```
+Magic-Resume/
+├── apps/
+│   ├── web/         # @magic-resume/web   — Next.js 15 frontend
+│   └── docs/        # @magic-resume/docs  — this Nextra site
+├── packages/
+│   ├── mcp/             # @magic-resume/mcp
+│   ├── resume-schema/   # @magic-resume/resume-schema
+│   ├── resume-templates/# @magic-resume/resume-templates
+│   ├── env/             # @magic-resume/env
+│   ├── utils/           # @magic-resume/utils
+│   └── tsconfig/        # @magic-resume/tsconfig
+├── patches/         # pnpm patches
+├── turbo.json
+├── pnpm-workspace.yaml
+└── CLAUDE.md        # short-form context for AI coding agents
+```
+
+## Editor setup
+
+The repo is TypeScript end-to-end. The recommended editor setup:
+
+- VS Code with the **ESLint** and **TypeScript Nightly** extensions, or
+- Cursor / Windsurf / Claude Code — all three know how to read `CLAUDE.md` and the workspace TS configs.
+
+`pnpm-workspace.yaml` and `packages/tsconfig` mean type-checking works across workspaces with no extra config. If your editor doesn't find a type, restart its TS server.
+
+## Hot reload across workspaces
+
+`pnpm run dev` from the repo root runs every workspace's `dev` script in parallel through Turbo. Most workspaces are watch-mode:
+
+| Workspace | What `dev` does |
+|---|---|
+| `apps/web` | `next dev` on `:3000` |
+| `apps/docs` | `next dev --port 3001` |
+| `packages/resume-schema` | `tsc --watch` |
+| `packages/resume-templates` | `tsc --watch` |
+| `packages/mcp` | `tsc --watch` |
+
+So a change in `packages/resume-schema/src/index.ts` triggers a rebuild that the web app picks up automatically via the workspace link.
+
+<Callout type="info">
+The web app supports Turbopack with `pnpm --filter @magic-resume/web dev:turbo`. It's faster but occasionally lags behind a Next.js minor — fall back to `dev` if you hit a Turbopack-specific bug.
+</Callout>
+
+## Lint and test before pushing
+
+`lint-staged` (configured in the root `package.json`) runs on staged files via Husky, but the full sweep is:
+
+```bash
+pnpm run lint    # turbo lint across every workspace
+pnpm run test    # turbo test
+```
+
+The `apps/web` workspace has an i18n check that fires on staged `.tsx`/`.ts` files:
+
+```bash
+pnpm --filter @magic-resume/web i18n:check
+```
+
+This validates that every new translation key is present in every locale. Adding a key in `en.json` without adding it in `zh-CN.json` will fail the pre-commit hook.
+
+## Branch hygiene
+
+The default branch is `master`. Feature branches use `<type>/<short-name>` (e.g. `feat/turborepo-mcp-migration-wip`). Commits follow conventional-commit style — see `git log` for examples.

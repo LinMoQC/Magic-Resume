@@ -1,0 +1,68 @@
+---
+title: Contributing
+description: How to contribute code, docs, or templates to Magic Resume.
+---
+
+import { Callout } from 'nextra/components'
+
+# Contributing
+
+Magic Resume is MIT-licensed and accepts contributions. PRs that come with reproductions, tests, and a clear `why` tend to land fast.
+
+## Before you start
+
+- Search [existing issues](https://github.com/LinMoQC/Magic-Resume/issues) and the [PR list](https://github.com/LinMoQC/Magic-Resume/pulls) to avoid duplicate work.
+- For anything bigger than a small fix or doc tweak, open an issue first and describe the approach. This saves us both from a "thanks but no" on a finished PR.
+- New deployment modes, new auth flows, or new local/cloud switches require maintainer signoff before you write code — these are intentionally narrow.
+
+## Workflow
+
+1. Fork the repo and clone your fork.
+2. Create a branch off `master`: `git checkout -b feat/<short-name>`.
+3. `pnpm install` at the repo root.
+4. Make your change. Keep the diff scoped — one PR, one concern.
+5. Run the gates: `pnpm run lint && pnpm run test`. The Husky pre-commit hook runs a subset automatically, but the full sweep is cheaper than a red CI.
+6. Open a PR with a description of *what* and *why*. Link the issue if there is one.
+
+## Hard rules
+
+<Callout type="error">
+**Do not modify Clerk auth without a maintainer asking for it.** That includes `clerkMiddleware`, `<ClerkProvider>`, `useAuth`, and the cloud sync layer in `useResumeStore`. The cloud/self-hosted split depends on these being predictable.
+</Callout>
+
+<Callout type="error">
+**Do not add new local/cloud toggles or deployment modes.** The current `NEXT_PUBLIC_APP_MODE` split is intentional. If you think you need a third mode, open an issue first.
+</Callout>
+
+<Callout type="error">
+**`@magic-resume/mcp` must stay browser-free.** No React, no Next.js, no `window`, no IndexedDB. If you import one of those by accident, `node --test` will catch you, but please catch yourself first.
+</Callout>
+
+## Where things go
+
+| You changed… | It belongs in… |
+|---|---|
+| Resume data shape | `packages/resume-schema`, never inlined in `apps/web` |
+| New template | `packages/resume-templates` + a new ID in `packages/resume-schema` + a thumbnail in `apps/web/public/templates/jpg/` |
+| MCP tool | `packages/mcp/src/server.ts` (registration) + `resume-tools.ts` (logic) + a `node --test` case |
+| API path | `apps/web/src/lib/api/routes.ts` — never an inline string in feature code |
+| Shared util | `packages/utils` if 2+ workspaces use it, otherwise local to the caller |
+| Docs | `apps/docs/content/` — write for OSS developers, code-first, no marketing speak |
+
+See [Architecture](/architecture) for the why behind each of these.
+
+## Commit style
+
+Conventional commits, present tense. Run `git log --oneline` to see the house style:
+
+```
+feat: add JSON Patch preview for MCP
+fix: auto-detect cloud mode from Clerk key
+refactor: centralize API route paths in lib/api/routes.ts
+docs: add JSDoc signatures to all lib/api functions
+chore(deps): bump turbo to 2.5.4
+```
+
+## License
+
+By submitting a PR you agree to license your contribution under the [MIT License](https://github.com/LinMoQC/Magic-Resume/blob/master/LICENSE).

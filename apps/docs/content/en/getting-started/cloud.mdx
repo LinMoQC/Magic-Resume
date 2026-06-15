@@ -1,0 +1,55 @@
+---
+title: Cloud Mode
+description: How cloud mode wires Clerk, the Core API, and the agent backend into Magic Resume.
+---
+
+import { Callout } from 'nextra/components'
+
+# Cloud Mode
+
+Cloud mode turns on three things that are off in self-hosted:
+
+1. **Clerk authentication** — login required, JWTs attached to every API request.
+2. **Cloud sync** — resumes round-trip through a NestJS **Core API**, with version history and resume sharing.
+3. **Python agent backend** — interview, translation and JD-optimize tools.
+
+## How mode detection works
+
+`apps/web/src/lib/config/app.ts` resolves the mode:
+
+```ts
+// pseudo-code
+const explicit = process.env.NEXT_PUBLIC_APP_MODE
+const hasClerk = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+
+export const APP_MODE =
+  explicit ?? (hasClerk ? 'cloud' : 'self-hosted')
+```
+
+`src/middleware.ts` switches at module load between Clerk's `clerkMiddleware` and a no-op handler based on this. There is no runtime toggle — the mode is baked at build time.
+
+<Callout type="warning">
+If you set `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` but forget the Core API URL, the app will still boot in cloud mode and every authenticated request will 404. Set both, or neither.
+</Callout>
+
+## Environment variables
+
+| Variable | Required (cloud) | Purpose |
+|---|---|---|
+| `NEXT_PUBLIC_APP_MODE` | optional | `cloud`. Defaults to `cloud` if a Clerk key is present. |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | yes | Public Clerk key. Also triggers cloud-mode auto-detection. |
+| `CLERK_SECRET_KEY` | yes | Server-side Clerk key. |
+| `NEXT_PUBLIC_CLOUD_API_URL` | yes | NestJS Core API base URL (default `http://localhost:3111`). |
+| `BACKEND_URL` | optional | Python agent base URL for AI Lab features (default `http://localhost:8000`). |
+
+## Backend services
+
+The Core API and Python agent are **separate repositories** outside this monorepo. For local cloud-mode development you need to run both, typically against `localhost:3111` and `localhost:8000`. If you only want to develop the frontend, self-hosted mode is faster.
+
+## Auth flow
+
+- Clerk issues a JWT on sign-in.
+- `apps/web/src/lib/api/httpClient.ts` attaches that JWT as a `Bearer` token via an Axios request interceptor (`configureHttpClient`).
+- Both `httpClient.api` (Core API) and `httpClient.agent` (Python backend) share the same interceptor — you should not pass tokens manually.
+
+See [Architecture → HTTP clients](/architecture/http-clients) for the full request path.

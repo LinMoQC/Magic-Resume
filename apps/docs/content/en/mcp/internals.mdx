@@ -1,0 +1,88 @@
+---
+title: Internals
+description: How @magic-resume/mcp is wired internally — entry points, config, and the Core API contract.
+---
+
+import { Callout } from 'nextra/components'
+
+# Internals
+
+For contributors hacking on the MCP package itself, or building a fork.
+
+## Layout
+
+```
+packages/mcp/
+├── src/
+│   ├── cli.ts           # `magic-resume` CLI entrypoint (config get/set/print/clear)
+│   ├── server.ts        # MCP server: tool registration, stdio transport
+│   ├── resume-tools.ts  # business logic for every tool above
+│   ├── config.ts        # ~/.magic-resume/mcp.json reader/writer
+│   └── http.ts          # thin axios wrapper that sends the PAT
+├── test/                # node --test suites
+└── package.json         # type: "module", bin: magic-resume
+```
+
+The CLI and the server share `config.ts` and `http.ts`. The CLI is for one-shot config commands; the MCP server is what AI tools spawn.
+
+## Entry points
+
+- **CLI:** `bin: { "magic-resume": "./dist/cli.js" }` in `package.json`. Subcommands: `config set`, `config get`, `config print`, `config clear`, and `mcp` (which boots the server).
+- **MCP server:** `magic-resume mcp` boots `server.ts`, registers tools, attaches `StdioServerTransport`, and runs forever.
+
+## Config file
+
+`~/.magic-resume/mcp.json`:
+
+```json
+{
+  "apiUrl": "https://api.magic-resume.cn",
+  "pat": "mr_pat_xxx"
+}
+```
+
+`config.ts` reads this lazily on first use. On Windows the path is `%USERPROFILE%\.magic-resume\mcp.json`.
+
+<Callout type="warning">
+This file holds a PAT in plaintext. The CLI sets file permissions to `0600` on POSIX. If you're contributing on Windows, don't relax this.
+</Callout>
+
+## Tool registration
+
+`server.ts` uses `@modelcontextprotocol/sdk` to register each tool with:
+
+- A name and description
+- A Zod-derived input schema (so the model gets typed parameter hints)
+- A handler delegating to `resume-tools.ts`
+
+Tools always return structured JSON. Errors throw `McpError` with a stable error code so AI tools can react (e.g. retry on transient network failures, abort on validation errors).
+
+## Core API contract
+
+The MCP server is a client of the same NestJS Core API the web app talks to. Relevant endpoints:
+
+| Endpoint | Method | Auth |
+|---|---|---|
+| `/v1/resumes` | GET | PAT |
+| `/v1/resumes/:id` | GET | PAT |
+| `/v1/resumes/:id/patch` | PATCH | PAT |
+| `/v1/schema` | GET | none |
+
+`http.ts` attaches `Authorization: Bearer <pat>` automatically. Unlike the web app, **there is no Clerk involvement** — PATs are a separate auth method the Core API understands.
+
+## Build and publish
+
+```bash
+pnpm --filter @magic-resume/mcp build      # tsc → dist/
+pnpm --filter @magic-resume/mcp test       # node --test test/*.test.mjs
+pnpm --filter @magic-resume/mcp lint       # tsc --noEmit
+```
+
+Publishing is gated by `publishConfig.access = "public"` and uses pnpm's `workspace:*` rewriting so the published `package.json` has real semver versions for `@magic-resume/resume-schema` and `@magic-resume/resume-templates`.
+
+## Adding a new tool
+
+1. Add the handler to `resume-tools.ts`. Keep it pure and patch-based.
+2. Register it in `server.ts` with a Zod input schema and a short description.
+3. Add a `node --test` case in `test/`.
+4. If the tool reads or mutates a new field, update [`get_resume_editing_guide`](/mcp/tools#get_resume_editing_guide) so models know how to use it.

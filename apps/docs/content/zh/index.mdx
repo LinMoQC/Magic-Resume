@@ -1,0 +1,131 @@
+---
+title: 简介
+description: Magic Resume 是一个开源的、AI 原生的简历平台，由前端 monorepo、NestJS Core API 和 Python Agent 三个仓库共同构成。
+---
+
+import { Cards, Callout } from 'nextra/components'
+
+# Magic Resume
+
+**Magic Resume** 是一个开源、AI 原生的简历平台，围绕三个核心思想构建：
+
+- **默认本地优先** —— 所有简历数据都保存在 IndexedDB 里。无需账号、无需后端即可运行整个应用。云端同步是可选项。
+- **Schema 优先的模板系统** —— 每份简历都是一个带类型的 Zod 值。模板从共享 Schema 渲染，AI 工具通过针对 Schema 的 JSON Patch 来编辑简历（无需"猜结构"）。
+- **AI 工具是一等公民** —— 内置原生 MCP 服务器（`@magic-resume/mcp`），Claude Code、Cursor、Windsurf 等工具可以通过和 Web 应用相同的数据层读取和安全编辑你的简历。
+
+本站是面向贡献者和集成方的手册。如果你想直接使用托管版应用，访问 [magic-resume.cn](https://magic-resume.cn)。如果你想 **运行它、改造它、或把 AI 工具接进去**，你来对地方了。
+
+## 系统架构：三个仓库
+
+Magic Resume 不是单一仓库。整个产品由 **三个独立部署的服务** 组成，分别住在三个 Git 仓库里，通过 HTTP 和 stdio 拼接成完整系统：
+
+```
+                      ┌──────────────────────────────────────────────┐
+                      │            浏览器 / AI 编程工具                │
+                      └──────────────────────────────────────────────┘
+                       │                  │                   │
+                       │ Clerk JWT        │ stdio (MCP)       │ Clerk JWT
+                       │ + HTTP           │                   │ + HTTP
+                       ▼                  ▼                   ▼
+            ┌──────────────────┐   ┌──────────────┐   ┌──────────────┐
+            │  apps/web        │   │ @magic-resume│   │  apps/web    │
+            │  (Next.js 15)    │   │ /mcp (Node)  │   │  (AI Lab UI) │
+            └────────┬─────────┘   └──────┬───────┘   └──────┬───────┘
+                     │                    │                  │
+                     │ HTTP + JWT         │ HTTP + PAT       │ HTTP + JWT
+                     ▼                    ▼                  ▼
+   ┌─────────────────────────────────────────┐    ┌─────────────────────┐
+   │  Magic-Resume-Core (独立仓库, NestJS)   │    │  Agent 后端          │
+   │  • /v1/resumes        简历 CRUD         │    │  (独立仓库, Python) │
+   │  • /v1/resumes/:id/patch  JSON Patch    │    │  • /interview       │
+   │  • /v1/share          分享 / 协作        │    │  • /translate       │
+   │  • PAT、JWT 双鉴权                       │    │  • /optimize        │
+   └─────────────────────┬───────────────────┘    │  LangChain/LangGraph │
+                         │                        └─────────────────────┘
+                         ▼
+                ┌──────────────┐
+                │  PostgreSQL  │
+                └──────────────┘
+```
+
+### 1. `Magic-Resume`（本仓库）
+
+[github.com/LinMoQC/Magic-Resume](https://github.com/LinMoQC/Magic-Resume) —— pnpm + Turborepo 单仓，包含：
+
+| Workspace | 角色 |
+|---|---|
+| `apps/web` | Next.js 15 前端，编辑器、模板预览、AI Lab UI、PDF 导出 |
+| `apps/docs` | 你正在看的文档站点（Nextra 4） |
+| `packages/mcp` | 发到 npm 的 `@magic-resume/mcp`，stdio MCP 服务器 + CLI |
+| `packages/resume-schema` | Zod Schema、类型、样例数据，所有仓库共享的简历真源 |
+| `packages/resume-templates` | 模板 DSL、渲染器、注册表 |
+| `packages/env` / `packages/utils` / `packages/tsconfig` | 工具与配置 |
+
+**职责**：所有面向用户的 UI、本地编辑、IndexedDB 持久化、MCP 工具。
+
+### 2. Magic-Resume-Core（独立仓库，NestJS）
+
+云端模式下提供 **持久化层** 的后端服务。Web 应用和 MCP 服务器都是它的客户端：
+
+- 简历 CRUD、JSON Patch 应用、Zod 校验
+- 版本历史、分享链接、协作权限
+- 双鉴权：浏览器走 Clerk JWT，CLI/MCP 走 PAT
+- 使用 PostgreSQL 存储
+
+**为什么独立**：浏览器端的 React 状态树和服务端的数据库是不同的关注点。把 Core API 拆出去意味着 MCP 服务器和未来的第三方客户端（移动端、CLI）可以共用同一份后端，不用拖着前端。
+
+### 3. Agent 后端（独立仓库，Python）
+
+AI Lab 的所有功能（面试模拟、JD 优化、简历翻译、深度分析）都跑在这里：
+
+- LangChain + LangGraph 编排
+- 长任务（可能跑数十秒）、需要流式响应
+- 与 Core API 没有直接交互 —— 它收到 JWT 后只调用 LLM，把结果回吐给浏览器
+
+**为什么独立**：Python 生态在 LLM 编排和 prompt 调优上更顺手，与 TypeScript 强解耦后两边可以独立演进。流式响应和长任务的特性也和 Next.js 边缘函数的执行模型不太合。
+
+### 三仓之间的契约
+
+| 谁 → 谁 | 协议 | 鉴权 |
+|---|---|---|
+| 浏览器 → Core API | HTTP (Axios) | Clerk JWT（拦截器自动附带） |
+| 浏览器 → Agent | HTTP (Axios) + SSE | Clerk JWT |
+| `@magic-resume/mcp` → Core API | HTTP | PAT（`~/.magic-resume/mcp.json`） |
+| Agent → LLM 提供方 | HTTP | 用户自带 Key 或托管侧 Key |
+
+Schema 一致性靠 `@magic-resume/resume-schema` 维护 —— 这个包发到 npm，Core API 和 Agent 都把它作为依赖装上。**一处定义，三处校验。**
+
+## 部署拓扑
+
+- **自托管模式**：只跑 `apps/web` 一个进程就够了。Core API 和 Agent 都不需要 —— 数据全在 IndexedDB，AI 功能用自带 Key（BYOK）。
+- **托管版（magic-resume.cn）**：三个仓库分别部署 —— Web 在 Vercel，Core API 在容器编排平台，Agent 在 GPU/CPU 池。
+- **自己跑云端模式**：你需要三仓都自己部署（详见 [云端模式](/zh/getting-started/cloud)），或选择性接入其中一两个，让另一些功能优雅降级。
+
+## 技术栈
+
+| 层级 | 选型 | 说明 |
+|---|---|---|
+| 单仓 | **pnpm** + **Turborepo** | `pnpm@10.28.1` |
+| Web 应用 | **Next.js 15** (App Router) + React 19 | `apps/web` |
+| 状态 | **Zustand** + Immer | 通过 `idb-keyval` 持久化到 IndexedDB |
+| 鉴权（云端模式） | **Clerk** | 仅当 `NEXT_PUBLIC_APP_MODE=cloud` 时加载 |
+| Schema | **Zod 4** | 唯一真源在 `@magic-resume/resume-schema` |
+| 编辑器 | **Tiptap** | 简历字段的富文本编辑 |
+| 模板 | 自定义 DSL → React 渲染器 | `@magic-resume/resume-templates` |
+| Core API | **NestJS** + **PostgreSQL** | 独立仓库 |
+| Agent | **Python** + **LangChain** + **LangGraph** | 独立仓库 |
+| MCP 服务器 | **`@modelcontextprotocol/sdk`** + `fast-json-patch` | `@magic-resume/mcp`（stdio，Node ESM） |
+| 文档 | **Nextra 4** + Next.js 15 | `apps/docs`（即本站） |
+
+## 接下来读什么
+
+<Cards>
+  <Cards.Card title="快速开始" href="/zh/getting-started" arrow />
+  <Cards.Card title="架构总览" href="/zh/architecture" arrow />
+  <Cards.Card title="MCP 服务器" href="/zh/mcp" arrow />
+  <Cards.Card title="本地开发" href="/zh/development" arrow />
+</Cards>
+
+<Callout type="info">
+本文档跟踪 `master` 分支。如果你在功能分支上发现某些内容过时了，仓库根目录的 `CLAUDE.md` 是最简洁的标准参考。
+</Callout>
