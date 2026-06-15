@@ -689,7 +689,6 @@ const useResumeStore = create<ResumeState>()(
       if (!state.activeResume) return;
       state.activeResume.info = newInfo;
       state.activeResume.updatedAt = Date.now();
-      
       const resumeIndex = state.resumes.findIndex(r => r.id === state.activeResume?.id);
       if (resumeIndex !== -1) {
         state.resumes[resumeIndex].info = newInfo;

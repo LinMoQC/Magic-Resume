@@ -1,3 +1,6 @@
 packages:
-  - "apps/*"
-  - "packages/*"
+  - apps/*
+  - packages/*
+
+patchedDependencies:
+  nextra-theme-docs@4.3.0: patches/nextra-theme-docs@4.3.0.patch
