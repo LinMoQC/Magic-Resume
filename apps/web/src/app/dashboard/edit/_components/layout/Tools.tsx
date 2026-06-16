@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useSettingStore } from "@/store/useSettingStore";
+import { isCloudMode } from "@/lib/config/app";
 
 export type ToolsProps = {
   isMobile: boolean;
@@ -57,7 +58,7 @@ export function Tools({ isMobile, zoomIn, zoomOut, resetTransform, info, onShowA
         )}
       >
         <>
-          {!isMobile && (
+          {!isMobile && isCloudMode && (
             <button
               className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"
               title={t('tools.aiAssistant')}
@@ -79,21 +80,23 @@ export function Tools({ isMobile, zoomIn, zoomOut, resetTransform, info, onShowA
             </button>
           )}
 
-          <button
-            className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"
-            onClick={() => {
-                if (onFeedbackClick) {
-                    onFeedbackClick();
-                } else if (currentId) {
-                    // Fallback to internal navigation if prop is not provided, though it should be.
-                    router.push('/dashboard/edit/' + currentId + '/feedback');
-                }
-            }}
-            title={t('tools.feedback', 'Feedback')}
-            type="button"
-          >
-            <MessageCircle size={18}/>
-          </button>
+          {isCloudMode && (
+            <button
+              className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"
+              onClick={() => {
+                  if (onFeedbackClick) {
+                      onFeedbackClick();
+                  } else if (currentId) {
+                      // Fallback to internal navigation if prop is not provided, though it should be.
+                      router.push('/dashboard/edit/' + currentId + '/feedback');
+                  }
+              }}
+              title={t('tools.feedback', 'Feedback')}
+              type="button"
+            >
+              <MessageCircle size={18}/>
+            </button>
+          )}
 
           {cloudSync && !isMobile && (
             <button

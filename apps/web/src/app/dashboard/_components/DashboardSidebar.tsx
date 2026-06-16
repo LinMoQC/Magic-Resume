@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useAppUser, AppUserButton } from '@/lib/auth';
+import { isCloudMode } from '@/lib/config/app';
 import { motion, AnimatePresence } from 'framer-motion';
 import useMobile from '@/hooks/useMobile';
 import { FiMenu, FiX } from 'react-icons/fi';
@@ -23,8 +24,12 @@ export default function DashboardSidebar() {
 
   const menuItems = [
     { href: '/dashboard', label: t('sidebar.resumes'), icon: FaRegFileAlt },
-    { href: '/dashboard/notifications', label: t('sidebar.notifications'), icon: FaBell },
-    { href: '/dashboard/settings', label: t('sidebar.settings'), icon: FaCog },
+    ...(isCloudMode
+      ? [
+          { href: '/dashboard/notifications', label: t('sidebar.notifications'), icon: FaBell },
+          { href: '/dashboard/settings', label: t('sidebar.settings'), icon: FaCog },
+        ]
+      : []),
   ];
 
   const { isMobile } = useMobile();

@@ -7,6 +7,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { FaPlus, FaDownload, FaRegClone, FaEdit, FaTrash } from 'react-icons/fa';
 import { Resume } from '@/types/frontend/resume';
 import { useSettingStore } from '@/store/useSettingStore';
+import { isCloudMode } from '@/lib/config/app';
 import { formatTime, cn } from '@/lib/utils';
 import Link from 'next/link';
 import { getMagicTemplateList } from '@magic-resume/resume-templates/config/magic-templates';
@@ -159,7 +160,7 @@ function CloudSyncBanner() {
   const { t } = useTranslation();
   const cloudSync = useSettingStore(state => state.cloudSync);
 
-  if (cloudSync) return null;
+  if (!isCloudMode || cloudSync) return null;
 
   return (
     <motion.div
