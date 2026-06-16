@@ -85,7 +85,6 @@ const nextConfig: NextConfig = {
 
   // 环境变量
   env: {
-    CUSTOM_KEY: process.env.CUSTOM_KEY,
     BACKEND_URL: process.env.BACKEND_URL,
   },
 

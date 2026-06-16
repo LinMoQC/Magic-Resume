@@ -70,7 +70,6 @@
     "next": "15.3.8",
     "pixi-live2d-display": "^0.4.0",
     "pixi.js": "^6.5.10",
-    "posthog-js": "^1.336.4",
     "react": "^19.0.0",
     "react-circular-progressbar": "^2.2.0",
     "react-dom": "^19.0.0",
