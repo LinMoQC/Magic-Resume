@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@magic-resume/tsconfig": "workspace:*",
+    "@types/node": "^20.19.41",
     "typescript": "^5"
   }
 }

@@ -420,6 +420,9 @@ importers:
       '@magic-resume/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
+      '@types/node':
+        specifier: ^20.19.41
+        version: 20.19.41
       typescript:
         specifier: ^5
         version: 5.9.3
