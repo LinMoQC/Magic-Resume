@@ -82,12 +82,10 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
               zoomIn={zoomIn} 
               zoomOut={zoomOut} 
               resetTransform={resetTransform} 
-              info={activeResume.info} 
+              resume={activeResume}
               onShowAI={onShowAI} 
               onVersionClick={onVersionClick}
               rightCollapsed={rightCollapsed}
-              templateId={activeResume.template}
-              customTemplate={activeResume.customTemplate}
               onShareClick={onShareClick}
               onFeedbackClick={onFeedbackClick}
             />
@@ -98,4 +96,4 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
   );
 };
 
-export default ResumePreviewPanel; 
+export default ResumePreviewPanel;
