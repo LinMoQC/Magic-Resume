@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Paperclip, Wand2, Loader2, CheckCircle, Eye, Code, Zap, Brain, Minimize2 } from 'lucide-react';
 import { useResumeOptimizer } from '@/hooks/useResumeOptimizer';
 import ResumePreview from '../preview/ResumePreview';
-import { trackEvent } from '@/components/features/analytics/Analytics';
 import { useTrace } from '@/hooks/useTrace';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
@@ -79,12 +78,6 @@ const {
     setViewMode('preview');
     setIsMinimized(false);
 
-    // 追踪AI优化使用
-    trackEvent('ai_optimization_started', {
-      feature: 'resume_optimize',
-      user_action: 'optimize_button_click'
-    });
-
     traceAiOptimizationStarted(!!jd);
 
     // V7: Include company name and job title
@@ -93,11 +86,6 @@ const {
 
   const handleApply = () => {
     if (optimizedResume) {
-      // 追踪优化结果应用
-      trackEvent('ai_optimization_applied', {
-        feature: 'resume_optimize',
-        sections_optimized: Object.keys(optimizedResume.sections || {}).length
-      });
       traceAiOptimizationApplied({
         sectionsOptimized: Object.keys(optimizedResume.sections || {}).length,
       });

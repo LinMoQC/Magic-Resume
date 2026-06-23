@@ -33,6 +33,7 @@
   - [AI Lab: Interview & Translation](#ai-lab-interview--translation)
   - [Privacy: Local-First Data Security](#privacy-local-first-data-security)
 - [🤖 MCP Integration](#-mcp-integration)
+- [⚙️ Environment Variables](#️-environment-variables)
 - [🛳 Self Hosting](#-self-hosting)
   - [Self-hosted Mode (No Backend Required)](#self-hosted-mode-no-backend-required)
   - [Deploying with Vercel](#deploying-with-vercel)
@@ -143,6 +144,32 @@ The MCP server is schema-aware and patch-based — AI tools make surgical edits 
 | MCP | [@modelcontextprotocol/sdk](https://modelcontextprotocol.io/) |
 | Schema | [Zod](https://zod.dev/) |
 | Internationalization | [i18next](https://www.i18next.com/) |
+
+---
+
+## ⚙️ Environment Variables
+
+All variables live in `apps/web/.env.local` (copy from `apps/web/.env.example`). Vars prefixed with `NEXT_PUBLIC_` are exposed to the browser; the rest are server-only.
+
+| Variable | Required in | Default | Purpose |
+|---|---|---|---|
+| `NEXT_PUBLIC_APP_MODE` | both | auto | `self-hosted` or `cloud`. If unset, auto-detected: `cloud` when `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` is set, otherwise `self-hosted`. |
+| `NEXT_PUBLIC_APP_URL` | both | `https://magic-resume.cn` | Canonical base URL used by `metadataBase` for OG tags and SEO. Set to your deployed origin (e.g. `http://localhost:3000` in dev). |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | cloud | — | Clerk publishable key (`pk_...`). Read by `@clerk/nextjs` on the client. |
+| `CLERK_SECRET_KEY` | cloud | — | Clerk secret key (`sk_...`). Read by `@clerk/nextjs` on the server. |
+| `NEXT_PUBLIC_CLOUD_API_URL` | cloud | `http://localhost:3111` | NestJS Core API base URL — used by `httpClient.api` for resumes, settings, sharing, PATs. |
+| `BACKEND_URL` | AI features | `http://localhost:8000` | Python agent server — used by `httpClient.agent` and the `/api/interview/*` Next.js rewrite proxy (interview, translate, AI optimize/analyze). |
+
+**Mode rules**
+
+- **`self-hosted`** — pure browser. No Clerk, no Core API; data lives in IndexedDB. Only `NEXT_PUBLIC_APP_URL` is meaningful.
+- **`cloud`** — requires the two Clerk keys plus `NEXT_PUBLIC_CLOUD_API_URL`. AI features additionally require `BACKEND_URL` (or remove AI features in your fork).
+
+**Notes**
+
+- Don't commit `.env.local` — it's gitignored. Use `.env.example` as the template.
+- Public-prefixed values are inlined into the JS bundle at build time; never put secrets behind `NEXT_PUBLIC_`.
+- Analytics env vars (PostHog / GA) were removed — product events go through the in-house tracking SDK in `apps/web/src/lib/analytics/core-events.ts`.
 
 ---
 
