@@ -6,11 +6,12 @@ import AIModal from '../../../_components/modals/AIModal';
 
 export default function AIModalPage() {
   const router = useRouter();
-  const { 
-    activeResume, 
-    updateSections, 
-    applyFullResume, 
-    isAiGenerating, 
+  const {
+    activeResume,
+    updateSections,
+    updateInfo,
+    applyFullResume,
+    isAiGenerating,
     setIsAiGenerating,
   } = useResumeStore();
 
@@ -30,6 +31,7 @@ export default function AIModalPage() {
       onClose={() => handleOpenChange(false)}
       resumeData={activeResume}
       onApplySectionChanges={updateSections}
+      onApplyInfo={updateInfo}
       onApplyFullResume={applyFullResume}
       templateId={templateId}
       isAiJobRunning={isAiGenerating}

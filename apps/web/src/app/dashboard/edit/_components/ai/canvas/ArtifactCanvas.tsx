@@ -6,8 +6,8 @@ import { Check, CircleCheck, FileDown, ArrowUpRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Resume, Section } from '@/types/frontend/resume';
 import ResumePreview from '../../preview/ResumePreview';
-import { SKILLS } from './registry';
-import type { CanvasState, CanvasView } from './types';
+import { SKILLS } from '../skills/registry';
+import type { CanvasState, CanvasView } from '../types';
 
 const VIEW_LABEL: Record<CanvasView, string> = {
   preview: '预览',
@@ -16,7 +16,7 @@ const VIEW_LABEL: Record<CanvasView, string> = {
   score: '评分',
 };
 
-type ResumeCanvasProps = {
+type ArtifactCanvasProps = {
   state: CanvasState;
   resumeData: Resume;
   templateId: string;
@@ -205,7 +205,7 @@ function ScoreView({ onExport }: { onExport: () => void }) {
   );
 }
 
-export default function ResumeCanvas({
+export default function ArtifactCanvas({
   state,
   resumeData,
   templateId,
@@ -213,7 +213,7 @@ export default function ResumeCanvas({
   onApply,
   onDiscard,
   onExport,
-}: ResumeCanvasProps) {
+}: ArtifactCanvasProps) {
   const { open, skillId, view, status } = state;
   const skill = skillId ? SKILLS[skillId] : null;
   const views = skill?.canvas?.views ?? [];

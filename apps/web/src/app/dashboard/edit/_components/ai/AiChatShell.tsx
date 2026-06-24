@@ -1,26 +1,28 @@
 'use client';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FlaskConical, FileText, SquarePen, X, Bot } from 'lucide-react';
+import { FlaskConical, FileText, SquarePen, X, Bot, PencilRuler, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { nanoid } from 'nanoid';
 import { toast } from 'sonner';
-import { Resume, Section } from '@/types/frontend/resume';
-import { SKILLS } from './registry';
+import { InfoType, Resume, Section } from '@/types/frontend/resume';
+import { SKILLS } from './skills/registry';
 import type { CanvasState, CanvasView, ChatMessage, SkillId } from './types';
-import ChatThread from './ChatThread';
-import Composer from './Composer';
-import SkillParamForm from './SkillParamForm';
-import WelcomeSuggestions from './WelcomeSuggestions';
-import ResumeCanvas from './ResumeCanvas';
-import InterviewOverlay from './InterviewOverlay';
+import ChatThread from './conversation/ChatThread';
+import Composer from './conversation/Composer';
+import SkillParamForm from './conversation/SkillParamForm';
+import WelcomeSuggestions from './conversation/WelcomeSuggestions';
+import ArtifactCanvas from './canvas/ArtifactCanvas';
+import InterviewOverlay from './interview/InterviewOverlay';
+import LivingCanvas, { type BatchRequest, type FocusRequest } from './canvas/living/LivingCanvas';
 
 type AiChatShellProps = {
   resumeData: Resume;
   templateId: string;
   onClose: () => void;
   onApplySections: (sections: Section) => void;
+  onApplyInfo: (info: InfoType) => void;
   setIsAiJobRunning: (running: boolean) => void;
 };
 
@@ -31,6 +33,7 @@ export default function AiChatShell({
   templateId,
   onClose,
   onApplySections,
+  onApplyInfo,
   setIsAiJobRunning,
 }: AiChatShellProps) {
   const [started, setStarted] = useState(false);
@@ -39,6 +42,13 @@ export default function AiChatShell({
   const [canvas, setCanvas] = useState<CanvasState>(CLOSED_CANVAS);
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [running, setRunning] = useState(false);
+  const [livingOpen, setLivingOpen] = useState(false);
+  const [livingSkillId, setLivingSkillId] = useState<SkillId | null>(null);
+  const [batchRequest, setBatchRequest] = useState<BatchRequest | null>(null);
+  const [focusRequest, setFocusRequest] = useState<FocusRequest | null>(null);
+  const [railCollapsed, setRailCollapsed] = useState(false);
+  const batchNonce = useRef(0);
+  const focusNonce = useRef(0);
 
   const addMessage = useCallback((msg: ChatMessage) => {
     setMessages((prev) => [...prev, msg]);
@@ -48,6 +58,47 @@ export default function AiChatShell({
     (content: string) => addMessage({ id: nanoid(), role: 'assistant', content }),
     [addMessage]
   );
+
+  const logChange = useCallback(
+    (content: string, resumePath?: string) =>
+      addMessage({ id: nanoid(), role: 'log', content, resumePath }),
+    [addMessage]
+  );
+
+  // Click a log entry → reopen the canvas and scroll to that spot (design §5 可点回溯).
+  const focusOnCanvas = useCallback((resumePath: string) => {
+    focusNonce.current += 1;
+    setLivingOpen(true);
+    setRailCollapsed(false);
+    setFocusRequest({ path: resumePath, nonce: focusNonce.current });
+  }, []);
+
+  const toggleLiving = useCallback(() => {
+    setLivingOpen((open) => {
+      const next = !open;
+      if (next) {
+        setStarted(true);
+        setCanvas(CLOSED_CANVAS);
+        setBatchRequest(null); // manual open starts clean — don't replay a prior skill batch
+        setLivingSkillId(null);
+      }
+      return next;
+    });
+  }, []);
+
+  // P3 · a whole-resume content skill (optimize / translate) drops its result onto
+  // the living canvas as a batch of in-place pending changes instead of a Diff tab.
+  const isBatchSkill = (id: SkillId) => id === 'optimize' || id === 'translate';
+
+  const seedBatch = useCallback((id: SkillId, params: Record<string, string>) => {
+    batchNonce.current += 1;
+    const kind = id === 'translate' ? 'translate' : 'optimize';
+    setStarted(true);
+    setCanvas(CLOSED_CANVAS);
+    setLivingOpen(true);
+    setLivingSkillId(id);
+    setBatchRequest({ kind, lang: params.lang, nonce: batchNonce.current });
+  }, []);
 
   const runSkill = useCallback(
     (id: SkillId, params: Record<string, string>, opts?: { addIntent?: boolean }) => {
@@ -68,12 +119,15 @@ export default function AiChatShell({
         );
         setRunning(false);
         setIsAiJobRunning(false);
-        if (skill.canvas) {
+        if (isBatchSkill(id)) {
+          seedBatch(id, params);
+        } else if (skill.canvas) {
+          setLivingOpen(false);
           setCanvas({ open: true, skillId: id, view: skill.canvas.defaultView, status: 'ready' });
         }
       }, 1500);
     },
-    [addMessage, setIsAiJobRunning]
+    [addMessage, setIsAiJobRunning, seedBatch]
   );
 
   const selectSkill = useCallback(
@@ -129,19 +183,32 @@ export default function AiChatShell({
     setStarted((s) => (messages.length === 0 ? false : s));
   }, [messages.length]);
 
-  const toggleCanvas = useCallback((id: SkillId) => {
-    setCanvas((prev) => {
-      if (prev.open && prev.skillId === id) return { ...prev, open: false };
-      const sk = SKILLS[id];
-      if (!sk.canvas) return prev;
-      return {
-        open: true,
-        skillId: id,
-        view: sk.canvas.defaultView,
-        status: prev.skillId === id ? prev.status : 'ready',
-      };
-    });
-  }, []);
+  const toggleCanvas = useCallback(
+    (id: SkillId) => {
+      // Content skills live on the living canvas — re-open it and regenerate the batch.
+      if (isBatchSkill(id)) {
+        if (livingOpen) {
+          setLivingOpen(false);
+        } else {
+          seedBatch(id, {});
+        }
+        return;
+      }
+      setLivingOpen(false);
+      setCanvas((prev) => {
+        if (prev.open && prev.skillId === id) return { ...prev, open: false };
+        const sk = SKILLS[id];
+        if (!sk.canvas) return prev;
+        return {
+          open: true,
+          skillId: id,
+          view: sk.canvas.defaultView,
+          status: prev.skillId === id ? prev.status : 'ready',
+        };
+      });
+    },
+    [livingOpen, seedBatch]
+  );
 
   const applyChanges = useCallback(() => {
     onApplySections(resumeData.sections);
@@ -156,6 +223,7 @@ export default function AiChatShell({
     setParamSkill(null);
     setCanvas(CLOSED_CANVAS);
     setOverlayOpen(false);
+    setLivingOpen(false);
   }, []);
 
   const composer = (
@@ -174,6 +242,21 @@ export default function AiChatShell({
           {resumeData.name || '未命名简历'}
         </span>
         <div className="ml-auto flex items-center gap-3 text-neutral-500">
+          <button
+            type="button"
+            onClick={toggleLiving}
+            aria-label="实时画布"
+            title="在简历上直接让 AI 改"
+            className={cn(
+              'inline-flex items-center gap-1.5 text-xs rounded-full px-2.5 py-1 border transition-colors cursor-pointer',
+              livingOpen
+                ? 'text-sky-300 border-sky-500/40 bg-sky-500/10'
+                : 'text-neutral-400 border-neutral-800 hover:text-white hover:border-neutral-700'
+            )}
+          >
+            <PencilRuler size={13} />
+            实时画布
+          </button>
           <button
             type="button"
             onClick={resetSession}
@@ -195,7 +278,37 @@ export default function AiChatShell({
       </header>
 
       <div className="flex-1 flex min-h-0">
+        {livingOpen && railCollapsed ? (
+          <aside className="shrink-0 w-12 flex flex-col items-center gap-3 py-4 border-r border-neutral-900">
+            <div className="w-8 h-8 rounded-full bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400">
+              <Bot size={15} />
+            </div>
+            <button
+              type="button"
+              onClick={() => setRailCollapsed(false)}
+              aria-label="展开对话"
+              title="展开对话"
+              className="text-neutral-500 hover:text-white transition-colors cursor-pointer"
+            >
+              <PanelLeftOpen size={16} />
+            </button>
+            {messages.length > 0 && (
+              <span className="text-[10px] text-neutral-600 tabular-nums">{messages.length}</span>
+            )}
+          </aside>
+        ) : (
         <div className={cn('relative flex-1 flex flex-col min-w-0 overflow-hidden', !started && 'justify-center')}>
+          {livingOpen && (
+            <button
+              type="button"
+              onClick={() => setRailCollapsed(true)}
+              aria-label="收起对话为侧栏"
+              title="收起为侧栏"
+              className="absolute top-2 right-2 z-10 text-neutral-600 hover:text-white transition-colors cursor-pointer"
+            >
+              <PanelLeftClose size={16} />
+            </button>
+          )}
           <AnimatePresence initial={false} mode="popLayout">
             {!started ? (
               <motion.div
@@ -223,7 +336,10 @@ export default function AiChatShell({
                 <ChatThread
                   messages={messages}
                   onToggleCanvas={toggleCanvas}
-                  openCanvasSkillId={canvas.open ? canvas.skillId : null}
+                  onLogClick={focusOnCanvas}
+                  openCanvasSkillId={
+                    canvas.open ? canvas.skillId : livingOpen ? livingSkillId : null
+                  }
                 />
               </motion.div>
             )}
@@ -272,16 +388,32 @@ export default function AiChatShell({
             )}
           </AnimatePresence>
         </div>
+        )}
 
-        <ResumeCanvas
-          state={canvas}
-          resumeData={resumeData}
-          templateId={templateId}
-          onSetView={(view: CanvasView) => setCanvas((prev) => ({ ...prev, view }))}
-          onApply={applyChanges}
-          onDiscard={() => setCanvas(CLOSED_CANVAS)}
-          onExport={() => addAssistant('体检报告已导出为 PDF。')}
-        />
+        {livingOpen ? (
+          <div className={cn('shrink-0 min-w-0', railCollapsed ? 'flex-1' : 'w-[58%]')}>
+            <LivingCanvas
+              resumeData={resumeData}
+              templateId={templateId}
+              onApplySections={onApplySections}
+              onApplyInfo={onApplyInfo}
+              onLog={logChange}
+              onClose={() => setLivingOpen(false)}
+              batchRequest={batchRequest}
+              focusRequest={focusRequest}
+            />
+          </div>
+        ) : (
+          <ArtifactCanvas
+            state={canvas}
+            resumeData={resumeData}
+            templateId={templateId}
+            onSetView={(view: CanvasView) => setCanvas((prev) => ({ ...prev, view }))}
+            onApply={applyChanges}
+            onDiscard={() => setCanvas(CLOSED_CANVAS)}
+            onExport={() => addAssistant('体检报告已导出为 PDF。')}
+          />
+        )}
       </div>
 
       <InterviewOverlay

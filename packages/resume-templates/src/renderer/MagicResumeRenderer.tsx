@@ -245,6 +245,7 @@ export const MagicResumeRenderer = React.memo(({ template, data, locale }: Props
             ...component.props,
             title: resolvedTitle,
             titleIcon: getSectionIcon(sectionKey, rawTitle),
+            sectionKey,
           };
 
           return (

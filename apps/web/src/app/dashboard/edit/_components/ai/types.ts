@@ -4,6 +4,13 @@ export type SkillId = 'create' | 'optimize' | 'analyze' | 'translate' | 'intervi
 
 export type CanvasView = 'preview' | 'diff' | 'json' | 'score';
 
+/**
+ * Where a skill can act (design §8.1). `whole-resume` is the classic "optimize
+ * the whole thing" mode; `element` / `selection` are the directed, in-place
+ * calls the living canvas drives. A skill can support more than one.
+ */
+export type SkillScope = 'whole-resume' | 'element' | 'selection';
+
 export type ParamField =
   | {
       id: string;
@@ -44,13 +51,15 @@ export interface AiSkill {
   cta?: string;
   /** which canvas views this skill produces; omitted = no canvas artifact */
   canvas?: { views: CanvasView[]; defaultView: CanvasView };
+  /** scopes this skill can target; defaults to whole-resume when omitted */
+  scope?: SkillScope[];
   /** compact one-liner shown as the user's request bubble */
   buildIntent: (params: Record<string, string>) => string;
   /** summary shown on the completed execution card */
   doneSummary: string;
 }
 
-export type ChatRole = 'user' | 'assistant' | 'exec';
+export type ChatRole = 'user' | 'assistant' | 'exec' | 'log';
 
 export interface ChatMessage {
   id: string;
@@ -59,6 +68,8 @@ export interface ChatMessage {
   /** present when role === 'exec' */
   skillId?: SkillId;
   status?: 'running' | 'done';
+  /** present when role === 'log' — anchors the entry back to a canvas change */
+  resumePath?: string;
 }
 
 export type CanvasStatus = 'idle' | 'streaming' | 'ready' | 'applied';

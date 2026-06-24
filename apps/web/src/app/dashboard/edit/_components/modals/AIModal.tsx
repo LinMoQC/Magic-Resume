@@ -1,13 +1,14 @@
 import React from 'react';
-import { Resume, Section } from '@/types/frontend/resume';
+import { InfoType, Resume, Section } from '@/types/frontend/resume';
 import { AnimatePresence, motion } from 'framer-motion';
-import AiChatShell from '../ai/chat/AiChatShell';
+import AiChatShell from '../ai/AiChatShell';
 
 type AIModalProps = {
   isOpen: boolean;
   onClose: () => void;
   resumeData: Resume;
   onApplySectionChanges: (newSections: Section) => void;
+  onApplyInfo: (info: InfoType) => void;
   onApplyFullResume: (newResume: Resume) => void;
   templateId: string;
   isAiJobRunning: boolean;
@@ -19,6 +20,7 @@ export default function AIModal({
   onClose,
   resumeData,
   onApplySectionChanges,
+  onApplyInfo,
   templateId,
   setIsAiJobRunning,
 }: AIModalProps) {
@@ -45,6 +47,7 @@ export default function AIModal({
                 templateId={templateId}
                 onClose={onClose}
                 onApplySections={onApplySectionChanges}
+                onApplyInfo={onApplyInfo}
                 setIsAiJobRunning={setIsAiJobRunning}
               />
             </motion.div>

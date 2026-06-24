@@ -1,6 +1,7 @@
 import React from 'react';
-import { getFieldValue } from './utils';
+import { getFieldValue, getFieldEntry } from './utils';
 import { WysiwygContent } from './WysiwygContent';
+import { Editable, SectionHandle, SectionInsertSlot } from '../renderer/EditableCanvas';
 
 interface Item {
   [key: string]: unknown;
@@ -15,9 +16,11 @@ interface Props {
   titleClassName?: string;
   containerClassName?: string;
   titleIcon?: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
+  /** resume section key — enables the editable canvas anchors */
+  sectionKey?: string;
 }
 
-export const ListSection = React.memo(function ListSection({ title, items, fieldMap, className, style, titleClassName, containerClassName, titleIcon: TitleIcon }: Props) {
+export const ListSection = React.memo(function ListSection({ title, items, fieldMap, className, style, titleClassName, containerClassName, titleIcon: TitleIcon, sectionKey }: Props) {
   if (!items || items.length === 0) return null;
 
   return (
@@ -47,27 +50,45 @@ export const ListSection = React.memo(function ListSection({ title, items, field
       >
         {TitleIcon && <TitleIcon style={{ display: 'var(--title-icon-display)', flexShrink: 0, width: '1em', height: '1em' }} />}
         {title}
+        {sectionKey && <SectionHandle sectionKey={sectionKey} title={title} />}
       </h4>
       <ul className={`list-none ${containerClassName || "grid gap-x-6 gap-y-1"}`}>
-        {items.map((item, idx) => (
-          <li className="space-y-2" key={idx}>
-            <div>
-              <div className="font-bold">
-                {getFieldValue(item, fieldMap.itemName)}
+        {items.map((item, idx) => {
+          const summary = getFieldEntry(item, fieldMap.summary);
+          const itemId = item.id != null ? String(item.id) : null;
+          return (
+            <li className="space-y-2" key={itemId || idx}>
+              <div>
+                <div className="font-bold">
+                  {getFieldValue(item, fieldMap.itemName)}
+                </div>
+                {getFieldValue(item, fieldMap.itemDetail) && (
+                  <div>{getFieldValue(item, fieldMap.itemDetail)}</div>
+                )}
+                {getFieldValue(item, fieldMap.date) && (
+                  <div>{getFieldValue(item, fieldMap.date)}</div>
+                )}
+                {summary &&
+                  (sectionKey && itemId ? (
+                    <Editable
+                      target={{
+                        sectionKey,
+                        itemId,
+                        fieldKey: summary.key,
+                        kind: 'html',
+                        label: `${title} · 第 ${idx + 1} 条`,
+                      }}
+                      html={summary.value}
+                    />
+                  ) : (
+                    <WysiwygContent dirtyHtml={summary.value} />
+                  ))}
               </div>
-              {getFieldValue(item, fieldMap.itemDetail) && (
-                <div>{getFieldValue(item, fieldMap.itemDetail)}</div>
-              )}
-              {getFieldValue(item, fieldMap.date) && (
-                <div>{getFieldValue(item, fieldMap.date)}</div>
-              )}
-              {getFieldValue(item, fieldMap.summary) && (
-                <WysiwygContent dirtyHtml={getFieldValue(item, fieldMap.summary) || ''} />
-              )}
-            </div>
-          </li>
-        ))}
+            </li>
+          );
+        })}
       </ul>
+      {sectionKey && <SectionInsertSlot sectionKey={sectionKey} />}
     </section>
   );
 });

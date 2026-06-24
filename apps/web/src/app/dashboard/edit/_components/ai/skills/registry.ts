@@ -1,5 +1,5 @@
 import { Wand2, BarChart3, BotMessageSquare, Mic, Languages } from 'lucide-react';
-import type { AiSkill, SkillId } from './types';
+import type { AiSkill, SkillId } from '../types';
 
 /**
  * The AI skill registry. Mock data flows through `buildIntent` / `doneSummary`
@@ -10,6 +10,7 @@ import type { AiSkill, SkillId } from './types';
 export const SKILLS: Record<SkillId, AiSkill> = {
   create: {
     id: 'create',
+    scope: ['whole-resume'],
     name: '引导创建',
     tagline: '对话式从零搭建',
     icon: BotMessageSquare,
@@ -23,6 +24,7 @@ export const SKILLS: Record<SkillId, AiSkill> = {
   },
   optimize: {
     id: 'optimize',
+    scope: ['whole-resume', 'element', 'selection'],
     name: '智能优化',
     tagline: '按 JD 定向改写',
     icon: Wand2,
@@ -48,6 +50,7 @@ export const SKILLS: Record<SkillId, AiSkill> = {
   },
   analyze: {
     id: 'analyze',
+    scope: ['whole-resume'],
     name: '简历分析',
     tagline: '多角色体检评分',
     icon: BarChart3,
@@ -61,6 +64,7 @@ export const SKILLS: Record<SkillId, AiSkill> = {
   },
   translate: {
     id: 'translate',
+    scope: ['whole-resume', 'element', 'selection'],
     name: '一键翻译',
     tagline: '生成多语言版本',
     icon: Languages,
@@ -88,6 +92,7 @@ export const SKILLS: Record<SkillId, AiSkill> = {
   },
   interview: {
     id: 'interview',
+    scope: ['whole-resume'],
     name: '模拟面试',
     tagline: '语音实战演练',
     icon: Mic,

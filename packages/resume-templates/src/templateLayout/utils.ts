@@ -19,6 +19,25 @@ export const getFieldValue = (item: Item, field: string | string[] | undefined) 
   return null;
 };
 
+/**
+ * Like {@link getFieldValue}, but also reports which concrete key produced the
+ * value. The living canvas needs the real field key (e.g. `summary`) to anchor a
+ * pending change back onto the right property — fieldMap aliases like
+ * `description` are not writable paths.
+ */
+export const getFieldEntry = (
+  item: Item,
+  field: string | string[] | undefined
+): { key: string; value: string } | null => {
+  if (!field) return null;
+  const fields = Array.isArray(field) ? field : [field];
+  for (const f of fields) {
+    const value = get(item, f);
+    if (value) return { key: f, value: String(value) };
+  }
+  return null;
+};
+
 const SECTION_ICON_MAP: Record<string, React.ComponentType<{ size?: number; className?: string; style?: React.CSSProperties }>> = {
   experience: Briefcase,
   education: GraduationCap,

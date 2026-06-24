@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { SKILL_LIST } from './registry';
-import type { SkillId } from './types';
+import { SKILL_LIST } from '../skills/registry';
+import type { SkillId } from '../types';
 
 const EXAMPLE_PROMPTS = [
   '按这份 JD 优化我的简历',

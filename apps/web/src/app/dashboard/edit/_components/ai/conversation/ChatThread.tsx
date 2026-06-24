@@ -3,8 +3,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Bot, Loader2, Check, Eye, EyeOff } from 'lucide-react';
-import { SKILLS } from './registry';
-import type { ChatMessage, SkillId } from './types';
+import { SKILLS } from '../skills/registry';
+import type { ChatMessage, SkillId } from '../types';
 
 function AssistantAvatar() {
   return (
@@ -117,6 +117,34 @@ function TypewriterText({ text }: { text: string }) {
   );
 }
 
+function LogLine({
+  message,
+  onLogClick,
+}: {
+  message: ChatMessage;
+  onLogClick?: (resumePath: string) => void;
+}) {
+  const clickable = !!message.resumePath && !!onLogClick;
+  const className = 'flex items-center gap-2 pl-10 text-[11px] text-neutral-500';
+  const body = (
+    <>
+      <Check size={12} className="text-emerald-500/80 shrink-0" />
+      <span className="truncate">{message.content}</span>
+    </>
+  );
+  if (!clickable) return <div className={className}>{body}</div>;
+  return (
+    <button
+      type="button"
+      onClick={() => onLogClick!(message.resumePath!)}
+      title="回到这处改动"
+      className={`${className} hover:text-neutral-300 transition-colors cursor-pointer w-full text-left`}
+    >
+      {body}
+    </button>
+  );
+}
+
 function Bubble({ message }: { message: ChatMessage }) {
   if (message.role === 'user') {
     return (
@@ -141,9 +169,10 @@ type ChatThreadProps = {
   messages: ChatMessage[];
   onToggleCanvas: (id: SkillId) => void;
   openCanvasSkillId: SkillId | null;
+  onLogClick?: (resumePath: string) => void;
 };
 
-export default function ChatThread({ messages, onToggleCanvas, openCanvasSkillId }: ChatThreadProps) {
+export default function ChatThread({ messages, onToggleCanvas, openCanvasSkillId, onLogClick }: ChatThreadProps) {
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -161,6 +190,8 @@ export default function ChatThread({ messages, onToggleCanvas, openCanvasSkillId
                 onToggleCanvas={onToggleCanvas}
                 isCanvasOpen={openCanvasSkillId === m.skillId}
               />
+            ) : m.role === 'log' ? (
+              <LogLine message={m} onLogClick={onLogClick} />
             ) : (
               <Bubble message={m} />
             )}

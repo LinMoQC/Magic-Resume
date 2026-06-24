@@ -5,7 +5,7 @@ import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import type { AiSkill } from './types';
+import type { AiSkill } from '../types';
 
 type SkillParamFormProps = {
   skill: AiSkill;

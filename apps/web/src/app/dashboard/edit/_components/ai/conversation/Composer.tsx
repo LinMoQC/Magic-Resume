@@ -4,8 +4,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Slash, ArrowUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { SKILL_LIST } from './registry';
-import type { SkillId } from './types';
+import { SKILL_LIST } from '../skills/registry';
+import type { SkillId } from '../types';
 
 type ComposerProps = {
   onPickSkill: (id: SkillId) => void;
