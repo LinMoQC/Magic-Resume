@@ -47,7 +47,6 @@ export const AGENT_ROUTES = {
   },
   translate: {
     text:   '/api/translate/text',
-    stream: '/api/translate/stream',
   },
 } as const;
 
@@ -57,8 +56,6 @@ export const AGENT_ROUTES = {
  * service layer (`ai/lib/services`) calls so they aren't hardcoded inline.
  */
 export const WEB_AGENT_ROUTES = {
-  analyzeMulti:     '/api/analyze_multi',
-  optimizerRewrite: '/api/optimizer-agent/rewrite',
   chat:             '/api/chat-agent',
   chatApprove:      '/api/chat-agent/approve',
 } as const;

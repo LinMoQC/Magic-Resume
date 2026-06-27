@@ -61,11 +61,17 @@ export interface AiSkill {
 
 export type ChatRole = 'user' | 'assistant' | 'exec' | 'log' | 'approval' | 'activity';
 
-/** A human-in-the-loop tool-approval prompt the agent paused on (design §6.5). */
+/**
+ * A human-in-the-loop tool-approval prompt the agent paused on. With native HITL
+ * the run resumes by `sessionId` + a `Command`, so no runId is needed here — the
+ * decision (approve/reject) is all the backend wants.
+ */
 export interface ApprovalRequest {
-  runId: string;
+  /** Interrupt id (display/key only; resume is keyed by sessionId server-side). */
   requestId: string;
-  /** resource class being requested, e.g. 'resume' */
+  /** Tool the agent paused before, e.g. 'read_resume'. */
+  toolName?: string;
+  /** resource class being requested, e.g. 'resume' (drives the read narration). */
   scope: string;
   status: 'pending' | 'approved' | 'denied';
 }

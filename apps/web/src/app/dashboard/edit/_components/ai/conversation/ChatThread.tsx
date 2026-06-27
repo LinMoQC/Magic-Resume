@@ -7,11 +7,7 @@ import { SKILLS } from '../skills/registry';
 import Markdown from './Markdown';
 import type { ApprovalRequest, ChatMessage, SkillId } from '../types';
 
-type ApprovalDecision = (
-  msgId: string,
-  req: { runId: string; requestId: string; scope: string },
-  approved: boolean
-) => void;
+type ApprovalDecision = (msgId: string, approved: boolean) => void;
 
 /**
  * Bot-side avatar. Consecutive bot messages share one avatar: only the first in a
@@ -195,8 +191,7 @@ function ApprovalCard({
 }) {
   const a = message.approval as ApprovalRequest | undefined;
   if (!a) return null;
-  const decide = (approved: boolean) =>
-    onApproval?.(message.id, { runId: a.runId, requestId: a.requestId, scope: a.scope }, approved);
+  const decide = (approved: boolean) => onApproval?.(message.id, approved);
 
   return (
     <div className="flex gap-3 items-start">

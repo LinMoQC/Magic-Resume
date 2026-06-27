@@ -1,6 +1,4 @@
 import { WEB_AGENT_ROUTES } from '@/lib/api/routes';
-import type { Resume } from '@/types/frontend/resume';
-import type { MultiPersonaResumeAnalysis } from '@/types/agent/multi-persona';
 import type { AgentLlmConfig, AgentSseEvent } from './types';
 
 /**
@@ -20,31 +18,6 @@ async function readError(res: Response): Promise<string> {
   } catch {
     return `请求失败（${res.status}）`;
   }
-}
-
-export interface AnalyzeParams {
-  resumeData: Resume;
-  config?: AgentLlmConfig;
-  language?: string;
-}
-
-/** Multi-persona competitiveness analysis — JSON (not streamed). */
-export async function analyzeResumeMulti({
-  resumeData,
-  config,
-  language,
-}: AnalyzeParams): Promise<MultiPersonaResumeAnalysis> {
-  const res = await fetch(WEB_AGENT_ROUTES.analyzeMulti, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ resumeData, config, language }),
-  });
-  if (!res.ok) throw new Error(await readError(res));
-  // v2 agent-service wraps non-streamed JSON in a TransformInterceptor envelope
-  // ({code,data,message}); tolerate both the envelope and a raw analysis (the
-  // analysis itself has no top-level `data`, so this never double-unwraps).
-  const body = await res.json();
-  return (body?.data ?? body) as MultiPersonaResumeAnalysis;
 }
 
 /**
@@ -102,9 +75,15 @@ export interface ChatStreamParams {
   messages: { role: 'system' | 'user' | 'assistant'; content: string }[];
   mode?: 'create' | 'optimize' | 'analyze' | 'translate' | 'interview' | 'general';
   /**
+   * Conversation/session id (= LangGraph thread, namespaced by user server-side).
+   * One conversation = one sessionId; "new chat" mints a new one. Persists history
+   * across turns via the checkpointer and reattaches HITL approvals to the thread
+   * (Magic-Core docs/agent-architecture-deepagents.md §2).
+   */
+  sessionId?: string;
+  /**
    * id of the resume this session is scoped to. The agent pulls it on demand via
-   * its `read_resume` tool (ReAct) instead of the client pushing a full snapshot
-   * (see Magic-Core docs/agent-read-resume-tool.md).
+   * its `read_resume` tool (ReAct) instead of the client pushing a full snapshot.
    */
   resumeId?: string;
   /**
@@ -113,12 +92,6 @@ export interface ChatStreamParams {
    * no server-side key — every AI session is driven by the user's own config (§3.11).
    */
   config?: AgentLlmConfig;
-  /**
-   * Resource scopes the user already authorized this session (e.g. `['resume']`) —
-   * lets the agent skip re-prompting for a tool the user already approved
-   * (Magic-Core docs/agent-tool-approval-hitl.md).
-   */
-  grantedScopes?: string[];
   signal?: AbortSignal;
 }
 
@@ -127,21 +100,32 @@ export function streamChat({ signal, ...body }: ChatStreamParams): AsyncGenerato
   return streamAgent(WEB_AGENT_ROUTES.chat, body, signal);
 }
 
+/** A human's decision on a paused tool call (native HITL). */
+export interface HitlDecision {
+  type: 'approve' | 'reject';
+  /** feedback to the model when rejecting */
+  message?: string;
+}
+
 export interface ApproveToolParams {
-  runId: string;
-  requestId: string;
-  approved: boolean;
+  /** the paused conversation thread to resume */
+  sessionId: string;
+  /** one decision per pending action request (read_resume → a single decision) */
+  decisions: HitlDecision[];
+  /** re-sent so the resumed agent re-binds read_resume and uses the same model */
+  resumeId?: string;
+  config?: AgentLlmConfig;
+  signal?: AbortSignal;
 }
 
 /**
- * Reply to a paused `tool_approval_request` (human-in-the-loop). Unblocks the
- * streaming run server-side; the original SSE stream then resumes.
+ * Reply to a paused `tool_approval_request` (native HITL). The approve endpoint
+ * now resumes the thread (`Command({ resume })`) and **streams the continuation**,
+ * so this returns the resumed SSE stream — consume it like {@link streamChat}.
  */
-export async function approveTool(params: ApproveToolParams): Promise<void> {
-  const res = await fetch(WEB_AGENT_ROUTES.chatApprove, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(params),
-  });
-  if (!res.ok) throw new Error(await readError(res));
+export function approveTool({
+  signal,
+  ...body
+}: ApproveToolParams): AsyncGenerator<AgentSseEvent> {
+  return streamAgent(WEB_AGENT_ROUTES.chatApprove, body, signal);
 }

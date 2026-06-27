@@ -2,10 +2,10 @@ import { Wand2, BarChart3, BotMessageSquare, Mic, Languages } from 'lucide-react
 import type { AiSkill, SkillId } from '../types';
 
 /**
- * The AI skill registry. Mock data flows through `buildIntent` / `doneSummary`
- * today; the real wiring swaps the shell's mock runner for the existing hooks
- * (useResumeOptimizer, useMultiPersonaAnalyzer, translateApi, …) without
- * touching this metadata.
+ * The AI skill registry — pure metadata (labels, params, intents). The shell
+ * wires each skill to its runner: `analyze` calls the backend today, the rest
+ * route through `/api/chat` (create) or are being migrated onto it. Editing this
+ * metadata never touches the runners.
  */
 export const SKILLS: Record<SkillId, AiSkill> = {
   create: {

@@ -18,7 +18,8 @@ import InterviewOverlay from './interview/InterviewOverlay';
 import LivingCanvas, { type BatchRequest, type FocusRequest } from './canvas/living/LivingCanvas';
 import { useTranslation } from 'react-i18next';
 import type { MultiPersonaResumeAnalysis } from '@/types/agent/multi-persona';
-import { analyzeResumeMulti, streamChat, approveTool } from './lib/services/agentClient';
+import { streamChat, approveTool } from './lib/services/agentClient';
+import type { AgentSseEvent } from './lib/services/types';
 import { buildOpeningSeed, fallbackOpening } from './lib/openingSeed';
 import { useResumeDraftStore } from '@/store/useResumeDraftStore';
 import { useSettingStore } from '@/store/useSettingStore';
@@ -74,9 +75,13 @@ export default function AiChatShell({
   const [chatMode, setChatMode] = useState<'idle' | 'create'>('idle');
   const [awaitingReply, setAwaitingReply] = useState(false);
   const [draftReady, setDraftReady] = useState<Resume | null>(null);
-  // Resource scopes the user has approved this session (e.g. 'resume'). Once granted,
-  // the agent skips re-prompting — carried to the backend on every turn (§6.5).
-  const [grantedScopes, setGrantedScopes] = useState<string[]>([]);
+  // One conversation = one sessionId (= LangGraph thread, namespaced by user
+  // server-side). "New chat" mints a new one (resetSession). Mirrored in a ref so
+  // the HITL resume — fired from an event handler — reads the current id without a
+  // stale closure (design §2).
+  const [sessionId, setSessionId] = useState(() => nanoid());
+  const sessionIdRef = useRef(sessionId);
+  sessionIdRef.current = sessionId;
   const setResumeDraft = useResumeDraftStore((s) => s.setResumeDraft);
   // BYOK: each user's AI session is initialized with their own LLM config
   // (key / baseUrl / model) — the backend has no server-side key (design §3.11).
@@ -84,10 +89,10 @@ export default function AiChatShell({
   const { i18n } = useTranslation();
   const messagesRef = useRef(messages);
   messagesRef.current = messages;
-  // runChat reads granted scopes mid-stream (after an in-stream approval), so mirror
-  // them in a ref to dodge the stale closure.
-  const grantedScopesRef = useRef(grantedScopes);
-  grantedScopesRef.current = grantedScopes;
+  // The analyze skill's exec card spans the analysis run; track its id so
+  // consumeStream flips it to "done" only when the resume_analysis result lands
+  // (or the flow ends).
+  const analyzeExecRef = useRef<string | null>(null);
 
   const addMessage = useCallback((msg: ChatMessage) => {
     setMessages((prev) => [...prev, msg]);
@@ -104,20 +109,25 @@ export default function AiChatShell({
     [addMessage]
   );
 
-  // Flip the most recent in-progress tool activity (e.g. "正在读取你的简历…") to its
-  // done state, so the read line resolves instead of spinning forever.
-  const markReadActivityDone = useCallback(() => {
+  // Flip the most recent in-progress tool activity to its done state with the
+  // given label, so an activity line resolves instead of spinning forever.
+  const markActivityDone = useCallback((doneText: string) => {
     setMessages((prev) => {
       for (let i = prev.length - 1; i >= 0; i--) {
         if (prev[i].role === 'activity' && prev[i].status === 'running') {
           const next = prev.slice();
-          next[i] = { ...next[i], status: 'done', content: '已读取简历' };
+          next[i] = { ...next[i], status: 'done', content: doneText };
           return next;
         }
       }
       return prev;
     });
   }, []);
+
+  const markReadActivityDone = useCallback(
+    () => markActivityDone('已读取简历'),
+    [markActivityDone]
+  );
 
   // Click a log entry → reopen the canvas and scroll to that spot (design §5 可点回溯).
   const focusOnCanvas = useCallback((resumePath: string) => {
@@ -154,32 +164,173 @@ export default function AiChatShell({
     setBatchRequest({ kind, lang: params.lang, nonce: batchNonce.current });
   }, []);
 
-  // analyze · real backend call (design P0) — multi-persona competitiveness → ScoreView.
-  const runAnalyze = useCallback(
-    async (execId: string) => {
-      const markDone = () =>
-        setMessages((prev) => prev.map((m) => (m.id === execId ? { ...m, status: 'done' } : m)));
+  // Consume an agent SSE stream into the thread — shared by the initial chat and
+  // the HITL resume (approve), since both speak the same normalized event schema.
+  // The initial stream ends at a `tool_approval_request`; approving opens a fresh
+  // continuation stream that this same consumer drains (design §6 native HITL).
+  // Streams message_chunk into a live assistant bubble; a resume surfaces as a
+  // reviewable draft.
+  const consumeStream = useCallback(
+    async (
+      makeGen: (signal: AbortSignal) => AsyncGenerator<AgentSseEvent>,
+      // When set, this is the generated opening: a first-token timeout (or any
+      // failure / empty stream before text) drops to this canned line instead of
+      // hanging or erroring — the opening must always leave a way in (§5 / §8.1).
+      opts?: { fallbackGreeting?: string; watchdog?: boolean }
+    ) => {
+      const aiId = nanoid();
+      // The assistant bubble is created lazily on the first chunk so any
+      // `read_resume` activity line lands *above* the reply (design §8.5).
+      let bubbleCreated = false;
+      const ensureBubble = () => {
+        if (bubbleCreated) return;
+        addMessage({ id: aiId, role: 'assistant', content: '', status: 'running', streamed: true });
+        bubbleCreated = true;
+        setAwaitingReply(false);
+      };
+
+      setRunning(true);
+      setIsAiJobRunning(true);
+      setAwaitingReply(true);
+
+      // The opening arms a first-token watchdog; on fire it aborts the hung stream
+      // and the catch/empty paths fall back to the canned greeting.
+      const controller = new AbortController();
+      const timer = opts?.watchdog
+        ? window.setTimeout(() => {
+            if (!bubbleCreated) controller.abort();
+          }, FIRST_TOKEN_TIMEOUT_MS)
+        : undefined;
+
+      let acc = '';
+      // The initial stream ends when the agent pauses for approval; track it so the
+      // finalizer doesn't drop an empty assistant bubble after the approval card.
+      let pausedForApproval = false;
       try {
-        const result = await analyzeResumeMulti({
-          resumeData,
-          config: { apiKey, baseUrl, modelName: model, maxTokens },
-          language: i18n.language,
-        });
-        setAnalysis(result);
-        markDone();
-        setLivingOpen(false);
-        setCanvas({ open: true, skillId: 'analyze', view: 'score', status: 'ready' });
+        for await (const ev of makeGen(controller.signal)) {
+          if (ev.type === 'message_chunk' && ev.content) {
+            if (timer) window.clearTimeout(timer);
+            ensureBubble();
+            acc += ev.content;
+            setMessages((prev) => prev.map((m) => (m.id === aiId ? { ...m, content: acc } : m)));
+          } else if (ev.type === 'tool_approval_request') {
+            // Agent paused before a sensitive tool (read_resume). The initial stream
+            // ends here; the approval card drives the resume (§6).
+            const p = ev.payload as { requestId?: string; toolName?: string; reason?: string } | undefined;
+            if (p?.requestId) {
+              pausedForApproval = true;
+              setAwaitingReply(false); // the card replaces the thinking dots
+              addMessage({
+                id: nanoid(),
+                role: 'approval',
+                content: p.reason || '想读取你的简历来给建议',
+                approval: { requestId: p.requestId, toolName: p.toolName, scope: 'resume', status: 'pending' },
+              });
+            }
+          } else if (ev.type === 'tool_started' && (ev.payload as { toolName?: string } | undefined)?.toolName === 'read_resume') {
+            // The read runs after approval — narrate it.
+            addMessage({ id: nanoid(), role: 'activity', content: '正在读取你的简历…', status: 'running' });
+          } else if (ev.type === 'tool_result' && (ev.payload as { toolName?: string } | undefined)?.toolName === 'read_resume') {
+            markReadActivityDone();
+          } else if (ev.type === 'tool_started' && (ev.payload as { toolName?: string } | undefined)?.toolName === 'analyze_resume') {
+            // Runs after approval — narrate the multi-persona evaluation in flight.
+            addMessage({
+              id: nanoid(),
+              role: 'activity',
+              content: '正在从同行 / 用人主管 / HRBP 三个视角评估你的简历…',
+              status: 'running',
+            });
+          } else if (ev.type === 'resume_update' || ev.type === 'resume_patch') {
+            const draft = (ev.data ?? (ev.payload as { resume?: unknown } | undefined)?.resume) as
+              | Resume
+              | undefined;
+            if (draft && typeof draft === 'object') {
+              setResumeDraft(draft);
+              setDraftReady(draft);
+            }
+          } else if (ev.type === 'resume_analysis') {
+            // The analyze_resume tool finished — surface the structured
+            // multi-persona result on the ScoreView canvas (analyze runs entirely
+            // through /api/chat; there's no separate analyze endpoint).
+            const result = (ev.data ?? (ev.payload as { data?: unknown } | undefined)?.data) as
+              | MultiPersonaResumeAnalysis
+              | undefined;
+            if (result && typeof result === 'object') {
+              markActivityDone('多角色评估完成');
+              setAnalysis(result);
+              setLivingOpen(false);
+              setCanvas({ open: true, skillId: 'analyze', view: 'score', status: 'ready' });
+              // The analysis landed → the exec card can now show "完成 / 查看画布".
+              if (analyzeExecRef.current) {
+                const execId = analyzeExecRef.current;
+                analyzeExecRef.current = null;
+                setMessages((prev) => prev.map((m) => (m.id === execId ? { ...m, status: 'done' } : m)));
+              }
+            }
+          } else if (ev.type === 'error') {
+            throw new Error(ev.error || '对话出错');
+          }
+        }
+        // Stream that produced no text at all → canned greeting (openings only).
+        if (opts?.fallbackGreeting && !bubbleCreated) {
+          addAssistant(opts.fallbackGreeting);
+        } else if (pausedForApproval && !bubbleCreated) {
+          // Paused for approval before any text — the card is the terminal UI for
+          // this segment; the resume stream picks up after the user decides.
+        } else {
+          ensureBubble();
+          setMessages((prev) => prev.map((m) => (m.id === aiId ? { ...m, status: 'done' } : m)));
+        }
       } catch (err) {
-        markDone();
-        const msg = err instanceof Error ? err.message : '分析失败';
-        toast.error(msg);
-        addAssistant(`分析没能完成：${msg}`);
+        if (opts?.fallbackGreeting && !bubbleCreated) {
+          addAssistant(opts.fallbackGreeting);
+        } else {
+          const msg = err instanceof Error ? err.message : '对话失败';
+          ensureBubble();
+          setMessages((prev) =>
+            prev.map((m) => (m.id === aiId ? { ...m, content: acc || `（出错：${msg}）`, status: 'done' } : m))
+          );
+          toast.error(msg);
+        }
       } finally {
+        if (timer) window.clearTimeout(timer);
+        markReadActivityDone(); // resolve any read line still spinning
+        // Resolve the analyze exec card if the flow ended without an analysis
+        // result (error, rejection, or the model just chatted) — but NOT at an
+        // approval pause, where the resumed stream still has to run.
+        if (!pausedForApproval && analyzeExecRef.current) {
+          const execId = analyzeExecRef.current;
+          analyzeExecRef.current = null;
+          setMessages((prev) => prev.map((m) => (m.id === execId ? { ...m, status: 'done' } : m)));
+        }
         setRunning(false);
         setIsAiJobRunning(false);
+        setAwaitingReply(false);
       }
     },
-    [resumeData, apiKey, baseUrl, model, maxTokens, i18n.language, addAssistant, setIsAiJobRunning]
+    [addMessage, addAssistant, markReadActivityDone, markActivityDone, setResumeDraft, setIsAiJobRunning]
+  );
+
+  // analyze · runs in-conversation through the single /api/chat entry. The
+  // orchestrator calls the `analyze_resume` tool (engine), which reads the resume
+  // and runs the 3-persona analysis internally, returning it as a `resume_analysis`
+  // event that consumeStream maps onto the ScoreView. The exec card's "done"
+  // state is owned by consumeStream via analyzeExecRef.
+  const runAnalyze = useCallback(
+    async (execId: string) => {
+      analyzeExecRef.current = execId;
+      await consumeStream((signal) =>
+        streamChat({
+          messages: [{ role: 'user', content: SKILLS.analyze.buildIntent({}) }],
+          mode: 'analyze',
+          sessionId: sessionIdRef.current,
+          resumeId: resumeData.id,
+          config: { apiKey, baseUrl, modelName: model, maxTokens },
+          signal,
+        })
+      );
+    },
+    [consumeStream, resumeData.id, apiKey, baseUrl, model, maxTokens]
   );
 
   const runSkill = useCallback(
@@ -195,7 +346,7 @@ export default function AiChatShell({
       setRunning(true);
       setIsAiJobRunning(true);
 
-      // analyze runs against the real backend; other skills remain mock for now.
+      // analyze runs in-conversation via /api/chat; other skills remain mock for now.
       if (id === 'analyze') {
         void runAnalyze(execId);
         return;
@@ -218,126 +369,36 @@ export default function AiChatShell({
     [addMessage, setIsAiJobRunning, seedBatch, runAnalyze]
   );
 
-  // create / general · real streaming chat (design P-create). Streams message_chunk
-  // into a live assistant bubble; a resume block surfaces as a reviewable draft.
+  // create / general · real streaming chat. Sends only the new turn(s); the
+  // checkpointer (keyed by sessionId) supplies the rest of the history (§2).
   const runChat = useCallback(
-    async (
+    (
       history: { role: 'user' | 'assistant'; content: string }[],
       mode: 'create' | 'general',
-      // When set, this is the generated opening: a first-token timeout (or any failure /
-      // empty stream before text) drops to this canned line instead of hanging or
-      // surfacing an error — the opening must always leave a way in (design §5 / §8.1).
       opts?: { fallbackGreeting?: string }
-    ) => {
-      const aiId = nanoid();
-      // The assistant bubble is created lazily on the first chunk so that any
-      // `read_resume` activity line lands *above* the reply, not below it. Until then
-      // the thread shows the `awaitingReply` thinking placeholder (design §8.5).
-      let bubbleCreated = false;
-      const ensureBubble = () => {
-        if (bubbleCreated) return;
-        addMessage({ id: aiId, role: 'assistant', content: '', status: 'running', streamed: true });
-        bubbleCreated = true;
-        setAwaitingReply(false); // bubble takes over from the thinking placeholder
-      };
-      setRunning(true);
-      setIsAiJobRunning(true);
-      setAwaitingReply(true);
-
-      // The opening arms a first-token watchdog; on fire it aborts the hung stream and
-      // the catch/empty paths below fall back to the canned greeting.
-      const controller = new AbortController();
-      const timer = opts?.fallbackGreeting
-        ? window.setTimeout(() => {
-            if (!bubbleCreated) controller.abort();
-          }, FIRST_TOKEN_TIMEOUT_MS)
-        : undefined;
-
-      let acc = '';
-      try {
-        for await (const ev of streamChat({
-          messages: history,
-          mode,
-          // The agent pulls the resume on demand via its `read_resume` tool; we just
-          // hand it the id (+ the session token server-side), not a full snapshot.
-          resumeId: resumeData.id,
-          config: { apiKey, baseUrl, modelName: model, maxTokens },
-          grantedScopes: grantedScopesRef.current,
-          signal: controller.signal,
-        })) {
-          if (ev.type === 'message_chunk' && ev.content) {
-            if (timer) window.clearTimeout(timer);
-            ensureBubble();
-            acc += ev.content;
-            setMessages((prev) => prev.map((m) => (m.id === aiId ? { ...m, content: acc } : m)));
-          } else if (ev.type === 'tool_approval_request') {
-            // Agent paused on a sensitive tool (read_resume) → ask the user (§6.5).
-            const p = ev.payload as { requestId?: string; scope?: string; reason?: string } | undefined;
-            if (ev.runId && p?.requestId) {
-              setAwaitingReply(false); // the card replaces the thinking dots
-              addMessage({
-                id: nanoid(),
-                role: 'approval',
-                content: p.reason || '想读取你的简历来给建议',
-                approval: { runId: ev.runId, requestId: p.requestId, scope: p.scope || 'resume', status: 'pending' },
-              });
-            }
-          } else if (ev.type === 'tool_started' && (ev.payload as { toolName?: string } | undefined)?.toolName === 'read_resume') {
-            // Only narrate the read when it runs unprompted (scope already granted this
-            // session); when ungranted, the approval card above drives the read line.
-            if (grantedScopesRef.current.includes('resume')) {
-              addMessage({ id: nanoid(), role: 'activity', content: '正在读取你的简历…', status: 'running' });
-            }
-          } else if (ev.type === 'tool_result' && (ev.payload as { toolName?: string } | undefined)?.toolName === 'read_resume') {
-            markReadActivityDone();
-          } else if (ev.type === 'resume_update' || ev.type === 'resume_patch') {
-            const draft = (ev.data ?? (ev.payload as { resume?: unknown } | undefined)?.resume) as
-              | Resume
-              | undefined;
-            if (draft && typeof draft === 'object') {
-              setResumeDraft(draft);
-              setDraftReady(draft);
-            }
-          } else if (ev.type === 'error') {
-            throw new Error(ev.error || '对话出错');
-          }
-        }
-        // Opening that produced no text at all → canned greeting, not an empty bubble.
-        if (opts?.fallbackGreeting && !bubbleCreated) {
-          addAssistant(opts.fallbackGreeting);
-        } else {
-          ensureBubble();
-          setMessages((prev) => prev.map((m) => (m.id === aiId ? { ...m, status: 'done' } : m)));
-        }
-      } catch (err) {
-        if (opts?.fallbackGreeting && !bubbleCreated) {
-          // Opening failed / timed out before any text — canned greeting, no error noise.
-          addAssistant(opts.fallbackGreeting);
-        } else {
-          const msg = err instanceof Error ? err.message : '对话失败';
-          ensureBubble();
-          setMessages((prev) =>
-            prev.map((m) => (m.id === aiId ? { ...m, content: acc || `（出错：${msg}）`, status: 'done' } : m))
-          );
-          toast.error(msg);
-        }
-      } finally {
-        if (timer) window.clearTimeout(timer);
-        markReadActivityDone(); // resolve any read line still spinning when the run ends
-        setRunning(false);
-        setIsAiJobRunning(false);
-        setAwaitingReply(false);
-      }
-    },
-    [resumeData, apiKey, baseUrl, model, maxTokens, addMessage, addAssistant, markReadActivityDone, setResumeDraft, setIsAiJobRunning]
+    ) =>
+      consumeStream(
+        (signal) =>
+          streamChat({
+            messages: history,
+            mode,
+            sessionId: sessionIdRef.current,
+            // The agent pulls the resume on demand via its `read_resume` tool; we
+            // just hand it the id (+ the session token server-side).
+            resumeId: resumeData.id,
+            config: { apiKey, baseUrl, modelName: model, maxTokens },
+            signal,
+          }),
+        { fallbackGreeting: opts?.fallbackGreeting, watchdog: !!opts?.fallbackGreeting }
+      ),
+    [consumeStream, resumeData.id, apiKey, baseUrl, model, maxTokens]
   );
 
-  // Human-in-the-loop: user answered a `tool_approval_request` card. Resolve it
-  // server-side (the paused run resumes), remember the grant for the session, and
-  // narrate the read on approve. The streamChat loop is still running and picks the
-  // continuation back up once the backend unblocks (design §6.5).
+  // Human-in-the-loop: the user answered a `tool_approval_request` card. Resume the
+  // paused thread by sessionId with the decision; the approve endpoint streams the
+  // continuation, which the shared consumer drains (design §6 native HITL).
   const handleApproval = useCallback(
-    (msgId: string, req: { runId: string; requestId: string; scope: string }, approved: boolean) => {
+    (msgId: string, approved: boolean) => {
       setMessages((prev) =>
         prev.map((m) =>
           m.id === msgId && m.approval
@@ -345,18 +406,17 @@ export default function AiChatShell({
             : m
         )
       );
-      if (approved) {
-        setGrantedScopes((prev) => (prev.includes(req.scope) ? prev : [...prev, req.scope]));
-        if (req.scope === 'resume') {
-          addMessage({ id: nanoid(), role: 'activity', content: '正在读取你的简历…', status: 'running' });
-        }
-      }
-      setAwaitingReply(true); // either way the agent now continues — wait for its reply
-      void approveTool({ runId: req.runId, requestId: req.requestId, approved }).catch((err) => {
-        toast.error(err instanceof Error ? err.message : '授权失败');
-      });
+      void consumeStream((signal) =>
+        approveTool({
+          sessionId: sessionIdRef.current,
+          decisions: [{ type: approved ? 'approve' : 'reject' }],
+          resumeId: resumeData.id,
+          config: { apiKey, baseUrl, modelName: model, maxTokens },
+          signal,
+        })
+      );
     },
-    [addMessage]
+    [consumeStream, resumeData.id, apiKey, baseUrl, model, maxTokens]
   );
 
   const selectSkill = useCallback(
@@ -461,7 +521,7 @@ export default function AiChatShell({
     setLivingOpen(false);
     setChatMode('idle');
     setAwaitingReply(false);
-    setGrantedScopes([]);
+    setSessionId(nanoid()); // new conversation → new thread (don't continue the old)
     setDraftReady(null);
   }, []);
 

@@ -2,5 +2,11 @@ packages:
   - apps/*
   - packages/*
 
+onlyBuiltDependencies:
+  - '@clerk/shared'
+  - esbuild
+  - sharp
+  - unrs-resolver
+
 patchedDependencies:
   nextra-theme-docs@4.3.0: patches/nextra-theme-docs@4.3.0.patch
