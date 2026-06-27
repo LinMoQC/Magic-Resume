@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
+import { API_ORIGIN } from './routes';
 
 // Mutable getter — set once by HttpClientProvider at app startup
 let _getToken: (() => Promise<string | null>) | null = null;
@@ -49,9 +50,11 @@ const createClient = (baseURL: string): AxiosInstance => {
   return client;
 };
 
+// Both share the single backend origin; the gateway/nginx splits by path prefix.
+// Two instances kept only for call-site semantics (CRUD vs agent).
 export const httpClient = {
-  api:   createClient(process.env.NEXT_PUBLIC_CLOUD_API_URL || 'http://localhost:3111'),
-  agent: createClient(process.env.BACKEND_URL || 'http://localhost:8000'),
+  api:   createClient(API_ORIGIN),
+  agent: createClient(API_ORIGIN),
 };
 
 export interface ApiResponse<T> {

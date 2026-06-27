@@ -1,7 +1,9 @@
 'use client'
 
+import { API_ORIGIN } from '@/lib/api/routes'
+
 const SESSION_TTL_MS = 30 * 60 * 1000
-const API_BASE_URL = process.env.NEXT_PUBLIC_CLOUD_API_URL || 'http://localhost:3111'
+const API_BASE_URL = API_ORIGIN
 
 const createId = () => {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {

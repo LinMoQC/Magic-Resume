@@ -1,4 +1,5 @@
 import { getServerUserId } from '@/lib/auth/server';
+import { serverFetchBackend } from '@/lib/auth/serverFetchBackend';
 
 export async function POST(request: Request) {
   try {
@@ -13,12 +14,8 @@ export async function POST(request: Request) {
       return new Response(JSON.stringify({ error: "Missing resumeData, jd, or config" }), { status: 400 });
     }
 
-    const backendUrl = process.env.BACKEND_URL;
-    const backendResponse = await fetch(`${backendUrl}/api/graph/research`, {
+    const backendResponse = await serverFetchBackend('/api/graph/research', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify({ resumeData, jd, config }),
     });
 

@@ -83,20 +83,8 @@ const nextConfig: NextConfig = {
 
   // SWC minification 现在是默认启用的，无需显式配置
 
-  // 环境变量
-  env: {
-    BACKEND_URL: process.env.BACKEND_URL,
-  },
-
-  // 接口转发 (Proxy)
-  async rewrites() {
-    return [
-      {
-        source: '/api/interview/:path*',
-        destination: (process.env.BACKEND_URL || 'http://localhost:8000') + '/api/interview/:path*',
-      },
-    ];
-  }
+  // 后端统一走单一 origin（NEXT_PUBLIC_API_URL）+ 本地网关；
+  // 不再用 next.config 注入 BACKEND_URL，也不再做 interview 路径转发。
 };
 
 export default nextConfig;

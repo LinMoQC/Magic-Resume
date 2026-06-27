@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerUserId } from '@/lib/auth/server';
+import { serverFetchBackend } from '@/lib/auth/serverFetchBackend';
 
 export const maxDuration = 60; // Set max duration to 60 seconds (or more if needed)
 
@@ -11,24 +12,9 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    
-    // 获取后端地址，优先使用环境变量，否则回退到本地默认
-    const backendUrl = process.env.BACKEND_URL;
 
-    if (!backendUrl) {
-      console.warn('BACKEND_URL not set, defaulting to http://127.0.0.1:8000');
-    }
-
-    console.log('Backend URL:', backendUrl);
-    
-    const apiUrl = `${backendUrl || 'http://127.0.0.1:8000'}/api/pdf/generate`;
-    console.log('Proxying PDF generation to:', apiUrl);
-
-    const backendResponse = await fetch(apiUrl, {
+    const backendResponse = await serverFetchBackend('/api/pdf/generate', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(body),
     });
 

@@ -2,7 +2,7 @@
 
 import React, { useCallback, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FlaskConical, FileText, SquarePen, X, Bot, PencilRuler, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { FlaskConical, FileText, SquarePen, X, Bot, PencilRuler, PanelLeftClose, PanelLeftOpen, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { nanoid } from 'nanoid';
 import { toast } from 'sonner';
@@ -16,6 +16,12 @@ import WelcomeSuggestions from './conversation/WelcomeSuggestions';
 import ArtifactCanvas from './canvas/ArtifactCanvas';
 import InterviewOverlay from './interview/InterviewOverlay';
 import LivingCanvas, { type BatchRequest, type FocusRequest } from './canvas/living/LivingCanvas';
+import { useTranslation } from 'react-i18next';
+import type { MultiPersonaResumeAnalysis } from '@/types/agent/multi-persona';
+import { analyzeResumeMulti, streamChat, approveTool } from './lib/services/agentClient';
+import { buildOpeningSeed, fallbackOpening } from './lib/openingSeed';
+import { useResumeDraftStore } from '@/store/useResumeDraftStore';
+import { useSettingStore } from '@/store/useSettingStore';
 
 type AiChatShellProps = {
   resumeData: Resume;
@@ -23,10 +29,24 @@ type AiChatShellProps = {
   onClose: () => void;
   onApplySections: (sections: Section) => void;
   onApplyInfo: (info: InfoType) => void;
+  onApplyFullResume: (resume: Resume) => void;
   setIsAiJobRunning: (running: boolean) => void;
 };
 
 const CLOSED_CANVAS: CanvasState = { open: false, skillId: null, view: 'preview', status: 'idle' };
+
+/** First-token timeout for the generated opening — past this, fall back to a canned
+ *  line so create mode never hangs on a blank canvas (design §5 超时 / §7). */
+const FIRST_TOKEN_TIMEOUT_MS = 8000;
+
+/** Map the shell's thread into the backend chat history (user/assistant text only). */
+function toBackendHistory(
+  msgs: ChatMessage[]
+): { role: 'user' | 'assistant'; content: string }[] {
+  return msgs
+    .filter((m) => (m.role === 'user' || m.role === 'assistant') && !!m.content)
+    .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content as string }));
+}
 
 export default function AiChatShell({
   resumeData,
@@ -34,6 +54,7 @@ export default function AiChatShell({
   onClose,
   onApplySections,
   onApplyInfo,
+  onApplyFullResume,
   setIsAiJobRunning,
 }: AiChatShellProps) {
   const [started, setStarted] = useState(false);
@@ -49,6 +70,24 @@ export default function AiChatShell({
   const [railCollapsed, setRailCollapsed] = useState(false);
   const batchNonce = useRef(0);
   const focusNonce = useRef(0);
+  const [analysis, setAnalysis] = useState<MultiPersonaResumeAnalysis | null>(null);
+  const [chatMode, setChatMode] = useState<'idle' | 'create'>('idle');
+  const [awaitingReply, setAwaitingReply] = useState(false);
+  const [draftReady, setDraftReady] = useState<Resume | null>(null);
+  // Resource scopes the user has approved this session (e.g. 'resume'). Once granted,
+  // the agent skips re-prompting — carried to the backend on every turn (§6.5).
+  const [grantedScopes, setGrantedScopes] = useState<string[]>([]);
+  const setResumeDraft = useResumeDraftStore((s) => s.setResumeDraft);
+  // BYOK: each user's AI session is initialized with their own LLM config
+  // (key / baseUrl / model) — the backend has no server-side key (design §3.11).
+  const { apiKey, baseUrl, model, maxTokens } = useSettingStore();
+  const { i18n } = useTranslation();
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
+  // runChat reads granted scopes mid-stream (after an in-stream approval), so mirror
+  // them in a ref to dodge the stale closure.
+  const grantedScopesRef = useRef(grantedScopes);
+  grantedScopesRef.current = grantedScopes;
 
   const addMessage = useCallback((msg: ChatMessage) => {
     setMessages((prev) => [...prev, msg]);
@@ -64,6 +103,21 @@ export default function AiChatShell({
       addMessage({ id: nanoid(), role: 'log', content, resumePath }),
     [addMessage]
   );
+
+  // Flip the most recent in-progress tool activity (e.g. "正在读取你的简历…") to its
+  // done state, so the read line resolves instead of spinning forever.
+  const markReadActivityDone = useCallback(() => {
+    setMessages((prev) => {
+      for (let i = prev.length - 1; i >= 0; i--) {
+        if (prev[i].role === 'activity' && prev[i].status === 'running') {
+          const next = prev.slice();
+          next[i] = { ...next[i], status: 'done', content: '已读取简历' };
+          return next;
+        }
+      }
+      return prev;
+    });
+  }, []);
 
   // Click a log entry → reopen the canvas and scroll to that spot (design §5 可点回溯).
   const focusOnCanvas = useCallback((resumePath: string) => {
@@ -100,6 +154,34 @@ export default function AiChatShell({
     setBatchRequest({ kind, lang: params.lang, nonce: batchNonce.current });
   }, []);
 
+  // analyze · real backend call (design P0) — multi-persona competitiveness → ScoreView.
+  const runAnalyze = useCallback(
+    async (execId: string) => {
+      const markDone = () =>
+        setMessages((prev) => prev.map((m) => (m.id === execId ? { ...m, status: 'done' } : m)));
+      try {
+        const result = await analyzeResumeMulti({
+          resumeData,
+          config: { apiKey, baseUrl, modelName: model, maxTokens },
+          language: i18n.language,
+        });
+        setAnalysis(result);
+        markDone();
+        setLivingOpen(false);
+        setCanvas({ open: true, skillId: 'analyze', view: 'score', status: 'ready' });
+      } catch (err) {
+        markDone();
+        const msg = err instanceof Error ? err.message : '分析失败';
+        toast.error(msg);
+        addAssistant(`分析没能完成：${msg}`);
+      } finally {
+        setRunning(false);
+        setIsAiJobRunning(false);
+      }
+    },
+    [resumeData, apiKey, baseUrl, model, maxTokens, i18n.language, addAssistant, setIsAiJobRunning]
+  );
+
   const runSkill = useCallback(
     (id: SkillId, params: Record<string, string>, opts?: { addIntent?: boolean }) => {
       const skill = SKILLS[id];
@@ -112,6 +194,12 @@ export default function AiChatShell({
       addMessage({ id: execId, role: 'exec', skillId: id, status: 'running' });
       setRunning(true);
       setIsAiJobRunning(true);
+
+      // analyze runs against the real backend; other skills remain mock for now.
+      if (id === 'analyze') {
+        void runAnalyze(execId);
+        return;
+      }
 
       window.setTimeout(() => {
         setMessages((prev) =>
@@ -127,7 +215,148 @@ export default function AiChatShell({
         }
       }, 1500);
     },
-    [addMessage, setIsAiJobRunning, seedBatch]
+    [addMessage, setIsAiJobRunning, seedBatch, runAnalyze]
+  );
+
+  // create / general · real streaming chat (design P-create). Streams message_chunk
+  // into a live assistant bubble; a resume block surfaces as a reviewable draft.
+  const runChat = useCallback(
+    async (
+      history: { role: 'user' | 'assistant'; content: string }[],
+      mode: 'create' | 'general',
+      // When set, this is the generated opening: a first-token timeout (or any failure /
+      // empty stream before text) drops to this canned line instead of hanging or
+      // surfacing an error — the opening must always leave a way in (design §5 / §8.1).
+      opts?: { fallbackGreeting?: string }
+    ) => {
+      const aiId = nanoid();
+      // The assistant bubble is created lazily on the first chunk so that any
+      // `read_resume` activity line lands *above* the reply, not below it. Until then
+      // the thread shows the `awaitingReply` thinking placeholder (design §8.5).
+      let bubbleCreated = false;
+      const ensureBubble = () => {
+        if (bubbleCreated) return;
+        addMessage({ id: aiId, role: 'assistant', content: '', status: 'running', streamed: true });
+        bubbleCreated = true;
+        setAwaitingReply(false); // bubble takes over from the thinking placeholder
+      };
+      setRunning(true);
+      setIsAiJobRunning(true);
+      setAwaitingReply(true);
+
+      // The opening arms a first-token watchdog; on fire it aborts the hung stream and
+      // the catch/empty paths below fall back to the canned greeting.
+      const controller = new AbortController();
+      const timer = opts?.fallbackGreeting
+        ? window.setTimeout(() => {
+            if (!bubbleCreated) controller.abort();
+          }, FIRST_TOKEN_TIMEOUT_MS)
+        : undefined;
+
+      let acc = '';
+      try {
+        for await (const ev of streamChat({
+          messages: history,
+          mode,
+          // The agent pulls the resume on demand via its `read_resume` tool; we just
+          // hand it the id (+ the session token server-side), not a full snapshot.
+          resumeId: resumeData.id,
+          config: { apiKey, baseUrl, modelName: model, maxTokens },
+          grantedScopes: grantedScopesRef.current,
+          signal: controller.signal,
+        })) {
+          if (ev.type === 'message_chunk' && ev.content) {
+            if (timer) window.clearTimeout(timer);
+            ensureBubble();
+            acc += ev.content;
+            setMessages((prev) => prev.map((m) => (m.id === aiId ? { ...m, content: acc } : m)));
+          } else if (ev.type === 'tool_approval_request') {
+            // Agent paused on a sensitive tool (read_resume) → ask the user (§6.5).
+            const p = ev.payload as { requestId?: string; scope?: string; reason?: string } | undefined;
+            if (ev.runId && p?.requestId) {
+              setAwaitingReply(false); // the card replaces the thinking dots
+              addMessage({
+                id: nanoid(),
+                role: 'approval',
+                content: p.reason || '想读取你的简历来给建议',
+                approval: { runId: ev.runId, requestId: p.requestId, scope: p.scope || 'resume', status: 'pending' },
+              });
+            }
+          } else if (ev.type === 'tool_started' && (ev.payload as { toolName?: string } | undefined)?.toolName === 'read_resume') {
+            // Only narrate the read when it runs unprompted (scope already granted this
+            // session); when ungranted, the approval card above drives the read line.
+            if (grantedScopesRef.current.includes('resume')) {
+              addMessage({ id: nanoid(), role: 'activity', content: '正在读取你的简历…', status: 'running' });
+            }
+          } else if (ev.type === 'tool_result' && (ev.payload as { toolName?: string } | undefined)?.toolName === 'read_resume') {
+            markReadActivityDone();
+          } else if (ev.type === 'resume_update' || ev.type === 'resume_patch') {
+            const draft = (ev.data ?? (ev.payload as { resume?: unknown } | undefined)?.resume) as
+              | Resume
+              | undefined;
+            if (draft && typeof draft === 'object') {
+              setResumeDraft(draft);
+              setDraftReady(draft);
+            }
+          } else if (ev.type === 'error') {
+            throw new Error(ev.error || '对话出错');
+          }
+        }
+        // Opening that produced no text at all → canned greeting, not an empty bubble.
+        if (opts?.fallbackGreeting && !bubbleCreated) {
+          addAssistant(opts.fallbackGreeting);
+        } else {
+          ensureBubble();
+          setMessages((prev) => prev.map((m) => (m.id === aiId ? { ...m, status: 'done' } : m)));
+        }
+      } catch (err) {
+        if (opts?.fallbackGreeting && !bubbleCreated) {
+          // Opening failed / timed out before any text — canned greeting, no error noise.
+          addAssistant(opts.fallbackGreeting);
+        } else {
+          const msg = err instanceof Error ? err.message : '对话失败';
+          ensureBubble();
+          setMessages((prev) =>
+            prev.map((m) => (m.id === aiId ? { ...m, content: acc || `（出错：${msg}）`, status: 'done' } : m))
+          );
+          toast.error(msg);
+        }
+      } finally {
+        if (timer) window.clearTimeout(timer);
+        markReadActivityDone(); // resolve any read line still spinning when the run ends
+        setRunning(false);
+        setIsAiJobRunning(false);
+        setAwaitingReply(false);
+      }
+    },
+    [resumeData, apiKey, baseUrl, model, maxTokens, addMessage, addAssistant, markReadActivityDone, setResumeDraft, setIsAiJobRunning]
+  );
+
+  // Human-in-the-loop: user answered a `tool_approval_request` card. Resolve it
+  // server-side (the paused run resumes), remember the grant for the session, and
+  // narrate the read on approve. The streamChat loop is still running and picks the
+  // continuation back up once the backend unblocks (design §6.5).
+  const handleApproval = useCallback(
+    (msgId: string, req: { runId: string; requestId: string; scope: string }, approved: boolean) => {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === msgId && m.approval
+            ? { ...m, approval: { ...m.approval, status: approved ? 'approved' : 'denied' } }
+            : m
+        )
+      );
+      if (approved) {
+        setGrantedScopes((prev) => (prev.includes(req.scope) ? prev : [...prev, req.scope]));
+        if (req.scope === 'resume') {
+          addMessage({ id: nanoid(), role: 'activity', content: '正在读取你的简历…', status: 'running' });
+        }
+      }
+      setAwaitingReply(true); // either way the agent now continues — wait for its reply
+      void approveTool({ runId: req.runId, requestId: req.requestId, approved }).catch((err) => {
+        toast.error(err instanceof Error ? err.message : '授权失败');
+      });
+    },
+    [addMessage]
   );
 
   const selectSkill = useCallback(
@@ -139,7 +368,14 @@ export default function AiChatShell({
         return;
       }
       if (skill.isChat) {
-        addAssistant('好，我们从零开始。先告诉我：你的目标岗位和所在行业是什么？');
+        setChatMode('create');
+        // Dynamic opening: the agent greets from scratch (no resume content in the
+        // seed — reading is approval-gated, §6.5). Seed isn't shown as a user bubble;
+        // a first-token timeout falls back to a canned greeting (design §8.1).
+        const seed = buildOpeningSeed(i18n.language);
+        void runChat([{ role: 'user', content: seed }], 'create', {
+          fallbackGreeting: fallbackOpening(i18n.language),
+        });
         return;
       }
       if (skill.params.length > 0) {
@@ -148,14 +384,18 @@ export default function AiChatShell({
       }
       runSkill(id, {});
     },
-    [addAssistant, runSkill]
+    [runChat, runSkill, i18n.language]
   );
 
   const handleSend = useCallback(
     (text: string) => {
       setStarted(true);
+      // Build the backend history (prior turns + this one) before the optimistic add.
+      const history = toBackendHistory(messagesRef.current).concat([{ role: 'user', content: text }]);
       addMessage({ id: nanoid(), role: 'user', content: text });
-      if (/优化|jd|岗位/i.test(text)) {
+      if (chatMode === 'create') {
+        void runChat(history, 'create');
+      } else if (/优化|jd|岗位/i.test(text)) {
         setParamSkill('optimize');
       } else if (/翻|英文|english|日|韩/i.test(text)) {
         setParamSkill('translate');
@@ -164,18 +404,13 @@ export default function AiChatShell({
       } else if (/面试|模拟/.test(text)) {
         setOverlayOpen(true);
       } else if (/创建|从零|搭建|新建|从头|新简历/.test(text)) {
-        window.setTimeout(
-          () => addAssistant('好，我们从零开始。先告诉我：你的目标岗位和所在行业是什么？'),
-          250
-        );
+        setChatMode('create');
+        void runChat(history, 'create');
       } else {
-        window.setTimeout(
-          () => addAssistant('我可以优化、分析、翻译，或模拟面试。选个技能，或告诉我目标岗位。'),
-          250
-        );
+        void runChat(history, 'general');
       }
     },
-    [addAssistant, addMessage, runSkill]
+    [chatMode, addMessage, runSkill, runChat]
   );
 
   const cancelParams = useCallback(() => {
@@ -224,10 +459,39 @@ export default function AiChatShell({
     setCanvas(CLOSED_CANVAS);
     setOverlayOpen(false);
     setLivingOpen(false);
+    setChatMode('idle');
+    setAwaitingReply(false);
+    setGrantedScopes([]);
+    setDraftReady(null);
   }, []);
 
+  const applyDraft = useCallback(() => {
+    if (!draftReady) return;
+    onApplyFullResume(draftReady);
+    setDraftReady(null);
+    addAssistant('已把草稿应用到当前简历。');
+  }, [draftReady, onApplyFullResume, addAssistant]);
+
   const composer = (
-    <Composer onPickSkill={selectSkill} onSend={handleSend} disabled={running || !!paramSkill} />
+    <>
+      {draftReady && (
+        <div className="px-4 pb-2">
+          <div className="max-w-3xl mx-auto flex items-center gap-3 rounded-xl border border-sky-500/30 bg-sky-500/10 px-3.5 py-2.5 text-xs text-sky-200">
+            <FileText size={14} className="text-sky-400 shrink-0" />
+            <span className="flex-1">已根据对话生成简历草稿</span>
+            <button
+              type="button"
+              onClick={applyDraft}
+              className="shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 px-3 py-1.5 text-sky-100 transition-colors cursor-pointer"
+            >
+              <Check size={12} />
+              应用到简历
+            </button>
+          </div>
+        </div>
+      )}
+      <Composer onPickSkill={selectSkill} onSend={handleSend} disabled={running || !!paramSkill} />
+    </>
   );
 
   return (
@@ -337,6 +601,8 @@ export default function AiChatShell({
                   messages={messages}
                   onToggleCanvas={toggleCanvas}
                   onLogClick={focusOnCanvas}
+                  onApproval={handleApproval}
+                  thinking={awaitingReply}
                   openCanvasSkillId={
                     canvas.open ? canvas.skillId : livingOpen ? livingSkillId : null
                   }
@@ -408,6 +674,7 @@ export default function AiChatShell({
             state={canvas}
             resumeData={resumeData}
             templateId={templateId}
+            analysis={analysis}
             onSetView={(view: CanvasView) => setCanvas((prev) => ({ ...prev, view }))}
             onApply={applyChanges}
             onDiscard={() => setCanvas(CLOSED_CANVAS)}

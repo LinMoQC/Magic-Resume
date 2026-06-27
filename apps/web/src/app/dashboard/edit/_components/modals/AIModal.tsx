@@ -21,6 +21,7 @@ export default function AIModal({
   resumeData,
   onApplySectionChanges,
   onApplyInfo,
+  onApplyFullResume,
   templateId,
   setIsAiJobRunning,
 }: AIModalProps) {
@@ -48,6 +49,7 @@ export default function AIModal({
                 onClose={onClose}
                 onApplySections={onApplySectionChanges}
                 onApplyInfo={onApplyInfo}
+                onApplyFullResume={onApplyFullResume}
                 setIsAiJobRunning={setIsAiJobRunning}
               />
             </motion.div>

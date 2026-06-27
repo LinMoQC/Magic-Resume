@@ -59,7 +59,16 @@ export interface AiSkill {
   doneSummary: string;
 }
 
-export type ChatRole = 'user' | 'assistant' | 'exec' | 'log';
+export type ChatRole = 'user' | 'assistant' | 'exec' | 'log' | 'approval' | 'activity';
+
+/** A human-in-the-loop tool-approval prompt the agent paused on (design §6.5). */
+export interface ApprovalRequest {
+  runId: string;
+  requestId: string;
+  /** resource class being requested, e.g. 'resume' */
+  scope: string;
+  status: 'pending' | 'approved' | 'denied';
+}
 
 export interface ChatMessage {
   id: string;
@@ -70,6 +79,10 @@ export interface ChatMessage {
   status?: 'running' | 'done';
   /** present when role === 'log' — anchors the entry back to a canvas change */
   resumePath?: string;
+  /** live-streamed assistant text — render raw (no typewriter re-animation) */
+  streamed?: boolean;
+  /** present when role === 'approval' — the pending tool-approval prompt */
+  approval?: ApprovalRequest;
 }
 
 export type CanvasStatus = 'idle' | 'streaming' | 'ready' | 'applied';

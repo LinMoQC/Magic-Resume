@@ -40,7 +40,7 @@ interface SettingsState extends SettingsData {
 const defaultSettings: SettingsData = {
   apiKey: '',
   baseUrl: 'http://localhost:11434/v1',
-  model: 'gpt-3.5-turbo',
+  model: 'gpt-5.5',
   maxTokens: 1024,
   cloudSync: false,
   syncDisclaimerAgreed: false,

@@ -101,7 +101,16 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
   const [previewScale, setPreviewScale] = useState(1);
   const openJsonModal = () => router.push(`/dashboard/edit/${id}/json`);
 
-  const openAIModal = () => router.push(`/dashboard/edit/${id}/ai-lab`);
+  const openAIModal = async () => {
+    // The AI agent reads the resume from the cloud DB (read_resume tool), so push
+    // the latest editor state first (best-effort; no-ops if cloud sync is off).
+    try {
+      await syncToCloud();
+    } catch {
+      // Open the lab regardless — read_resume degrades gracefully if unsynced.
+    }
+    router.push(`/dashboard/edit/${id}/ai-lab`);
+  };
   const [isSaving, setIsSaving] = useState(false);
 
   const openVersionHistory = () => router.push(`/dashboard/edit/${id}/history`);

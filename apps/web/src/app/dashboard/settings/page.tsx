@@ -8,11 +8,13 @@ import { Input } from '@/components/ui/input';
 import { InfoCircledIcon, LockClosedIcon } from '@radix-ui/react-icons';
 import { Cloud, Settings as SettingsIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MODEL_API_URL_MAP } from '@/lib/constants/modals';
+import { MODEL_API_URL_MAP, MODEL_PROVIDERS } from '@/lib/constants/modals';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -205,10 +207,17 @@ export default function Settings() {
                       <SelectValue placeholder={t('settings.llm.modelPlaceholder')} />
                     </SelectTrigger>
                     <SelectContent className='bg-neutral-900 border-neutral-800 text-white'>
-                      {Object.keys(MODEL_API_URL_MAP).map((modelName) => (
-                        <SelectItem key={modelName} value={modelName} className="focus:bg-neutral-800 focus:text-sky-400 transition-colors">
-                          {modelName}
-                        </SelectItem>
+                      {MODEL_PROVIDERS.map((provider) => (
+                        <SelectGroup key={provider.id}>
+                          <SelectLabel className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">
+                            {provider.label}
+                          </SelectLabel>
+                          {provider.models.map((modelName) => (
+                            <SelectItem key={modelName} value={modelName} className="focus:bg-neutral-800 focus:text-sky-400 transition-colors">
+                              {modelName}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
                       ))}
                     </SelectContent>
                   </Select>

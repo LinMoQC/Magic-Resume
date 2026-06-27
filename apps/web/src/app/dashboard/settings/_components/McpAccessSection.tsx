@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAppAuth } from '@/lib/auth';
+import { API_ORIGIN } from '@/lib/api/routes';
 import { Check, Copy, KeyRound, Plus, RefreshCw, Terminal, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -267,8 +268,7 @@ export function McpAccessSection() {
 }
 
 function getMcpApiUrl(): string {
-  const baseUrl = process.env.NEXT_PUBLIC_CLOUD_API_URL || 'http://localhost:3111';
-  const normalized = baseUrl.replace(/\/+$/, '');
+  const normalized = API_ORIGIN.replace(/\/+$/, '');
   return normalized.endsWith('/api') ? normalized : `${normalized}/api`;
 }
 

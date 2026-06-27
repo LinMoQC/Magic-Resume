@@ -8,6 +8,7 @@ import { Resume, Section } from '@/types/frontend/resume';
 import ResumePreview from '../../preview/ResumePreview';
 import { SKILLS } from '../skills/registry';
 import type { CanvasState, CanvasView } from '../types';
+import type { MultiPersonaResumeAnalysis, PersonaAnalysis } from '@/types/agent/multi-persona';
 
 const VIEW_LABEL: Record<CanvasView, string> = {
   preview: '预览',
@@ -20,6 +21,7 @@ type ArtifactCanvasProps = {
   state: CanvasState;
   resumeData: Resume;
   templateId: string;
+  analysis: MultiPersonaResumeAnalysis | null;
   onSetView: (view: CanvasView) => void;
   onApply: () => void;
   onDiscard: () => void;
@@ -75,18 +77,37 @@ function buildDiffSections(sections: Section): Section {
   return clone;
 }
 
-const PERSONAS = [
-  { label: '同行专家', value: 85, color: '#38bdf8' },
-  { label: '用人主管', value: 78, color: '#a78bfa' },
-  { label: 'HRBP', value: 82, color: '#34d399' },
-];
+const PERSONA_COLORS = { peer: '#38bdf8', leader: '#a78bfa', hrbp: '#34d399' };
+
+/** Flatten + de-dupe persona bullet lists, capping the count for the compact view. */
+function topItems(lists: string[][], cap = 4): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const list of lists) {
+    for (const item of list || []) {
+      const t = item.trim();
+      if (!t || seen.has(t)) continue;
+      seen.add(t);
+      out.push(t);
+      if (out.length >= cap) return out;
+    }
+  }
+  return out;
+}
+
+function scoreBand(score: number): string {
+  if (score >= 85) return '综合竞争力优秀';
+  if (score >= 70) return '综合竞争力良好';
+  if (score >= 50) return '综合竞争力中等';
+  return '竞争力有待提升';
+}
 
 function RingGauge({ score }: { score: number }) {
   const size = 96;
   const stroke = 8;
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
-  const pct = Math.max(0, Math.min(1, score / 10));
+  const pct = Math.max(0, Math.min(1, score / 100));
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
@@ -112,24 +133,12 @@ function RingGauge({ score }: { score: number }) {
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-[26px] leading-none font-semibold text-white tabular-nums">{score.toFixed(1)}</span>
-        <span className="text-[10px] text-neutral-500 mt-0.5">/ 10</span>
+        <span className="text-[26px] leading-none font-semibold text-white tabular-nums">{Math.round(score)}</span>
+        <span className="text-[10px] text-neutral-500 mt-0.5">/ 100</span>
       </div>
     </div>
   );
 }
-
-const STRENGTHS = [
-  '项目经历包含量化成果，说服力强',
-  '技术栈与目标岗位匹配度高',
-  '成长路径清晰、履历连续',
-];
-
-const IMPROVEMENTS = [
-  '部分经历表述偏笼统，建议突出个人贡献与角色',
-  '缺少团队规模与业务影响力的描述',
-  '可补充 3–5 个目标岗位关键词以提升匹配',
-];
 
 function ReportSection({ label, color, children }: { label: string; color: string; children: React.ReactNode }) {
   return (
@@ -143,21 +152,41 @@ function ReportSection({ label, color, children }: { label: string; color: strin
   );
 }
 
-function ScoreView({ onExport }: { onExport: () => void }) {
+function ScoreView({
+  analysis,
+  onExport,
+}: {
+  analysis: MultiPersonaResumeAnalysis | null;
+  onExport: () => void;
+}) {
+  if (!analysis) {
+    return (
+      <div className="rounded-2xl bg-neutral-900/60 p-6 text-sm text-neutral-500">暂无分析结果。</div>
+    );
+  }
+
+  const personas: { label: string; color: string; data: PersonaAnalysis }[] = [
+    { label: '同行专家', color: PERSONA_COLORS.peer, data: analysis.peer_analysis },
+    { label: '用人主管', color: PERSONA_COLORS.leader, data: analysis.leader_analysis },
+    { label: 'HRBP', color: PERSONA_COLORS.hrbp, data: analysis.hrbp_analysis },
+  ];
+  const strengths = topItems(personas.map((p) => p.data.strengths));
+  const improvements = topItems(personas.map((p) => p.data.weaknesses));
+
   return (
     <div className="rounded-2xl bg-neutral-900/60 p-6 space-y-6">
       <div className="flex items-center gap-5">
-        <RingGauge score={8.2} />
+        <RingGauge score={analysis.overall_score} />
         <div className="min-w-0">
-          <div className="text-[15px] font-medium text-white">综合竞争力良好</div>
+          <div className="text-[15px] font-medium text-white">{scoreBand(analysis.overall_score)}</div>
           <p className="text-xs text-neutral-500 mt-1.5 leading-relaxed">
-            三位虚拟面试官综合评估，优于约 78% 的同岗位简历。
+            三位虚拟面试官（同行 / 用人主管 / HRBP）综合评估。
           </p>
         </div>
       </div>
 
       <div className="space-y-3.5">
-        {PERSONAS.map((p, i) => (
+        {personas.map((p, i) => (
           <div key={p.label} className="flex items-center gap-3">
             <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: p.color }} />
             <span className="text-xs text-neutral-300 w-16 shrink-0">{p.label}</span>
@@ -166,32 +195,36 @@ function ScoreView({ onExport }: { onExport: () => void }) {
                 className="h-full rounded-full"
                 style={{ background: p.color }}
                 initial={{ width: 0 }}
-                animate={{ width: `${p.value}%` }}
+                animate={{ width: `${Math.max(0, Math.min(100, p.data.score))}%` }}
                 transition={{ duration: 0.7, delay: 0.15 + i * 0.1, ease: 'easeOut' }}
               />
             </div>
-            <span className="text-xs font-medium text-white w-7 text-right tabular-nums">{(p.value / 10).toFixed(1)}</span>
+            <span className="text-xs font-medium text-white w-7 text-right tabular-nums">{Math.round(p.data.score)}</span>
           </div>
         ))}
       </div>
 
-      <ReportSection label="亮点" color="#34d399">
-        {STRENGTHS.map((s) => (
-          <li key={s} className="flex gap-2 text-xs text-neutral-400 leading-relaxed">
-            <Check size={13} className="text-emerald-400 mt-0.5 shrink-0" />
-            <span>{s}</span>
-          </li>
-        ))}
-      </ReportSection>
+      {strengths.length > 0 && (
+        <ReportSection label="亮点" color="#34d399">
+          {strengths.map((s) => (
+            <li key={s} className="flex gap-2 text-xs text-neutral-400 leading-relaxed">
+              <Check size={13} className="text-emerald-400 mt-0.5 shrink-0" />
+              <span>{s}</span>
+            </li>
+          ))}
+        </ReportSection>
+      )}
 
-      <ReportSection label="待改进" color="#fbbf24">
-        {IMPROVEMENTS.map((s) => (
-          <li key={s} className="flex gap-2 text-xs text-neutral-400 leading-relaxed">
-            <ArrowUpRight size={13} className="text-amber-400 mt-0.5 shrink-0" />
-            <span>{s}</span>
-          </li>
-        ))}
-      </ReportSection>
+      {improvements.length > 0 && (
+        <ReportSection label="待改进" color="#fbbf24">
+          {improvements.map((s) => (
+            <li key={s} className="flex gap-2 text-xs text-neutral-400 leading-relaxed">
+              <ArrowUpRight size={13} className="text-amber-400 mt-0.5 shrink-0" />
+              <span>{s}</span>
+            </li>
+          ))}
+        </ReportSection>
+      )}
 
       <button
         type="button"
@@ -209,6 +242,7 @@ export default function ArtifactCanvas({
   state,
   resumeData,
   templateId,
+  analysis,
   onSetView,
   onApply,
   onDiscard,
@@ -269,7 +303,7 @@ export default function ArtifactCanvas({
 
             {view === 'score' && (
               <div className="mx-auto w-full max-w-sm">
-                <ScoreView onExport={onExport} />
+                <ScoreView analysis={analysis} onExport={onExport} />
               </div>
             )}
           </div>

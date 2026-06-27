@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerUserId } from '@/lib/auth/server';
+import { serverFetchBackend } from '@/lib/auth/serverFetchBackend';
 
 export async function POST(req: NextRequest) {
     try {
@@ -9,20 +10,11 @@ export async function POST(req: NextRequest) {
         }
 
         const body = await req.json();
-        const { messages, config} = body;
 
-        // 转发请求到Python后端
-        const backendUrl = `${process.env.BACKEND_URL}/api/chat`;
-
-        const backendResponse = await fetch(backendUrl, {
+        // 转发到 agent-service（单一 origin + 带 Clerk token）；整包透传（含 mode / currentResume）
+        const backendResponse = await serverFetchBackend('/api/chat', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                messages,
-                config
-            }),
+            body: JSON.stringify(body),
         });
 
         if (!backendResponse.ok) {

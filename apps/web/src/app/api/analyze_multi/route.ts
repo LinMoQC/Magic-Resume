@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerUserId } from '@/lib/auth/server';
+import { serverFetchBackend } from '@/lib/auth/serverFetchBackend';
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,13 +10,10 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:8000';
-    
-    const response = await fetch(`${backendUrl}/api/graph/analyze-resume-multi`, {
+
+    // Single origin + forwards the Clerk token (v2 agent-service is guarded).
+    const response = await serverFetchBackend('/api/graph/analyze-resume-multi', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(body),
     });
 
