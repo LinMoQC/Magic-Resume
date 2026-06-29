@@ -1,14 +1,12 @@
 import { cn } from "@/lib/utils";
-import { exportResumeToPdf } from '@/lib/utils/pdf-export';
 import { Resume } from '@/types/frontend/resume';
 import { DownloadIcon } from "@radix-ui/react-icons";
-import { Bot, History, Share2, MessageCircle, ChevronDown, ChevronUp, LoaderCircle } from "lucide-react";
+import { Bot, History, Share2, MessageCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useSettingStore } from "@/store/useSettingStore";
 import { isCloudMode } from "@/lib/config/app";
-import { toast } from "sonner";
 
 export type ToolsProps = {
   isMobile: boolean;
@@ -24,14 +22,13 @@ export type ToolsProps = {
 };
 
 export function Tools({ isMobile, zoomIn, zoomOut, resetTransform, resume, onShowAI, onVersionClick, rightCollapsed = false, onShareClick, onFeedbackClick }: ToolsProps){
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const router = useRouter();
   const params = useParams();
   // We can fallback to 'default' or handle error if id is missing, but it should be present in this context
   const currentId = (params?.id as string) || resume.id;
 
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
   const cloudSync = useSettingStore((state) => state.cloudSync);
   
   // 计算桌面端工具栏的right位置，避免被模板栏遮挡
@@ -39,20 +36,11 @@ export function Tools({ isMobile, zoomIn, zoomOut, resetTransform, resume, onSho
   
   const toggleCollapsed = () => setIsCollapsed((prev) => !prev);
 
-  const handleExportPdf = async () => {
-    if (isExporting) return;
-    setIsExporting(true);
-    const toastId = toast.loading(t('tools.exportingPDF'));
-    try {
-      await exportResumeToPdf(resume, i18n.resolvedLanguage || i18n.language);
-      toast.success(t('tools.exportPDFSuccess'));
-    } catch (error) {
-      console.error('Local PDF export failed:', error);
-      toast.error(t('tools.exportPDFError'));
-    } finally {
-      toast.dismiss(toastId);
-      setIsExporting(false);
-    }
+  const handleExportPdf = () => {
+    // Print the actual rendered resume (the #resume-print-root copy) — pixel-matches
+    // the preview, vector + selectable text (ATS-friendly). The user picks
+    // 「另存为 PDF」 in the browser print dialog.
+    window.print();
   };
 
   return (
@@ -127,12 +115,10 @@ export function Tools({ isMobile, zoomIn, zoomOut, resetTransform, resume, onSho
           <button
             className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"
             onClick={handleExportPdf}
-            title={isExporting ? t('tools.exportingPDF') : t('tools.exportPDF')}
+            title={t('tools.exportPDF')}
             type="button"
-            disabled={isExporting}
-            aria-busy={isExporting}
           >
-            {isExporting ? <LoaderCircle size={16} className="animate-spin" /> : <DownloadIcon />}
+            <DownloadIcon />
           </button>
           <button
             className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"

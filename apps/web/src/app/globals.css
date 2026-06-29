@@ -943,3 +943,46 @@ h4:hover > .lc-section-handle,
   25% { box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.35); }
   100% { box-shadow: 0 0 0 0 rgba(2, 132, 199, 0); }
 }
+
+/* ── PDF 导出:浏览器打印真实渲染的简历(#resume-print-root)──────────────
+   导出 PDF 按钮触发 window.print();这里隐藏编辑器其余 UI,只渲染那份按自然
+   A4 尺寸渲染的简历副本 —— 所见即所得、矢量可选中文字(ATS 友好)。 */
+#resume-print-root {
+  display: none;
+}
+
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  #resume-print-root,
+  #resume-print-root * {
+    visibility: visible !important;
+  }
+  #resume-print-root {
+    display: block !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: #ffffff;
+  }
+  /* 简历页本身:去掉预览态的阴影 / 圆角,贴合纸张,水平居中 */
+  #resume-print-root > * {
+    margin: 0 auto !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+  html,
+  body {
+    background: #ffffff !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+  @page {
+    size: A4;
+    margin: 0;
+  }
+}
