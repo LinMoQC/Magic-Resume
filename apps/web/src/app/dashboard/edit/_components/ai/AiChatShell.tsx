@@ -8,10 +8,11 @@ import { nanoid } from 'nanoid';
 import { toast } from 'sonner';
 import { InfoType, Resume, Section } from '@/types/frontend/resume';
 import { SKILLS } from './skills/registry';
+import { WIDGETS } from './widgets/registry';
+import type { WidgetActionResult, WidgetKind } from './widgets/types';
 import type { CanvasState, ChatMessage, PlanTodo, SkillId } from './types';
 import ChatThread from './conversation/ChatThread';
 import Composer from './conversation/Composer';
-import SkillParamForm from './conversation/SkillParamForm';
 import WelcomeSuggestions from './conversation/WelcomeSuggestions';
 import ArtifactCanvas from './canvas/ArtifactCanvas';
 import { PolarisAvatar } from './PolarisMark';
@@ -36,22 +37,13 @@ type AiChatShellProps = {
 
 const CLOSED_CANVAS: CanvasState = { open: false, skillId: null, view: 'preview', status: 'idle' };
 
-/** Build the data-carrying intent a whole-resume skill sends to the agent. The
- *  frontend passes intent + DATA (JD / target language) — not prompt/behavior, which
- *  lives in the backend skills (AGENTS.md + resume-optimization / resume-translation). */
-function buildBatchAgentMessage(kind: BatchKind, params: Record<string, string>): string {
-  if (kind === 'translate') {
-    return `把我的简历整份翻译成 ${params.lang || 'English'}。`;
-  }
-  const target = [params.company, params.title].filter(Boolean).join(' · ');
-  const jd = params.jd?.trim();
-  return [
-    `请按目标岗位优化我的简历${target ? `(目标:${target})` : ''}。`,
-    jd ? `目标 JD:\n${jd}` : '',
-  ]
-    .filter(Boolean)
-    .join('\n\n');
-}
+/** Default conversational intent when a content skill is launched without typed text.
+ *  The AI gathers specifics (JD / target language) in-conversation via a `request_form`
+ *  card — the frontend no longer pre-collects them in a gated popup. */
+const SKILL_INTENT: Record<BatchKind, string> = {
+  optimize: '帮我针对目标岗位优化我的简历。',
+  translate: '把我的简历翻译成目标语言。',
+};
 
 /** Map the shell's thread into the backend chat history (user/assistant text only). */
 function toBackendHistory(
@@ -73,7 +65,6 @@ export default function AiChatShell({
 }: AiChatShellProps) {
   const [started, setStarted] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [paramSkill, setParamSkill] = useState<SkillId | null>(null);
   const [canvas, setCanvas] = useState<CanvasState>(CLOSED_CANVAS);
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [running, setRunning] = useState(false);
@@ -266,22 +257,43 @@ export default function AiChatShell({
               setMessages((prev) => prev.map((m) => (m.id === aiId ? { ...m, content: acc } : m)));
             }
           } else if (ev.type === 'tool_approval_request') {
-            // Agent paused before a sensitive tool (read_resume). The initial stream
-            // ends here; the approval card drives the resume (§6).
-            const p = ev.payload as { requestId?: string; toolName?: string; reason?: string } | undefined;
+            // Agent paused before a sensitive tool (read_resume) OR to collect input
+            // via a GenUI widget (request_form). The initial stream ends here; the
+            // card drives the resume (§6 · genui-systematization §4).
+            const p = ev.payload as {
+              requestId?: string;
+              toolName?: string;
+              reason?: string;
+              args?: Record<string, unknown>;
+            } | undefined;
             if (p?.requestId) {
               pausedForApproval = true;
               setAwaitingReply(false); // the card replaces the thinking dots
-              const approvalId = nanoid();
-              // The read result will resolve on this same card (issue §3), so the
-              // direct read_resume approval owns it; analyze reads via its todolist.
-              if (p.toolName === 'read_resume') readApprovalRef.current = approvalId;
-              addMessage({
-                id: approvalId,
-                role: 'approval',
-                content: p.reason || '想读取你的简历来给建议',
-                approval: { requestId: p.requestId, toolName: p.toolName, scope: 'resume', status: 'pending' },
-              });
+              if (p.toolName && WIDGETS[p.toolName]) {
+                // GenUI widget: render the registered card; submit/cancel resumes the
+                // run via handleWidgetAction (respond / reject).
+                addMessage({
+                  id: nanoid(),
+                  role: 'widget',
+                  widget: {
+                    widgetId: p.requestId,
+                    kind: p.toolName as WidgetKind,
+                    props: p.args ?? {},
+                    status: 'pending',
+                  },
+                });
+              } else {
+                const approvalId = nanoid();
+                // The read result resolves on this same card; the direct read_resume
+                // approval owns it; analyze reads via its todolist.
+                if (p.toolName === 'read_resume') readApprovalRef.current = approvalId;
+                addMessage({
+                  id: approvalId,
+                  role: 'approval',
+                  content: p.reason || '想读取你的简历来给建议',
+                  approval: { requestId: p.requestId, toolName: p.toolName, scope: 'resume', status: 'pending' },
+                });
+              }
             }
           } else if (ev.type === 'tool_started' && (ev.payload as { toolName?: string } | undefined)?.toolName === 'read_resume') {
             // The read runs after approval. Show progress on the approval card
@@ -529,23 +541,24 @@ export default function AiChatShell({
     [consumeStream, resumeData.id, apiKey, baseUrl, model, maxTokens]
   );
 
-  // Whole-resume skill (optimize / translate) → real agent via /api/chat. The agent
-  // routes to the resume-optimization / resume-translation skill, writes the full
-  // resume (one `resume_update`), which consumeStream diffs onto the living canvas.
-  const runBatchSkill = useCallback(
-    (id: SkillId, params: Record<string, string>) => {
-      const kind: BatchKind = id === 'translate' ? 'translate' : 'optimize';
+  // Whole-resume content skill (optimize / translate) → CONVERSATIONAL run via
+  // /api/chat (session-threaded). No upfront param popup: the AI routes to the
+  // resume-optimization / resume-translation skill, and when it needs specifics
+  // (JD / target language) it calls `request_form` mid-conversation → a FormCard the
+  // user fills → `respond` resumes → optimize. The final full-resume `resume_update`
+  // diffs onto the living canvas (skillBatchRunRef survives the form interrupt).
+  const runContentSkill = useCallback(
+    (kind: BatchKind, message: string) => {
       setCanvas(CLOSED_CANVAS);
       setLivingOpen(true);
-      setLivingSkillId(id);
-      skillBatchRunRef.current = { kind, lang: params.lang };
-      const message = buildBatchAgentMessage(kind, params);
+      setLivingSkillId(kind);
+      skillBatchRunRef.current = { kind };
+      sessionUsedRef.current = true; // multi-turn (ask → fill → optimize) needs the thread
       void consumeStream((signal) =>
         streamChat({
           messages: [{ role: 'user', content: message }],
           mode: kind,
-          // No sessionId: optimize / translate are one-shot transforms → threadless
-          // (backend skips the checkpointer, CC1 / BP2). sessionId is for chat only.
+          sessionId: sessionIdRef.current,
           resumeId: resumeData.id,
           config: { apiKey, baseUrl, modelName: model, maxTokens },
           signal,
@@ -555,23 +568,49 @@ export default function AiChatShell({
     [consumeStream, resumeData.id, apiKey, baseUrl, model, maxTokens]
   );
 
-  const runSkill = useCallback(
-    (id: SkillId, params: Record<string, string>, opts?: { addIntent?: boolean }) => {
-      setStarted(true);
-      setParamSkill(null);
-      if (opts?.addIntent !== false) {
-        addMessage({ id: nanoid(), role: 'user', content: SKILLS[id].buildIntent(params) });
-      }
-      // analyze → analyze_resume tool (score); optimize/translate → resume-optimization
-      // / resume-translation skill (full-resume diff on the living canvas). Both real,
-      // both narrate via the SSE stream — no exec card, no mock.
-      if (id === 'analyze') {
-        void runAnalyze();
-      } else if (isBatchSkill(id)) {
-        runBatchSkill(id, params);
-      }
+  // The user acted on a GenUI widget card (submit / cancel). Mark it resolved and
+  // resume the paused run via the HITL channel: submit → `respond` with the values;
+  // cancel → `reject` (design/genui-systematization.md §5).
+  const handleWidgetAction = useCallback(
+    (widgetId: string, result: WidgetActionResult) => {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.widget?.widgetId === widgetId
+            ? {
+                ...m,
+                widget: {
+                  ...m.widget,
+                  status: result.type === 'submit' ? 'submitted' : 'cancelled',
+                },
+              }
+            : m
+        )
+      );
+      // Resume the paused `request_form` tool. Submit → `edit` injects the user's
+      // values into the tool args (the tool echoes them back to the model); cancel
+      // → `reject`. (langchain HITL has no `respond`, so submit rides on `edit`.)
+      const w = messagesRef.current.find((m) => m.widget?.widgetId === widgetId)?.widget;
+      const decision =
+        result.type === 'submit'
+          ? {
+              type: 'edit' as const,
+              editedAction: {
+                name: w?.kind ?? 'request_form',
+                args: { ...(w?.props ?? {}), values: result.values ?? {} },
+              },
+            }
+          : { type: 'reject' as const, message: '用户取消了填写' };
+      void consumeStream((signal) =>
+        approveTool({
+          sessionId: sessionIdRef.current,
+          decisions: [decision],
+          resumeId: resumeData.id,
+          config: { apiKey, baseUrl, modelName: model, maxTokens },
+          signal,
+        })
+      );
     },
-    [addMessage, runAnalyze, runBatchSkill]
+    [consumeStream, resumeData.id, apiKey, baseUrl, model, maxTokens]
   );
 
   // create / general · real streaming chat. Sends only the new turn(s); the
@@ -630,11 +669,11 @@ export default function AiChatShell({
       if (chatMode === 'create') {
         void runChat(history, 'create');
       } else if (/优化|jd|岗位/i.test(text)) {
-        setParamSkill('optimize');
+        runContentSkill('optimize', text); // conversational; AI asks for JD via a FormCard
       } else if (/翻|英文|english|日|韩/i.test(text)) {
-        setParamSkill('translate');
+        runContentSkill('translate', text);
       } else if (/分析|体检|评分|竞争力/.test(text)) {
-        window.setTimeout(() => runSkill('analyze', {}, { addIntent: false }), 250);
+        void runAnalyze();
       } else if (/面试|模拟/.test(text)) {
         setOverlayOpen(true);
       } else if (/创建|从零|搭建|新建|从头|新简历/.test(text)) {
@@ -644,7 +683,7 @@ export default function AiChatShell({
         void runChat(history, 'general');
       }
     },
-    [chatMode, addMessage, runSkill, runChat]
+    [chatMode, addMessage, runContentSkill, runAnalyze, runChat]
   );
 
   // A skill picked from the `/` menu rides as a chip + freeform text in the Composer:
@@ -662,23 +701,26 @@ export default function AiChatShell({
         return;
       }
 
+      // Content skills (optimize / translate) run conversationally: typed text is the
+      // turn; with no text we send a natural intent and the AI gathers specifics via a
+      // FormCard. No upfront param popup.
+      if (id === 'translate' || id === 'optimize') {
+        const msg = t || SKILL_INTENT[id];
+        addMessage({ id: nanoid(), role: 'user', content: msg, skillId: id });
+        runContentSkill(id, msg);
+        return;
+      }
+
       const display = t || skill.buildIntent({});
-      const history = toBackendHistory(messagesRef.current).concat([
-        { role: 'user', content: display },
-      ]);
       // Tag the turn with the skill so the bubble shows which skill ran.
       addMessage({ id: nanoid(), role: 'user', content: display, skillId: id });
 
       if (skill.isChat) {
         setChatMode('create');
-        void runChat(history, 'create');
-        return;
-      }
-
-      if (id === 'translate' || id === 'optimize') {
-        const params: Record<string, string> = {};
-        if (t) params[id === 'translate' ? 'lang' : 'jd'] = t;
-        runBatchSkill(id, params);
+        void runChat(
+          toBackendHistory(messagesRef.current).concat([{ role: 'user', content: display }]),
+          'create',
+        );
         return;
       }
 
@@ -686,13 +728,8 @@ export default function AiChatShell({
       // typed text just shows as the turn while the standard analysis runs.
       void runAnalyze();
     },
-    [addMessage, runChat, runBatchSkill, runAnalyze],
+    [addMessage, runChat, runContentSkill, runAnalyze],
   );
-
-  const cancelParams = useCallback(() => {
-    setParamSkill(null);
-    setStarted((s) => (messages.length === 0 ? false : s));
-  }, [messages.length]);
 
   const toggleCanvas = useCallback(
     (id: SkillId) => {
@@ -733,7 +770,6 @@ export default function AiChatShell({
     sessionUsedRef.current = false;
     setMessages([]);
     setStarted(false);
-    setParamSkill(null);
     setCanvas(CLOSED_CANVAS);
     setOverlayOpen(false);
     setLivingOpen(false);
@@ -742,6 +778,9 @@ export default function AiChatShell({
     setSessionId(nanoid()); // new conversation → new thread (don't continue the old)
     setDraftReady(null);
   }, []);
+
+  // (param-form popup removed — optimize/translate now gather inputs in-conversation
+  //  via a FormCard widget; see runContentSkill + handleWidgetAction.)
 
   const stopRun = useCallback(() => {
     controllerRef.current?.abort();
@@ -800,7 +839,7 @@ export default function AiChatShell({
           </div>
         </div>
       )}
-      <Composer onRunSkill={runSkillWithText} onSend={handleSend} disabled={running || !!paramSkill} />
+      <Composer onRunSkill={runSkillWithText} onSend={handleSend} disabled={running} />
     </>
   );
 
@@ -906,6 +945,7 @@ export default function AiChatShell({
                   onToggleCanvas={toggleCanvas}
                   onLogClick={focusOnCanvas}
                   onApproval={handleApproval}
+                  onWidgetAction={handleWidgetAction}
                   thinking={awaitingReply}
                   openCanvasSkillId={
                     canvas.open ? canvas.skillId : livingOpen ? livingSkillId : null
@@ -920,27 +960,6 @@ export default function AiChatShell({
             transition={{ type: 'spring', stiffness: 320, damping: 32 }}
             className="relative"
           >
-            <AnimatePresence>
-              {paramSkill && (
-                <motion.div
-                  key="paramform"
-                  initial={{ opacity: 0, y: 12, scale: 0.97 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 8, scale: 0.98 }}
-                  transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
-                  style={{ transformOrigin: 'bottom center' }}
-                  className="absolute bottom-full left-0 right-0 px-4 pb-2"
-                >
-                  <div className="max-w-3xl mx-auto">
-                    <SkillParamForm
-                      skill={SKILLS[paramSkill]}
-                      onRun={(values) => runSkill(paramSkill, values)}
-                      onCancel={cancelParams}
-                    />
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
             {composer}
           </motion.div>
 

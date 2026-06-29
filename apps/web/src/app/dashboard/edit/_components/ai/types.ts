@@ -1,4 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
+import type { WidgetInstance } from './widgets/types';
 
 export type SkillId = 'create' | 'optimize' | 'analyze' | 'translate' | 'interview';
 
@@ -59,7 +60,7 @@ export interface AiSkill {
   doneSummary: string;
 }
 
-export type ChatRole = 'user' | 'assistant' | 'exec' | 'log' | 'approval' | 'activity' | 'plan';
+export type ChatRole = 'user' | 'assistant' | 'exec' | 'log' | 'approval' | 'activity' | 'plan' | 'widget';
 
 /** A single checklist item in a `plan` message — the live analyze todolist. */
 export interface PlanTodo {
@@ -105,6 +106,8 @@ export interface ChatMessage {
   todos?: PlanTodo[];
   /** present when role === 'plan' and the todolist belongs to a subagent (the `task` tool) */
   subagentName?: string;
+  /** present when role === 'widget' — a GenUI interactive card (form / decision) */
+  widget?: WidgetInstance;
 }
 
 export type CanvasStatus = 'idle' | 'streaming' | 'ready' | 'applied';

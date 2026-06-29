@@ -7,7 +7,9 @@ import { cn } from '@/lib/utils';
 import { SKILLS } from '../skills/registry';
 import Markdown from './Markdown';
 import PolarisMark, { POLARIS_STAR_D } from '../PolarisMark';
+import WidgetHost from './WidgetHost';
 import type { ApprovalRequest, ChatMessage, SkillId } from '../types';
+import type { WidgetActionResult } from '../widgets/types';
 
 type ApprovalDecision = (msgId: string, approved: boolean) => void;
 
@@ -429,11 +431,13 @@ type ChatThreadProps = {
   onLogClick?: (resumePath: string) => void;
   /** resolve a tool-approval card (human-in-the-loop) */
   onApproval?: ApprovalDecision;
+  /** a GenUI widget card was acted on (submit / cancel) */
+  onWidgetAction?: (widgetId: string, result: WidgetActionResult) => void;
   /** a chat turn is awaiting its first token — render the thinking placeholder */
   thinking?: boolean;
 };
 
-export default function ChatThread({ messages, onToggleCanvas, openCanvasSkillId, onLogClick, onApproval, thinking }: ChatThreadProps) {
+export default function ChatThread({ messages, onToggleCanvas, openCanvasSkillId, onLogClick, onApproval, onWidgetAction, thinking }: ChatThreadProps) {
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -487,6 +491,10 @@ export default function ChatThread({ messages, onToggleCanvas, openCanvasSkillId
                 onToggleCanvas={onToggleCanvas}
                 isCanvasOpen={openCanvasSkillId === (m.skillId ?? 'analyze')}
               />
+            ) : m.role === 'widget' ? (
+              m.widget ? (
+                <WidgetHost instance={m.widget} onAction={onWidgetAction ?? (() => {})} />
+              ) : null
             ) : (
               <Bubble message={m} showAvatar={showAvatarFor[i]} />
             )}

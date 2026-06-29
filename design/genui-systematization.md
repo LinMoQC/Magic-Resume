@@ -1,7 +1,8 @@
 # GenUI 体系化 — 把 LLM 文字输出变成可交互组件 — ADR 草案 v1
 
-> **状态**:草案,待评审。定方向后再开编码。
-> **范围**:① 混合驱动(工具驱动为主 + `emit_widget` 逃生口);② 首期只做**垂直切片**,端到端跑通一张全新「多选项决策卡」;③ 现有授权卡 / 计划卡**暂不迁移**。
+> **状态**:方向已确认(2026-06-29),首期切片落地中。
+> **范围**:① 混合驱动(工具驱动为主 + `emit_widget` 逃生口);② 首期垂直切片端到端跑通**通用表单卡 `FormCard`**(`request_form` 工具 → `interruptOn` 暂停 → 卡片 → `respond` 回灌),覆盖 **智能优化**(JD/公司/岗位)与 **一键翻译**(目标语言)——**删掉这两个技能的参数弹窗**,改为「AI 在对话里按需弹卡、用户填写提交后再续跑」;③ 现有授权卡 / 计划卡**暂不迁移**。
+> **关联变更**:optimize/translate 由「前端表单门控的一次性 batch」改为**会话化**(走 session thread),反转 adr-0010 CC1 中 optimize 的 threadless(更贴合 adr-0007「单一 chat + AI 路由技能」)。
 > **关联**:`agent-tool-approval-contract.md`(HITL 授权契约,本稿复用其回传通道)、`ai-lab-living-canvas.md`(画布是舞台、对话是旁白)、`frontend-v2-backend-integration.md`(SSE 事件契约)。
 > **跨仓库**:本稿是 **Magic-Resume 前端侧 + 契约** 的权威稿;`ask_choice` 工具与 `ui_widget` 事件的后端实现细节,落地时按既有惯例在 `Magic-Core/docs/` 留权威副本。
 

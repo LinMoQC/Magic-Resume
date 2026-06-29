@@ -122,9 +122,13 @@ export async function endSessionThread(sessionId: string): Promise<void> {
 
 /** A human's decision on a paused tool call (native HITL). */
 export interface HitlDecision {
-  type: 'approve' | 'reject';
-  /** feedback to the model when rejecting */
+  /** approve/reject gate a sensitive tool; `edit` re-runs the tool with new args —
+   *  GenUI widgets use it to inject the user's submitted form values. */
+  type: 'approve' | 'reject' | 'edit';
+  /** feedback to the model when rejecting. */
   message?: string;
+  /** for `edit`: the tool call with the user's values merged into args. */
+  editedAction?: { name: string; args: Record<string, unknown> };
 }
 
 export interface ApproveToolParams {
