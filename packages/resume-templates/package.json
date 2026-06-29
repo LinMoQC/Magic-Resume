@@ -33,6 +33,10 @@
       "types": "./dist/renderer/EditableCanvas.d.ts",
       "default": "./dist/renderer/EditableCanvas.js"
     },
+    "./pdf/browser": {
+      "types": "./dist/pdf/browser.d.ts",
+      "default": "./dist/pdf/browser.js"
+    },
     "./registry": {
       "types": "./dist/registry.d.ts",
       "default": "./dist/registry.js"
@@ -56,10 +60,12 @@
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",
     "lint": "tsc -p tsconfig.json --noEmit",
-    "test": "npm run lint"
+    "test": "npm run lint",
+    "test:pdf": "npm run build && tsx scripts/render-pdf-smoke.mjs"
   },
   "dependencies": {
     "@magic-resume/resume-schema": "workspace:*",
+    "@react-pdf/renderer": "4.5.1",
     "dompurify": "^3.2.6",
     "lodash.get": "^4.4.2"
   },
@@ -71,10 +77,12 @@
     "react-i18next": "^15.5.2"
   },
   "devDependencies": {
+    "@react-pdf/types": "2.11.1",
     "@types/dompurify": "^3.0.5",
     "@types/lodash.get": "^4.4.9",
     "@types/react": "^19.1.6",
     "@types/react-dom": "^19",
+    "tsx": "4.21.0",
     "typescript": "^5"
   }
 }
