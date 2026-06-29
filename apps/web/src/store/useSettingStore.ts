@@ -41,7 +41,9 @@ const defaultSettings: SettingsData = {
   apiKey: '',
   baseUrl: 'http://localhost:11434/v1',
   model: 'gpt-5.5',
-  maxTokens: 1024,
+  // 8192 (was 1024): long resume optimize / translate / create outputs were being
+  // silently truncated at 1024 tokens (CC7).
+  maxTokens: 8192,
   cloudSync: false,
   syncDisclaimerAgreed: false,
 };

@@ -100,6 +100,26 @@ export function streamChat({ signal, ...body }: ChatStreamParams): AsyncGenerato
   return streamAgent(WEB_AGENT_ROUTES.chat, body, signal);
 }
 
+/**
+ * Reclaim the backend session thread when the conversation ends (modal close /
+ * new chat) — the ephemeral-data lifecycle (Magic-Core adr-0010 D4). Best-effort
+ * and `keepalive` so it survives an unmount/tab close; failures are swallowed (the
+ * TTL sweeper is the backstop). Carries only the sessionId, never the BYOK key.
+ */
+export async function endSessionThread(sessionId: string): Promise<void> {
+  if (!sessionId) return;
+  try {
+    await fetch(WEB_AGENT_ROUTES.chatSession, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId }),
+      keepalive: true,
+    });
+  } catch {
+    // best-effort — the server-side TTL sweeper reclaims anything missed.
+  }
+}
+
 /** A human's decision on a paused tool call (native HITL). */
 export interface HitlDecision {
   type: 'approve' | 'reject';

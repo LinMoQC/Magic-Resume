@@ -55,4 +55,5 @@ export const AGENT_ROUTES = {
 export const WEB_AGENT_ROUTES = {
   chat:             '/api/chat-agent',
   chatApprove:      '/api/chat-agent/approve',
+  chatSession:      '/api/chat-agent/session',
 } as const;

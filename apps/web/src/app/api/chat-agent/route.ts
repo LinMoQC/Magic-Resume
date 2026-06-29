@@ -11,10 +11,13 @@ export async function POST(req: NextRequest) {
 
         const body = await req.json();
 
-        // 转发到 agent-service（单一 origin + 带 Clerk token）；整包透传（含 mode / currentResume）
+        // 转发到 agent-service（单一 origin + 带 Clerk token）；整包透传（含 mode / currentResume）。
+        // 透传 req.signal：浏览器中断 / 关窗导致客户端断连时，上游到 agent-service 的 fetch 一并 abort，
+        // 后端据此停止 LangGraph 生成（不再空烧用户 BYOK token）。
         const backendResponse = await serverFetchBackend('/api/chat', {
             method: 'POST',
             body: JSON.stringify(body),
+            signal: req.signal,
         });
 
         if (!backendResponse.ok) {
@@ -31,25 +34,28 @@ export async function POST(req: NextRequest) {
                 throw new Error('No response body');
             }
 
+            // Hoisted so cancel() can tear down the upstream read when the client
+            // disconnects (closed modal / stop), closing the agent-service socket.
+            let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
             const readable = new ReadableStream({
                 async start(controller) {
-                    const reader = backendResponse.body!.getReader();
+                    reader = backendResponse.body!.getReader();
                     const decoder = new TextDecoder();
                     let buffer = '';
-                    
+
                     try {
                         while (true) {
                             const { done, value } = await reader.read();
                             if (done) break;
-                            
+
                             // 解码数据并按行分割
                             const text = decoder.decode(value, { stream: true });
                             buffer += text;
-                            
+
                             // 处理完整的lines
                             const lines = buffer.split('\n');
                             buffer = lines.pop() || ''; // 保留最后一个可能不完整的行
-                            
+
                             for (const line of lines) {
                                 if (line.trim()) {
                                     // 立即发送每一行
@@ -58,19 +64,29 @@ export async function POST(req: NextRequest) {
                                 }
                             }
                         }
-                        
+
                         // 发送剩余的buffer
                         if (buffer.trim()) {
                             const chunk = new TextEncoder().encode(buffer);
                             controller.enqueue(chunk);
                         }
-                    } catch (error) {
-                        console.error('Stream error:', error);
-                        controller.error(error);
-                    } finally {
                         controller.close();
+                    } catch (error) {
+                        // A client/upstream abort surfaces as AbortError once req.signal
+                        // fires — that's an expected cancel, not a stream failure.
+                        if ((error as Error)?.name === 'AbortError') {
+                            controller.close();
+                        } else {
+                            console.error('Stream error:', error);
+                            controller.error(error);
+                        }
                     }
-                }
+                },
+                cancel(reason) {
+                    // Consumer (browser) cancelled: release the upstream read so the
+                    // agent-service request socket closes and its run is aborted.
+                    reader?.cancel(reason).catch(() => {});
+                },
             });
 
             return new Response(readable, {

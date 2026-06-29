@@ -23,8 +23,21 @@ export default function AIModal({
   onApplyInfo,
   onApplyFullResume,
   templateId,
+  isAiJobRunning,
   setIsAiJobRunning,
 }: AIModalProps) {
+  const handleBackdropClose = () => {
+    // Closing still aborts the backend stream (AiChatShell unmount cleanup), so this
+    // guard only prevents losing an in-flight job to a stray backdrop click.
+    if (
+      isAiJobRunning &&
+      typeof window !== 'undefined' &&
+      !window.confirm('AI 正在生成，关闭将停止本次生成。确定关闭？')
+    ) {
+      return;
+    }
+    onClose();
+  };
   return (
     <AnimatePresence>
       {isOpen && (
@@ -33,7 +46,7 @@ export default function AIModal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
+            onClick={handleBackdropClose}
             className="fixed inset-0 bg-black/60 z-100 backdrop-blur-md cursor-pointer"
           />
           <div className="fixed inset-0 z-101 flex items-center justify-center p-3 sm:p-5 pointer-events-none">

@@ -20,6 +20,7 @@ export async function POST(req: NextRequest) {
     const backendResponse = await serverFetchBackend('/api/chat/approve', {
       method: 'POST',
       body: JSON.stringify(body),
+      signal: req.signal,
     });
 
     if (!backendResponse.ok) {
@@ -35,9 +36,10 @@ export async function POST(req: NextRequest) {
         throw new Error('No response body');
       }
 
+      let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
       const readable = new ReadableStream({
         async start(controller) {
-          const reader = backendResponse.body!.getReader();
+          reader = backendResponse.body!.getReader();
           const decoder = new TextDecoder();
           let buffer = '';
           try {
@@ -56,12 +58,19 @@ export async function POST(req: NextRequest) {
             if (buffer.trim()) {
               controller.enqueue(new TextEncoder().encode(buffer));
             }
-          } catch (error) {
-            console.error('Approve stream error:', error);
-            controller.error(error);
-          } finally {
             controller.close();
+          } catch (error) {
+            // Client/upstream abort → expected cancel, not a failure.
+            if ((error as Error)?.name === 'AbortError') {
+              controller.close();
+            } else {
+              console.error('Approve stream error:', error);
+              controller.error(error);
+            }
           }
+        },
+        cancel(reason) {
+          reader?.cancel(reason).catch(() => {});
         },
       });
 

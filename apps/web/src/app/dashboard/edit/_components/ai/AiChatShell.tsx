@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FlaskConical, FileText, SquarePen, X, PencilRuler, Check } from 'lucide-react';
+import { FlaskConical, FileText, SquarePen, X, PencilRuler, Check, CircleStop } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { nanoid } from 'nanoid';
 import { toast } from 'sonner';
@@ -19,7 +19,7 @@ import InterviewOverlay from './interview/InterviewOverlay';
 import LivingCanvas, { type BatchRequest, type FocusRequest } from './canvas/living/LivingCanvas';
 import { type BatchKind } from './lib/diffResume';
 import type { MultiPersonaResumeAnalysis } from '@/types/agent/multi-persona';
-import { streamChat, approveTool } from './lib/services/agentClient';
+import { streamChat, approveTool, endSessionThread } from './lib/services/agentClient';
 import type { AgentSseEvent } from './lib/services/types';
 import { useResumeDraftStore } from '@/store/useResumeDraftStore';
 import { useSettingStore } from '@/store/useSettingStore';
@@ -98,6 +98,26 @@ export default function AiChatShell({
   const [sessionId, setSessionId] = useState(() => nanoid());
   const sessionIdRef = useRef(sessionId);
   sessionIdRef.current = sessionId;
+  // Single source of truth for the in-flight run: the AbortController that stops it
+  // (so close / new-chat / unmount halts the backend stream instead of orphaning a
+  // run that keeps spending the user's BYOK tokens), plus a generation counter so a
+  // superseded run's lingering async callbacks early-return instead of writing into
+  // the new session (design P0 · CC4 / LC3).
+  const controllerRef = useRef<AbortController | null>(null);
+  const runGenRef = useRef(0);
+  // True once this session opened a persisted chat thread (create / general), so we
+  // only fire the reclaim DELETE when there's actually a thread to delete.
+  const sessionUsedRef = useRef(false);
+  // On unmount (modal close / route back): abort the in-flight run, invalidate its
+  // callbacks, and reclaim the backend session thread (ephemeral-data lifecycle).
+  useEffect(
+    () => () => {
+      runGenRef.current += 1;
+      controllerRef.current?.abort();
+      if (sessionUsedRef.current) void endSessionThread(sessionIdRef.current);
+    },
+    []
+  );
   const setResumeDraft = useResumeDraftStore((s) => s.setResumeDraft);
   // BYOK: each user's AI session is initialized with their own LLM config
   // (key / baseUrl / model) — the backend has no server-side key (design §3.11).
@@ -216,11 +236,17 @@ export default function AiChatShell({
         setAwaitingReply(false);
       };
 
+      // Supersede any prior in-flight run: abort it and bump the generation so its
+      // lingering callbacks early-return instead of writing into this run's session.
+      controllerRef.current?.abort();
+      const controller = new AbortController();
+      controllerRef.current = controller;
+      const myGen = ++runGenRef.current;
+      const isCurrent = () => myGen === runGenRef.current;
+
       setRunning(true);
       setIsAiJobRunning(true);
       setAwaitingReply(true);
-
-      const controller = new AbortController();
 
       let acc = '';
       // The initial stream ends when the agent pauses for approval; track it so the
@@ -228,6 +254,8 @@ export default function AiChatShell({
       let pausedForApproval = false;
       try {
         for await (const ev of makeGen(controller.signal)) {
+          // A newer run (or unmount) superseded this one — stop touching state.
+          if (!isCurrent()) return;
           if (ev.type === 'message_chunk' && ev.content) {
             // A subagent's raw tokens (e.g. translation JSON / its reasoning) stay out
             // of the chat — its progress shows on its own todolist card and its result
@@ -429,6 +457,11 @@ export default function AiChatShell({
           setMessages((prev) => prev.map((m) => (m.id === aiId ? { ...m, status: 'done' } : m)));
         }
       } catch (err) {
+        // Aborted (user stopped / closed / reset / unmounted) or superseded by a
+        // newer run — not a failure, so no error bubble or toast.
+        if (controller.signal.aborted || !isCurrent()) {
+          return;
+        }
         const msg = err instanceof Error ? err.message : '对话失败';
         ensureBubble();
         setMessages((prev) =>
@@ -436,34 +469,36 @@ export default function AiChatShell({
         );
         toast.error(msg);
       } finally {
-        markReadActivityDone(); // resolve any read line still spinning
-        // The review todolist is normally finalized by resume_analysis; if the
-        // flow instead ended on an error/abort while it was live, stop its
-        // spinners so it doesn't hang mid-step.
-        // Finalize any still-live plan card — the main one AND an active subagent's —
-        // so neither hangs on a spinner if the stream ends/errors mid-step.
-        activeSubagentRef.current = null;
-        for (const ref of [planCardRef, subagentPlanCardRef]) {
-          if (!ref.current) continue;
-          const planId = ref.current;
-          ref.current = null;
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === planId
-                ? {
-                    ...m,
-                    status: 'done',
-                    todos: m.todos?.map((t) =>
-                      t.status === 'in_progress' ? { ...t, status: 'pending' } : t
-                    ),
-                  }
-                : m
-            )
-          );
+        // Only the current run cleans up shared UI state — a superseded/unmounted run
+        // must not flip the new run's spinners off or write into its thread.
+        if (isCurrent()) {
+          markReadActivityDone(); // resolve any read line still spinning
+          // Finalize any still-live plan card — the main one AND an active subagent's —
+          // so neither hangs on a spinner if the stream ends/errors mid-step.
+          activeSubagentRef.current = null;
+          for (const ref of [planCardRef, subagentPlanCardRef]) {
+            if (!ref.current) continue;
+            const planId = ref.current;
+            ref.current = null;
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === planId
+                  ? {
+                      ...m,
+                      status: 'done',
+                      todos: m.todos?.map((t) =>
+                        t.status === 'in_progress' ? { ...t, status: 'pending' } : t
+                      ),
+                    }
+                  : m
+              )
+            );
+          }
+          setRunning(false);
+          setIsAiJobRunning(false);
+          setAwaitingReply(false);
+          controllerRef.current = null;
         }
-        setRunning(false);
-        setIsAiJobRunning(false);
-        setAwaitingReply(false);
       }
     },
     [addMessage, markReadActivityDone, setApprovalReadState, setResumeDraft, setIsAiJobRunning]
@@ -482,7 +517,9 @@ export default function AiChatShell({
         streamChat({
           messages: [{ role: 'user', content: SKILLS.analyze.buildIntent({}) }],
           mode: 'analyze',
-          sessionId: sessionIdRef.current,
+          // No sessionId: analyze is a one-shot transform — it runs threadless so the
+          // backend skips the checkpointer (no write amplification / no cross-mode
+          // context bleed, CC1). sessionId is reserved for the create/general chat.
           resumeId: resumeData.id,
           config: { apiKey, baseUrl, modelName: model, maxTokens },
           signal,
@@ -507,7 +544,8 @@ export default function AiChatShell({
         streamChat({
           messages: [{ role: 'user', content: message }],
           mode: kind,
-          sessionId: sessionIdRef.current,
+          // No sessionId: optimize / translate are one-shot transforms → threadless
+          // (backend skips the checkpointer, CC1 / BP2). sessionId is for chat only.
           resumeId: resumeData.id,
           config: { apiKey, baseUrl, modelName: model, maxTokens },
           signal,
@@ -541,6 +579,7 @@ export default function AiChatShell({
   const runChat = useCallback(
     (history: { role: 'user' | 'assistant'; content: string }[], mode: 'create' | 'general') => {
       skillBatchRunRef.current = null; // not a whole-resume skill batch run
+      sessionUsedRef.current = true; // a persisted chat thread now exists → reclaim on end
       return consumeStream((signal) =>
         streamChat({
           messages: history,
@@ -688,6 +727,10 @@ export default function AiChatShell({
   }, [onApplySections, resumeData.sections, addAssistant]);
 
   const resetSession = useCallback(() => {
+    runGenRef.current += 1; // invalidate the in-flight run's lingering callbacks
+    controllerRef.current?.abort(); // stop the old thread's backend stream
+    if (sessionUsedRef.current) void endSessionThread(sessionIdRef.current); // reclaim old thread
+    sessionUsedRef.current = false;
     setMessages([]);
     setStarted(false);
     setParamSkill(null);
@@ -699,6 +742,24 @@ export default function AiChatShell({
     setSessionId(nanoid()); // new conversation → new thread (don't continue the old)
     setDraftReady(null);
   }, []);
+
+  const stopRun = useCallback(() => {
+    controllerRef.current?.abort();
+  }, []);
+
+  const handleClose = useCallback(() => {
+    // Closing mid-run aborts the backend stream (no orphaned BYOK token burn); the
+    // confirm just guards against losing an in-flight job to a stray click.
+    if (
+      running &&
+      typeof window !== 'undefined' &&
+      !window.confirm('AI 正在生成，关闭将停止本次生成。确定关闭？')
+    ) {
+      return;
+    }
+    controllerRef.current?.abort();
+    onClose();
+  }, [running, onClose]);
 
   const applyDraft = useCallback(() => {
     if (!draftReady) return;
@@ -721,6 +782,20 @@ export default function AiChatShell({
             >
               <Check size={12} />
               应用到简历
+            </button>
+          </div>
+        </div>
+      )}
+      {running && (
+        <div className="px-4 pb-2">
+          <div className="max-w-3xl mx-auto flex justify-center">
+            <button
+              type="button"
+              onClick={stopRun}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-700 bg-neutral-900/80 px-3 py-1.5 text-xs text-neutral-300 hover:text-white hover:border-neutral-600 transition-colors cursor-pointer"
+            >
+              <CircleStop size={13} />
+              停止生成
             </button>
           </div>
         </div>
@@ -767,7 +842,7 @@ export default function AiChatShell({
           </button>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="关闭"
             className="hover:text-white transition-colors cursor-pointer active:scale-90"
           >
