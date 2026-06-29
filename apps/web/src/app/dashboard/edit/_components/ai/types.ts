@@ -59,7 +59,13 @@ export interface AiSkill {
   doneSummary: string;
 }
 
-export type ChatRole = 'user' | 'assistant' | 'exec' | 'log' | 'approval' | 'activity';
+export type ChatRole = 'user' | 'assistant' | 'exec' | 'log' | 'approval' | 'activity' | 'plan';
+
+/** A single checklist item in a `plan` message — the live analyze todolist. */
+export interface PlanTodo {
+  content: string;
+  status: 'pending' | 'in_progress' | 'completed';
+}
 
 /**
  * A human-in-the-loop tool-approval prompt the agent paused on. With native HITL
@@ -74,6 +80,12 @@ export interface ApprovalRequest {
   /** resource class being requested, e.g. 'resume' (drives the read narration). */
   scope: string;
   status: 'pending' | 'approved' | 'denied';
+  /**
+   * For a read_resume approval: how far the read has progressed once approved.
+   * Lets the card show 已允许读取 → 正在读取简历… → 已读取简历 in one place instead of
+   * spawning a separate activity line.
+   */
+  readState?: 'reading' | 'read';
 }
 
 export interface ChatMessage {
@@ -89,6 +101,10 @@ export interface ChatMessage {
   streamed?: boolean;
   /** present when role === 'approval' — the pending tool-approval prompt */
   approval?: ApprovalRequest;
+  /** present when role === 'plan' — the live review checklist (analyze / subagent todolist) */
+  todos?: PlanTodo[];
+  /** present when role === 'plan' and the todolist belongs to a subagent (the `task` tool) */
+  subagentName?: string;
 }
 
 export type CanvasStatus = 'idle' | 'streaming' | 'ready' | 'applied';

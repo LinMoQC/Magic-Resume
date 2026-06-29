@@ -2,9 +2,11 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Bot, Loader2, Check, Eye, EyeOff, ShieldQuestion, X } from 'lucide-react';
+import { Loader2, Check, Eye, EyeOff, ShieldQuestion, X, ListChecks, Circle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { SKILLS } from '../skills/registry';
 import Markdown from './Markdown';
+import PolarisMark, { POLARIS_STAR_D } from '../PolarisMark';
 import type { ApprovalRequest, ChatMessage, SkillId } from '../types';
 
 type ApprovalDecision = (msgId: string, approved: boolean) => void;
@@ -18,7 +20,7 @@ function Avatar({ show }: { show: boolean }) {
   if (!show) return <div className="w-7 shrink-0" aria-hidden />;
   return (
     <div className="w-7 h-7 rounded-full bg-sky-500/10 border border-sky-500/20 shrink-0 flex items-center justify-center text-sky-400">
-      <Bot size={15} />
+      <PolarisMark size={15} />
     </div>
   );
 }
@@ -38,14 +40,21 @@ function ThinkingIndicator({ showAvatar }: { showAvatar: boolean }) {
       className="flex gap-3 items-start"
     >
       <Avatar show={showAvatar} />
-      <div className="flex items-center gap-1 pt-2.5">
+      {/* Polaris-themed loader: three north stars twinkling in sequence. */}
+      <div className="flex items-center gap-1.5 pt-2 text-sky-400/80">
         {[0, 1, 2].map((i) => (
-          <motion.span
+          <motion.svg
             key={i}
-            className="w-1.5 h-1.5 rounded-full bg-sky-400/70"
-            animate={{ opacity: [0.3, 1, 0.3], y: [0, -2, 0] }}
-            transition={{ duration: 0.9, repeat: Infinity, delay: i * 0.15, ease: 'easeInOut' }}
-          />
+            width={12}
+            height={12}
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+            animate={{ opacity: [0.2, 1, 0.2], scale: [0.7, 1, 0.7], rotate: [-12, 12, -12] }}
+            transition={{ duration: 1.3, repeat: Infinity, delay: i * 0.2, ease: 'easeInOut' }}
+          >
+            <path d={POLARIS_STAR_D} fill="currentColor" />
+          </motion.svg>
         ))}
       </div>
     </motion.div>
@@ -112,7 +121,7 @@ function ExecCard({
         {clickable && (
           <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-sky-400 bg-sky-500/10 group-hover:bg-sky-500/20 rounded-full px-2.5 py-1 shrink-0 transition-colors">
             {isCanvasOpen ? <EyeOff size={12} /> : <Eye size={12} />}
-            {isCanvasOpen ? '收起画布' : '查看画布'}
+            {isCanvasOpen ? '收起' : '查看'}
           </span>
         )}
       </div>
@@ -133,6 +142,102 @@ function ExecCard({
       ) : (
         <div className="min-w-[260px] max-w-sm rounded-2xl bg-neutral-900 px-4 py-3.5">{body}</div>
       )}
+    </div>
+  );
+}
+
+/**
+ * A live review checklist (the analyze todolist). The agent ticks each step —
+ * 读取简历 → 每个角色评审 → 汇总评分 — as its backend progress events land, so the
+ * card is the narration of "分别 review" instead of one opaque "完成" badge. Once
+ * done it doubles as the score-canvas toggle (the old exec-card affordance).
+ */
+function PlanCard({
+  message,
+  showAvatar,
+  onToggleCanvas,
+  isCanvasOpen,
+}: {
+  message: ChatMessage;
+  showAvatar: boolean;
+  onToggleCanvas: (id: SkillId) => void;
+  isCanvasOpen: boolean;
+}) {
+  const todos = message.todos ?? [];
+  const total = todos.length;
+  const done = todos.filter((t) => t.status === 'completed').length;
+  const allDone = total > 0 && done === total;
+
+  return (
+    <div className="flex gap-3 items-start">
+      <Avatar show={showAvatar} />
+      <div className="min-w-[280px] max-w-sm rounded-2xl bg-neutral-900 px-4 py-3.5">
+        <div className="flex items-center gap-2.5">
+          <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0 bg-emerald-500/[0.12]">
+            <ListChecks size={14} className="text-emerald-400" />
+          </div>
+          {message.subagentName ? (
+            <span className="text-[13px] font-medium text-white">
+              <span className="text-sky-400">子代理</span>
+              {message.subagentName !== '子代理' && message.subagentName !== 'general-purpose'
+                ? ` · ${message.subagentName}`
+                : ''}
+            </span>
+          ) : (
+            <span className="text-[13px] font-medium text-white">{message.content || '任务清单'}</span>
+          )}
+          {message.status === 'done' || allDone ? (
+            <span className="ml-auto inline-flex items-center gap-1 text-[11px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+              <Check size={12} />
+              完成
+            </span>
+          ) : total > 0 ? (
+            <span className="ml-auto text-[11px] text-neutral-500 tabular-nums">{done}/{total}</span>
+          ) : (
+            <span className="ml-auto inline-flex items-center gap-1 text-[11px] text-neutral-500">
+              <Loader2 size={11} className="animate-spin" />
+              工作中
+            </span>
+          )}
+        </div>
+        <ul className="mt-3 flex flex-col gap-2">
+          {todos.map((todo, i) => (
+            <li key={`${todo.content}-${i}`} className="flex items-center gap-2.5 text-xs">
+              {todo.status === 'completed' ? (
+                <Check size={13} className="shrink-0 text-emerald-400" />
+              ) : todo.status === 'in_progress' ? (
+                <Loader2 size={13} className="shrink-0 animate-spin text-sky-400" />
+              ) : (
+                <Circle size={12} className="shrink-0 text-neutral-600" />
+              )}
+              <span
+                className={cn(
+                  'truncate',
+                  todo.status === 'completed'
+                    ? 'text-neutral-400'
+                    : todo.status === 'in_progress'
+                      ? 'text-neutral-100'
+                      : 'text-neutral-500'
+                )}
+              >
+                {todo.content}
+              </span>
+              {/* On the last row (汇总竞争力评分), the canvas toggle floats right —
+                  bottom-right of the card, sharing the line with that step. */}
+              {allDone && i === total - 1 && (
+                <button
+                  type="button"
+                  onClick={() => onToggleCanvas(message.skillId ?? 'analyze')}
+                  className="ml-auto shrink-0 inline-flex items-center gap-1.5 text-[11px] font-medium text-sky-400 bg-sky-500/10 hover:bg-sky-500/20 rounded-full px-2.5 py-1 transition-colors cursor-pointer"
+                >
+                  {isCanvasOpen ? <EyeOff size={12} /> : <Eye size={12} />}
+                  {isCanvasOpen ? '收起' : '查看'}
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }
@@ -222,15 +327,25 @@ function ApprovalCard({
           </div>
         ) : (
           <div className="mt-2 inline-flex items-center gap-1.5 text-[11px] text-neutral-500">
-            {a.status === 'approved' ? (
-              <>
-                <Check size={11} className="text-emerald-500/80" />
-                已允许读取
-              </>
-            ) : (
+            {a.status === 'denied' ? (
               <>
                 <X size={11} />
                 已拒绝
+              </>
+            ) : a.readState === 'read' ? (
+              <>
+                <Check size={11} className="text-emerald-500/80" />
+                已读取简历
+              </>
+            ) : a.readState === 'reading' ? (
+              <>
+                <Loader2 size={11} className="animate-spin text-neutral-500" />
+                正在读取简历…
+              </>
+            ) : (
+              <>
+                <Check size={11} className="text-emerald-500/80" />
+                已允许读取
               </>
             )}
           </div>
@@ -270,9 +385,17 @@ function LogLine({
 
 function Bubble({ message, showAvatar }: { message: ChatMessage; showAvatar: boolean }) {
   if (message.role === 'user') {
+    const skill = message.skillId ? SKILLS[message.skillId] : null;
+    const SkillIcon = skill?.icon;
     return (
       <div className="flex justify-end">
         <div className="max-w-[80%] rounded-2xl bg-neutral-800 text-neutral-100 px-4 py-2.5 text-sm leading-relaxed">
+          {skill && (
+            <span className="inline-flex items-center gap-1 align-middle mr-2 rounded-md bg-neutral-700/70 px-1.5 py-0.5">
+              {SkillIcon && <SkillIcon size={11} className={skill.accent} />}
+              <span className={cn('text-[11px] font-medium', skill.accent)}>{skill.name}</span>
+            </span>
+          )}
           {message.content}
         </div>
       </div>
@@ -333,10 +456,17 @@ export default function ChatThread({ messages, onToggleCanvas, openCanvasSkillId
   });
 
   return (
-    <div className="flex-1 overflow-y-auto custom-scrollbar px-4 py-6">
+    <div className="flex-1 overflow-y-auto scrollbar-hide px-4 py-6">
       <div className="max-w-3xl mx-auto flex flex-col gap-5">
+        {/* New messages rise + fade in (Claude-desktop style 由下到上); keyed by id
+            so only freshly-mounted turns animate, never re-renders of existing ones. */}
         {messages.map((m, i) => (
-          <motion.div key={m.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
+          <motion.div
+            key={m.id}
+            initial={{ opacity: 0, y: 16, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          >
             {m.role === 'exec' ? (
               <ExecCard
                 message={m}
@@ -350,6 +480,13 @@ export default function ChatThread({ messages, onToggleCanvas, openCanvasSkillId
               <ActivityLine message={m} />
             ) : m.role === 'approval' ? (
               <ApprovalCard message={m} onApproval={onApproval} showAvatar={showAvatarFor[i]} />
+            ) : m.role === 'plan' ? (
+              <PlanCard
+                message={m}
+                showAvatar={showAvatarFor[i]}
+                onToggleCanvas={onToggleCanvas}
+                isCanvasOpen={openCanvasSkillId === (m.skillId ?? 'analyze')}
+              />
             ) : (
               <Bubble message={m} showAvatar={showAvatarFor[i]} />
             )}

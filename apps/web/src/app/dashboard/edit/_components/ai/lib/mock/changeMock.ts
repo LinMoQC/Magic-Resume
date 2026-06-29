@@ -299,80 +299,11 @@ export function createInsertChange(sectionKey: string, title: string, seed = 0):
 }
 
 // ----------------------------------------------------------------------------
-// P3 · whole-resume skill → a batch of in-place pending changes
-// ----------------------------------------------------------------------------
-
-const BATCH_FIELD_KEYS = ['summary', 'description'];
-const BATCH_CAP = 5;
-const OPTIMIZE_CYCLE: QuickActionId[] = ['quantify', 'verb', 'evidence'];
-
-export type BatchKind = 'optimize' | 'translate';
-
-/**
- * Turn a whole-resume skill run into a set of reviewable in-place changes
- * (design §F / §8.4) instead of a separate Diff view. Walks the editable
- * rich-text fields and proposes one change each, up to a cap.
- */
-export function createBatchChanges(sections: Section, kind: BatchKind, lang?: string): PendingChange[] {
-  const out: PendingChange[] = [];
-  for (const sectionKey of Object.keys(sections)) {
-    const items = sections[sectionKey];
-    if (!Array.isArray(items)) continue;
-    let indexInSection = 0;
-    for (const item of items) {
-      if (out.length >= BATCH_CAP) return out;
-      if (item.visible === false) continue;
-      indexInSection += 1;
-      const fieldKey = BATCH_FIELD_KEYS.find(
-        (k) => typeof item[k] === 'string' && (item[k] as string).trim().length > 0
-      );
-      if (!fieldKey) continue;
-      const html = String(item[fieldKey]);
-      const target: EditableTarget = {
-        sectionKey,
-        itemId: String(item.id),
-        fieldKey,
-        kind: 'html',
-        label: `${sectionTitle(sectionKey)} · 第 ${indexInSection} 条`,
-      };
-      const seed = out.length;
-      if (kind === 'translate') {
-        const after = wrapLike(html, translateMock(stripHtml(html), lang, seed));
-        out.push({
-          id: nanoid(),
-          target,
-          before: html,
-          after,
-          rationale: `翻译为 ${lang || 'English'}`,
-          rationaleDetail: RATIONALE_DETAIL.translate,
-          action: 'translate',
-          lang,
-          seed,
-          status: 'pending',
-        });
-      } else {
-        const action = OPTIMIZE_CYCLE[seed % OPTIMIZE_CYCLE.length];
-        const { after, rationale } = generate(html, action, undefined, seed);
-        out.push({
-          id: nanoid(),
-          target,
-          before: html,
-          after,
-          rationale,
-          rationaleDetail: RATIONALE_DETAIL[action],
-          action,
-          seed,
-          status: 'pending',
-        });
-      }
-    }
-  }
-  return out;
-}
-
-// ----------------------------------------------------------------------------
 // P4 · proactive coach — intelligence anchored to specific canvas items (§11 P4)
 // ----------------------------------------------------------------------------
+
+/** Rich-text fields the coach scans for weak (unquantified) bullets. */
+const COACH_FIELD_KEYS = ['summary', 'description'];
 
 /**
  * Scan the resume for the weakest bullets (here: those lacking any quantification)
@@ -391,7 +322,7 @@ export function createCoachChanges(sections: Section): PendingChange[] {
       if (out.length >= 4) return out;
       if (item.visible === false) continue;
       indexInSection += 1;
-      const fieldKey = BATCH_FIELD_KEYS.find(
+      const fieldKey = COACH_FIELD_KEYS.find(
         (k) => typeof item[k] === 'string' && (item[k] as string).trim().length > 0
       );
       if (!fieldKey) continue;

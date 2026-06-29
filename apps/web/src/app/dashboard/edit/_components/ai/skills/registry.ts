@@ -19,7 +19,7 @@ export const SKILLS: Record<SkillId, AiSkill> = {
     surface: 'inline',
     isChat: true,
     params: [],
-    buildIntent: () => '引导创建',
+    buildIntent: () => '我想从零创建一份简历，带我开始',
     doneSummary: '',
   },
   optimize: {
@@ -44,7 +44,7 @@ export const SKILLS: Record<SkillId, AiSkill> = {
       { id: 'title', label: '岗位', kind: 'text', placeholder: '例如 高级产品经理', defaultValue: '高级产品经理' },
     ],
     cta: '开始优化',
-    canvas: { views: ['preview', 'diff', 'json'], defaultView: 'preview' },
+    canvas: { views: ['preview', 'json'], defaultView: 'preview' },
     buildIntent: (p) => `智能优化 · ${p.company || '—'} · ${p.title || '—'}`,
     doneSummary: '已改写 4 个模块',
   },

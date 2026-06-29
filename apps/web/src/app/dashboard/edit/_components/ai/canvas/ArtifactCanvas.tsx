@@ -1,81 +1,24 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Check, CircleCheck, FileDown, ArrowUpRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Resume, Section } from '@/types/frontend/resume';
+import { Resume } from '@/types/frontend/resume';
 import ResumePreview from '../../preview/ResumePreview';
 import { SKILLS } from '../skills/registry';
-import type { CanvasState, CanvasView } from '../types';
+import type { CanvasState } from '../types';
 import type { MultiPersonaResumeAnalysis, PersonaAnalysis } from '@/types/agent/multi-persona';
-
-const VIEW_LABEL: Record<CanvasView, string> = {
-  preview: '预览',
-  diff: 'Diff',
-  json: 'JSON',
-  score: '评分',
-};
 
 type ArtifactCanvasProps = {
   state: CanvasState;
   resumeData: Resume;
   templateId: string;
   analysis: MultiPersonaResumeAnalysis | null;
-  onSetView: (view: CanvasView) => void;
   onApply: () => void;
   onDiscard: () => void;
   onExport: () => void;
 };
-
-const DIFF_STYLE_DEL =
-  'text-decoration:line-through;color:#dc2626;background:#fef2f2;border-radius:3px;padding:0 3px;';
-const DIFF_STYLE_INS =
-  'text-decoration:none;color:#15803d;background:#f0fdf4;border-radius:3px;padding:0 3px;';
-
-const IMPROVED = [
-  '主导核心模块重构，使首屏加载时间缩短 40%，覆盖日活 50w+ 用户',
-  '基于 React 18 + TS 搭建组件库，复用率达 70%，迭代效率提升 3 倍',
-  '通过虚拟列表与懒加载将长列表渲染耗时降低 60%',
-  '推动接口聚合与缓存策略，P95 响应从 800ms 降至 220ms',
-];
-
-function injectDiff(html: string, improved: string): string {
-  const liRegex = /<li[^>]*>([\s\S]*?)<\/li>/i;
-  if (liRegex.test(html)) {
-    return html.replace(
-      liRegex,
-      (_m, inner) =>
-        `<li><del style="${DIFF_STYLE_DEL}">${inner}</del> <ins style="${DIFF_STYLE_INS}">${improved}</ins></li>`
-    );
-  }
-  return `<del style="${DIFF_STYLE_DEL}">${html}</del> <ins style="${DIFF_STYLE_INS}">${improved}</ins>`;
-}
-
-/**
- * Mock: inject inline diff markup into the real resume's HTML descriptions so the
- * changes render in-place on the actual rendered resume. Real wiring would map an
- * AI-produced before/after onto these same fields.
- */
-function buildDiffSections(sections: Section): Section {
-  const clone: Section = JSON.parse(JSON.stringify(sections));
-  let n = 0;
-  for (const key of Object.keys(clone)) {
-    const items = clone[key];
-    if (!Array.isArray(items)) continue;
-    for (const item of items) {
-      if (n >= IMPROVED.length) return clone;
-      const fieldKey = Object.keys(item).find(
-        (k) => typeof item[k] === 'string' && /<li|<p|<ul|<ol/i.test(item[k] as string)
-      );
-      if (fieldKey) {
-        item[fieldKey] = injectDiff(item[fieldKey] as string, IMPROVED[n]);
-        n += 1;
-      }
-    }
-  }
-  return clone;
-}
 
 const PERSONA_COLORS = { peer: '#38bdf8', leader: '#a78bfa', hrbp: '#34d399' };
 
@@ -243,15 +186,12 @@ export default function ArtifactCanvas({
   resumeData,
   templateId,
   analysis,
-  onSetView,
   onApply,
   onDiscard,
   onExport,
 }: ArtifactCanvasProps) {
   const { open, skillId, view, status } = state;
   const skill = skillId ? SKILLS[skillId] : null;
-  const views = skill?.canvas?.views ?? [];
-  const diffSections = useMemo(() => buildDiffSections(resumeData.sections), [resumeData.sections]);
 
   return (
     <div
@@ -262,32 +202,13 @@ export default function ArtifactCanvas({
     >
       {open && skill && (
         <>
-          <div className="flex items-center gap-3 px-5 py-3 shrink-0">
-            <span className="text-sm font-medium text-white whitespace-nowrap">简历画布</span>
-            <div className="ml-auto inline-flex rounded-lg bg-neutral-900 p-0.5">
-              {views.map((v) => (
-                <button
-                  key={v}
-                  type="button"
-                  onClick={() => onSetView(v)}
-                  className={cn(
-                    'text-xs px-3 py-1 rounded-md transition-colors cursor-pointer',
-                    v === view ? 'bg-neutral-800 text-white' : 'text-neutral-500 hover:text-neutral-300'
-                  )}
-                >
-                  {VIEW_LABEL[v]}
-                </button>
-              ))}
-            </div>
-          </div>
-
           <div className="flex-1 overflow-y-auto custom-scrollbar p-5 flex flex-col">
-            {(view === 'preview' || view === 'diff') && (
+            {view === 'preview' && (
               <div className="bg-white/95 rounded-lg p-2 flex justify-center overflow-hidden">
                 <div style={{ transform: 'scale(0.5)', transformOrigin: 'top center', minWidth: '600px' }}>
                   <ResumePreview
                     info={resumeData.info}
-                    sections={view === 'diff' ? diffSections : resumeData.sections}
+                    sections={resumeData.sections}
                     sectionOrder={resumeData.sectionOrder.map((s) => s.key)}
                     templateId={templateId}
                   />

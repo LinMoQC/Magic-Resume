@@ -2,23 +2,28 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Slash, ArrowUp } from 'lucide-react';
+import { ArrowUp, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { SKILL_LIST } from '../skills/registry';
+import { SKILLS, SKILL_LIST } from '../skills/registry';
 import type { SkillId } from '../types';
 
 type ComposerProps = {
-  onPickSkill: (id: SkillId) => void;
+  /** Run a skill picked via `/`, carrying whatever the user typed after the chip. */
+  onRunSkill: (id: SkillId, text: string) => void;
   onSend: (text: string) => void;
   disabled?: boolean;
 };
 
-export default function Composer({ onPickSkill, onSend, disabled }: ComposerProps) {
+export default function Composer({ onRunSkill, onSend, disabled }: ComposerProps) {
   const [value, setValue] = useState('');
   const [highlight, setHighlight] = useState(0);
+  // The skill picked from `/`: shown as a highlighted chip in the input. Selecting
+  // does NOT launch — the user keeps typing context, then Enter runs it (Claude-style).
+  const [activeSkill, setActiveSkill] = useState<SkillId | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const slashActive = value.startsWith('/');
+  // `/` only opens the menu when no skill chip is active (one skill at a time).
+  const slashActive = !activeSkill && value.startsWith('/');
   const query = slashActive ? value.slice(1).trim().toLowerCase() : '';
   const matches = slashActive
     ? SKILL_LIST.filter(
@@ -29,20 +34,31 @@ export default function Composer({ onPickSkill, onSend, disabled }: ComposerProp
       )
     : [];
   const showSlash = slashActive && matches.length > 0;
+  const activeMeta = activeSkill ? SKILLS[activeSkill] : null;
+  const ActiveIcon = activeMeta?.icon;
+  const canSend = !!activeSkill || !!value.trim();
 
   useEffect(() => {
     setHighlight(0);
   }, [value]);
 
-  const pickSkill = (id: SkillId) => {
+  // Pick a skill → drop it into the input as a chip and keep the cursor for more typing.
+  const chooseSkill = (id: SkillId) => {
+    setActiveSkill(id);
     setValue('');
-    onPickSkill(id);
+    requestAnimationFrame(() => inputRef.current?.focus());
   };
 
   const submit = () => {
     if (slashActive) {
       const chosen = matches[highlight];
-      if (chosen) pickSkill(chosen.id);
+      if (chosen) chooseSkill(chosen.id);
+      return;
+    }
+    if (activeSkill) {
+      onRunSkill(activeSkill, value.trim());
+      setActiveSkill(null);
+      setValue('');
       return;
     }
     const text = value.trim();
@@ -69,6 +85,12 @@ export default function Composer({ onPickSkill, onSend, disabled }: ComposerProp
         return;
       }
     }
+    // Backspace on an empty input pops the skill chip (like deleting a token).
+    if (e.key === 'Backspace' && activeSkill && value === '') {
+      e.preventDefault();
+      setActiveSkill(null);
+      return;
+    }
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       submit();
@@ -81,74 +103,107 @@ export default function Composer({ onPickSkill, onSend, disabled }: ComposerProp
         <AnimatePresence>
           {showSlash && (
             <motion.div
-              initial={{ opacity: 0, y: 6, scale: 0.98 }}
+              initial={{ opacity: 0, y: 8, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 6, scale: 0.98 }}
-              transition={{ duration: 0.14 }}
-              className="absolute left-0 right-0 bottom-[calc(100%+8px)] rounded-2xl bg-neutral-800 p-1.5 z-20 shadow-2xl shadow-black/50 origin-bottom"
+              exit={{ opacity: 0, y: 8, scale: 0.98 }}
+              transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
+              className="absolute left-0 right-0 bottom-[calc(100%+10px)] rounded-2xl bg-neutral-900/95 backdrop-blur-xl border border-neutral-800 p-2 z-20 shadow-2xl shadow-black/60 origin-bottom"
             >
+              <div className="px-2 pb-1.5 pt-0.5 text-[10px] font-medium uppercase tracking-wider text-neutral-600">
+                技能
+              </div>
               {matches.map((s, i) => {
                 const Icon = s.icon;
+                const active = i === highlight;
                 return (
                   <button
                     key={s.id}
                     type="button"
                     onMouseEnter={() => setHighlight(i)}
-                    onClick={() => pickSkill(s.id)}
+                    onClick={() => chooseSkill(s.id)}
                     className={cn(
-                      'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg transition-colors cursor-pointer text-left',
-                      i === highlight ? 'bg-neutral-700/70' : 'hover:bg-neutral-700/40'
+                      'w-full flex items-center gap-3 px-2 py-2 rounded-xl transition-colors cursor-pointer text-left',
+                      active ? 'bg-neutral-800' : 'hover:bg-neutral-800/50'
                     )}
                   >
-                    <Icon size={15} className={s.accent} />
-                    <span className="text-[13px] text-neutral-100">{s.name}</span>
-                    <span className="ml-auto text-[11px] text-neutral-500">{s.tagline}</span>
+                    <span
+                      className="flex items-center justify-center w-8 h-8 rounded-lg shrink-0"
+                      style={{ backgroundColor: `${s.accentHex}1f` }}
+                    >
+                      <Icon size={16} className={s.accent} />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[13px] font-medium text-neutral-100 truncate">{s.name}</span>
+                      <span className="block text-[11px] text-neutral-500 truncate">{s.tagline}</span>
+                    </span>
+                    <kbd
+                      className={cn(
+                        'shrink-0 rounded bg-neutral-700/70 px-1.5 py-0.5 font-mono text-[10px] leading-none text-sky-300 transition-opacity',
+                        active ? 'opacity-100' : 'opacity-0'
+                      )}
+                    >
+                      ↵
+                    </kbd>
                   </button>
                 );
               })}
-              <div className="flex items-center gap-3 px-2.5 pt-2 pb-1 text-[10px] text-neutral-600">
-                <span>↑↓ 切换</span>
-                <span>↵ 选择</span>
-                <span>esc 退出</span>
+              <div className="mt-1.5 flex items-center gap-3 px-2 pt-2 text-[10px] text-neutral-600 border-t border-neutral-800/80">
+                <span className="inline-flex items-center gap-1">
+                  <kbd className="rounded bg-neutral-800 px-1 py-0.5 font-mono text-neutral-400">↑↓</kbd>
+                  切换
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <kbd className="rounded bg-neutral-800 px-1 py-0.5 font-mono text-neutral-400">↵</kbd>
+                  选择
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <kbd className="rounded bg-neutral-800 px-1 py-0.5 font-mono text-neutral-400">esc</kbd>
+                  退出
+                </span>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        <div
-          className={cn(
-            'flex items-center gap-2.5 rounded-2xl bg-neutral-800/60 px-3.5 py-2.5 transition-colors focus-within:bg-neutral-800',
-            slashActive && 'ring-1 ring-sky-500/40'
+        <div className="flex items-center gap-2 rounded-2xl bg-neutral-800/60 px-3.5 py-2.5 transition-colors focus-within:bg-neutral-800">
+          {activeMeta && (
+            <motion.span
+              layout
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-neutral-700/60 pl-2 pr-1 py-1 shrink-0"
+            >
+              {ActiveIcon && <ActiveIcon size={13} className={activeMeta.accent} />}
+              <span className={cn('text-[12px] font-medium', activeMeta.accent)}>{activeMeta.name}</span>
+              <button
+                type="button"
+                onClick={() => setActiveSkill(null)}
+                aria-label="移除技能"
+                className="ml-0.5 text-neutral-500 hover:text-neutral-200 transition-colors cursor-pointer"
+              >
+                <X size={12} />
+              </button>
+            </motion.span>
           )}
-        >
-          <button
-            type="button"
-            aria-label="技能菜单"
-            onClick={() => {
-              setValue('/');
-              inputRef.current?.focus();
-            }}
-            className={cn(
-              'transition-colors cursor-pointer shrink-0',
-              slashActive ? 'text-sky-400' : 'text-neutral-500 hover:text-sky-400'
-            )}
-          >
-            <Slash size={17} />
-          </button>
           <input
             ref={inputRef}
             value={value}
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={onKeyDown}
             disabled={disabled}
-            placeholder="描述需求，或输入 / 调用技能…"
+            placeholder={
+              activeMeta
+                ? `补充说明（可选），回车运行「${activeMeta.name}」…`
+                : '描述需求，或输入 / 调用技能…'
+            }
             className="flex-1 bg-transparent text-sm text-neutral-100 placeholder:text-neutral-600 focus:outline-none disabled:opacity-50"
           />
           <button
             type="button"
             aria-label="发送"
             onClick={submit}
-            disabled={disabled || !value.trim()}
+            disabled={disabled || !canSend}
             className="w-8 h-8 rounded-full bg-sky-500 hover:bg-sky-600 disabled:opacity-40 disabled:hover:bg-sky-500 text-white flex items-center justify-center transition-colors cursor-pointer shrink-0"
           >
             <ArrowUp size={16} />

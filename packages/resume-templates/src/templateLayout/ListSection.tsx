@@ -55,12 +55,30 @@ export const ListSection = React.memo(function ListSection({ title, items, field
       <ul className={`list-none ${containerClassName || "grid gap-x-6 gap-y-1"}`}>
         {items.map((item, idx) => {
           const summary = getFieldEntry(item, fieldMap.summary);
+          const itemName = getFieldEntry(item, fieldMap.itemName);
           const itemId = item.id != null ? String(item.id) : null;
           return (
             <li className="space-y-2" key={itemId || idx}>
               <div>
+                {/* The item title is the only translatable/editable text for
+                    skills / languages / certificates — make it an editable anchor
+                    so AI batch changes (e.g. translation) can diff it in place.
+                    Falls back to plain text when the canvas isn't enabled. */}
                 <div className="font-bold">
-                  {getFieldValue(item, fieldMap.itemName)}
+                  {itemName && sectionKey && itemId ? (
+                    <Editable
+                      target={{
+                        sectionKey,
+                        itemId,
+                        fieldKey: itemName.key,
+                        kind: 'text',
+                        label: `${title} · 第 ${idx + 1} 条`,
+                      }}
+                      text={itemName.value}
+                    />
+                  ) : (
+                    getFieldValue(item, fieldMap.itemName)
+                  )}
                 </div>
                 {getFieldValue(item, fieldMap.itemDetail) && (
                   <div>{getFieldValue(item, fieldMap.itemDetail)}</div>

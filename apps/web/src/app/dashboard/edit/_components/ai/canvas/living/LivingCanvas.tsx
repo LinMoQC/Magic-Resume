@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { X, Lightbulb, ListChecks, Sparkles } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
+import { ListChecks } from 'lucide-react';
 import { InfoType, Resume, Section } from '@/types/frontend/resume';
 import {
   EditableCanvasProvider,
@@ -28,19 +28,23 @@ import {
   type SelectionActionId,
 } from '../../lib/changeModel';
 import {
-  createBatchChanges,
-  createCoachChanges,
   createInsertChange,
   createPendingChange,
   createSelectionChange,
   regeneratePendingChange,
-  type BatchKind,
 } from '../../lib/mock/changeMock';
+import { diffResumeToChanges, type BatchKind } from '../../lib/diffResume';
 
 const PAGE_WIDTH = 794;
 const SCALE = 0.82;
 
-export type BatchRequest = { kind: BatchKind; lang?: string; nonce: number };
+export type BatchRequest = {
+  kind: BatchKind;
+  lang?: string;
+  nonce: number;
+  /** The agent's proposed resume (from a `resume_update` event) to diff against current. */
+  proposedSections?: Section;
+};
 export type FocusRequest = { path: string; nonce: number };
 
 type LivingCanvasProps = {
@@ -49,7 +53,6 @@ type LivingCanvasProps = {
   onApplySections: (sections: Section) => void;
   onApplyInfo: (info: InfoType) => void;
   onLog: (text: string, resumePath?: string) => void;
-  onClose: () => void;
   batchRequest?: BatchRequest | null;
   focusRequest?: FocusRequest | null;
 };
@@ -63,7 +66,6 @@ export default function LivingCanvas({
   onApplySections,
   onApplyInfo,
   onLog,
-  onClose,
   batchRequest,
   focusRequest,
 }: LivingCanvasProps) {
@@ -75,7 +77,9 @@ export default function LivingCanvas({
   const [selection, setSelection] = useState<SelectionState | null>(null);
   const [sectionPopover, setSectionPopover] = useState<SectionPopoverState | null>(null);
   const [cursor, setCursor] = useState(0);
-  const [interacted, setInteracted] = useState(false);
+  // `interacted` tracked first user action to gate the (now-removed) hover hint;
+  // the value is no longer read, but the setter is kept harmless at call sites.
+  const [, setInteracted] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -363,32 +367,6 @@ export default function LivingCanvas({
     setPanelOpen(false);
   }, []);
 
-  // P4 · proactive coach — scan for weak spots and anchor suggestions onto them.
-  const runCoach = useCallback(() => {
-    const changes = createCoachChanges(sectionsRef.current).filter(
-      (c) => !pendingRef.current[pathOf(c.target)]
-    );
-    if (!changes.length) {
-      onLog('教练扫描完成：暂无明显可加强项');
-      return;
-    }
-    const entries = changes.map((c) => ({ path: pathOf(c.target), change: c }));
-    const paths = entries.map((e) => e.path);
-    setInteracted(true);
-    setProcessing((prev) => [...prev, ...paths.filter((p) => !prev.includes(p))]);
-    window.setTimeout(() => {
-      setProcessing((prev) => prev.filter((p) => !paths.includes(p)));
-      setPending((prev) => {
-        const next = { ...prev };
-        for (const { path, change } of entries) next[path] = change;
-        return next;
-      });
-      setOrder((prev) => [...prev, ...paths.filter((p) => !prev.includes(p))]);
-      setCursor(0);
-      onLog(`教练发现 ${changes.length} 处可加强`);
-    }, 1000);
-  }, [onLog]);
-
   const goTo = useCallback(
     (dir: 1 | -1) => {
       if (order.length === 0) return;
@@ -430,7 +408,13 @@ export default function LivingCanvas({
   useEffect(() => {
     if (!batchRequest || batchRequest.nonce === lastBatchNonce.current) return;
     lastBatchNonce.current = batchRequest.nonce;
-    const changes = createBatchChanges(sectionsRef.current, batchRequest.kind, batchRequest.lang);
+    if (!batchRequest.proposedSections) return;
+    const changes = diffResumeToChanges(
+      sectionsRef.current,
+      batchRequest.proposedSections,
+      batchRequest.kind,
+      batchRequest.lang
+    );
     if (!changes.length) return;
     const entries = changes.map((c) => ({ path: pathOf(c.target), change: c }));
     const paths = entries.map((e) => e.path);
@@ -520,7 +504,6 @@ export default function LivingCanvas({
   );
 
   const count = order.length;
-  const showCoach = !interacted && count === 0 && processing.length === 0;
 
   const changeRows = useMemo(
     () =>
@@ -546,39 +529,18 @@ export default function LivingCanvas({
 
   return (
     <div className="relative flex flex-col h-full min-w-0 bg-neutral-900/25">
-      <div className="flex items-center gap-3 px-5 py-3 shrink-0">
-        <span className="text-sm font-medium text-white whitespace-nowrap">简历画布</span>
-        <span className="text-[11px] text-neutral-500 truncate">指着任意一处，让 AI 就地帮你改</span>
-        <div className="ml-auto flex items-center gap-2">
+      {count > 0 && (
+        <div className="flex items-center px-5 py-3 shrink-0">
           <button
             type="button"
-            onClick={runCoach}
-            title="让 AI 教练扫描可加强的地方"
-            className="inline-flex items-center gap-1.5 text-[11px] text-sky-300 border border-sky-500/30 hover:bg-sky-500/10 rounded-full px-2.5 py-1 transition-colors cursor-pointer"
+            onClick={() => setPanelOpen((v) => !v)}
+            className="ml-auto inline-flex items-center gap-1.5 text-[11px] text-neutral-300 border border-neutral-800 hover:border-neutral-700 rounded-full px-2.5 py-1 transition-colors cursor-pointer"
           >
-            <Sparkles size={12} />
-            AI 教练
-          </button>
-          {count > 0 && (
-            <button
-              type="button"
-              onClick={() => setPanelOpen((v) => !v)}
-              className="inline-flex items-center gap-1.5 text-[11px] text-neutral-300 border border-neutral-800 hover:border-neutral-700 rounded-full px-2.5 py-1 transition-colors cursor-pointer"
-            >
-              <ListChecks size={12} />
-              {count} 处改动
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="关闭画布"
-            className="text-neutral-500 hover:text-white transition-colors cursor-pointer"
-          >
-            <X size={18} />
+            <ListChecks size={12} />
+            {count} 处改动
           </button>
         </div>
-      </div>
+      )}
 
       <AnimatePresence>
         {panelOpen && (
@@ -597,20 +559,6 @@ export default function LivingCanvas({
         onMouseUp={onResumeMouseUp}
         className="relative flex-1 overflow-auto custom-scrollbar"
       >
-        <AnimatePresence>
-          {showCoach && (
-            <motion.div
-              initial={{ opacity: 0, y: -6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              className="sticky top-3 z-20 mx-auto w-fit flex items-center gap-2 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-200 text-xs px-3.5 py-2 shadow-lg"
-            >
-              <Lightbulb size={13} className="text-sky-400" />
-              hover 任意一条经历，让 AI 就地帮你改
-            </motion.div>
-          )}
-        </AnimatePresence>
-
         <div className="flex justify-center pt-6 pb-24 px-12">
           <div style={{ width: PAGE_WIDTH * SCALE }}>
             <div

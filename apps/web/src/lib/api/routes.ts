@@ -45,9 +45,6 @@ export const AGENT_ROUTES = {
     chat:    '/api/interview/chat',
     session: (sessionId: string) => `/api/interview/session/${sessionId}`,
   },
-  translate: {
-    text:   '/api/translate/text',
-  },
 } as const;
 
 /**

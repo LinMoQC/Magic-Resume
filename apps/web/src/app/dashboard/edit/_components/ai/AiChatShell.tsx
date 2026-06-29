@@ -2,25 +2,25 @@
 
 import React, { useCallback, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FlaskConical, FileText, SquarePen, X, Bot, PencilRuler, PanelLeftClose, PanelLeftOpen, Check } from 'lucide-react';
+import { FlaskConical, FileText, SquarePen, X, PencilRuler, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { nanoid } from 'nanoid';
 import { toast } from 'sonner';
 import { InfoType, Resume, Section } from '@/types/frontend/resume';
 import { SKILLS } from './skills/registry';
-import type { CanvasState, CanvasView, ChatMessage, SkillId } from './types';
+import type { CanvasState, ChatMessage, PlanTodo, SkillId } from './types';
 import ChatThread from './conversation/ChatThread';
 import Composer from './conversation/Composer';
 import SkillParamForm from './conversation/SkillParamForm';
 import WelcomeSuggestions from './conversation/WelcomeSuggestions';
 import ArtifactCanvas from './canvas/ArtifactCanvas';
+import { PolarisAvatar } from './PolarisMark';
 import InterviewOverlay from './interview/InterviewOverlay';
 import LivingCanvas, { type BatchRequest, type FocusRequest } from './canvas/living/LivingCanvas';
-import { useTranslation } from 'react-i18next';
+import { type BatchKind } from './lib/diffResume';
 import type { MultiPersonaResumeAnalysis } from '@/types/agent/multi-persona';
 import { streamChat, approveTool } from './lib/services/agentClient';
 import type { AgentSseEvent } from './lib/services/types';
-import { buildOpeningSeed, fallbackOpening } from './lib/openingSeed';
 import { useResumeDraftStore } from '@/store/useResumeDraftStore';
 import { useSettingStore } from '@/store/useSettingStore';
 
@@ -36,9 +36,22 @@ type AiChatShellProps = {
 
 const CLOSED_CANVAS: CanvasState = { open: false, skillId: null, view: 'preview', status: 'idle' };
 
-/** First-token timeout for the generated opening — past this, fall back to a canned
- *  line so create mode never hangs on a blank canvas (design §5 超时 / §7). */
-const FIRST_TOKEN_TIMEOUT_MS = 8000;
+/** Build the data-carrying intent a whole-resume skill sends to the agent. The
+ *  frontend passes intent + DATA (JD / target language) — not prompt/behavior, which
+ *  lives in the backend skills (AGENTS.md + resume-optimization / resume-translation). */
+function buildBatchAgentMessage(kind: BatchKind, params: Record<string, string>): string {
+  if (kind === 'translate') {
+    return `把我的简历整份翻译成 ${params.lang || 'English'}。`;
+  }
+  const target = [params.company, params.title].filter(Boolean).join(' · ');
+  const jd = params.jd?.trim();
+  return [
+    `请按目标岗位优化我的简历${target ? `(目标:${target})` : ''}。`,
+    jd ? `目标 JD:\n${jd}` : '',
+  ]
+    .filter(Boolean)
+    .join('\n\n');
+}
 
 /** Map the shell's thread into the backend chat history (user/assistant text only). */
 function toBackendHistory(
@@ -68,9 +81,12 @@ export default function AiChatShell({
   const [livingSkillId, setLivingSkillId] = useState<SkillId | null>(null);
   const [batchRequest, setBatchRequest] = useState<BatchRequest | null>(null);
   const [focusRequest, setFocusRequest] = useState<FocusRequest | null>(null);
-  const [railCollapsed, setRailCollapsed] = useState(false);
   const batchNonce = useRef(0);
   const focusNonce = useRef(0);
+  // Set while a whole-resume skill (optimize/translate) run is in flight, so the
+  // `resume_update` it emits routes into the living-canvas diff (not the chat draft
+  // banner). Survives the read_resume approval pause; reset when a new run starts.
+  const skillBatchRunRef = useRef<{ kind: BatchKind; lang?: string } | null>(null);
   const [analysis, setAnalysis] = useState<MultiPersonaResumeAnalysis | null>(null);
   const [chatMode, setChatMode] = useState<'idle' | 'create'>('idle');
   const [awaitingReply, setAwaitingReply] = useState(false);
@@ -86,13 +102,26 @@ export default function AiChatShell({
   // BYOK: each user's AI session is initialized with their own LLM config
   // (key / baseUrl / model) — the backend has no server-side key (design §3.11).
   const { apiKey, baseUrl, model, maxTokens } = useSettingStore();
-  const { i18n } = useTranslation();
   const messagesRef = useRef(messages);
   messagesRef.current = messages;
-  // The analyze skill's exec card spans the analysis run; track its id so
-  // consumeStream flips it to "done" only when the resume_analysis result lands
-  // (or the flow ends).
-  const analyzeExecRef = useRef<string | null>(null);
+  // The analyze skill renders a live review todolist (a `plan` card) instead of a
+  // single exec card. It's created on the first plan_update — which the backend
+  // only emits once the analyze_resume tool actually runs, i.e. *after* approval,
+  // so the card lands below the approval card. The id is tracked here so later
+  // plan_updates update the same card and resume_analysis can finalize it.
+  const planCardRef = useRef<string | null>(null);
+  // Name of the active subagent (set on subagent_started, cleared on completed).
+  // While set, plan_updates feed that subagent's own todolist card and its raw
+  // streamed tokens are kept out of the main bubble.
+  const activeSubagentRef = useRef<string | null>(null);
+  // The active subagent's OWN plan card — separate from planCardRef so starting a
+  // subagent mid-run doesn't orphan the main agent's plan card (which would then
+  // never finalize and hang on "工作中").
+  const subagentPlanCardRef = useRef<string | null>(null);
+  // The read_resume approval card spans two streams (approve in one, the read in
+  // the next). Tracked here so the read's progress (reading → read) updates that
+  // same card's footer in place — 已允许读取 → 已读取简历 — instead of a separate line.
+  const readApprovalRef = useRef<string | null>(null);
 
   const addMessage = useCallback((msg: ChatMessage) => {
     setMessages((prev) => [...prev, msg]);
@@ -129,11 +158,25 @@ export default function AiChatShell({
     [markActivityDone]
   );
 
+  // Advance a read_resume approval card's footer through its read lifecycle
+  // (reading → read), so 已允许读取 / 正在读取简历… / 已读取简历 all live in one place.
+  const setApprovalReadState = useCallback(
+    (msgId: string, readState: 'reading' | 'read') => {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === msgId && m.approval
+            ? { ...m, approval: { ...m.approval, readState } }
+            : m
+        )
+      );
+    },
+    []
+  );
+
   // Click a log entry → reopen the canvas and scroll to that spot (design §5 可点回溯).
   const focusOnCanvas = useCallback((resumePath: string) => {
     focusNonce.current += 1;
     setLivingOpen(true);
-    setRailCollapsed(false);
     setFocusRequest({ path: resumePath, nonce: focusNonce.current });
   }, []);
 
@@ -154,16 +197,6 @@ export default function AiChatShell({
   // the living canvas as a batch of in-place pending changes instead of a Diff tab.
   const isBatchSkill = (id: SkillId) => id === 'optimize' || id === 'translate';
 
-  const seedBatch = useCallback((id: SkillId, params: Record<string, string>) => {
-    batchNonce.current += 1;
-    const kind = id === 'translate' ? 'translate' : 'optimize';
-    setStarted(true);
-    setCanvas(CLOSED_CANVAS);
-    setLivingOpen(true);
-    setLivingSkillId(id);
-    setBatchRequest({ kind, lang: params.lang, nonce: batchNonce.current });
-  }, []);
-
   // Consume an agent SSE stream into the thread — shared by the initial chat and
   // the HITL resume (approve), since both speak the same normalized event schema.
   // The initial stream ends at a `tool_approval_request`; approving opens a fresh
@@ -171,13 +204,7 @@ export default function AiChatShell({
   // Streams message_chunk into a live assistant bubble; a resume surfaces as a
   // reviewable draft.
   const consumeStream = useCallback(
-    async (
-      makeGen: (signal: AbortSignal) => AsyncGenerator<AgentSseEvent>,
-      // When set, this is the generated opening: a first-token timeout (or any
-      // failure / empty stream before text) drops to this canned line instead of
-      // hanging or erroring — the opening must always leave a way in (§5 / §8.1).
-      opts?: { fallbackGreeting?: string; watchdog?: boolean }
-    ) => {
+    async (makeGen: (signal: AbortSignal) => AsyncGenerator<AgentSseEvent>) => {
       const aiId = nanoid();
       // The assistant bubble is created lazily on the first chunk so any
       // `read_resume` activity line lands *above* the reply (design §8.5).
@@ -193,14 +220,7 @@ export default function AiChatShell({
       setIsAiJobRunning(true);
       setAwaitingReply(true);
 
-      // The opening arms a first-token watchdog; on fire it aborts the hung stream
-      // and the catch/empty paths fall back to the canned greeting.
       const controller = new AbortController();
-      const timer = opts?.watchdog
-        ? window.setTimeout(() => {
-            if (!bubbleCreated) controller.abort();
-          }, FIRST_TOKEN_TIMEOUT_MS)
-        : undefined;
 
       let acc = '';
       // The initial stream ends when the agent pauses for approval; track it so the
@@ -209,10 +229,14 @@ export default function AiChatShell({
       try {
         for await (const ev of makeGen(controller.signal)) {
           if (ev.type === 'message_chunk' && ev.content) {
-            if (timer) window.clearTimeout(timer);
-            ensureBubble();
-            acc += ev.content;
-            setMessages((prev) => prev.map((m) => (m.id === aiId ? { ...m, content: acc } : m)));
+            // A subagent's raw tokens (e.g. translation JSON / its reasoning) stay out
+            // of the chat — its progress shows on its own todolist card and its result
+            // lands via resume_update. Only the main agent's narration hits the bubble.
+            if (!activeSubagentRef.current) {
+              ensureBubble();
+              acc += ev.content;
+              setMessages((prev) => prev.map((m) => (m.id === aiId ? { ...m, content: acc } : m)));
+            }
           } else if (ev.type === 'tool_approval_request') {
             // Agent paused before a sensitive tool (read_resume). The initial stream
             // ends here; the approval card drives the resume (§6).
@@ -220,33 +244,149 @@ export default function AiChatShell({
             if (p?.requestId) {
               pausedForApproval = true;
               setAwaitingReply(false); // the card replaces the thinking dots
+              const approvalId = nanoid();
+              // The read result will resolve on this same card (issue §3), so the
+              // direct read_resume approval owns it; analyze reads via its todolist.
+              if (p.toolName === 'read_resume') readApprovalRef.current = approvalId;
               addMessage({
-                id: nanoid(),
+                id: approvalId,
                 role: 'approval',
                 content: p.reason || '想读取你的简历来给建议',
                 approval: { requestId: p.requestId, toolName: p.toolName, scope: 'resume', status: 'pending' },
               });
             }
           } else if (ev.type === 'tool_started' && (ev.payload as { toolName?: string } | undefined)?.toolName === 'read_resume') {
-            // The read runs after approval — narrate it.
-            addMessage({ id: nanoid(), role: 'activity', content: '正在读取你的简历…', status: 'running' });
+            // The read runs after approval. Show progress on the approval card
+            // itself (已允许读取 → 正在读取简历…) instead of a separate activity line;
+            // fall back to a line only if there's no card to update.
+            if (readApprovalRef.current) {
+              setApprovalReadState(readApprovalRef.current, 'reading');
+            } else {
+              addMessage({ id: nanoid(), role: 'activity', content: '正在读取你的简历…', status: 'running' });
+            }
           } else if (ev.type === 'tool_result' && (ev.payload as { toolName?: string } | undefined)?.toolName === 'read_resume') {
-            markReadActivityDone();
-          } else if (ev.type === 'tool_started' && (ev.payload as { toolName?: string } | undefined)?.toolName === 'analyze_resume') {
-            // Runs after approval — narrate the multi-persona evaluation in flight.
+            if (readApprovalRef.current) {
+              setApprovalReadState(readApprovalRef.current, 'read'); // → 已读取简历
+              readApprovalRef.current = null;
+            } else {
+              markReadActivityDone();
+            }
+          } else if (ev.type === 'plan_update') {
+            // A live todolist (the analyze checklist, or a write_todos plan from the
+            // main agent or a subagent). Route to the active subagent's card while one
+            // is running, else the main card — so the two never collide. The label
+            // comes from the backend (analyze → "简历多角色评审"); plain plans default.
+            const payload = ev.payload as { todos?: PlanTodo[]; label?: string } | undefined;
+            const todos = payload?.todos;
+            if (Array.isArray(todos)) {
+              const allDone = todos.length > 0 && todos.every((t) => t.status === 'completed');
+              const sub = activeSubagentRef.current;
+              const ref = sub ? subagentPlanCardRef : planCardRef;
+              if (ref.current) {
+                const planId = ref.current;
+                setMessages((prev) =>
+                  prev.map((m) =>
+                    m.id === planId ? { ...m, todos, status: allDone ? 'done' : 'running' } : m
+                  )
+                );
+              } else {
+                const planId = nanoid();
+                ref.current = planId;
+                setAwaitingReply(false); // the todolist replaces the thinking dots
+                // Route the card's canvas toggle to the right surface: a batch run
+                // (translate / optimize) lives on the living canvas; analyze on the
+                // score canvas. Without this the toggle was hardcoded to 'analyze',
+                // so a translate plan opened the empty score canvas (and mislabelled
+                // 查看/收起 since the living canvas was already open).
+                const canvasSkill: SkillId = skillBatchRunRef.current
+                  ? skillBatchRunRef.current.kind
+                  : 'analyze';
+                addMessage({
+                  id: planId,
+                  role: 'plan',
+                  ...(sub ? { subagentName: sub } : { skillId: canvasSkill }),
+                  content: sub ? '' : payload?.label || '任务清单',
+                  todos,
+                  status: allDone ? 'done' : 'running',
+                });
+              }
+            }
+          } else if (ev.type === 'subagent_started') {
+            // A subagent started. Everything until subagent_completed is its work:
+            // give it its OWN todolist card (separate ref, so the main plan card isn't
+            // orphaned), and keep its raw streamed tokens out of the main bubble.
+            const payload = ev.payload as
+              | { name?: string; args?: { description?: string } }
+              | undefined;
+            const rawName = payload?.name;
+            const task = payload?.args?.description?.trim();
+            // Prefer the subagent's type/skill name (e.g. resume-translation); for a
+            // generic worker (general-purpose), fall back to the task it was given so
+            // the card says what it's doing instead of an empty "子代理".
+            const name =
+              rawName && rawName !== '子代理' && rawName !== 'general-purpose'
+                ? rawName
+                : task
+                  ? task.length > 36
+                    ? `${task.slice(0, 36)}…`
+                    : task
+                  : '子代理';
+            activeSubagentRef.current = name;
+            const planId = nanoid();
+            subagentPlanCardRef.current = planId;
+            setAwaitingReply(false);
             addMessage({
-              id: nanoid(),
-              role: 'activity',
-              content: '正在从同行 / 用人主管 / HRBP 三个视角评估你的简历…',
+              id: planId,
+              role: 'plan',
+              subagentName: name,
+              content: '',
+              todos: [],
               status: 'running',
             });
+          } else if (ev.type === 'subagent_completed') {
+            activeSubagentRef.current = null;
+            if (subagentPlanCardRef.current) {
+              const planId = subagentPlanCardRef.current;
+              subagentPlanCardRef.current = null;
+              setMessages((prev) =>
+                prev.map((m) =>
+                  m.id === planId
+                    ? { ...m, status: 'done', todos: (m.todos ?? []).map((t) => ({ ...t, status: 'completed' })) }
+                    : m
+                )
+              );
+            }
           } else if (ev.type === 'resume_update' || ev.type === 'resume_patch') {
             const draft = (ev.data ?? (ev.payload as { resume?: unknown } | undefined)?.resume) as
               | Resume
               | undefined;
-            if (draft && typeof draft === 'object') {
-              setResumeDraft(draft);
-              setDraftReady(draft);
+            // A resume_update must carry a keyed `sections` object. A malformed
+            // payload (e.g. a backend that forgot to unwrap the stored `content`
+            // blob) would otherwise reach MagicResumeRenderer and crash it on
+            // `data.sections.<key>`. Ignore + warn instead of rendering garbage.
+            const sections =
+              draft && typeof draft === 'object' ? draft.sections : undefined;
+            if (draft && sections && typeof sections === 'object' && !Array.isArray(sections)) {
+              const batch = skillBatchRunRef.current;
+              if (batch) {
+                // optimize/translate skill run → stage real per-field diffs on the
+                // living canvas (the agent's full resume vs the current one).
+                batchNonce.current += 1;
+                setBatchRequest({
+                  kind: batch.kind,
+                  lang: batch.lang,
+                  proposedSections: sections,
+                  nonce: batchNonce.current,
+                });
+              } else {
+                setResumeDraft(draft);
+                setDraftReady(draft);
+              }
+            } else {
+              console.warn(
+                '[ai] ignoring malformed resume_update (no sections object)',
+                draft,
+              );
             }
           } else if (ev.type === 'resume_analysis') {
             // The analyze_resume tool finished — surface the structured
@@ -256,25 +396,32 @@ export default function AiChatShell({
               | MultiPersonaResumeAnalysis
               | undefined;
             if (result && typeof result === 'object') {
-              markActivityDone('多角色评估完成');
               setAnalysis(result);
               setLivingOpen(false);
               setCanvas({ open: true, skillId: 'analyze', view: 'score', status: 'ready' });
-              // The analysis landed → the exec card can now show "完成 / 查看画布".
-              if (analyzeExecRef.current) {
-                const execId = analyzeExecRef.current;
-                analyzeExecRef.current = null;
-                setMessages((prev) => prev.map((m) => (m.id === execId ? { ...m, status: 'done' } : m)));
+              // The analysis landed → mark every checklist step done (defensive: the
+              // assemble step's plan_update may race the artifact event).
+              if (planCardRef.current) {
+                const planId = planCardRef.current;
+                planCardRef.current = null;
+                setMessages((prev) =>
+                  prev.map((m) =>
+                    m.id === planId
+                      ? {
+                          ...m,
+                          status: 'done',
+                          todos: m.todos?.map((t) => ({ ...t, status: 'completed' })),
+                        }
+                      : m
+                  )
+                );
               }
             }
           } else if (ev.type === 'error') {
             throw new Error(ev.error || '对话出错');
           }
         }
-        // Stream that produced no text at all → canned greeting (openings only).
-        if (opts?.fallbackGreeting && !bubbleCreated) {
-          addAssistant(opts.fallbackGreeting);
-        } else if (pausedForApproval && !bubbleCreated) {
+        if (pausedForApproval && !bubbleCreated) {
           // Paused for approval before any text — the card is the terminal UI for
           // this segment; the resume stream picks up after the user decides.
         } else {
@@ -282,43 +429,55 @@ export default function AiChatShell({
           setMessages((prev) => prev.map((m) => (m.id === aiId ? { ...m, status: 'done' } : m)));
         }
       } catch (err) {
-        if (opts?.fallbackGreeting && !bubbleCreated) {
-          addAssistant(opts.fallbackGreeting);
-        } else {
-          const msg = err instanceof Error ? err.message : '对话失败';
-          ensureBubble();
-          setMessages((prev) =>
-            prev.map((m) => (m.id === aiId ? { ...m, content: acc || `（出错：${msg}）`, status: 'done' } : m))
-          );
-          toast.error(msg);
-        }
+        const msg = err instanceof Error ? err.message : '对话失败';
+        ensureBubble();
+        setMessages((prev) =>
+          prev.map((m) => (m.id === aiId ? { ...m, content: acc || `（出错：${msg}）`, status: 'done' } : m))
+        );
+        toast.error(msg);
       } finally {
-        if (timer) window.clearTimeout(timer);
         markReadActivityDone(); // resolve any read line still spinning
-        // Resolve the analyze exec card if the flow ended without an analysis
-        // result (error, rejection, or the model just chatted) — but NOT at an
-        // approval pause, where the resumed stream still has to run.
-        if (!pausedForApproval && analyzeExecRef.current) {
-          const execId = analyzeExecRef.current;
-          analyzeExecRef.current = null;
-          setMessages((prev) => prev.map((m) => (m.id === execId ? { ...m, status: 'done' } : m)));
+        // The review todolist is normally finalized by resume_analysis; if the
+        // flow instead ended on an error/abort while it was live, stop its
+        // spinners so it doesn't hang mid-step.
+        // Finalize any still-live plan card — the main one AND an active subagent's —
+        // so neither hangs on a spinner if the stream ends/errors mid-step.
+        activeSubagentRef.current = null;
+        for (const ref of [planCardRef, subagentPlanCardRef]) {
+          if (!ref.current) continue;
+          const planId = ref.current;
+          ref.current = null;
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === planId
+                ? {
+                    ...m,
+                    status: 'done',
+                    todos: m.todos?.map((t) =>
+                      t.status === 'in_progress' ? { ...t, status: 'pending' } : t
+                    ),
+                  }
+                : m
+            )
+          );
         }
         setRunning(false);
         setIsAiJobRunning(false);
         setAwaitingReply(false);
       }
     },
-    [addMessage, addAssistant, markReadActivityDone, markActivityDone, setResumeDraft, setIsAiJobRunning]
+    [addMessage, markReadActivityDone, setApprovalReadState, setResumeDraft, setIsAiJobRunning]
   );
 
   // analyze · runs in-conversation through the single /api/chat entry. The
   // orchestrator calls the `analyze_resume` tool (engine), which reads the resume
-  // and runs the 3-persona analysis internally, returning it as a `resume_analysis`
-  // event that consumeStream maps onto the ScoreView. The exec card's "done"
-  // state is owned by consumeStream via analyzeExecRef.
+  // and runs the 3-persona analysis internally, streaming a checklist (plan_update)
+  // as it goes and finally a `resume_analysis` event that consumeStream maps onto
+  // the ScoreView. The live todolist card is owned by consumeStream via planCardRef.
   const runAnalyze = useCallback(
-    async (execId: string) => {
-      analyzeExecRef.current = execId;
+    async () => {
+      planCardRef.current = null; // a fresh review todolist for this run
+      skillBatchRunRef.current = null; // not a whole-resume skill batch run
       await consumeStream((signal) =>
         streamChat({
           messages: [{ role: 'user', content: SKILLS.analyze.buildIntent({}) }],
@@ -333,64 +492,68 @@ export default function AiChatShell({
     [consumeStream, resumeData.id, apiKey, baseUrl, model, maxTokens]
   );
 
+  // Whole-resume skill (optimize / translate) → real agent via /api/chat. The agent
+  // routes to the resume-optimization / resume-translation skill, writes the full
+  // resume (one `resume_update`), which consumeStream diffs onto the living canvas.
+  const runBatchSkill = useCallback(
+    (id: SkillId, params: Record<string, string>) => {
+      const kind: BatchKind = id === 'translate' ? 'translate' : 'optimize';
+      setCanvas(CLOSED_CANVAS);
+      setLivingOpen(true);
+      setLivingSkillId(id);
+      skillBatchRunRef.current = { kind, lang: params.lang };
+      const message = buildBatchAgentMessage(kind, params);
+      void consumeStream((signal) =>
+        streamChat({
+          messages: [{ role: 'user', content: message }],
+          mode: kind,
+          sessionId: sessionIdRef.current,
+          resumeId: resumeData.id,
+          config: { apiKey, baseUrl, modelName: model, maxTokens },
+          signal,
+        })
+      );
+    },
+    [consumeStream, resumeData.id, apiKey, baseUrl, model, maxTokens]
+  );
+
   const runSkill = useCallback(
     (id: SkillId, params: Record<string, string>, opts?: { addIntent?: boolean }) => {
-      const skill = SKILLS[id];
       setStarted(true);
       setParamSkill(null);
       if (opts?.addIntent !== false) {
-        addMessage({ id: nanoid(), role: 'user', content: skill.buildIntent(params) });
+        addMessage({ id: nanoid(), role: 'user', content: SKILLS[id].buildIntent(params) });
       }
-      const execId = nanoid();
-      addMessage({ id: execId, role: 'exec', skillId: id, status: 'running' });
-      setRunning(true);
-      setIsAiJobRunning(true);
-
-      // analyze runs in-conversation via /api/chat; other skills remain mock for now.
+      // analyze → analyze_resume tool (score); optimize/translate → resume-optimization
+      // / resume-translation skill (full-resume diff on the living canvas). Both real,
+      // both narrate via the SSE stream — no exec card, no mock.
       if (id === 'analyze') {
-        void runAnalyze(execId);
-        return;
+        void runAnalyze();
+      } else if (isBatchSkill(id)) {
+        runBatchSkill(id, params);
       }
-
-      window.setTimeout(() => {
-        setMessages((prev) =>
-          prev.map((m) => (m.id === execId ? { ...m, status: 'done' } : m))
-        );
-        setRunning(false);
-        setIsAiJobRunning(false);
-        if (isBatchSkill(id)) {
-          seedBatch(id, params);
-        } else if (skill.canvas) {
-          setLivingOpen(false);
-          setCanvas({ open: true, skillId: id, view: skill.canvas.defaultView, status: 'ready' });
-        }
-      }, 1500);
     },
-    [addMessage, setIsAiJobRunning, seedBatch, runAnalyze]
+    [addMessage, runAnalyze, runBatchSkill]
   );
 
   // create / general · real streaming chat. Sends only the new turn(s); the
   // checkpointer (keyed by sessionId) supplies the rest of the history (§2).
   const runChat = useCallback(
-    (
-      history: { role: 'user' | 'assistant'; content: string }[],
-      mode: 'create' | 'general',
-      opts?: { fallbackGreeting?: string }
-    ) =>
-      consumeStream(
-        (signal) =>
-          streamChat({
-            messages: history,
-            mode,
-            sessionId: sessionIdRef.current,
-            // The agent pulls the resume on demand via its `read_resume` tool; we
-            // just hand it the id (+ the session token server-side).
-            resumeId: resumeData.id,
-            config: { apiKey, baseUrl, modelName: model, maxTokens },
-            signal,
-          }),
-        { fallbackGreeting: opts?.fallbackGreeting, watchdog: !!opts?.fallbackGreeting }
-      ),
+    (history: { role: 'user' | 'assistant'; content: string }[], mode: 'create' | 'general') => {
+      skillBatchRunRef.current = null; // not a whole-resume skill batch run
+      return consumeStream((signal) =>
+        streamChat({
+          messages: history,
+          mode,
+          sessionId: sessionIdRef.current,
+          // The agent pulls the resume on demand via its `read_resume` tool; we
+          // just hand it the id (+ the session token server-side).
+          resumeId: resumeData.id,
+          config: { apiKey, baseUrl, modelName: model, maxTokens },
+          signal,
+        })
+      );
+    },
     [consumeStream, resumeData.id, apiKey, baseUrl, model, maxTokens]
   );
 
@@ -419,34 +582,6 @@ export default function AiChatShell({
     [consumeStream, resumeData.id, apiKey, baseUrl, model, maxTokens]
   );
 
-  const selectSkill = useCallback(
-    (id: SkillId) => {
-      const skill = SKILLS[id];
-      setStarted(true);
-      if (skill.surface === 'immersive') {
-        setOverlayOpen(true);
-        return;
-      }
-      if (skill.isChat) {
-        setChatMode('create');
-        // Dynamic opening: the agent greets from scratch (no resume content in the
-        // seed — reading is approval-gated, §6.5). Seed isn't shown as a user bubble;
-        // a first-token timeout falls back to a canned greeting (design §8.1).
-        const seed = buildOpeningSeed(i18n.language);
-        void runChat([{ role: 'user', content: seed }], 'create', {
-          fallbackGreeting: fallbackOpening(i18n.language),
-        });
-        return;
-      }
-      if (skill.params.length > 0) {
-        setParamSkill(id);
-        return;
-      }
-      runSkill(id, {});
-    },
-    [runChat, runSkill, i18n.language]
-  );
-
   const handleSend = useCallback(
     (text: string) => {
       setStarted(true);
@@ -473,6 +608,48 @@ export default function AiChatShell({
     [chatMode, addMessage, runSkill, runChat]
   );
 
+  // A skill picked from the `/` menu rides as a chip + freeform text in the Composer:
+  // selecting it no longer launches immediately; the user types context, then Enter
+  // runs it here. The text maps to the skill's primary param (translate → target
+  // language, optimize → JD); empty text falls back to the skill's own defaults.
+  const runSkillWithText = useCallback(
+    (id: SkillId, text: string) => {
+      const skill = SKILLS[id];
+      setStarted(true);
+      const t = text.trim();
+
+      if (skill.surface === 'immersive') {
+        setOverlayOpen(true);
+        return;
+      }
+
+      const display = t || skill.buildIntent({});
+      const history = toBackendHistory(messagesRef.current).concat([
+        { role: 'user', content: display },
+      ]);
+      // Tag the turn with the skill so the bubble shows which skill ran.
+      addMessage({ id: nanoid(), role: 'user', content: display, skillId: id });
+
+      if (skill.isChat) {
+        setChatMode('create');
+        void runChat(history, 'create');
+        return;
+      }
+
+      if (id === 'translate' || id === 'optimize') {
+        const params: Record<string, string> = {};
+        if (t) params[id === 'translate' ? 'lang' : 'jd'] = t;
+        runBatchSkill(id, params);
+        return;
+      }
+
+      // analyze (no params): the multi-persona tool takes no freeform input — the
+      // typed text just shows as the turn while the standard analysis runs.
+      void runAnalyze();
+    },
+    [addMessage, runChat, runBatchSkill, runAnalyze],
+  );
+
   const cancelParams = useCallback(() => {
     setParamSkill(null);
     setStarted((s) => (messages.length === 0 ? false : s));
@@ -480,13 +657,11 @@ export default function AiChatShell({
 
   const toggleCanvas = useCallback(
     (id: SkillId) => {
-      // Content skills live on the living canvas — re-open it and regenerate the batch.
+      // Content skills live on the living canvas. Re-running optimize/translate needs
+      // its params (JD / language), so the rail toggle just shows/hides the canvas with
+      // the last result — re-run the skill itself to regenerate.
       if (isBatchSkill(id)) {
-        if (livingOpen) {
-          setLivingOpen(false);
-        } else {
-          seedBatch(id, {});
-        }
+        setLivingOpen((open) => !open);
         return;
       }
       setLivingOpen(false);
@@ -502,7 +677,7 @@ export default function AiChatShell({
         };
       });
     },
-    [livingOpen, seedBatch]
+    []
   );
 
   const applyChanges = useCallback(() => {
@@ -550,7 +725,7 @@ export default function AiChatShell({
           </div>
         </div>
       )}
-      <Composer onPickSkill={selectSkill} onSend={handleSend} disabled={running || !!paramSkill} />
+      <Composer onRunSkill={runSkillWithText} onSend={handleSend} disabled={running || !!paramSkill} />
     </>
   );
 
@@ -602,52 +777,46 @@ export default function AiChatShell({
       </header>
 
       <div className="flex-1 flex min-h-0">
-        {livingOpen && railCollapsed ? (
-          <aside className="shrink-0 w-12 flex flex-col items-center gap-3 py-4 border-r border-neutral-900">
-            <div className="w-8 h-8 rounded-full bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400">
-              <Bot size={15} />
-            </div>
-            <button
-              type="button"
-              onClick={() => setRailCollapsed(false)}
-              aria-label="展开对话"
-              title="展开对话"
-              className="text-neutral-500 hover:text-white transition-colors cursor-pointer"
-            >
-              <PanelLeftOpen size={16} />
-            </button>
-            {messages.length > 0 && (
-              <span className="text-[10px] text-neutral-600 tabular-nums">{messages.length}</span>
-            )}
-          </aside>
-        ) : (
         <div className={cn('relative flex-1 flex flex-col min-w-0 overflow-hidden', !started && 'justify-center')}>
-          {livingOpen && (
-            <button
-              type="button"
-              onClick={() => setRailCollapsed(true)}
-              aria-label="收起对话为侧栏"
-              title="收起为侧栏"
-              className="absolute top-2 right-2 z-10 text-neutral-600 hover:text-white transition-colors cursor-pointer"
-            >
-              <PanelLeftClose size={16} />
-            </button>
-          )}
           <AnimatePresence initial={false} mode="popLayout">
             {!started ? (
               <motion.div
                 key="greeting"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial="hidden"
+                animate="show"
                 exit={{ opacity: 0, y: -8, transition: { duration: 0.15 } }}
-                transition={{ duration: 0.25 }}
+                variants={{
+                  hidden: {},
+                  show: { transition: { staggerChildren: 0.08, delayChildren: 0.04 } },
+                }}
                 className="flex flex-col items-center text-center px-4"
               >
-                <div className="w-14 h-14 rounded-2xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 mb-5">
-                  <Bot size={27} />
-                </div>
-                <h2 className="text-2xl font-semibold text-white tracking-tight mb-2">今天想怎么打磨简历？</h2>
-                <p className="text-sm text-neutral-500">描述你的需求，我会调用合适的技能来完成</p>
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, y: 10, scale: 0.92 },
+                    show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.32, ease: 'easeOut' } },
+                  }}
+                >
+                  <PolarisAvatar className="mb-5" />
+                </motion.div>
+                <motion.h2
+                  variants={{
+                    hidden: { opacity: 0, y: 10 },
+                    show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } },
+                  }}
+                  className="text-2xl font-semibold text-white tracking-tight mb-2"
+                >
+                  今天想怎么打磨简历？
+                </motion.h2>
+                <motion.p
+                  variants={{
+                    hidden: { opacity: 0, y: 10 },
+                    show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } },
+                  }}
+                  className="text-sm text-neutral-500"
+                >
+                  描述你的需求，我会调用合适的技能来完成
+                </motion.p>
               </motion.div>
             ) : (
               <motion.div
@@ -680,10 +849,11 @@ export default function AiChatShell({
               {paramSkill && (
                 <motion.div
                   key="paramform"
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 8 }}
-                  transition={{ duration: 0.18, ease: 'easeOut' }}
+                  initial={{ opacity: 0, y: 12, scale: 0.97 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                  transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
+                  style={{ transformOrigin: 'bottom center' }}
                   className="absolute bottom-full left-0 right-0 px-4 pb-2"
                 >
                   <div className="max-w-3xl mx-auto">
@@ -709,33 +879,41 @@ export default function AiChatShell({
                 transition={{ duration: 0.25, delay: 0.05 }}
                 className="mt-1"
               >
-                <WelcomeSuggestions onPick={selectSkill} onPrompt={handleSend} />
+                <WelcomeSuggestions onPrompt={handleSend} />
               </motion.div>
             )}
           </AnimatePresence>
         </div>
-        )}
 
-        {livingOpen ? (
-          <div className={cn('shrink-0 min-w-0', railCollapsed ? 'flex-1' : 'w-[58%]')}>
-            <LivingCanvas
-              resumeData={resumeData}
-              templateId={templateId}
-              onApplySections={onApplySections}
-              onApplyInfo={onApplyInfo}
-              onLog={logChange}
-              onClose={() => setLivingOpen(false)}
-              batchRequest={batchRequest}
-              focusRequest={focusRequest}
-            />
-          </div>
-        ) : (
+        {/* 实时画布以宽度+透明度滑入/滑出（贴元素、不弹跳，缓动同参数表单）。 */}
+        <AnimatePresence initial={false}>
+          {livingOpen && (
+            <motion.div
+              key="living-canvas"
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: '58%', opacity: 1 }}
+              exit={{ width: 0, opacity: 0 }}
+              transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+              className="shrink-0 min-w-0 overflow-hidden"
+            >
+              <LivingCanvas
+                resumeData={resumeData}
+                templateId={templateId}
+                onApplySections={onApplySections}
+                onApplyInfo={onApplyInfo}
+                onLog={logChange}
+                batchRequest={batchRequest}
+                focusRequest={focusRequest}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+        {!livingOpen && (
           <ArtifactCanvas
             state={canvas}
             resumeData={resumeData}
             templateId={templateId}
             analysis={analysis}
-            onSetView={(view: CanvasView) => setCanvas((prev) => ({ ...prev, view }))}
             onApply={applyChanges}
             onDiscard={() => setCanvas(CLOSED_CANVAS)}
             onExport={() => addAssistant('体检报告已导出为 PDF。')}
