@@ -8,6 +8,20 @@ import {
   View,
 } from '@react-pdf/renderer';
 import type { Style } from '@react-pdf/types';
+import type { IconNode } from 'lucide';
+import {
+  Award,
+  Briefcase,
+  FolderOpen,
+  Globe,
+  GraduationCap,
+  Languages,
+  Mail,
+  MapPin,
+  Phone,
+  User,
+  Wrench,
+} from 'lucide';
 import type {
   ComponentDefinition,
   ComponentStyle,
@@ -15,6 +29,8 @@ import type {
   MagicTemplateDSL,
 } from '../types/magic-dsl';
 import type { InfoType, Resume, SectionItem } from '../types/resume';
+import { PdfLucideIcon } from './PdfLucideIcon';
+import { FREE_FORM_PAGE_MIN_HEIGHT_STYLE, FREE_FORM_PAGE_SIZE } from './page-size';
 
 type PdfStyle = Style | Style[];
 
@@ -51,6 +67,39 @@ const ZH_TITLE_BY_ENGLISH: Record<string, string> = {
   profiles: '个人主页',
   links: '个人主页',
   awards: '奖项',
+};
+
+const SECTION_ICON_MAP: Record<string, IconNode> = {
+  summary: User,
+  experience: Briefcase,
+  education: GraduationCap,
+  projects: FolderOpen,
+  skills: Wrench,
+  languages: Languages,
+  certificates: Award,
+  profiles: User,
+  awards: Award,
+};
+
+const TITLE_ICON_KEYWORDS: Array<[string, IconNode]> = [
+  ['工作', Briefcase], ['experience', Briefcase], ['work', Briefcase],
+  ['教育', GraduationCap], ['education', GraduationCap],
+  ['项目', FolderOpen], ['project', FolderOpen],
+  ['技能', Wrench], ['skill', Wrench], ['technical', Wrench],
+  ['语言', Languages], ['language', Languages],
+  ['证书', Award], ['certif', Award], ['award', Award],
+  ['个人', User], ['profile', User], ['summary', User],
+  ['联系', Globe], ['contact', Globe],
+];
+
+const getSectionIcon = (component: ComponentDefinition): IconNode | undefined => {
+  const sectionKey = component.dataBinding.startsWith('sections.')
+    ? component.dataBinding.slice('sections.'.length)
+    : '';
+  if (SECTION_ICON_MAP[sectionKey]) return SECTION_ICON_MAP[sectionKey];
+
+  const title = String(component.props?.title ?? '').toLowerCase();
+  return TITLE_ICON_KEYWORDS.find(([keyword]) => title.includes(keyword))?.[1];
 };
 
 const cssSizeToPoints = (value: string | number | undefined, fallback = 0): number => {
@@ -173,8 +222,9 @@ interface RenderContext {
   locale?: string;
 }
 
-const SectionTitle = ({ title, sidebar, context }: { title: string; sidebar?: boolean; context: RenderContext }) => {
+const SectionTitle = ({ title, icon, sidebar, context }: { title: string; icon?: IconNode; sidebar?: boolean; context: RenderContext }) => {
   const color = sidebar ? context.colors.background : context.colors.primary;
+  const fontSize = cssSizeToPoints(context.typography.fontSize.lg, 12);
   return (
     <View
       style={{
@@ -187,13 +237,11 @@ const SectionTitle = ({ title, sidebar, context }: { title: string; sidebar?: bo
         paddingBottom: cssSizeToPoints(context.spacing.sm, 6),
       }}
     >
-      {context.showTitleIcon ? (
-        <View style={{ width: 5, height: 5, borderRadius: 2.5, backgroundColor: color }} />
-      ) : null}
+      {context.showTitleIcon && icon ? <PdfLucideIcon icon={icon} color={color} size={fontSize} /> : null}
       <Text
         style={{
           color,
-          fontSize: cssSizeToPoints(context.typography.fontSize.lg, 12),
+          fontSize,
           fontWeight: 700,
           textTransform: sidebar ? 'uppercase' : undefined,
         }}
@@ -224,11 +272,11 @@ const HeaderBlock = ({ info, component, context }: {
   const labelContacts = props.contactStyle === 'label';
   const avatarWidth = cssSizeToPoints(Number(props.avatarWidth ?? 40));
   const avatarHeight = cssSizeToPoints(Number(props.avatarHeight ?? 40));
-  const contacts = [
-    { label: context.locale?.startsWith('zh') ? '电话' : 'Phone', value: info.phoneNumber, href: info.phoneNumber ? `tel:${info.phoneNumber}` : '' },
-    { label: context.locale?.startsWith('zh') ? '邮箱' : 'Email', value: info.email, href: info.email ? `mailto:${info.email}` : '' },
-    { label: context.locale?.startsWith('zh') ? '地址' : 'Address', value: info.address, href: '' },
-    { label: context.locale?.startsWith('zh') ? '网站' : 'Website', value: info.website, href: safeWebsiteUrl(info.website) },
+  const contacts: Array<{ label: string; value: string; href: string; icon?: IconNode }> = [
+    { label: context.locale?.startsWith('zh') ? '电话' : 'Phone', value: info.phoneNumber, href: info.phoneNumber ? `tel:${info.phoneNumber}` : '', icon: Phone },
+    { label: context.locale?.startsWith('zh') ? '邮箱' : 'Email', value: info.email, href: info.email ? `mailto:${info.email}` : '', icon: Mail },
+    { label: context.locale?.startsWith('zh') ? '地址' : 'Address', value: info.address, href: '', icon: MapPin },
+    { label: context.locale?.startsWith('zh') ? '网站' : 'Website', value: info.website, href: safeWebsiteUrl(info.website), icon: Globe },
   ].filter((item) => item.value);
 
   if (props.showCustomFields) {
@@ -269,6 +317,7 @@ const HeaderBlock = ({ info, component, context }: {
           {contacts.map((item) => (
             <View key={`${item.label}:${item.value}`} style={{ flexDirection: 'row', gap: 2, width: labelContacts ? '47%' : undefined }}>
               {labelContacts ? <Text style={{ color: context.colors.textSecondary, fontSize: 7.5 }}>{item.label}:</Text> : null}
+              {!labelContacts && item.icon ? <PdfLucideIcon icon={item.icon} color={context.colors.textSecondary} size={7.5} /> : null}
               <ContactText value={item.value} href={item.href} style={{ color: context.colors.text, fontSize: 7.5, textDecoration: 'none' }} />
             </View>
           ))}
@@ -286,6 +335,12 @@ const ProfileBlock = ({ info, component, sidebar, context }: {
   context: RenderContext;
 }) => {
   const textColor = component.style?.color ?? (sidebar ? context.colors.background : context.colors.text);
+  const contacts = [
+    { icon: Mail, value: info.email },
+    { icon: Phone, value: info.phoneNumber },
+    { icon: MapPin, value: info.address },
+    { icon: Globe, value: info.website },
+  ].filter((item) => item.value);
   return (
     <View
       wrap={false}
@@ -301,10 +356,15 @@ const ProfileBlock = ({ info, component, sidebar, context }: {
         {info.fullName || (context.locale?.startsWith('zh') ? '你的名字' : 'Your Name')}
       </Text>
       {info.headline ? <Text style={{ color: textColor, fontSize: 9, opacity: 0.85, textAlign: 'center' }}>{info.headline}</Text> : null}
-      {!sidebar ? (
-        <Text style={{ color: context.colors.textSecondary, fontSize: 8, textAlign: 'center' }}>
-          {[info.email, info.phoneNumber, info.address, info.website].filter(Boolean).join('  |  ')}
-        </Text>
+      {!sidebar && contacts.length > 0 ? (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 7 }}>
+          {contacts.map((item) => (
+            <View key={item.value} style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+              <PdfLucideIcon icon={item.icon} color={context.colors.textSecondary} size={8} />
+              <Text style={{ color: context.colors.textSecondary, fontSize: 8 }}>{item.value}</Text>
+            </View>
+          ))}
+        </View>
       ) : null}
     </View>
   );
@@ -318,19 +378,22 @@ const ContactBlock = ({ info, component, sidebar, context }: {
 }) => {
   const color = component.style?.color ?? (sidebar ? context.colors.background : context.colors.text);
   const items = [
-    { value: info.address, href: '' },
-    { value: info.phoneNumber, href: info.phoneNumber ? `tel:${info.phoneNumber}` : '' },
-    { value: info.email, href: info.email ? `mailto:${info.email}` : '' },
-    { value: info.website, href: safeWebsiteUrl(info.website) },
+    { icon: MapPin, value: info.address, href: '' },
+    { icon: Phone, value: info.phoneNumber, href: info.phoneNumber ? `tel:${info.phoneNumber}` : '' },
+    { icon: Mail, value: info.email, href: info.email ? `mailto:${info.email}` : '' },
+    { icon: Globe, value: info.website, href: safeWebsiteUrl(info.website) },
   ].filter((item) => item.value);
   if (items.length === 0) return null;
 
   return (
     <View style={[{ marginBottom: cssSizeToPoints(context.spacing.lg, 12) }, toPdfComponentStyle(component.style)]}>
-      <SectionTitle title={context.locale?.startsWith('zh') ? '联系方式' : 'Contact'} sidebar={sidebar} context={context} />
+      <SectionTitle title={context.locale?.startsWith('zh') ? '联系方式' : 'Contact'} icon={Globe} sidebar={sidebar} context={context} />
       <View style={{ gap: 7 }}>
         {items.map((item) => (
-          <ContactText key={item.value} value={item.value} href={item.href} style={{ color, fontSize: 8, textDecoration: 'none' }} />
+          <View key={item.value} style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <PdfLucideIcon icon={item.icon} color={color} size={8} />
+            <ContactText value={item.value} href={item.href} style={{ color, fontSize: 8, textDecoration: 'none' }} />
+          </View>
         ))}
       </View>
     </View>
@@ -350,7 +413,7 @@ const DefaultSectionBlock = ({ component, items, context }: {
   const fields = component.fieldMap ?? {};
   return (
     <View style={[{ marginBottom: cssSizeToPoints(context.spacing.lg, 12) }, toPdfComponentStyle(component.style)]}>
-      <SectionTitle title={resolveTitle(component, context.locale)} context={context} />
+      <SectionTitle title={resolveTitle(component, context.locale)} icon={getSectionIcon(component)} context={context} />
       <View style={{ gap: cssSizeToPoints(context.spacing.md, 8) }}>
         {items.map((item, index) => {
           const record = item as Record<string, unknown>;
@@ -385,7 +448,7 @@ const ListSectionBlock = ({ component, items, context }: {
   const fields = component.fieldMap ?? {};
   return (
     <View style={[{ marginBottom: cssSizeToPoints(context.spacing.lg, 12) }, toPdfComponentStyle(component.style)]}>
-      <SectionTitle title={resolveTitle(component, context.locale)} context={context} />
+      <SectionTitle title={resolveTitle(component, context.locale)} icon={getSectionIcon(component)} context={context} />
       <View style={{ gap: 6 }}>
         {items.map((item, index) => {
           const record = item as Record<string, unknown>;
@@ -413,7 +476,7 @@ const CompactListBlock = ({ component, items, sidebar, context }: {
   const color = component.style?.color ?? (sidebar ? context.colors.background : context.colors.text);
   return (
     <View style={[{ marginBottom: cssSizeToPoints(context.spacing.lg, 12) }, toPdfComponentStyle(component.style)]}>
-      <SectionTitle title={resolveTitle(component, context.locale)} sidebar={sidebar} context={context} />
+      <SectionTitle title={resolveTitle(component, context.locale)} icon={getSectionIcon(component)} sidebar={sidebar} context={context} />
       <View style={{ gap: 7 }}>
         {items.map((item, index) => {
           const record = item as Record<string, unknown>;
@@ -440,7 +503,7 @@ const TimelineBlock = ({ component, items, context }: {
   const color = component.style?.color ?? context.colors.text;
   return (
     <View style={[{ marginBottom: cssSizeToPoints(context.spacing.lg, 12) }, toPdfComponentStyle(component.style)]}>
-      <SectionTitle title={resolveTitle(component, context.locale)} context={context} />
+      <SectionTitle title={resolveTitle(component, context.locale)} icon={getSectionIcon(component)} context={context} />
       <View style={{ gap: cssSizeToPoints(context.spacing.md, 8) }}>
         {items.map((item, index) => {
           const record = item as Record<string, unknown>;
@@ -528,7 +591,7 @@ export const MagicResumePdfDocument = ({ data, template, locale }: MagicResumePd
       title={data.name || data.info.fullName}
     >
       {template.layout.type === 'two-column' && template.layout.twoColumn ? (
-        <Page size="A4" style={[baseStyle, { flexDirection: 'row' }]}>
+        <Page size={FREE_FORM_PAGE_SIZE} style={[baseStyle, FREE_FORM_PAGE_MIN_HEIGHT_STYLE, { flexDirection: 'row' }]}>
           <View
             style={{
               width: template.layout.twoColumn.leftWidth,
@@ -551,8 +614,10 @@ export const MagicResumePdfDocument = ({ data, template, locale }: MagicResumePd
           </View>
         </Page>
       ) : (
-        <Page size="A4" style={[baseStyle, { padding }]}>
-          {main.map((component) => <ComponentBlock key={component.id} component={component} data={data} sidebar={false} context={context} />)}
+        <Page size={FREE_FORM_PAGE_SIZE} style={[baseStyle, FREE_FORM_PAGE_MIN_HEIGHT_STYLE]}>
+          <View style={{ padding }}>
+            {main.map((component) => <ComponentBlock key={component.id} component={component} data={data} sidebar={false} context={context} />)}
+          </View>
         </Page>
       )}
     </Document>

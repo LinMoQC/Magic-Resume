@@ -5,8 +5,10 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import React from 'react';
 import { Font, renderToBuffer } from '@react-pdf/renderer';
+import { Mail } from 'lucide';
 import { magicTemplateList } from '../src/config/magic-templates.ts';
 import { MagicResumePdfDocument } from '../src/pdf/MagicResumePdfDocument.tsx';
+import { PdfLucideIcon } from '../src/pdf/PdfLucideIcon.tsx';
 
 const packageDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const webFontsDir = resolve(packageDir, '../../apps/web/public/fonts');
@@ -19,6 +21,13 @@ Font.register({
   ],
 });
 Font.registerHyphenationCallback((word) => /[\u3400-\u9fff]/.test(word) ? Array.from(word) : [word]);
+
+const iconElement = PdfLucideIcon({ icon: Mail, color: '#3b82f6', size: 12 });
+for (const primitive of React.Children.toArray(iconElement.props.children)) {
+  assert.equal(primitive.props.fill, 'none', 'Lucide PDF primitives must disable the default black fill');
+  assert.equal(primitive.props.stroke, '#3b82f6', 'Lucide PDF primitives must receive the requested stroke color');
+  assert.equal(primitive.props.strokeWidth, 2, 'Lucide PDF primitives must preserve the Lucide stroke width');
+}
 
 const repeatedSummary = '<p>负责复杂产品的规划与交付，推动跨团队协作并持续改进用户体验。</p>'.repeat(4);
 const entries = Array.from({ length: 8 }, (_, index) => ({
@@ -91,6 +100,14 @@ try {
 
     assert.equal(bytes.subarray(0, 4).toString(), '%PDF', `${template.id} did not render a PDF`);
     assert.ok(bytes.byteLength > 10_000, `${template.id} PDF was unexpectedly small`);
+
+    const pdfSource = bytes.toString('latin1');
+    assert.match(pdfSource, /\/Count 1\b/, `${template.id} should render as one free-form page`);
+
+    const mediaBox = pdfSource.match(/\/MediaBox \[0 0 ([\d.]+) ([\d.]+)\]/);
+    assert.ok(mediaBox, `${template.id} PDF did not contain a page MediaBox`);
+    assert.ok(Math.abs(Number(mediaBox[1]) - 595.28) < 0.1, `${template.id} did not keep the A4 page width`);
+    assert.ok(Number(mediaBox[2]) > 841.89, `${template.id} did not grow beyond the A4 minimum height`);
   }
 
   console.log(`Rendered ${magicTemplateList.length} templates successfully.`);

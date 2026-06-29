@@ -63,7 +63,8 @@
     "@magic-resume/resume-schema": "workspace:*",
     "@react-pdf/renderer": "4.5.1",
     "dompurify": "^3.2.6",
-    "lodash.get": "^4.4.2"
+    "lodash.get": "^4.4.2",
+    "lucide": "0.513.0"
   },
   "peerDependencies": {
     "lucide-react": "^0.513.0",

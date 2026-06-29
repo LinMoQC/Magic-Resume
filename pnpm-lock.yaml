@@ -398,6 +398,9 @@ importers:
       lodash.get:
         specifier: ^4.4.2
         version: 4.4.2
+      lucide:
+        specifier: 0.513.0
+        version: 0.513.0
       lucide-react:
         specifier: ^0.513.0
         version: 0.513.0(react@19.2.7)
@@ -5453,6 +5456,9 @@ packages:
     resolution: {integrity: sha512-CJZKq2g8Y8yN4Aq002GahSXbG2JpFv9kXwyiOAMvUBv7pxeOFHUWKB0mO7MiY4ZVFCV4aNjv2BJFq/z3DgKPQg==}
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
+  lucide@0.513.0:
+    resolution: {integrity: sha512-c7gYh8As4tFHFk7j6xtog+1aLyKw0uDjT1wTXILVlRmmcOuArOv98LeWT1bWJqs/jqHXgRFbsmKmOMhsSAC2cg==}
 
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
@@ -12501,6 +12507,8 @@ snapshots:
   lucide-react@0.513.0(react@19.2.7):
     dependencies:
       react: 19.2.7
+
+  lucide@0.513.0: {}
 
   magic-string@0.30.21:
     dependencies:
