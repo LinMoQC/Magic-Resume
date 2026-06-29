@@ -355,8 +355,8 @@ const DefaultSectionBlock = ({ component, items, context }: {
         {items.map((item, index) => {
           const record = item as Record<string, unknown>;
           return (
-            <View key={item.id || index} wrap={false} style={{ gap: 2 }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
+            <View key={item.id || index} style={{ gap: 2 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }} wrap={false}>
                 <View style={{ flexGrow: 1, flexShrink: 1, gap: 1 }}>
                   <Text style={{ color: context.colors.text, fontSize: 9, fontWeight: 700 }}>{getFieldValue(record, fields.mainTitle)}</Text>
                   <Text style={{ color: context.colors.text, fontSize: 8 }}>{getFieldValue(record, fields.mainSubtitle)}</Text>
@@ -390,7 +390,7 @@ const ListSectionBlock = ({ component, items, context }: {
         {items.map((item, index) => {
           const record = item as Record<string, unknown>;
           return (
-            <View key={item.id || index} wrap={false} style={{ gap: 2 }}>
+            <View key={item.id || index} style={{ gap: 2 }}>
               <Text style={{ color: context.colors.text, fontSize: 8.5, fontWeight: 700 }}>{getFieldValue(record, fields.itemName)}</Text>
               <Text style={{ color: context.colors.text, fontSize: 8 }}>{getFieldValue(record, fields.itemDetail)}</Text>
               <Text style={{ color: context.colors.textSecondary, fontSize: 7.5 }}>{getFieldValue(record, fields.date)}</Text>
@@ -450,13 +450,13 @@ const TimelineBlock = ({ component, items, context }: {
           const location = getFieldValue(record, ['location']);
           const description = getFieldValue(record, fields.description ?? ['summary', 'description']);
           return (
-            <View key={item.id || index} wrap={false} style={{ flexDirection: 'row', gap: 7 }}>
+            <View key={item.id || index} style={{ flexDirection: 'row', gap: 7 }}>
               <View style={{ alignItems: 'center', width: 7 }}>
                 <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: context.colors.primary, marginTop: 2 }} />
                 {index < items.length - 1 ? <View style={{ width: 0.75, flexGrow: 1, minHeight: 18, backgroundColor: context.colors.border }} /> : null}
               </View>
               <View style={{ flexGrow: 1, flexShrink: 1, gap: 2 }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }} wrap={false}>
                   <View style={{ flexGrow: 1, flexShrink: 1, gap: 1 }}>
                     <Text style={{ color, fontSize: 9, fontWeight: 700 }}>{title}</Text>
                     {subtitle ? <Text style={{ color: context.colors.primary, fontSize: 8, fontWeight: 700 }}>{subtitle}</Text> : null}
