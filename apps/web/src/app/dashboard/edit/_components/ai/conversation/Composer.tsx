@@ -68,6 +68,12 @@ export default function Composer({ onRunSkill, onSend, disabled }: ComposerProps
   };
 
   const onKeyDown = (e: React.KeyboardEvent) => {
+    // While the IME is composing (e.g. typing Chinese pinyin), Enter confirms a
+    // candidate — it must NOT submit or drive the slash menu. Without this, hitting
+    // Enter to pick a 候选词 fires off the message mid-typing.
+    if (e.nativeEvent.isComposing || e.keyCode === 229) {
+      return;
+    }
     if (showSlash) {
       if (e.key === 'ArrowDown') {
         e.preventDefault();
