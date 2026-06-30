@@ -10,78 +10,34 @@ import {
 import type { Style } from '@react-pdf/types';
 import type {
   ComponentDefinition,
-  ComponentStyle,
   FieldMapping,
   MagicTemplateDSL,
 } from '../types/magic-dsl';
 import type { InfoType, Resume, SectionItem } from '../types/resume';
+import { resolvePdfSectionTitle, getPdfSectionIconName, PdfRenderProvider } from './context';
+import { buildPdfComponentMap, planPdfLayout, type PdfLayoutPagePlan } from './layout';
+import { PdfIcon, type PdfIconName } from './pdfIcons';
+import { RichText } from './shared/rich-text';
+import { cssSizeToPoints, toPdfComponentStyle } from './shared/styles';
 
 type PdfStyle = Style | Style[];
+
+const sectionKeyOf = (component: ComponentDefinition): string | undefined =>
+  component.dataBinding.startsWith('sections.')
+    ? component.dataBinding.slice('sections.'.length)
+    : undefined;
 
 export interface MagicResumePdfDocumentProps {
   data: Resume;
   template: MagicTemplateDSL;
   locale?: string;
+  /**
+   * 单页连续模式:把整份简历放在「一整页」上(高度=内容高,不切 A4)。
+   * 单位 pt。通常由导出时测量预览 DOM 高度换算得到(px × 0.75)。
+   * 仅当布局规划为单页(无显式 pdfLayout.pages)时生效。
+   */
+  pageHeight?: number;
 }
-
-const ZH_TITLE_BY_SECTION_KEY: Record<string, string> = {
-  summary: '个人总结',
-  experience: '工作经历',
-  education: '教育经历',
-  projects: '项目经历',
-  skills: '专业技能',
-  languages: '语言能力',
-  certificates: '证书资质',
-  profiles: '个人主页',
-  awards: '奖项',
-};
-
-const ZH_TITLE_BY_ENGLISH: Record<string, string> = {
-  summary: '个人总结',
-  experience: '工作经历',
-  'work experience': '工作经历',
-  'professional experience': '专业经历',
-  education: '教育经历',
-  projects: '项目经历',
-  skills: '专业技能',
-  'technical skills': '技术技能',
-  languages: '语言能力',
-  certificates: '证书资质',
-  certifications: '证书资质',
-  profiles: '个人主页',
-  links: '个人主页',
-  awards: '奖项',
-};
-
-const cssSizeToPoints = (value: string | number | undefined, fallback = 0): number => {
-  if (typeof value === 'number') return value * 0.75;
-  if (!value) return fallback;
-
-  const parsed = Number.parseFloat(value);
-  if (!Number.isFinite(parsed)) return fallback;
-  if (value.endsWith('rem')) return parsed * 12;
-  if (value.endsWith('mm')) return parsed * 2.83465;
-  if (value.endsWith('pt')) return parsed;
-  return parsed * 0.75;
-};
-
-const htmlToText = (value: string | null | undefined): string => {
-  if (!value) return '';
-
-  return value
-    .replace(/<\s*br\s*\/?>/gi, '\n')
-    .replace(/<\s*li[^>]*>/gi, '• ')
-    .replace(/<\s*\/\s*(p|div|li|ul|ol|h[1-6])\s*>/gi, '\n')
-    .replace(/<[^>]+>/g, '')
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/&amp;/gi, '&')
-    .replace(/&lt;/gi, '<')
-    .replace(/&gt;/gi, '>')
-    .replace(/&quot;/gi, '"')
-    .replace(/&#39;/gi, "'")
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
-};
 
 const getNestedValue = (item: Record<string, unknown>, path: string): unknown => {
   return path.split('.').reduce<unknown>((current, key) => {
@@ -117,51 +73,7 @@ const getSectionItems = (data: Resume, binding: string): SectionItem[] => {
 
 const resolveTitle = (component: ComponentDefinition, locale?: string): string => {
   const title = String(component.props?.title ?? 'Section');
-  if (!locale?.toLowerCase().startsWith('zh')) return title;
-
-  const sectionKey = component.dataBinding.startsWith('sections.')
-    ? component.dataBinding.slice('sections.'.length)
-    : '';
-  return ZH_TITLE_BY_SECTION_KEY[sectionKey] ?? ZH_TITLE_BY_ENGLISH[title.trim().toLowerCase()] ?? title;
-};
-
-const sortComponents = (template: MagicTemplateDSL, data: Resume): ComponentDefinition[] => {
-  const sidebar = template.components
-    .filter((component) => component.position?.area === 'sidebar')
-    .sort((a, b) => (a.position?.order ?? 0) - (b.position?.order ?? 0));
-  const main = template.components.filter((component) => component.position?.area !== 'sidebar');
-  const headers = main.filter((component) => component.dataBinding === 'info');
-  const sections = main.filter((component) => component.dataBinding.startsWith('sections.'));
-  const ordered: ComponentDefinition[] = [];
-
-  for (const entry of data.sectionOrder ?? []) {
-    const component = sections.find((candidate) => candidate.dataBinding === `sections.${entry.key}`);
-    if (component) ordered.push(component);
-  }
-
-  for (const component of sections) {
-    if (!ordered.includes(component)) ordered.push(component);
-  }
-
-  return [...sidebar, ...headers, ...ordered];
-};
-
-const toPdfComponentStyle = (style?: ComponentStyle): Style => {
-  if (!style) return {};
-
-  return {
-    backgroundColor: style.backgroundColor,
-    color: style.color,
-    padding: cssSizeToPoints(style.padding),
-    marginTop: cssSizeToPoints(style.marginTop ?? style.margin),
-    marginRight: cssSizeToPoints(style.marginRight ?? style.margin),
-    marginBottom: cssSizeToPoints(style.marginBottom ?? style.margin),
-    marginLeft: cssSizeToPoints(style.marginLeft ?? style.margin),
-    borderRadius: cssSizeToPoints(style.borderRadius),
-    fontSize: style.fontSize ? cssSizeToPoints(style.fontSize) : undefined,
-    fontWeight: style.fontWeight ? Number(style.fontWeight) : undefined,
-    textAlign: style.textAlign,
-  };
+  return resolvePdfSectionTitle({ sectionKey: sectionKeyOf(component), fallbackTitle: title, locale });
 };
 
 interface RenderContext {
@@ -173,27 +85,32 @@ interface RenderContext {
   locale?: string;
 }
 
-const SectionTitle = ({ title, sidebar, context }: { title: string; sidebar?: boolean; context: RenderContext }) => {
+const SectionTitle = ({ title, sidebar, context, iconName }: { title: string; sidebar?: boolean; context: RenderContext; iconName?: PdfIconName | null }) => {
   const color = sidebar ? context.colors.background : context.colors.primary;
+  const titleSize = cssSizeToPoints(context.typography.fontSize.lg, 12);
   return (
     <View
+      wrap={false}
+      minPresenceAhead={48}
       style={{
         alignItems: 'center',
         borderBottomColor: color,
         borderBottomWidth: context.showTitleDivider ? 0.75 : 0,
         flexDirection: 'row',
-        gap: 4,
+        gap: titleSize * 0.4,
         marginBottom: cssSizeToPoints(context.spacing.sm, 6),
         paddingBottom: cssSizeToPoints(context.spacing.sm, 6),
       }}
     >
-      {context.showTitleIcon ? (
+      {context.showTitleIcon && iconName ? (
+        <PdfIcon name={iconName} size={titleSize} color={color} />
+      ) : context.showTitleIcon ? (
         <View style={{ width: 5, height: 5, borderRadius: 2.5, backgroundColor: color }} />
       ) : null}
       <Text
         style={{
           color,
-          fontSize: cssSizeToPoints(context.typography.fontSize.lg, 12),
+          fontSize: titleSize,
           fontWeight: 700,
           textTransform: sidebar ? 'uppercase' : undefined,
         }}
@@ -224,11 +141,11 @@ const HeaderBlock = ({ info, component, context }: {
   const labelContacts = props.contactStyle === 'label';
   const avatarWidth = cssSizeToPoints(Number(props.avatarWidth ?? 40));
   const avatarHeight = cssSizeToPoints(Number(props.avatarHeight ?? 40));
-  const contacts = [
-    { label: context.locale?.startsWith('zh') ? '电话' : 'Phone', value: info.phoneNumber, href: info.phoneNumber ? `tel:${info.phoneNumber}` : '' },
-    { label: context.locale?.startsWith('zh') ? '邮箱' : 'Email', value: info.email, href: info.email ? `mailto:${info.email}` : '' },
-    { label: context.locale?.startsWith('zh') ? '地址' : 'Address', value: info.address, href: '' },
-    { label: context.locale?.startsWith('zh') ? '网站' : 'Website', value: info.website, href: safeWebsiteUrl(info.website) },
+  const contacts: Array<{ label: string; value: string; href: string; icon?: PdfIconName }> = [
+    { label: context.locale?.startsWith('zh') ? '电话' : 'Phone', value: info.phoneNumber, href: info.phoneNumber ? `tel:${info.phoneNumber}` : '', icon: 'phone' },
+    { label: context.locale?.startsWith('zh') ? '邮箱' : 'Email', value: info.email, href: info.email ? `mailto:${info.email}` : '', icon: 'mail' },
+    { label: context.locale?.startsWith('zh') ? '地址' : 'Address', value: info.address, href: '', icon: 'mapPin' },
+    { label: context.locale?.startsWith('zh') ? '网站' : 'Website', value: info.website, href: safeWebsiteUrl(info.website), icon: 'globe' },
   ].filter((item) => item.value);
 
   if (props.showCustomFields) {
@@ -267,8 +184,12 @@ const HeaderBlock = ({ info, component, context }: {
         {info.headline ? <Text style={{ color: context.colors.textSecondary, fontSize: 9 }}>{info.headline}</Text> : null}
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: labelContacts ? 5 : 7, marginTop: 2 }}>
           {contacts.map((item) => (
-            <View key={`${item.label}:${item.value}`} style={{ flexDirection: 'row', gap: 2, width: labelContacts ? '47%' : undefined }}>
-              {labelContacts ? <Text style={{ color: context.colors.textSecondary, fontSize: 7.5 }}>{item.label}:</Text> : null}
+            <View key={`${item.label}:${item.value}`} style={{ flexDirection: 'row', gap: 2.5, alignItems: 'center', width: labelContacts ? '47%' : undefined }}>
+              {labelContacts ? (
+                <Text style={{ color: context.colors.textSecondary, fontSize: 7.5 }}>{item.label}:</Text>
+              ) : item.icon ? (
+                <PdfIcon name={item.icon} size={7.5} color={context.colors.primary} />
+              ) : null}
               <ContactText value={item.value} href={item.href} style={{ color: context.colors.text, fontSize: 7.5, textDecoration: 'none' }} />
             </View>
           ))}
@@ -327,7 +248,7 @@ const ContactBlock = ({ info, component, sidebar, context }: {
 
   return (
     <View style={[{ marginBottom: cssSizeToPoints(context.spacing.lg, 12) }, toPdfComponentStyle(component.style)]}>
-      <SectionTitle title={context.locale?.startsWith('zh') ? '联系方式' : 'Contact'} sidebar={sidebar} context={context} />
+      <SectionTitle title={context.locale?.startsWith('zh') ? '联系方式' : 'Contact'} sidebar={sidebar} context={context} iconName={getPdfSectionIconName('contact')} />
       <View style={{ gap: 7 }}>
         {items.map((item) => (
           <ContactText key={item.value} value={item.value} href={item.href} style={{ color, fontSize: 8, textDecoration: 'none' }} />
@@ -337,10 +258,9 @@ const ContactBlock = ({ info, component, sidebar, context }: {
   );
 };
 
-const Description = ({ value, color }: { value: string; color: string }) => {
-  const text = htmlToText(value);
-  return text ? <Text style={{ color, fontSize: 8, lineHeight: 1.45, marginTop: 4 }}>{text}</Text> : null;
-};
+const Description = ({ value, color }: { value: string; color: string }) => (
+  <RichText html={value} baseFontSize={8} color={color} lineHeight={1.1} />
+);
 
 const DefaultSectionBlock = ({ component, items, context }: {
   component: ComponentDefinition;
@@ -350,7 +270,7 @@ const DefaultSectionBlock = ({ component, items, context }: {
   const fields = component.fieldMap ?? {};
   return (
     <View style={[{ marginBottom: cssSizeToPoints(context.spacing.lg, 12) }, toPdfComponentStyle(component.style)]}>
-      <SectionTitle title={resolveTitle(component, context.locale)} context={context} />
+      <SectionTitle title={resolveTitle(component, context.locale)} context={context} iconName={getPdfSectionIconName(sectionKeyOf(component))} />
       <View style={{ gap: cssSizeToPoints(context.spacing.md, 8) }}>
         {items.map((item, index) => {
           const record = item as Record<string, unknown>;
@@ -385,7 +305,7 @@ const ListSectionBlock = ({ component, items, context }: {
   const fields = component.fieldMap ?? {};
   return (
     <View style={[{ marginBottom: cssSizeToPoints(context.spacing.lg, 12) }, toPdfComponentStyle(component.style)]}>
-      <SectionTitle title={resolveTitle(component, context.locale)} context={context} />
+      <SectionTitle title={resolveTitle(component, context.locale)} context={context} iconName={getPdfSectionIconName(sectionKeyOf(component))} />
       <View style={{ gap: 6 }}>
         {items.map((item, index) => {
           const record = item as Record<string, unknown>;
@@ -413,7 +333,7 @@ const CompactListBlock = ({ component, items, sidebar, context }: {
   const color = component.style?.color ?? (sidebar ? context.colors.background : context.colors.text);
   return (
     <View style={[{ marginBottom: cssSizeToPoints(context.spacing.lg, 12) }, toPdfComponentStyle(component.style)]}>
-      <SectionTitle title={resolveTitle(component, context.locale)} sidebar={sidebar} context={context} />
+      <SectionTitle title={resolveTitle(component, context.locale)} sidebar={sidebar} context={context} iconName={getPdfSectionIconName(sectionKeyOf(component))} />
       <View style={{ gap: 7 }}>
         {items.map((item, index) => {
           const record = item as Record<string, unknown>;
@@ -440,7 +360,7 @@ const TimelineBlock = ({ component, items, context }: {
   const color = component.style?.color ?? context.colors.text;
   return (
     <View style={[{ marginBottom: cssSizeToPoints(context.spacing.lg, 12) }, toPdfComponentStyle(component.style)]}>
-      <SectionTitle title={resolveTitle(component, context.locale)} context={context} />
+      <SectionTitle title={resolveTitle(component, context.locale)} context={context} iconName={getPdfSectionIconName(sectionKeyOf(component))} />
       <View style={{ gap: cssSizeToPoints(context.spacing.md, 8) }}>
         {items.map((item, index) => {
           const record = item as Record<string, unknown>;
@@ -495,7 +415,7 @@ const ComponentBlock = ({ component, data, sidebar, context }: {
   return <DefaultSectionBlock component={component} items={items} context={context} />;
 };
 
-export const MagicResumePdfDocument = ({ data, template, locale }: MagicResumePdfDocumentProps) => {
+export const MagicResumePdfDocument = ({ data, template, locale, pageHeight }: MagicResumePdfDocumentProps) => {
   const { colors, typography, spacing } = template.designTokens;
   const context: RenderContext = {
     colors,
@@ -505,10 +425,14 @@ export const MagicResumePdfDocument = ({ data, template, locale }: MagicResumePd
     showTitleIcon: template.layout.showTitleIcon !== false,
     locale,
   };
-  const sorted = sortComponents(template, data);
-  const sidebar = sorted.filter((component) => component.position?.area === 'sidebar');
-  const main = sorted.filter((component) => component.position?.area !== 'sidebar');
-  const lineHeight = typography.lineHeight ?? 1.5;
+  const layoutPlan = planPdfLayout(template, data);
+  const componentMap = buildPdfComponentMap(template);
+  // 单页连续模式:仅在单页规划 + 提供了 pageHeight 时启用。
+  const continuous = typeof pageHeight === 'number' && pageHeight > 0 && layoutPlan.pages.length === 1;
+  const containerWidthPt = cssSizeToPoints(template.layout.containerWidth, 595);
+  const pageSize: 'A4' | [number, number] = continuous ? [containerWidthPt, pageHeight as number] : 'A4';
+  // Source Han Sans 行盒偏高:把基础行高收紧(封顶 1.3),避免标题/副标题/日期等也显得松。
+  const lineHeight = Math.min(typography.lineHeight ?? 1.5, 1.3);
   const baseStyle: Style = {
     backgroundColor: colors.background,
     color: colors.text,
@@ -517,44 +441,74 @@ export const MagicResumePdfDocument = ({ data, template, locale }: MagicResumePd
     lineHeight,
   };
   const padding = cssSizeToPoints(template.layout.padding, 24);
+  const renderComponents = (ids: string[], sidebar: boolean) => ids.map((id) => {
+    const component = componentMap.get(id);
+    if (!component) return null;
+
+    return <ComponentBlock key={component.id} component={component} data={data} sidebar={sidebar} context={context} />;
+  });
+
+  const renderTwoColumnPage = (page: PdfLayoutPagePlan, index: number) => {
+    const sidebarWidth = layoutPlan.sidebarWidth ? `${layoutPlan.sidebarWidth}%` : template.layout.twoColumn?.leftWidth;
+
+    return (
+      <Page key={`page-${index}`} size={pageSize} wrap={!continuous} style={[baseStyle, { flexDirection: 'row' }]}>
+        <View
+          fixed={!continuous}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            bottom: 0,
+            width: sidebarWidth,
+            backgroundColor: colors.sidebar ?? colors.primary,
+          }}
+        />
+        <View
+          style={{
+            width: sidebarWidth,
+            padding,
+            paddingRight: Math.max(padding - cssSizeToPoints(template.layout.twoColumn?.gap) / 2, 8),
+          }}
+        >
+          {renderComponents(page.sidebar, true)}
+        </View>
+        <View
+          style={{
+            flexGrow: 1,
+            flexShrink: 1,
+            padding,
+            paddingLeft: Math.max(padding - cssSizeToPoints(template.layout.twoColumn?.gap) / 2, 8),
+          }}
+        >
+          {renderComponents(page.main, false)}
+        </View>
+      </Page>
+    );
+  };
+
+  const renderFullWidthPage = (page: PdfLayoutPagePlan, index: number) => (
+    <Page key={`page-${index}`} size={pageSize} wrap={!continuous} style={[baseStyle, { padding }]}>
+      {renderComponents([...page.sidebar, ...page.main], false)}
+    </Page>
+  );
 
   return (
-    <Document
-      author={data.info.fullName}
-      creator="Magic Resume"
-      language={locale ?? 'zh-CN'}
-      producer="Magic Resume"
-      subject={data.info.headline}
-      title={data.name || data.info.fullName}
-    >
-      {template.layout.type === 'two-column' && template.layout.twoColumn ? (
-        <Page size="A4" style={[baseStyle, { flexDirection: 'row' }]}>
-          <View
-            style={{
-              width: template.layout.twoColumn.leftWidth,
-              backgroundColor: colors.sidebar ?? colors.primary,
-              padding,
-              paddingRight: Math.max(padding - cssSizeToPoints(template.layout.twoColumn.gap) / 2, 8),
-            }}
-          >
-            {sidebar.map((component) => <ComponentBlock key={component.id} component={component} data={data} sidebar context={context} />)}
-          </View>
-          <View
-            style={{
-              flexGrow: 1,
-              flexShrink: 1,
-              padding,
-              paddingLeft: Math.max(padding - cssSizeToPoints(template.layout.twoColumn.gap) / 2, 8),
-            }}
-          >
-            {main.map((component) => <ComponentBlock key={component.id} component={component} data={data} sidebar={false} context={context} />)}
-          </View>
-        </Page>
-      ) : (
-        <Page size="A4" style={[baseStyle, { padding }]}>
-          {main.map((component) => <ComponentBlock key={component.id} component={component} data={data} sidebar={false} context={context} />)}
-        </Page>
-      )}
-    </Document>
+    <PdfRenderProvider data={data} template={template} locale={locale}>
+      <Document
+        author={data.info.fullName}
+        creator="Magic Resume"
+        language={locale ?? 'zh-CN'}
+        producer="Magic Resume"
+        subject={data.info.headline}
+        title={data.name || data.info.fullName}
+      >
+        {layoutPlan.pages.map((page, index) => (
+          template.layout.type === 'two-column' && template.layout.twoColumn && !page.fullWidth
+            ? renderTwoColumnPage(page, index)
+            : renderFullWidthPage(page, index)
+        ))}
+      </Document>
+    </PdfRenderProvider>
   );
 };

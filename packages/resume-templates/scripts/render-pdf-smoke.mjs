@@ -1,24 +1,17 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import React from 'react';
-import { Font, renderToBuffer } from '@react-pdf/renderer';
+import { renderToBuffer } from '@react-pdf/renderer';
 import { magicTemplateList } from '../src/config/magic-templates.ts';
-import { MagicResumePdfDocument } from '../src/pdf/MagicResumePdfDocument.tsx';
+import { MagicResumePdfDocument } from '../src/pdf/document.tsx';
+import { registerMagicResumePdfFonts } from '../src/pdf/fonts.ts';
 
 const packageDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const webFontsDir = resolve(packageDir, '../../apps/web/public/fonts');
-
-Font.register({
-  family: 'Source Han Sans SC',
-  fonts: [
-    { src: join(webFontsDir, 'SourceHanSansSC-Regular.otf'), fontWeight: 400 },
-    { src: join(webFontsDir, 'SourceHanSansSC-Bold.otf'), fontWeight: 700 },
-  ],
-});
-Font.registerHyphenationCallback((word) => /[\u3400-\u9fff]/.test(word) ? Array.from(word) : [word]);
 
 const repeatedSummary = '<p>负责复杂产品的规划与交付，推动跨团队协作并持续改进用户体验。</p>'.repeat(4);
 const entries = Array.from({ length: 8 }, (_, index) => ({
@@ -76,6 +69,11 @@ const outputDir = requestedOutputDir
   ? resolve(requestedOutputDir)
   : await mkdtemp(join(tmpdir(), 'magic-resume-pdf-'));
 await mkdir(outputDir, { recursive: true });
+registerMagicResumePdfFonts({ baseUrl: webFontsDir, data });
+
+const canRenderWithPoppler = spawnSync('pdftoppm', ['-v'], { encoding: 'utf8' }).status === 0;
+const pngOutputDir = join(outputDir, 'png');
+if (canRenderWithPoppler) await mkdir(pngOutputDir, { recursive: true });
 
 try {
   for (const template of magicTemplateList) {
@@ -91,9 +89,18 @@ try {
 
     assert.equal(bytes.subarray(0, 4).toString(), '%PDF', `${template.id} did not render a PDF`);
     assert.ok(bytes.byteLength > 10_000, `${template.id} PDF was unexpectedly small`);
+
+    if (canRenderWithPoppler) {
+      const pngPrefix = join(pngOutputDir, template.id);
+      const render = spawnSync('pdftoppm', ['-png', '-f', '1', '-singlefile', outputPath, pngPrefix], { encoding: 'utf8' });
+      assert.equal(render.status, 0, render.stderr || render.stdout || `${template.id} failed Poppler rendering`);
+
+      const pngBytes = await readFile(`${pngPrefix}.png`);
+      assert.equal(pngBytes.subarray(1, 4).toString(), 'PNG', `${template.id} did not render a PNG preview`);
+    }
   }
 
-  console.log(`Rendered ${magicTemplateList.length} templates successfully.`);
+  console.log(`Rendered ${magicTemplateList.length} templates successfully${canRenderWithPoppler ? ' with PNG previews' : ''}.`);
 } finally {
   if (!requestedOutputDir) await rm(outputDir, { recursive: true, force: true });
 }

@@ -1,32 +1,17 @@
 import React from 'react';
-import { Font, pdf } from '@react-pdf/renderer';
+import { pdf } from '@react-pdf/renderer';
 import type { MagicTemplateDSL } from '../types/magic-dsl';
 import type { Resume } from '../types/resume';
-import { MagicResumePdfDocument } from './MagicResumePdfDocument';
+import { MagicResumePdfDocument } from './document';
+import { registerMagicResumePdfFonts } from './fonts';
 
 export interface CreateMagicResumePdfBlobOptions {
   data: Resume;
   template: MagicTemplateDSL;
   locale?: string;
+  /** 单页连续模式的页高(pt);由调用方测量预览 DOM 高度换算传入。 */
+  pageHeight?: number;
 }
-
-let fontsRegistered = false;
-
-const registerFonts = () => {
-  if (fontsRegistered) return;
-  if (typeof window === 'undefined') throw new Error('PDF export is only available in the browser.');
-
-  const baseUrl = window.location.origin;
-  Font.register({
-    family: 'Source Han Sans SC',
-    fonts: [
-      { src: `${baseUrl}/fonts/SourceHanSansSC-Regular.otf`, fontWeight: 400 },
-      { src: `${baseUrl}/fonts/SourceHanSansSC-Bold.otf`, fontWeight: 700 },
-    ],
-  });
-  Font.registerHyphenationCallback((word) => /[\u3400-\u9fff]/.test(word) ? Array.from(word) : [word]);
-  fontsRegistered = true;
-};
 
 const blobToDataUrl = (blob: Blob): Promise<string> => new Promise((resolve, reject) => {
   const reader = new FileReader();
@@ -54,11 +39,13 @@ export const createMagicResumePdfBlob = async ({
   data,
   template,
   locale,
+  pageHeight,
 }: CreateMagicResumePdfBlobOptions): Promise<Blob> => {
-  registerFonts();
+  if (typeof window === 'undefined') throw new Error('PDF export is only available in the browser.');
   const preparedData = await prepareResumeImages(data);
+  registerMagicResumePdfFonts({ baseUrl: `${window.location.origin}/fonts`, data: preparedData });
   const document = (
-    <MagicResumePdfDocument data={preparedData} template={template} locale={locale} />
+    <MagicResumePdfDocument data={preparedData} template={template} locale={locale} pageHeight={pageHeight} />
   );
 
   return pdf(document).toBlob();

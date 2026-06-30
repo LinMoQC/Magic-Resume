@@ -37,6 +37,10 @@
       "types": "./dist/pdf/browser.d.ts",
       "default": "./dist/pdf/browser.js"
     },
+    "./pdf/document": {
+      "types": "./dist/pdf/document.d.ts",
+      "default": "./dist/pdf/document.js"
+    },
     "./registry": {
       "types": "./dist/registry.d.ts",
       "default": "./dist/registry.js"
@@ -60,14 +64,16 @@
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",
     "lint": "tsc -p tsconfig.json --noEmit",
-    "test": "npm run lint",
+    "test": "npm run lint && npm run test:unit",
+    "test:unit": "node --import tsx --test \"test/**/*.test.ts\"",
     "test:pdf": "npm run build && tsx scripts/render-pdf-smoke.mjs"
   },
   "dependencies": {
     "@magic-resume/resume-schema": "workspace:*",
     "@react-pdf/renderer": "4.5.1",
     "dompurify": "^3.2.6",
-    "lodash.get": "^4.4.2"
+    "lodash.get": "^4.4.2",
+    "node-html-parser": "^8.0.3"
   },
   "peerDependencies": {
     "lucide-react": "^0.513.0",
