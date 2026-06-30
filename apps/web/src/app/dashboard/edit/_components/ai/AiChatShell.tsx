@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FlaskConical, FileText, SquarePen, X, PencilRuler, Check, CircleStop } from 'lucide-react';
+import { FlaskConical, FileText, SquarePen, X, PencilRuler, Check, CircleStop, KeyRound } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { nanoid } from 'nanoid';
 import { toast } from 'sonner';
@@ -24,6 +24,7 @@ import { streamChat, approveTool, endSessionThread } from './lib/services/agentC
 import type { AgentSseEvent } from './lib/services/types';
 import { useResumeDraftStore } from '@/store/useResumeDraftStore';
 import { useSettingStore } from '@/store/useSettingStore';
+import { ModelConfigFields } from '@/components/llm/ModelConfigFields';
 
 type AiChatShellProps = {
   resumeData: Resume;
@@ -44,6 +45,12 @@ const SKILL_INTENT: Record<BatchKind, string> = {
   optimize: '帮我针对目标岗位优化我的简历。',
   translate: '把我的简历翻译成目标语言。',
 };
+
+/** A user action deferred until they supply an LLM key — replayed once the in-chat gate is satisfied. */
+type PendingRun =
+  | { kind: 'analyze' }
+  | { kind: 'content'; skill: BatchKind; message: string }
+  | { kind: 'chat'; history: { role: 'user' | 'assistant'; content: string }[]; mode: 'create' | 'general' };
 
 /** Map the shell's thread into the backend chat history (user/assistant text only). */
 function toBackendHistory(
@@ -112,7 +119,7 @@ export default function AiChatShell({
   const setResumeDraft = useResumeDraftStore((s) => s.setResumeDraft);
   // BYOK: each user's AI session is initialized with their own LLM config
   // (key / baseUrl / model) — the backend has no server-side key (design §3.11).
-  const { apiKey, baseUrl, model, maxTokens } = useSettingStore();
+  const { apiKey, baseUrl, model, maxTokens, saveSettings, hasLlmConfig } = useSettingStore();
   const messagesRef = useRef(messages);
   messagesRef.current = messages;
   // The analyze skill renders a live review todolist (a `plan` card) instead of a
@@ -412,6 +419,9 @@ export default function AiChatShell({
                 // optimize/translate skill run → stage real per-field diffs on the
                 // living canvas (the agent's full resume vs the current one).
                 batchNonce.current += 1;
+                setCanvas(CLOSED_CANVAS);
+                setLivingOpen(true);
+                setLivingSkillId(batch.kind);
                 setBatchRequest({
                   kind: batch.kind,
                   lang: batch.lang,
@@ -516,6 +526,23 @@ export default function AiChatShell({
     [addMessage, markReadActivityDone, setApprovalReadState, setResumeDraft, setIsAiJobRunning]
   );
 
+  // ── In-chat LLM config gate (BYOK) ───────────────────────────────────────
+  // AI runs on the user's own key. Instead of letting a keyless run fail mid-
+  // stream, the first action stashes itself and surfaces an inline config card
+  // above the composer (就地, not a detour to /settings); we replay it once a key
+  // lands. Interview is exempt — it holds a server-side key (§3.11).
+  const [configGateOpen, setConfigGateOpen] = useState(false);
+  const pendingRunRef = useRef<PendingRun | null>(null);
+
+  // Returns true when AI can run now; otherwise stashes the action + opens the gate.
+  const guardLlmConfig = useCallback((pending: PendingRun) => {
+    if (useSettingStore.getState().hasLlmConfig()) return true;
+    pendingRunRef.current = pending;
+    setStarted(true); // reveal the thread/composer area so the gate card is in view
+    setConfigGateOpen(true);
+    return false;
+  }, []);
+
   // analyze · runs in-conversation through the single /api/chat entry. The
   // orchestrator calls the `analyze_resume` tool (engine), which reads the resume
   // and runs the 3-persona analysis internally, streaming a checklist (plan_update)
@@ -523,6 +550,7 @@ export default function AiChatShell({
   // the ScoreView. The live todolist card is owned by consumeStream via planCardRef.
   const runAnalyze = useCallback(
     async () => {
+      if (!guardLlmConfig({ kind: 'analyze' })) return;
       planCardRef.current = null; // a fresh review todolist for this run
       skillBatchRunRef.current = null; // not a whole-resume skill batch run
       await consumeStream((signal) =>
@@ -538,7 +566,7 @@ export default function AiChatShell({
         })
       );
     },
-    [consumeStream, resumeData.id, apiKey, baseUrl, model, maxTokens]
+    [consumeStream, resumeData.id, apiKey, baseUrl, model, maxTokens, guardLlmConfig]
   );
 
   // Whole-resume content skill (optimize / translate) → CONVERSATIONAL run via
@@ -549,8 +577,8 @@ export default function AiChatShell({
   // diffs onto the living canvas (skillBatchRunRef survives the form interrupt).
   const runContentSkill = useCallback(
     (kind: BatchKind, message: string) => {
+      if (!guardLlmConfig({ kind: 'content', skill: kind, message })) return;
       setCanvas(CLOSED_CANVAS);
-      setLivingOpen(true);
       setLivingSkillId(kind);
       skillBatchRunRef.current = { kind };
       sessionUsedRef.current = true; // multi-turn (ask → fill → optimize) needs the thread
@@ -565,7 +593,7 @@ export default function AiChatShell({
         })
       );
     },
-    [consumeStream, resumeData.id, apiKey, baseUrl, model, maxTokens]
+    [consumeStream, resumeData.id, apiKey, baseUrl, model, maxTokens, guardLlmConfig]
   );
 
   // The user acted on a GenUI widget card (submit / cancel). Mark it resolved and
@@ -617,6 +645,7 @@ export default function AiChatShell({
   // checkpointer (keyed by sessionId) supplies the rest of the history (§2).
   const runChat = useCallback(
     (history: { role: 'user' | 'assistant'; content: string }[], mode: 'create' | 'general') => {
+      if (!guardLlmConfig({ kind: 'chat', history, mode })) return;
       skillBatchRunRef.current = null; // not a whole-resume skill batch run
       sessionUsedRef.current = true; // a persisted chat thread now exists → reclaim on end
       return consumeStream((signal) =>
@@ -632,7 +661,7 @@ export default function AiChatShell({
         })
       );
     },
-    [consumeStream, resumeData.id, apiKey, baseUrl, model, maxTokens]
+    [consumeStream, resumeData.id, apiKey, baseUrl, model, maxTokens, guardLlmConfig]
   );
 
   // Human-in-the-loop: the user answered a `tool_approval_request` card. Resume the
@@ -731,6 +760,23 @@ export default function AiChatShell({
     [addMessage, runChat, runContentSkill, runAnalyze],
   );
 
+  // Replay the action the user attempted before the config gate intercepted it.
+  const continuePendingRun = useCallback(() => {
+    const pending = pendingRunRef.current;
+    pendingRunRef.current = null;
+    setConfigGateOpen(false);
+    if (!pending) return;
+    if (pending.kind === 'analyze') void runAnalyze();
+    else if (pending.kind === 'content') runContentSkill(pending.skill, pending.message);
+    else void runChat(pending.history, pending.mode);
+  }, [runAnalyze, runContentSkill, runChat]);
+
+  // Gate "保存并继续": persist the key (survives reload) then resume the stashed run.
+  const handleGateContinue = useCallback(async () => {
+    await saveSettings();
+    continuePendingRun();
+  }, [saveSettings, continuePendingRun]);
+
   const toggleCanvas = useCallback(
     (id: SkillId) => {
       // Content skills live on the living canvas. Re-running optimize/translate needs
@@ -809,6 +855,49 @@ export default function AiChatShell({
 
   const composer = (
     <>
+      {configGateOpen && (
+        <div className="px-4 pb-2">
+          <div className="max-w-3xl mx-auto rounded-2xl border border-sky-500/30 bg-neutral-900/90 backdrop-blur px-4 py-4">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="w-8 h-8 rounded-lg bg-sky-500/10 flex items-center justify-center text-sky-400 shrink-0">
+                <KeyRound size={16} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-white">先连一个模型</p>
+                <p className="text-xs text-neutral-400 mt-0.5 leading-relaxed">
+                  选择服务商、粘贴你的 API Key 就能开始。密钥只保存在你的浏览器本地。
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setConfigGateOpen(false)}
+                aria-label="关闭"
+                className="ml-auto text-neutral-500 hover:text-white transition-colors shrink-0 cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+            <ModelConfigFields />
+            <div className="flex items-center justify-end gap-2 mt-4">
+              <button
+                type="button"
+                onClick={() => setConfigGateOpen(false)}
+                className="px-4 py-2 rounded-lg text-xs text-neutral-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+              >
+                稍后
+              </button>
+              <button
+                type="button"
+                onClick={handleGateContinue}
+                disabled={!hasLlmConfig()}
+                className="px-4 py-2 rounded-lg text-xs font-semibold bg-sky-500 text-white hover:bg-sky-400 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                保存并继续
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {draftReady && (
         <div className="px-4 pb-2">
           <div className="max-w-3xl mx-auto flex items-center gap-3 rounded-xl border border-sky-500/30 bg-sky-500/10 px-3.5 py-2.5 text-xs text-sky-200">

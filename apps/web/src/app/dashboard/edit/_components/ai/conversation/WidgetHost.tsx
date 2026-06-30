@@ -23,7 +23,7 @@ export default function WidgetHost({
 
   if (!descriptor || !normalized) {
     return (
-      <div className="flex items-center gap-2 pl-10 text-[11px] text-neutral-500">
+      <div className="text-[11px] text-neutral-500">
         <span className="truncate">（无法渲染的卡片：{instance.kind}）</span>
       </div>
     );

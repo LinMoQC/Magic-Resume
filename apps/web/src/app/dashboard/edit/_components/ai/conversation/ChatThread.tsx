@@ -493,7 +493,10 @@ export default function ChatThread({ messages, onToggleCanvas, openCanvasSkillId
               />
             ) : m.role === 'widget' ? (
               m.widget ? (
-                <WidgetHost instance={m.widget} onAction={onWidgetAction ?? (() => {})} />
+                <div className="flex gap-3 items-start">
+                  <Avatar show={showAvatarFor[i]} />
+                  <WidgetHost instance={m.widget} onAction={onWidgetAction ?? (() => {})} />
+                </div>
               ) : null
             ) : (
               <Bubble message={m} showAvatar={showAvatarFor[i]} />

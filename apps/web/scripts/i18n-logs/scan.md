@@ -1,13 +1,9 @@
-# i18n Scan Report (2026/6/25 14:56:34)
+# i18n Scan Report (2026/6/30 02:41:25)
 
-Found 6 issues in 1 files.
+Found 2 issues in 1 files.
 
-## 📄 src/app/dashboard/edit/_components/ai/conversation/ChatThread.tsx
+## 📄 src/components/llm/ModelConfigFields.tsx
 
-- L83: **[HARDCODED_TEXT]** Hardcoded JSX text: "完成"
-- L188: **[HARDCODED_TEXT]** Hardcoded JSX text: "允许"
-- L196: **[HARDCODED_TEXT]** Hardcoded JSX text: "拒绝"
-- L204: **[HARDCODED_TEXT]** Hardcoded JSX text: "已允许读取"
-- L209: **[HARDCODED_TEXT]** Hardcoded JSX text: "已拒绝"
-- L239: **[HARDCODED_TEXT]** Hardcoded attribute title: "回到这处改动"
+- L157: **[HARDCODED_TEXT]** Hardcoded attribute placeholder: "sk-..."
+- L275: **[HARDCODED_TEXT]** Hardcoded attribute placeholder: "https://api.openai.com/v1"
 
