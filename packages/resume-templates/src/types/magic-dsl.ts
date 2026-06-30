@@ -87,20 +87,6 @@ export interface MagicTemplateDSL {
   
   // 组件定义
   components: ComponentDefinition[];
-
-  // PDF 专用页面布局。未配置时导出器会从 components + sectionOrder 生成默认单页布局。
-  pdfLayout?: PdfLayoutDefinition;
-}
-
-export interface PdfLayoutDefinition {
-  pages?: PdfLayoutPageDefinition[];
-  sidebarWidth?: number;
-}
-
-export interface PdfLayoutPageDefinition {
-  fullWidth?: boolean;
-  main: string[];
-  sidebar?: string[];
 }
 
 export interface ComponentDefinition {

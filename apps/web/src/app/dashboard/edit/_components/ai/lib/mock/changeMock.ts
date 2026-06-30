@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid';
-import type { EditableTarget } from '@magic-resume/resume-templates/renderer/EditableCanvas';
+import type { EditableTarget } from '../editableCanvas';
 import type { Section } from '@/types/frontend/resume';
 import {
   finalizeAfter,

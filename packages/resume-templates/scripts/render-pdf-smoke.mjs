@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
@@ -114,11 +113,6 @@ const outputDir = requestedOutputDir
   ? resolve(requestedOutputDir)
   : await mkdtemp(join(tmpdir(), 'magic-resume-pdf-'));
 await mkdir(outputDir, { recursive: true });
-registerMagicResumePdfFonts({ baseUrl: webFontsDir, data });
-
-const canRenderWithPoppler = spawnSync('pdftoppm', ['-v'], { encoding: 'utf8' }).status === 0;
-const pngOutputDir = join(outputDir, 'png');
-if (canRenderWithPoppler) await mkdir(pngOutputDir, { recursive: true });
 
 try {
   for (const template of magicTemplateList) {
@@ -144,7 +138,7 @@ try {
     assert.ok(Number(mediaBox[2]) > 841.89, `${template.id} did not grow beyond the A4 minimum height`);
   }
 
-  console.log(`Rendered ${magicTemplateList.length} templates successfully${canRenderWithPoppler ? ' with PNG previews' : ''}.`);
+  console.log(`Rendered ${magicTemplateList.length} templates successfully.`);
 } finally {
   if (!requestedOutputDir) await rm(outputDir, { recursive: true, force: true });
 }

@@ -3,7 +3,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowUp } from 'lucide-react';
-import type { EditableTarget } from '@magic-resume/resume-templates/renderer/EditableCanvas';
+import type { EditableTarget } from '../../lib/editableCanvas';
 import { actionsForTarget, type QuickActionId } from '../../lib/changeModel';
 
 const POPOVER_WIDTH = 288;

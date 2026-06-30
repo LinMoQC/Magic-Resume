@@ -10,7 +10,7 @@ import {
   type EditableTarget,
   type EditableCanvasContextValue,
   type PendingChangeView,
-} from '@magic-resume/resume-templates/renderer/EditableCanvas';
+} from '../../lib/editableCanvas';
 import ResumePreview from '../../../preview/ResumePreview';
 import ActionPopover from './ActionPopover';
 import ReviewBar from './ReviewBar';

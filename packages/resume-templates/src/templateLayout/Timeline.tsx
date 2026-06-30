@@ -1,7 +1,6 @@
 import React from 'react';
-import { getFieldValue, getFieldEntry } from './utils';
+import { getFieldValue } from './utils';
 import { WysiwygContent } from './WysiwygContent';
-import { Editable, SectionHandle, SectionInsertSlot } from '../renderer/EditableCanvas';
 
 interface Item {
   [key: string]: unknown;
@@ -13,11 +12,9 @@ interface Props {
   fieldMap?: Record<string, string | string[]>;
   style?: React.CSSProperties;
   titleIcon?: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
-  /** resume section key — enables the editable canvas anchors */
-  sectionKey?: string;
 }
 
-export const Timeline = React.memo(function Timeline({ title, items, fieldMap = {}, style, titleIcon: TitleIcon, sectionKey }: Props) {
+export const Timeline = React.memo(function Timeline({ title, items, fieldMap = {}, style, titleIcon: TitleIcon }: Props) {
   if (!items || items.length === 0) return null;
 
   const textColor = style?.color || 'var(--color-text)';
@@ -52,7 +49,6 @@ export const Timeline = React.memo(function Timeline({ title, items, fieldMap = 
       >
         {TitleIcon && <TitleIcon style={{ display: 'var(--title-icon-display)', flexShrink: 0, width: '1em', height: '1em' }} />}
         {title}
-        {sectionKey && <SectionHandle sectionKey={sectionKey} title={title} />}
       </h2>
       
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--paragraph-spacing)' }}>
@@ -61,11 +57,10 @@ export const Timeline = React.memo(function Timeline({ title, items, fieldMap = 
           const position = getFieldValue(item, fieldMap.subtitle || ['position', 'degree', 'role']);
           const date = getFieldValue(item, fieldMap.date || 'date');
           const location = getFieldValue(item, ['location']);
-          const description = getFieldEntry(item, fieldMap.description || ['summary', 'description']);
-          const itemId = item.id != null ? String(item.id) : null;
-
+          const description = getFieldValue(item, fieldMap.description || ['summary', 'description']);
+          
           return (
-            <div key={itemId || idx} className="relative pl-6">
+            <div key={idx} className="relative pl-6">
               <div 
                 style={{
                   position: 'absolute',
@@ -120,27 +115,13 @@ export const Timeline = React.memo(function Timeline({ title, items, fieldMap = 
                 
                 {description && (
                   <div style={{ color: textColor, fontSize: 'var(--font-size-body)' }}>
-                    {sectionKey && itemId ? (
-                      <Editable
-                        target={{
-                          sectionKey,
-                          itemId,
-                          fieldKey: description.key,
-                          kind: 'html',
-                          label: `${title} · 第 ${idx + 1} 条`,
-                        }}
-                        html={description.value}
-                      />
-                    ) : (
-                      <WysiwygContent dirtyHtml={description.value} />
-                    )}
+                    <WysiwygContent dirtyHtml={description} />
                   </div>
                 )}
               </div>
             </div>
           );
         })}
-        {sectionKey && <SectionInsertSlot sectionKey={sectionKey} />}
       </div>
     </section>
   );
