@@ -86,23 +86,15 @@ type ImportResumeDialogProps = {
 
 export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeDialogProps) {
   const { importResume } = useResumeStore();
-  const { apiKey, baseUrl, model, maxTokens } = useSettingStore();
+  const { apiKey, baseUrl, model, maxTokens, hasLlmConfig: hasLlmConfigFn } = useSettingStore();
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [llmConfigMissing, setLlmConfigMissing] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [importStatus, setImportStatus] = useState<string>('');
   const [fileType, setFileType] = useState<FileType>(null);
   const { t } = useTranslation();
-  const hasLlmConfig = (() => {
-    const isNonEmpty = (value: unknown) => String(value ?? '').trim().length > 0;
-    const maxTokensNumber = Number(maxTokens);
-    const hasValidMaxTokens = Number.isFinite(maxTokensNumber) && maxTokensNumber > 0;
-
-    return isNonEmpty(apiKey)
-      && isNonEmpty(baseUrl)
-      && isNonEmpty(model)
-      && hasValidMaxTokens;
-  })();
+  // Shared readiness check (provider + key + baseUrl + model + maxTokens) — see useSettingStore.
+  const hasLlmConfig = hasLlmConfigFn();
 
   const handleClose = useCallback((open: boolean) => {
     if (!open) {

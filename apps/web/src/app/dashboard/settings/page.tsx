@@ -4,20 +4,10 @@ import React, { useEffect, useState } from 'react';
 import { useSettingStore } from '@/store/useSettingStore';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { InfoCircledIcon, LockClosedIcon } from '@radix-ui/react-icons';
-import { Cloud, Settings as SettingsIcon } from 'lucide-react';
+import { InfoCircledIcon } from '@radix-ui/react-icons';
+import { Cloud, Settings as SettingsIcon, CheckCircle2, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MODEL_API_URL_MAP, MODEL_PROVIDERS } from '@/lib/constants/modals';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { ModelConfigFields } from '@/components/llm/ModelConfigFields';
 import { Switch } from '@/components/ui/switch';
 import {
   Dialog,
@@ -28,7 +18,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
-import { useTranslation, Trans } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { useTrace } from '@/hooks/useTrace';
 import { McpAccessSection } from './_components/McpAccessSection';
 import { isCloudMode } from '@/lib/config/app';
@@ -36,18 +26,12 @@ import { isCloudMode } from '@/lib/config/app';
 export default function Settings() {
   const { t } = useTranslation();
   const {
-    apiKey,
-    baseUrl,
     model,
-    maxTokens,
     cloudSync,
     syncDisclaimerAgreed,
-    setApiKey,
-    setBaseUrl,
-    setModel,
-    setMaxTokens,
     setCloudSync,
     setSyncDisclaimerAgreed,
+    hasLlmConfig,
     isDirty,
     saveSettings,
     resetSettings,
@@ -73,17 +57,6 @@ export default function Settings() {
   const handleReset = () => {
     resetSettings();
     toast.info(t('settings.notifications.changesReset'));
-  };
-
-  const handleModelChange = (newModel: string) => {
-    setModel(newModel);
-
-    const officialUrl = MODEL_API_URL_MAP[newModel as keyof typeof MODEL_API_URL_MAP];
-    const isOfficialUrl = Object.values(MODEL_API_URL_MAP).includes(baseUrl);
-
-    if (officialUrl && (!baseUrl || isOfficialUrl)) {
-      setBaseUrl(officialUrl);
-    }
   };
 
   const handleCloudSyncToggle = (checked: boolean) => {
@@ -149,95 +122,30 @@ export default function Settings() {
 
           {/* LLM Settings Section */}
           <section id="llm-settings">
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <div className="w-1.5 h-6 bg-sky-500 rounded-full" />
-              {t('settings.llm.title')}
-            </h2>
-            
-            <Card className="border-neutral-800/50 bg-neutral-900/50 backdrop-blur-sm p-6">
-              <div className="space-y-4 mb-8">
-                <p className="text-neutral-400 text-sm leading-relaxed">
-                  {t('settings.llm.description1')}
-                </p>
-                <p className="text-neutral-400 text-sm leading-relaxed">
-                  {/* i18n-ignore */}
-                  <Trans i18nKey="settings.llm.description2">
-                    You have the option to <a href="https://platform.openai.com/account/api-keys" target="_blank" rel="noopener noreferrer" className="text-sky-400 hover:underline">obtain your own OpenAI API key</a>. This key empowers you to leverage the API as you see fit. Alternatively, if you wish to disable the AI features in Reactive Resume altogether, you can simply remove the key from your settings.
-                  </Trans>
-                </p>
-                <p className="text-neutral-400 text-sm leading-relaxed">
-                  {t('settings.llm.description3')}
-                </p>
-              </div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <div className="w-1.5 h-6 bg-sky-500 rounded-full" />
+                {t('settings.llm.title')}
+              </h2>
+              {hasLlmConfig() ? (
+                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  {t('settings.llm.statusReady')}
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  {t('settings.llm.statusNotConfigured')}
+                </span>
+              )}
+            </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                <div className="space-y-2">
-                  <label htmlFor="apiKey" className="text-sm font-medium text-neutral-300 flex items-center gap-2">
-                    <LockClosedIcon className="w-3.5 h-3.5" />
-                    {t('settings.llm.apiKeyLabel')}
-                  </label>
-                  <Input
-                    id="apiKey"
-                    type="password"
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                    placeholder="sk-..."
-                    className="bg-neutral-950/50 border-neutral-800 focus:ring-sky-500/50 transition-all placeholder:text-neutral-600"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="baseUrl" className="text-sm font-medium text-neutral-300">
-                    {t('settings.llm.baseUrlLabel')}
-                  </label>
-                  <Input
-                    id="baseUrl"
-                    type="text"
-                    value={baseUrl}
-                    onChange={(e) => setBaseUrl(e.target.value)}
-                    placeholder="http://localhost:11434/v1"
-                    className="bg-neutral-950/50 border-neutral-800 focus:ring-sky-500/50 transition-all placeholder:text-neutral-600"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="model" className="text-sm font-medium text-neutral-300">
-                    {t('settings.llm.modelLabel')}
-                  </label>
-                  <Select onValueChange={handleModelChange} value={model}>
-                    <SelectTrigger className="bg-neutral-950/50 border-neutral-800">
-                      <SelectValue placeholder={t('settings.llm.modelPlaceholder')} />
-                    </SelectTrigger>
-                    <SelectContent className='bg-neutral-900 border-neutral-800 text-white'>
-                      {MODEL_PROVIDERS.map((provider) => (
-                        <SelectGroup key={provider.id}>
-                          <SelectLabel className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">
-                            {provider.label}
-                          </SelectLabel>
-                          {provider.models.map((modelName) => (
-                            <SelectItem key={modelName} value={modelName} className="focus:bg-neutral-800 focus:text-sky-400 transition-colors">
-                              {modelName}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="maxTokens" className="text-sm font-medium text-neutral-300">
-                    {t('settings.llm.maxTokensLabel')}
-                  </label>
-                  <Input
-                    id="maxTokens"
-                    type="number"
-                    value={maxTokens}
-                    max={65536}
-                    min={1024}
-                    onChange={(e) => setMaxTokens(parseInt(e.target.value, 10))}
-                    placeholder="1024"
-                    className="bg-neutral-950/50 border-neutral-800 focus:ring-sky-500/50 transition-all"
-                  />
-                </div>
-              </div>
+            <Card className="relative overflow-hidden rounded-2xl border-neutral-800/60 bg-gradient-to-b from-neutral-900/70 to-neutral-900/40 backdrop-blur-sm p-6">
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-sky-500/40 to-transparent" />
+              <p className="text-neutral-400 text-sm leading-relaxed mb-6">
+                {t('settings.llm.description')}
+              </p>
+              <ModelConfigFields />
             </Card>
           </section>
         </div>
