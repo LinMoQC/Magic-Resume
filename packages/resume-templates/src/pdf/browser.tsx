@@ -1,17 +1,44 @@
 import React from 'react';
-import { pdf } from '@react-pdf/renderer';
+import { Font, pdf } from '@react-pdf/renderer';
 import type { MagicTemplateDSL } from '../types/magic-dsl';
 import type { Resume } from '../types/resume';
-import { MagicResumePdfDocument } from './document';
-import { registerMagicResumePdfFonts } from './fonts';
+import { magicPdfHyphenationCallback } from './hyphenation';
+import { MagicResumePdfDocument } from './MagicResumePdfDocument';
 
 export interface CreateMagicResumePdfBlobOptions {
   data: Resume;
   template: MagicTemplateDSL;
   locale?: string;
-  /** 单页连续模式的页高(pt);由调用方测量预览 DOM 高度换算传入。 */
-  pageHeight?: number;
 }
+
+let fontsRegistered = false;
+
+const registerFonts = () => {
+  if (fontsRegistered) return;
+  if (typeof window === 'undefined') throw new Error('PDF export is only available in the browser.');
+
+  const baseUrl = window.location.origin;
+  Font.register({
+    family: 'Source Han Sans SC',
+    fonts: [
+      { src: `${baseUrl}/fonts/SourceHanSansSC-Regular.otf`, fontWeight: 400 },
+      { src: `${baseUrl}/fonts/SourceHanSansSC-RegularOblique.woff`, fontWeight: 400, fontStyle: 'italic' },
+      { src: `${baseUrl}/fonts/SourceHanSansSC-Bold.otf`, fontWeight: 700 },
+      { src: `${baseUrl}/fonts/SourceHanSansSC-BoldOblique.woff`, fontWeight: 700, fontStyle: 'italic' },
+    ],
+  });
+  Font.register({
+    family: 'Source Han Serif SC',
+    fonts: [
+      { src: `${baseUrl}/fonts/SourceHanSerifSC-Regular.woff`, fontWeight: 400 },
+      { src: `${baseUrl}/fonts/SourceHanSerifSC-RegularOblique.woff`, fontWeight: 400, fontStyle: 'italic' },
+      { src: `${baseUrl}/fonts/SourceHanSerifSC-Bold.woff`, fontWeight: 700 },
+      { src: `${baseUrl}/fonts/SourceHanSerifSC-BoldOblique.woff`, fontWeight: 700, fontStyle: 'italic' },
+    ],
+  });
+  Font.registerHyphenationCallback(magicPdfHyphenationCallback);
+  fontsRegistered = true;
+};
 
 const blobToDataUrl = (blob: Blob): Promise<string> => new Promise((resolve, reject) => {
   const reader = new FileReader();
@@ -39,13 +66,11 @@ export const createMagicResumePdfBlob = async ({
   data,
   template,
   locale,
-  pageHeight,
 }: CreateMagicResumePdfBlobOptions): Promise<Blob> => {
-  if (typeof window === 'undefined') throw new Error('PDF export is only available in the browser.');
+  registerFonts();
   const preparedData = await prepareResumeImages(data);
-  registerMagicResumePdfFonts({ baseUrl: `${window.location.origin}/fonts`, data: preparedData });
   const document = (
-    <MagicResumePdfDocument data={preparedData} template={template} locale={locale} pageHeight={pageHeight} />
+    <MagicResumePdfDocument data={preparedData} template={template} locale={locale} />
   );
 
   return pdf(document).toBlob();

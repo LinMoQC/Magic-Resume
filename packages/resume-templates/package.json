@@ -73,7 +73,9 @@
     "@react-pdf/renderer": "4.5.1",
     "dompurify": "^3.2.6",
     "lodash.get": "^4.4.2",
-    "node-html-parser": "^8.0.3"
+    "lucide": "0.513.0",
+    "node-html-parser": "8.0.3",
+    "react-pdf-html": "2.1.5"
   },
   "peerDependencies": {
     "lucide-react": "^0.513.0",
