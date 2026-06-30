@@ -13,6 +13,7 @@ import { Timeline } from '../templateLayout/Timeline';
 import { Layout } from '../templateLayout/Layout';
 import { TwoColumnLayout } from '../templateLayout/TwoColumnLayout';
 import { getSectionIcon } from '../templateLayout/utils';
+import { getWebFontStack } from '../font-family';
 
 const componentRegistry = {
   Header,
@@ -97,7 +98,7 @@ function generateCSSVariables(designTokens: MagicTemplateDSL['designTokens'], la
     '--color-text-secondary': designTokens.colors.textSecondary,
     '--color-background': designTokens.colors.background,
     '--color-border': designTokens.colors.border,
-    '--font-family-primary': designTokens.typography.fontFamily.primary,
+    '--font-family-primary': getWebFontStack(designTokens.typography.fontFamily.primary),
     '--font-size-xs': designTokens.typography.fontSize.xs,
     '--font-size-sm': designTokens.typography.fontSize.sm,
     '--font-size-md': designTokens.typography.fontSize.md,

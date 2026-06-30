@@ -1,5 +1,69 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Source Han Sans SC";
+  src: url("/fonts/SourceHanSansSC-Regular.otf") format("opentype");
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Source Han Sans SC";
+  src: url("/fonts/SourceHanSansSC-Bold.otf") format("opentype");
+  font-style: normal;
+  font-weight: 700 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Source Han Sans SC";
+  src: url("/fonts/SourceHanSansSC-RegularOblique.woff") format("woff");
+  font-style: italic;
+  font-weight: 400 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Source Han Sans SC";
+  src: url("/fonts/SourceHanSansSC-BoldOblique.woff") format("woff");
+  font-style: italic;
+  font-weight: 700 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Source Han Serif SC";
+  src: url("/fonts/SourceHanSerifSC-Regular.woff") format("woff");
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Source Han Serif SC";
+  src: url("/fonts/SourceHanSerifSC-Bold.woff") format("woff");
+  font-style: normal;
+  font-weight: 700 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Source Han Serif SC";
+  src: url("/fonts/SourceHanSerifSC-RegularOblique.woff") format("woff");
+  font-style: italic;
+  font-weight: 400 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Source Han Serif SC";
+  src: url("/fonts/SourceHanSerifSC-BoldOblique.woff") format("woff");
+  font-style: italic;
+  font-weight: 700 900;
+  font-display: swap;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;

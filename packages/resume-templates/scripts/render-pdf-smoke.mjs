@@ -9,6 +9,7 @@ import { Mail } from 'lucide';
 import { magicTemplateList } from '../src/config/magic-templates.ts';
 import { MagicResumePdfDocument } from '../src/pdf/MagicResumePdfDocument.tsx';
 import { PdfLucideIcon } from '../src/pdf/PdfLucideIcon.tsx';
+import { magicPdfHyphenationCallback } from '../src/pdf/hyphenation.ts';
 
 const packageDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const webFontsDir = resolve(packageDir, '../../apps/web/public/fonts');
@@ -17,10 +18,24 @@ Font.register({
   family: 'Source Han Sans SC',
   fonts: [
     { src: join(webFontsDir, 'SourceHanSansSC-Regular.otf'), fontWeight: 400 },
+    { src: join(webFontsDir, 'SourceHanSansSC-RegularOblique.woff'), fontWeight: 400, fontStyle: 'italic' },
     { src: join(webFontsDir, 'SourceHanSansSC-Bold.otf'), fontWeight: 700 },
+    { src: join(webFontsDir, 'SourceHanSansSC-BoldOblique.woff'), fontWeight: 700, fontStyle: 'italic' },
   ],
 });
-Font.registerHyphenationCallback((word) => /[\u3400-\u9fff]/.test(word) ? Array.from(word) : [word]);
+Font.register({
+  family: 'Source Han Serif SC',
+  fonts: [
+    { src: join(webFontsDir, 'SourceHanSerifSC-Regular.woff'), fontWeight: 400 },
+    { src: join(webFontsDir, 'SourceHanSerifSC-RegularOblique.woff'), fontWeight: 400, fontStyle: 'italic' },
+    { src: join(webFontsDir, 'SourceHanSerifSC-Bold.woff'), fontWeight: 700 },
+    { src: join(webFontsDir, 'SourceHanSerifSC-BoldOblique.woff'), fontWeight: 700, fontStyle: 'italic' },
+  ],
+});
+Font.registerHyphenationCallback(magicPdfHyphenationCallback);
+
+assert.deepEqual(magicPdfHyphenationCallback('中文'), ['中', '', '文', '']);
+assert.deepEqual(magicPdfHyphenationCallback('Reactive'), ['Reactive']);
 
 const iconElement = PdfLucideIcon({ icon: Mail, color: '#3b82f6', size: 12 });
 for (const primitive of React.Children.toArray(iconElement.props.children)) {
@@ -29,7 +44,20 @@ for (const primitive of React.Children.toArray(iconElement.props.children)) {
   assert.equal(primitive.props.strokeWidth, 2, 'Lucide PDF primitives must preserve the Lucide stroke width');
 }
 
-const repeatedSummary = '<p>负责复杂产品的规划与交付，推动跨团队协作并持续改进用户体验。</p>'.repeat(4);
+const repeatedSummary = [
+  '<p>负责复杂产品的规划与交付，推动业务团队协同开发以及日常值周oncall处理；负责 40+ PO 与 4 个 PO 级需求迭代，如 “Inspection 平台接入”、“Approval Flow Photo适配”等核心项目。</p>',
+  '<p>基于 React + TypeScript monorepo架构，完成 AI 解析、多模板渲染、PDF 导出等能力，并通过 pnpm patch 重写 @react-pdf/textkit 字体度量读取逻辑。</p>',
+  '<p><em>斜体混排：React项目、Photo适配、monorepo架构与中文斜体。</em></p>',
+  '<ul>',
+  '<li><p><strong>智能表格与 Agent 落地：</strong><br>完成核心架构设计与交付。</p></li>',
+  '<li><p><span style="color: #dc2626"><u>跨团队协作</u></span>并持续优化体验。</p></li>',
+  '</ul>',
+].join('');
+const richTextCoverage = [
+  '<h2 style="text-align: center">富文本能力验证</h2>',
+  '<p><em><u>斜体下划线</u></em>、<strong><em>粗斜体</em></strong>、<s>删除线</s>、<a href="https://example.com">链接</a>与<code>inline code</code></p>',
+  '<ol><li><p>编号列表一</p></li><li><p>编号列表二</p></li></ol>',
+].join('');
 const entries = Array.from({ length: 8 }, (_, index) => ({
   id: `experience-${index}`,
   visible: true,
@@ -55,7 +83,7 @@ const data = {
     customFields: [],
   },
   sections: {
-    summary: [{ id: 'summary', visible: true, name: '简介', summary: repeatedSummary }],
+    summary: [{ id: 'summary', visible: true, name: '简介', summary: richTextCoverage }],
     experience: entries,
     education: [{ id: 'education', visible: true, school: '示例大学', degree: '硕士', major: '计算机科学', date: '2015 - 2018', summary: '优秀毕业生' }],
     projects: [{ id: 'project', visible: true, name: '智能简历项目', role: '负责人', date: '2025', summary: repeatedSummary }],

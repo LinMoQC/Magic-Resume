@@ -2,6 +2,7 @@ import React from 'react';
 import { Font, pdf } from '@react-pdf/renderer';
 import type { MagicTemplateDSL } from '../types/magic-dsl';
 import type { Resume } from '../types/resume';
+import { magicPdfHyphenationCallback } from './hyphenation';
 import { MagicResumePdfDocument } from './MagicResumePdfDocument';
 
 export interface CreateMagicResumePdfBlobOptions {
@@ -21,10 +22,21 @@ const registerFonts = () => {
     family: 'Source Han Sans SC',
     fonts: [
       { src: `${baseUrl}/fonts/SourceHanSansSC-Regular.otf`, fontWeight: 400 },
+      { src: `${baseUrl}/fonts/SourceHanSansSC-RegularOblique.woff`, fontWeight: 400, fontStyle: 'italic' },
       { src: `${baseUrl}/fonts/SourceHanSansSC-Bold.otf`, fontWeight: 700 },
+      { src: `${baseUrl}/fonts/SourceHanSansSC-BoldOblique.woff`, fontWeight: 700, fontStyle: 'italic' },
     ],
   });
-  Font.registerHyphenationCallback((word) => /[\u3400-\u9fff]/.test(word) ? Array.from(word) : [word]);
+  Font.register({
+    family: 'Source Han Serif SC',
+    fonts: [
+      { src: `${baseUrl}/fonts/SourceHanSerifSC-Regular.woff`, fontWeight: 400 },
+      { src: `${baseUrl}/fonts/SourceHanSerifSC-RegularOblique.woff`, fontWeight: 400, fontStyle: 'italic' },
+      { src: `${baseUrl}/fonts/SourceHanSerifSC-Bold.woff`, fontWeight: 700 },
+      { src: `${baseUrl}/fonts/SourceHanSerifSC-BoldOblique.woff`, fontWeight: 700, fontStyle: 'italic' },
+    ],
+  });
+  Font.registerHyphenationCallback(magicPdfHyphenationCallback);
   fontsRegistered = true;
 };
 
