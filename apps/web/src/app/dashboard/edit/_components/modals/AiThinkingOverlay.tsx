@@ -1,8 +1,8 @@
 "use client";
 
 import React from 'react';
-import { Wand2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import PolarisMark from '../ai/PolarisMark';
 
 interface AiThinkingOverlayProps {
   isVisible: boolean;
@@ -19,7 +19,11 @@ const AiThinkingOverlay: React.FC<AiThinkingOverlayProps> = ({
 
   // 从主题色提取RGB值用于动效
   const hexToRgb = (hex: string) => {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    const cleaned = hex.replace('#', '').trim();
+    const normalized = cleaned.length === 3
+      ? cleaned.split('').map((char) => char + char).join('')
+      : cleaned;
+    const result = /^([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(normalized);
     return result ? {
       r: parseInt(result[1], 16),
       g: parseInt(result[2], 16),
@@ -29,67 +33,36 @@ const AiThinkingOverlay: React.FC<AiThinkingOverlayProps> = ({
 
   const themeRgb = hexToRgb(themeColor);
   const primaryColor = `${themeRgb.r}, ${themeRgb.g}, ${themeRgb.b}`;
+  const overlayStyle = {
+    '--ai-color': primaryColor,
+  } as React.CSSProperties;
 
   return (
-    <div 
-      className="absolute inset-0 z-50 flex flex-col items-center justify-center"
-      style={{
-        background: `rgba(${primaryColor}, 0.15)`,
-        backdropFilter: 'blur(12px) saturate(150%)',
-        WebkitBackdropFilter: 'blur(12px) saturate(150%)',
-      }}
+    <div
+      className="ai-thinking-overlay absolute inset-0 z-50 flex flex-col items-center justify-center"
+      style={overlayStyle}
+      aria-live="polite"
     >
-
-      
-      {/* 简洁AI思考核心 */}
-      <div className="relative">
-        {/* 中央AI图标 */}
-        <div 
-          className="relative w-16 h-16 rounded-full flex items-center justify-center animate-pulse"
-          style={{
-            backgroundColor: `rgba(${primaryColor}, 0.9)`,
-            boxShadow: `0 0 30px rgba(${primaryColor}, 0.5)`
-          }}
-        >
-          <Wand2 size={32} className="text-white" />
-          
-          {/* 简单旋转环 */}
-          <div 
-            className="absolute inset-0 rounded-full border-2 border-transparent animate-spin"
-            style={{
-              borderTopColor: `rgba(255, 255, 255, 0.3)`,
-              borderRightColor: `rgba(255, 255, 255, 0.1)`
-            }}
-          ></div>
+      <div className="ai-thinking-overlay__core">
+        <span className="ai-thinking-overlay__halo" aria-hidden />
+        <span className="ai-thinking-overlay__ripple ai-thinking-overlay__ripple--one" aria-hidden />
+        <span className="ai-thinking-overlay__ripple ai-thinking-overlay__ripple--two" aria-hidden />
+        <div className="ai-thinking-overlay__orb">
+          <span className="ai-thinking-overlay__sheen" aria-hidden />
+          <PolarisMark size={34} className="ai-thinking-overlay__mark" />
         </div>
       </div>
-      
-      {/* 简洁文字 */}
-      <div className="mt-8 text-center">
-        <p 
-          className="text-lg font-medium text-white animate-pulse"
-        >
+
+      <div className="relative mt-7 text-center">
+        <p className="text-sm font-medium tracking-wide text-white/90">
           {t('editPage.ai.generatingSuggestion')}
         </p>
-        
-        {/* 简单思考点 */}
-        <div className="flex justify-center space-x-1 mt-3">
-          <div 
-            className="w-2 h-2 rounded-full animate-bounce"
-            style={{ backgroundColor: `rgba(${primaryColor}, 0.8)` }}
-          ></div>
-          <div 
-            className="w-2 h-2 rounded-full animate-bounce animation-delay-200"
-            style={{ backgroundColor: `rgba(${primaryColor}, 0.8)` }}
-          ></div>
-          <div 
-            className="w-2 h-2 rounded-full animate-bounce animation-delay-400"
-            style={{ backgroundColor: `rgba(${primaryColor}, 0.8)` }}
-          ></div>
+        <div className="ai-thinking-overlay__meter" aria-hidden>
+          <span />
         </div>
       </div>
     </div>
   );
 };
 
-export default AiThinkingOverlay; 
+export default AiThinkingOverlay;

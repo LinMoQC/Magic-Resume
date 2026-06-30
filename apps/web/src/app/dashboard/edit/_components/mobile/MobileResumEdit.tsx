@@ -69,6 +69,7 @@ export default function MobileResumEdit({
                 isAiJobRunning={isAiJobRunning}
                 onShareClick={onShareClick}
                 onFeedbackClick={onFeedbackClick}
+                onJsonClick={openJsonModal}
             />
         </div>
 

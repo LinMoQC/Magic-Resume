@@ -115,6 +115,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
 
   const openVersionHistory = () => router.push(`/dashboard/edit/${id}/history`);
   const openShareModal = () => router.push(`/dashboard/edit/${id}/share`);
+  const openFeedback = () => router.push(`/dashboard/edit/${id}/feedback`);
 
   const { t } = useTranslation();
 
@@ -187,6 +188,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
           router.prefetch(`/dashboard/edit/${id}/history`);
           router.prefetch(`/dashboard/edit/${id}/json`);
           router.prefetch(`/dashboard/edit/${id}/share`);
+          router.prefetch(`/dashboard/edit/${id}/feedback`);
         }
       }
 
@@ -443,6 +445,8 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
             title={activeResume?.name}
             updatedAt={activeResume?.updatedAt}
             syncStatus={syncStatus}
+            onVersionClick={openVersionHistory}
+            onFeedbackClick={openFeedback}
           />
           {/* 简历预览面板 */}
           <ResumePreviewPanel
@@ -450,10 +454,9 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
             previewScale={previewScale}
             setPreviewScale={setPreviewScale}
             onShowAI={openAIModal}
-            onVersionClick={openVersionHistory}
             isAiJobRunning={isAiGenerating}
-            rightCollapsed={rightCollapsed}
             onShareClick={openShareModal}
+            onJsonClick={openJsonModal}
           />
         </div>
       </main>

@@ -687,6 +687,7 @@
   },
   "tools": {
     "aiAssistant": "AI Assistant",
+    "polaris": "Polaris",
     "share": "Share",
     "feedback": "Feedback",
     "exportPDF": "Export PDF",
@@ -771,8 +772,10 @@
   "header": {
     "version": "Version Management",
     "versionHistory": "Version History",
-    "synced": "Synced to Cloud",
+    "synced": "Synced",
     "syncing": "Syncing...",
+    "pendingSync": "Pending",
+    "backToDashboard": "Back to dashboard",
     "localOnly": "Local Only",
     "syncError": "Sync Error",
     "lastUpdated": "Last Update",

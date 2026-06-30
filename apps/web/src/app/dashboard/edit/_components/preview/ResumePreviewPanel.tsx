@@ -6,30 +6,31 @@ import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import { Resume } from '@/types/frontend/resume';
 import useMobile from '@/hooks/useMobile';
 import { Tools } from '../layout/Tools';
+import { EditorDock } from '../layout/EditorDock';
+import { AiFab } from '../layout/AiFab';
 import AiThinkingOverlay from '../modals/AiThinkingOverlay';
 import { useTranslation } from 'react-i18next';
+import { isCloudMode } from '@/lib/config/app';
 
 interface ResumePreviewPanelProps {
   activeResume: Resume | null;
   previewScale: number;
   setPreviewScale: (scale: number) => void;
   onShowAI: () => void;
-  onVersionClick?: () => void;
   isAiJobRunning: boolean;
-  rightCollapsed?: boolean;
   onShareClick?: () => void;
   onFeedbackClick?: () => void;
+  onJsonClick: () => void;
 }
 
 const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
   activeResume,
   setPreviewScale,
   onShowAI,
-  onVersionClick,
   isAiJobRunning,
-  rightCollapsed = false,
   onShareClick,
-  onFeedbackClick
+  onFeedbackClick,
+  onJsonClick,
 }) => {
   const { isMobile } = useMobile();
   const { t } = useTranslation();
@@ -45,7 +46,14 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
   return (
     <section
       className="flex-1 flex items-center justify-center bg-black relative overflow-hidden max-h-screen"
+      data-ai-running={isAiJobRunning ? "true" : "false"}
     >
+      {isAiJobRunning && (
+        <div className="ai-canvas-edge-flow" aria-hidden>
+          <div className="ai-canvas-edge-flow__spin" />
+        </div>
+      )}
+
       <TransformWrapper
         initialScale={0.6}
         minScale={0.5}
@@ -63,35 +71,46 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
               contentStyle={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', width: '100%', height: '100%', paddingTop: '5rem', paddingBottom: '5rem' }}
             >
               <div className="relative">
-                <ResumePreview 
-                  info={activeResume.info} 
-                  sections={activeResume.sections} 
-                  sectionOrder={activeResume.sectionOrder.map(s => s.key)} 
+                <ResumePreview
+                  info={activeResume.info}
+                  sections={activeResume.sections}
+                  sectionOrder={activeResume.sectionOrder.map(s => s.key)}
                   templateId={activeResume.template}
                   customTemplate={activeResume.customTemplate}
                 />
-                <AiThinkingOverlay 
-                  isVisible={isAiJobRunning} 
+                <AiThinkingOverlay
+                  isVisible={isAiJobRunning}
                   themeColor={activeResume.themeColor || '#38bdf8'}
                 />
               </div>
             </TransformComponent>
 
-            <Tools 
-              isMobile={isMobile} 
-              zoomIn={zoomIn} 
-              zoomOut={zoomOut} 
-              resetTransform={resetTransform} 
-              resume={activeResume}
-              onShowAI={onShowAI} 
-              onVersionClick={onVersionClick}
-              rightCollapsed={rightCollapsed}
-              onShareClick={onShareClick}
-              onFeedbackClick={onFeedbackClick}
-            />
+            {isMobile ? (
+              <Tools
+                isMobile
+                zoomIn={zoomIn}
+                zoomOut={zoomOut}
+                resetTransform={resetTransform}
+                resume={activeResume}
+                onShowAI={onShowAI}
+                onShareClick={onShareClick}
+                onFeedbackClick={onFeedbackClick}
+              />
+            ) : (
+              <EditorDock
+                zoomIn={zoomIn}
+                zoomOut={zoomOut}
+                resetTransform={resetTransform}
+                resume={activeResume}
+                onShareClick={onShareClick}
+                onJsonClick={onJsonClick}
+              />
+            )}
           </>
         )}
       </TransformWrapper>
+
+      {!isMobile && isCloudMode && <AiFab onClick={onShowAI} isRunning={isAiJobRunning} />}
     </section>
   );
 };

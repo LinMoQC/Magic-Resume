@@ -47,7 +47,7 @@ export default function AIModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={handleBackdropClose}
-            className="fixed inset-0 bg-black/60 z-100 backdrop-blur-md cursor-pointer"
+            className="fixed inset-0 bg-black/40 z-100 backdrop-blur-sm cursor-pointer"
           />
           <div className="fixed inset-0 z-101 flex items-center justify-center p-3 sm:p-5 pointer-events-none">
             <motion.div

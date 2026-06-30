@@ -44,14 +44,14 @@ export default function PolarisMark({
  * one-shot ring that expands on mount. All transform/opacity, all disabled under
  * `prefers-reduced-motion` (design: 动效轻、快、贴元素).
  */
-export function PolarisAvatar({ className }: { className?: string }) {
+export function PolarisAvatar({ className, rounded = 'rounded-2xl' }: { className?: string; rounded?: string }) {
   return (
     <div className={cn('relative', className)}>
       {/* ambient glow — slow pulse */}
-      <div className="absolute inset-0 rounded-2xl bg-sky-500/25 blur-xl polaris-glow" aria-hidden="true" />
+      <div className={cn('absolute inset-0 bg-sky-500/25 blur-xl polaris-glow', rounded)} aria-hidden="true" />
       {/* one-shot ring that expands once when the hero appears */}
-      <div className="polaris-ring absolute inset-0 rounded-2xl border border-sky-400/40" aria-hidden="true" />
-      <div className="relative w-14 h-14 rounded-2xl overflow-hidden bg-gradient-to-b from-sky-500/15 to-sky-500/[0.04] border border-sky-500/25 flex items-center justify-center text-sky-300">
+      <div className={cn('polaris-ring absolute inset-0 border border-sky-400/40', rounded)} aria-hidden="true" />
+      <div className={cn('relative w-14 h-14 overflow-hidden bg-gradient-to-b from-sky-500/15 to-sky-500/[0.04] border border-sky-500/25 flex items-center justify-center text-sky-300', rounded)}>
         {/* specular sheen sweeping across the plate every few seconds */}
         <div className="polaris-sheen pointer-events-none absolute inset-0" aria-hidden="true" />
         {/* the star itself — breathing */}

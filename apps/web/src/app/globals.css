@@ -410,7 +410,7 @@ button {
   content: '';
   position: absolute;
   top: -3px;
-  left: -100%;
+  left: 0;
   width: 100%;
   height: calc(100% + 6px);
   background: linear-gradient(90deg, 
@@ -423,6 +423,7 @@ button {
   animation: ai-sweep 1.8s ease-in-out infinite;
   mix-blend-mode: overlay;
   pointer-events: none;
+  will-change: transform;
 }
 
 
@@ -430,6 +431,602 @@ button {
   background-size: 150% 100%;
   animation-duration: 1s, 2s;
   transform: scale(1.02);
+}
+
+.polaris-fab {
+  --polaris-sky: 56, 189, 248;
+  isolation: isolate;
+}
+
+.polaris-fab-flow {
+  position: absolute;
+  inset: -5px;
+  z-index: 0;
+  border-radius: 9999px;
+  padding: 1px;
+  background: conic-gradient(
+    from 0deg,
+    rgba(var(--polaris-sky), 0),
+    rgba(var(--polaris-sky), 0.72) 16%,
+    rgba(103, 232, 249, 0.42) 28%,
+    rgba(129, 140, 248, 0.2) 42%,
+    rgba(var(--polaris-sky), 0) 68%,
+    rgba(var(--polaris-sky), 0)
+  );
+  opacity: 0.45;
+  transform-origin: 50% 50%;
+  animation: polaris-fab-flow 7.5s linear infinite;
+  will-change: transform, opacity;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+.polaris-fab-breath {
+  position: absolute;
+  inset: -12px;
+  z-index: 0;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(var(--polaris-sky), 0.28),
+    rgba(var(--polaris-sky), 0.11) 44%,
+    transparent 72%
+  );
+  filter: blur(10px);
+  opacity: 0.34;
+  transform: scale(0.92);
+  animation: polaris-fab-breath 4.8s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.polaris-fab:hover .polaris-fab-flow {
+  opacity: 0.76;
+}
+
+.polaris-fab[data-running="true"] .polaris-fab-flow {
+  opacity: 0.92;
+  animation-duration: 3.6s;
+}
+
+.polaris-fab[data-running="true"] .polaris-fab-breath {
+  opacity: 0.82;
+  animation-duration: 2.4s;
+}
+
+/* Siri 风格玻璃球 + 北极星:玻璃壳下多片彩色流光各自不同速度公转(交叠叠成亮光),星在球心 */
+.polaris-orb {
+  position: relative;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 9999px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  --orb-speed: 1;
+  background: radial-gradient(circle at 50% 52%, #1b2668 0%, #141a48 55%, #090c28 100%);
+  box-shadow:
+    0 14px 30px -12px rgba(0, 0, 0, 0.9),
+    0 0 22px -6px rgba(80, 120, 255, 0.45),
+    0 0 0 1px rgba(120, 150, 255, 0.12);
+}
+
+.polaris-orb__light {
+  position: absolute;
+  inset: -12%;
+  filter: blur(6px) saturate(1.4);
+}
+
+/* 每片色光各自不同速度/方向公转 → 交叠不断变化 = 流动 */
+.polaris-orb__rib {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  transform-origin: 50% 50%;
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+.polaris-orb__rib--violet { background: radial-gradient(ellipse 36% 24% at 50% 34%, rgba(168, 110, 255, 0.75), transparent 64%); animation: polaris-orb-spin calc(11s * var(--orb-speed)) linear infinite; }
+.polaris-orb__rib--magenta { background: radial-gradient(ellipse 52% 30% at 38% 42%, rgba(255, 64, 156, 0.95), transparent 66%); animation: polaris-orb-spin calc(9s * var(--orb-speed)) linear infinite reverse; }
+.polaris-orb__rib--blue { background: radial-gradient(ellipse 50% 34% at 60% 60%, rgba(56, 120, 255, 0.92), transparent 66%); animation: polaris-orb-spin calc(13s * var(--orb-speed)) linear infinite; }
+.polaris-orb__rib--cyan { background: radial-gradient(ellipse 40% 26% at 63% 42%, rgba(40, 222, 240, 0.9), transparent 64%); animation: polaris-orb-spin calc(8s * var(--orb-speed)) linear infinite reverse; }
+.polaris-orb__rib--teal { background: radial-gradient(ellipse 44% 28% at 40% 60%, rgba(40, 224, 170, 0.82), transparent 66%); animation: polaris-orb-spin calc(10s * var(--orb-speed)) linear infinite; }
+
+.polaris-orb__streak {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  transform-origin: 50% 50%;
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+.polaris-orb__streak--1 { background: radial-gradient(ellipse 66% 8% at 50% 50%, rgba(198, 232, 255, 0.85), transparent 60%); animation: polaris-orb-spin calc(15s * var(--orb-speed)) linear infinite; }
+.polaris-orb__streak--2 { background: radial-gradient(ellipse 58% 7% at 50% 50%, rgba(120, 255, 236, 0.7), transparent 60%); animation: polaris-orb-spin calc(12s * var(--orb-speed)) linear infinite reverse; }
+
+.polaris-orb__core {
+  position: absolute;
+  inset: 36%;
+  border-radius: 9999px;
+  mix-blend-mode: screen;
+  background: radial-gradient(circle, rgba(160, 210, 255, 0.55), rgba(120, 180, 255, 0.25) 40%, transparent 72%);
+  filter: blur(3px);
+  animation: polaris-orb-core 4.5s ease-in-out infinite;
+}
+
+/* 散布的小碎星(星空),错相闪烁 */
+.polaris-orb__stars {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+.polaris-orb__spark {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  color: #94e1f6;
+  filter: drop-shadow(0 0 1.5px rgba(148, 225, 246, 0.85));
+  animation: polaris-spark 3.6s ease-in-out infinite;
+}
+.polaris-orb__spark svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+@keyframes polaris-spark {
+  0%, 100% { opacity: 0.45; transform: translate(-50%, -50%) scale(0.8); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.12); }
+}
+
+/* 玻璃壳:固定的高光与边缘,光在其下流动 */
+.polaris-orb__glass {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: 9999px;
+  pointer-events: none;
+  background: radial-gradient(ellipse 46% 26% at 36% 20%, rgba(255, 255, 255, 0.38), transparent 60%);
+  box-shadow:
+    inset 0 2px 3px rgba(255, 255, 255, 0.3),
+    inset 0 -10px 18px rgba(0, 2, 20, 0.45),
+    inset 0 0 0 1px rgba(180, 200, 255, 0.14);
+}
+
+/* 生成中:流光提速一倍 */
+.polaris-fab[data-running="true"] .polaris-orb { --orb-speed: 0.5; }
+
+@keyframes polaris-orb-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes polaris-orb-core {
+  0%, 100% { opacity: 0.8; transform: scale(0.92); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+/* Apple Intelligence(iOS 18)式:四边亮起一圈流动的彩色光晕描边。
+   做法:一团旋转的 conic 渐变(sky→cyan→indigo→violet→pink),
+   用 padding + mask 只露出贴边的一圈光带,再 blur 成柔光;
+   transform 旋转(合成层,顺滑),中心镂空不挡画布。 */
+.ai-canvas-edge-flow {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  overflow: hidden;
+  /* 羽化的四边遮罩(两轴线性渐变取并集):四边都亮、向内柔和淡出,中心镂空不挡画布 */
+  -webkit-mask:
+    linear-gradient(to right, #000, transparent 16%, transparent 84%, #000),
+    linear-gradient(to bottom, #000, transparent 16%, transparent 84%, #000);
+  -webkit-mask-composite: source-over;
+  mask:
+    linear-gradient(to right, #000, transparent 16%, transparent 84%, #000),
+    linear-gradient(to bottom, #000, transparent 16%, transparent 84%, #000);
+  mask-composite: add;
+  animation: ai-edge-in 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.ai-canvas-edge-flow__spin {
+  position: absolute;
+  inset: -65%;
+  /* 常亮的 sky 底 + 一段 cyan→indigo→violet→pink 的亮弧;旋转时亮弧绕四边流动 */
+  background: conic-gradient(
+    from 0deg,
+    rgba(56, 189, 248, 0.34),
+    rgba(56, 189, 248, 0.34) 78deg,
+    rgba(45, 212, 191, 0.62) 118deg,
+    rgba(34, 211, 238, 0.95) 158deg,
+    rgba(129, 140, 248, 1) 196deg,
+    rgba(192, 132, 252, 0.92) 230deg,
+    rgba(236, 72, 153, 0.6) 264deg,
+    rgba(56, 189, 248, 0.34) 312deg,
+    rgba(56, 189, 248, 0.34)
+  );
+  filter: blur(20px);
+  transform-origin: 50% 50%;
+  animation: ai-edge-rotate 6.5s linear infinite;
+  will-change: transform;
+}
+
+@keyframes ai-edge-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ai-edge-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.ai-canvas-edge-flow__beam,
+.ai-thinking-overlay__beam {
+  position: absolute;
+  display: block;
+  border-radius: 9999px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(56, 189, 248, 0.16),
+    rgba(56, 189, 248, 0.82),
+    rgba(103, 232, 249, 0.38),
+    transparent
+  );
+  filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.38));
+  will-change: transform, opacity;
+}
+
+.ai-canvas-edge-flow__beam--top,
+.ai-thinking-overlay__beam--top {
+  top: 0;
+  left: 0;
+  width: 34%;
+  height: 2px;
+  animation: ai-edge-sweep-x 5.6s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+.ai-canvas-edge-flow__beam--bottom,
+.ai-thinking-overlay__beam--bottom {
+  right: 0;
+  bottom: 0;
+  width: 34%;
+  height: 2px;
+  animation: ai-edge-sweep-x-reverse 6.2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+.ai-canvas-edge-flow__beam--right,
+.ai-thinking-overlay__beam--right,
+.ai-canvas-edge-flow__beam--left,
+.ai-thinking-overlay__beam--left {
+  width: 2px;
+  height: 38%;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgba(56, 189, 248, 0.14),
+    rgba(56, 189, 248, 0.76),
+    rgba(103, 232, 249, 0.34),
+    transparent
+  );
+}
+
+.ai-canvas-edge-flow__beam--right,
+.ai-thinking-overlay__beam--right {
+  top: 0;
+  right: 0;
+  animation: ai-edge-sweep-y 6s cubic-bezier(0.16, 1, 0.3, 1) 0.35s infinite;
+}
+
+.ai-canvas-edge-flow__beam--left,
+.ai-thinking-overlay__beam--left {
+  bottom: 0;
+  left: 0;
+  animation: ai-edge-sweep-y-reverse 6.4s cubic-bezier(0.16, 1, 0.3, 1) 0.2s infinite;
+}
+
+.ai-thinking-overlay {
+  --ai-color: 56, 189, 248;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 46%, rgba(var(--ai-color), 0.2), transparent 32%),
+    rgba(2, 8, 14, 0.34);
+  backdrop-filter: blur(12px) saturate(145%);
+  -webkit-backdrop-filter: blur(12px) saturate(145%);
+}
+
+.ai-thinking-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(var(--ai-color), 0.2);
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.12),
+    rgba(var(--ai-color), 0.04) 38%,
+    rgba(2, 8, 14, 0.16)
+  );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+}
+
+.ai-thinking-overlay__edge {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0.92;
+}
+
+.ai-thinking-overlay__core {
+  position: relative;
+  display: flex;
+  width: 5.75rem;
+  height: 5.75rem;
+  align-items: center;
+  justify-content: center;
+  isolation: isolate;
+}
+
+.ai-thinking-overlay__halo {
+  position: absolute;
+  inset: -1.2rem;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle,
+    rgba(var(--ai-color), 0.38),
+    rgba(var(--ai-color), 0.1) 46%,
+    transparent 72%
+  );
+  filter: blur(14px);
+  animation: ai-thinking-halo 3s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.ai-thinking-overlay__ripple {
+  position: absolute;
+  inset: 0.35rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(var(--ai-color), 0.42);
+  opacity: 0;
+  animation: ai-thinking-ripple 3.2s ease-out infinite;
+  will-change: transform, opacity;
+}
+
+.ai-thinking-overlay__ripple--two {
+  animation-delay: 1.45s;
+}
+
+.ai-thinking-overlay__orb {
+  position: relative;
+  display: flex;
+  width: 4rem;
+  height: 4rem;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 9999px;
+  background:
+    radial-gradient(circle at 36% 28%, rgba(255, 255, 255, 0.34), transparent 30%),
+    linear-gradient(145deg, rgba(var(--ai-color), 0.9), rgba(var(--ai-color), 0.58));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -12px 24px rgba(2, 8, 14, 0.12),
+    0 20px 38px -24px rgba(var(--ai-color), 0.75);
+  animation: ai-thinking-orb 4.2s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.ai-thinking-overlay__sheen {
+  position: absolute;
+  inset: -35%;
+  background: linear-gradient(
+    115deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.32) 49%,
+    transparent 58%
+  );
+  transform: translate3d(-56%, 0, 0) rotate(18deg);
+  animation: ai-thinking-sheen 3.8s ease-in-out infinite;
+  will-change: transform;
+}
+
+.ai-thinking-overlay__mark {
+  position: relative;
+  z-index: 1;
+  color: rgba(255, 255, 255, 0.94);
+  filter: drop-shadow(0 4px 12px rgba(2, 8, 14, 0.22));
+}
+
+.ai-thinking-overlay__meter {
+  position: relative;
+  width: 8rem;
+  height: 2px;
+  margin: 0.85rem auto 0;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.ai-thinking-overlay__meter span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 44%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(var(--ai-color), 0.92),
+    rgba(255, 255, 255, 0.76),
+    transparent
+  );
+  animation: ai-thinking-meter 1.8s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes polaris-fab-flow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes polaris-fab-breath {
+  0%,
+  100% {
+    opacity: 0.32;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 0.78;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes ai-edge-sweep-x {
+  0% {
+    opacity: 0;
+    transform: translate3d(-115%, 0, 0);
+  }
+  16%,
+  76% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(315%, 0, 0);
+  }
+}
+
+@keyframes ai-edge-sweep-x-reverse {
+  0% {
+    opacity: 0;
+    transform: translate3d(115%, 0, 0);
+  }
+  16%,
+  76% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(-315%, 0, 0);
+  }
+}
+
+@keyframes ai-edge-sweep-y {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -115%, 0);
+  }
+  16%,
+  76% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, 285%, 0);
+  }
+}
+
+@keyframes ai-edge-sweep-y-reverse {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 115%, 0);
+  }
+  16%,
+  76% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, -285%, 0);
+  }
+}
+
+@keyframes ai-thinking-halo {
+  0%,
+  100% {
+    opacity: 0.48;
+    transform: scale(0.94);
+  }
+  50% {
+    opacity: 0.88;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes ai-thinking-ripple {
+  0% {
+    opacity: 0.56;
+    transform: scale(0.88);
+  }
+  80%,
+  100% {
+    opacity: 0;
+    transform: scale(1.8);
+  }
+}
+
+@keyframes ai-thinking-orb {
+  0%,
+  100% {
+    transform: scale(1) rotate(-1.5deg);
+  }
+  50% {
+    transform: scale(1.06) rotate(1.5deg);
+  }
+}
+
+@keyframes ai-thinking-sheen {
+  0% {
+    transform: translate3d(-58%, 0, 0) rotate(18deg);
+  }
+  56%,
+  100% {
+    transform: translate3d(58%, 0, 0) rotate(18deg);
+  }
+}
+
+@keyframes ai-thinking-meter {
+  0% {
+    opacity: 0;
+    transform: translate3d(-110%, 0, 0);
+  }
+  18%,
+  74% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(250%, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .polaris-fab-flow,
+  .polaris-fab-breath,
+  .ai-canvas-edge-flow__spin,
+  .polaris-orb__rib,
+  .polaris-orb__streak,
+  .polaris-orb__core,
+  .polaris-orb__spark,
+  .ai-thinking-overlay__halo,
+  .ai-thinking-overlay__ripple,
+  .ai-thinking-overlay__orb,
+  .ai-thinking-overlay__sheen,
+  .ai-thinking-overlay__meter span {
+    animation: none;
+  }
+
+  .polaris-fab-flow,
+  .polaris-fab-breath,
+  .ai-canvas-edge-flow,
+  .ai-thinking-overlay__edge {
+    opacity: 0.5;
+  }
 }
 
 
@@ -478,10 +1075,10 @@ button {
 
 @keyframes ai-sweep {
   0% {
-    left: -100%;
+    transform: translate3d(-115%, 0, 0);
   }
   100% {
-    left: 100%;
+    transform: translate3d(115%, 0, 0);
   }
 }
 
@@ -526,7 +1123,14 @@ button {
 }
 
 .ai-loading-effect[data-complexity="high"]::after {
-  content: '🧠';
+  content: '';
+  display: inline-block;
+  width: 0.45em;
+  height: 0.45em;
+  margin-left: 0.35em;
+  border-radius: 9999px;
+  background: rgba(var(--ai-color), 0.82);
+  box-shadow: 0 0 10px rgba(var(--ai-color), 0.5);
   animation-duration: 0.8s, 2s;
 }
 
@@ -668,7 +1272,7 @@ button {
 }
 
 .animate-thinking-glow {
-  background: linear-gradient(-45deg, #06b6d4, #8b5cf6, #3b82f6, #06b6d4);
+  background: linear-gradient(-45deg, #0284c7, #38bdf8, #0ea5e9, #0284c7);
   background-size: 400% 400%;
   animation: thinking-glow 3s ease infinite;
 }
