@@ -43,7 +43,6 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
   }
 
   return (
-    <>
     <section
       className="flex-1 flex items-center justify-center bg-black relative overflow-hidden max-h-screen"
     >
@@ -94,19 +93,6 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
         )}
       </TransformWrapper>
     </section>
-    {/* Print-only copy of the real rendered resume at natural A4 size (no zoom
-        transform). Hidden on screen; 导出 PDF 触发 window.print(),@media print
-        (globals.css) 只渲染它 —— 与预览一模一样、矢量可选中文字。 */}
-    <div id="resume-print-root" aria-hidden>
-      <ResumePreview
-        info={activeResume.info}
-        sections={activeResume.sections}
-        sectionOrder={activeResume.sectionOrder.map((s) => s.key)}
-        templateId={activeResume.template}
-        customTemplate={activeResume.customTemplate}
-      />
-    </div>
-    </>
   );
 };
 
