@@ -9,9 +9,9 @@ import { isCloudMode } from "@/lib/config/app";
 
 import PreloadOptimizer from "@/components/shared/PreloadOptimizer";
 import StructuredData from "@/components/shared/StructuredData";
-import PageViewTracker from "@/components/providers/PageViewTracker";
 import I18nProvider from "@/components/providers/I18nProvider";
 import { HttpClientProvider } from "@/components/providers/HttpClientProvider";
+import { CommercialRuntimeProvider } from "@/lib/commercial/runtime";
 import { CloudAuthBridge } from "@/lib/auth";
 
 export const metadata: Metadata = {
@@ -43,14 +43,15 @@ export default async function RootLayout({
         <HttpClientProvider>
           <html lang={lang} className="hide-scrollbar">
             <body className="font-sans">
-              <PageViewTracker />
-              <I18nProvider>
-                <Theme appearance="dark">
-                  {children}
-                  <Toaster />
-                  <PreloadOptimizer />
-                </Theme>
-              </I18nProvider>
+              <CommercialRuntimeProvider>
+                <I18nProvider>
+                  <Theme appearance="dark">
+                    {children}
+                    <Toaster />
+                    <PreloadOptimizer />
+                  </Theme>
+                </I18nProvider>
+              </CommercialRuntimeProvider>
               <StructuredData type="website" />
               <StructuredData type="organization" />
               <StructuredData type="product" />

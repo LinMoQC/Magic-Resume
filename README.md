@@ -169,7 +169,7 @@ All variables live in `apps/web/.env.local` (copy from `apps/web/.env.example`).
 
 - Don't commit `.env.local` — it's gitignored. Use `.env.example` as the template.
 - Public-prefixed values are inlined into the JS bundle at build time; never put secrets behind `NEXT_PUBLIC_`.
-- Analytics env vars (PostHog / GA) were removed — product events go through the in-house tracking SDK in `apps/web/src/lib/analytics/core-events.ts`.
+- Analytics env vars (PostHog / GA) were removed. The open-source and self-hosted web app does not send product analytics events; `apps/web/src/lib/analytics/core-events.ts` is a no-op facade reserved for private commercial overlays.
 
 ---
 
@@ -177,7 +177,7 @@ All variables live in `apps/web/.env.local` (copy from `apps/web/.env.example`).
 
 ### Self-hosted Mode (No Backend Required)
 
-Magic Resume runs fully in the browser with no backend, no database, and no account required. Set `NEXT_PUBLIC_APP_MODE=self-hosted` (or leave it unset) and all data is persisted in IndexedDB.
+Magic Resume runs fully in the browser with no backend, no database, and no account required. Set `NEXT_PUBLIC_APP_MODE=self-hosted` (or leave it unset) and all data is persisted in IndexedDB. The open-source self-hosted build does not send product analytics events.
 
 ```bash
 git clone https://github.com/LinMoQC/Magic-Resume.git
