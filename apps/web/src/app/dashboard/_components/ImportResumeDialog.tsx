@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { z } from 'zod';
 import Link from 'next/link';
+import { appLifecycle, type FileSizeBucket } from '@/lib/extensions/app-lifecycle';
 
 // ─── Zod 校验 Schema ───
 
@@ -84,9 +85,15 @@ type ImportResumeDialogProps = {
   onOpenChange: (open: boolean) => void;
 };
 
+const getFileSizeBucket = (bytes: number): FileSizeBucket => {
+  if (bytes < 512 * 1024) return 'small';
+  if (bytes < 2 * 1024 * 1024) return 'medium';
+  return 'large';
+};
+
 export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeDialogProps) {
   const { importResume } = useResumeStore();
-  const { apiKey, baseUrl, model, maxTokens, hasLlmConfig: hasLlmConfigFn } = useSettingStore();
+  const { apiKey, baseUrl, model, maxTokens, cloudSync, hasLlmConfig: hasLlmConfigFn } = useSettingStore();
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [llmConfigMissing, setLlmConfigMissing] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
@@ -181,6 +188,7 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
     setImportStatus('');
     const file = acceptedFiles[acceptedFiles.length - 1];
     if (!file) return;
+    if (!fileType) return;
     if (fileType === 'pdf' && !hasLlmConfig) {
       setLlmConfigMissing(true);
       setUploadError(t('importDialog.errors.noApiKey', { defaultValue: 'Please complete your AI model settings before importing PDF files.' }));
@@ -210,6 +218,11 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
       } as Resume;
 
       await importResume(newResume);
+      appLifecycle.resumeImportCompleted({
+        source: fileType,
+        cloudSyncEnabled: cloudSync,
+        sizeBucket: getFileSizeBucket(file.size),
+      });
 
       toast.success(
         fileType === 'pdf'
@@ -231,7 +244,7 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
       setIsImporting(false);
       setImportStatus('');
     }
-  }, [fileType, hasLlmConfig, importResume, handleClose, t, handleJsonFile, handlePdfFile]);
+  }, [fileType, hasLlmConfig, importResume, handleClose, t, handleJsonFile, handlePdfFile, cloudSync]);
 
   const dropzoneAccept: Record<string, string[]> = fileType === 'pdf'
     ? { 'application/pdf': ['.pdf'] }

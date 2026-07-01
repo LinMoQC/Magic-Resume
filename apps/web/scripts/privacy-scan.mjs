@@ -48,11 +48,23 @@ assertNotContains('root layout', read('src/app/layout.tsx'), [
   /PageViewTracker/,
 ]);
 
-assertNotContains('product event hook', read('src/hooks/useTrace.ts'), [
+assertNotContains('extension lifecycle', read('src/lib/extensions/app-lifecycle.ts'), [
+  /@magic-resume\/analytics-sdk/,
+  /analytics\./,
+  /track\(/,
+  /capture/,
+  /sendBeacon/,
+  /\/api\/analytics\/events/,
+  /resume\.created/,
+  /resume\.imported/,
   /username/,
   /primaryEmailAddress/,
   /resume_name/,
   /resumeName/,
+  /fullName/,
+  /email/,
+  /jobDescription/,
+  /resumeContent/,
 ]);
 
 if (failures.length) {

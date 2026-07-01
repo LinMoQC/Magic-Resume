@@ -35,7 +35,7 @@ import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import HeaderTab from './layout/HeaderTab';
-import { useTrace } from '@/hooks/useTrace';
+import { appLifecycle } from '@/lib/extensions/app-lifecycle';
 
 const ResumePreviewPanel = dynamic(() => import('./preview/ResumePreviewPanel'), {
   ssr: false,
@@ -88,7 +88,6 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
 
   const cloudSync = useSettingStore(state => state.cloudSync);
 
-  const { traceEditorViewed, traceResumeSaved, traceDownloadJson, traceTemplateChanged } = useTrace();
 
   const { isMobile } = useMobile();
 
@@ -121,10 +120,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
 
   const handleDownloadJson = () => {
     if (activeResume) {
-      traceDownloadJson({
-        resumeId: activeResume.id,
-        resumeName: activeResume.name
-      });
+      appLifecycle.resumeJsonDownloaded({ source: 'editor' });
     }
     if (!activeResume) return;
     const sanitized = getSanitizedResume(activeResume);
@@ -204,16 +200,12 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     setupEditor();
   }, [id, loadResumeForEdit, isStoreLoading, resumes, router]); // resumes 依然保留，但靠内部 activeResume?.id === id 熔断
 
-  // 追踪编辑器查看事件
+  // 编辑器查看生命周期
   useEffect(() => {
     if (activeResume && !isStoreLoading) {
-      traceEditorViewed({
-        resumeId: activeResume.id,
-        templateId: activeResume.template,
-        resumeName: activeResume.name
-      });
+      appLifecycle.editorViewed({ templateId: activeResume.template });
     }
-  }, [activeResume?.id, activeResume?.template, activeResume?.name, isStoreLoading, traceEditorViewed]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [activeResume?.id, activeResume?.template, isStoreLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 同步activeResume的template到currentTemplateId
   useEffect(() => {
@@ -230,10 +222,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     console.log('[Save] Starting manual save process...');
     try {
       if (activeResume) {
-        traceResumeSaved({
-          resumeId: activeResume.id,
-          resumeName: activeResume.name
-        });
+        appLifecycle.resumeSaveRequested({ source: 'manual' });
       }
       
       console.log('[Save] Calling store saveResume...');
@@ -300,15 +289,14 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
   // 选择模板
   const handleSelectTemplate = useCallback((templateId: string) => {
     if (activeResume) {
-      traceTemplateChanged({
-        oldTemplate: currentTemplateId,
-        newTemplate: templateId,
-        resumeName: activeResume.name
+      appLifecycle.resumeTemplateSelected({
+        previousTemplateId: currentTemplateId,
+        nextTemplateId: templateId
       });
     }
     setCurrentTemplateId(templateId);
     updateTemplate(templateId);
-  }, [activeResume, currentTemplateId, traceTemplateChanged, updateTemplate]);
+  }, [activeResume, currentTemplateId, updateTemplate]);
 
   // 拖拽排序
   function handleDragEnd(event: DragEndEvent) {
