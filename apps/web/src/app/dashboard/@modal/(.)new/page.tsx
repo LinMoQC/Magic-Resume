@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useResumeStore } from '@/store/useResumeStore';
-import { useTrace } from '@/hooks/useTrace';
+import { appLifecycle } from '@/lib/extensions/app-lifecycle';
 import NewResumeDialog from '../../_components/NewResumeDialog';
 
 export default function NewResumePage() {
@@ -11,7 +11,6 @@ export default function NewResumePage() {
   const [newName, setNewName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const { createResume } = useResumeStore();
-  const { traceResumeCreated } = useTrace();
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
@@ -29,7 +28,7 @@ export default function NewResumePage() {
            router.push(`/dashboard/edit/${newId}`);
         }, 100);
         
-        traceResumeCreated(newId);
+        appLifecycle.resumeCreated();
       } catch (error) {
         console.error('Failed to create resume:', error);
       } finally {

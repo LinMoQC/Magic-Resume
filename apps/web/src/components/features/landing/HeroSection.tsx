@@ -6,7 +6,7 @@ import { motion, useAnimation, useScroll, useTransform } from 'framer-motion';
 import { FiArrowRight, FiZap, FiGithub } from 'react-icons/fi';
 import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
-import { useTrace } from '@/hooks/useTrace';
+import { appLifecycle } from '@/lib/extensions/app-lifecycle';
 import { ShinyText, TextType, DotGrid } from '@/components/effects';
 import { MacbookScroll } from '@/components/ui/macbook-scroll';
 import { useEffect, useState } from 'react';
@@ -39,7 +39,6 @@ export function HeroSection() {
   const { scrollYProgress } = useScroll();
   const y = useTransform(scrollYProgress, [0, 1], [0, -50]);
   const [stars, setStars] = useState<number | null>(null);
-  const { traceGetStarted, traceGithubStar } = useTrace();
   const router = useRouter();
 
   // Fetch GitHub stars and prefetch dashboard modals
@@ -147,7 +146,7 @@ export function HeroSection() {
             <Link 
               href="/dashboard"
               className="w-full sm:w-auto"
-              onClick={() => traceGetStarted()}
+              onClick={() => appLifecycle.getStartedClicked()}
             >
               <div className="group relative rounded-full p-px bg-linear-to-b from-white/20 to-white/0 shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] transition-all duration-300">
                   <div className="relative rounded-full bg-linear-to-b from-[#7e22ce] to-[#581c87] px-8 py-4 flex items-center justify-center sm:justify-start gap-2 overflow-hidden transition-all duration-300 group-hover:brightness-110">
@@ -164,7 +163,7 @@ export function HeroSection() {
                target="_blank" 
                rel="noopener noreferrer" 
                className="hidden md:flex"
-               onClick={() => traceGithubStar('hero_glass_button')}
+               onClick={() => appLifecycle.githubStarClicked('hero_glass_button')}
              >
               <div className="px-8 py-4 rounded-full bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300 flex items-center gap-2 cursor-pointer">
                 <FiGithub className="text-neutral-300" />
@@ -202,7 +201,7 @@ export function HeroSection() {
               badge={
                 <Link 
                   href="https://github.com/LinMoQC/Magic-Resume"
-                  onClick={() => traceGithubStar('hero_macbook_badge')}
+                  onClick={() => appLifecycle.githubStarClicked('hero_macbook_badge')}
                 >
                   <div className="h-10 w-10 transform -rotate-12 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center shadow-lg hover:scale-110 transition-transform cursor-pointer">
                      <FiGithub className="text-white w-6 h-6" />
