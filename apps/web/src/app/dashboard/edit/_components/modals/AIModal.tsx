@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { FlaskConical, Wand2, BarChart3, BotMessageSquare, Mic, Languages, X } from 'lucide-react';
 import { Resume, Section } from '@/types/frontend/resume';
 import { useTranslation } from 'react-i18next';
@@ -8,7 +8,6 @@ import AnalyzeTab from '../ai/AnalyzeTab';
 import CreateTab from '../ai/CreateTab';
 import InterviewTab from '../ai/InterviewTab';
 import TranslateTab from '../ai/TranslateTab';
-import { useTrace } from '@/hooks/useTrace';
 
 type AIModalProps = {
   isOpen: boolean;
@@ -42,27 +41,6 @@ export default function AIModal({
 }: AIModalProps) {
   const { t } = useTranslation();
   const [activeTabKey, setActiveTabKey] = useState(TABS_CONFIG[0].key);
-  const { traceAiCreateViewed, traceAiOptimizeViewed, traceAiAnalyzeViewed, traceAiInterviewViewed } = useTrace();
-
-  useEffect(() => {
-    if (isOpen) {
-      switch (activeTabKey) {
-        case 'create':
-          traceAiCreateViewed();
-          break;
-        case 'optimize':
-          traceAiOptimizeViewed();
-          break;
-        case 'analyze':
-          traceAiAnalyzeViewed();
-          break;
-        case 'interview':
-          traceAiInterviewViewed();
-          break;
-      }
-    }
-  }, [isOpen, activeTabKey, traceAiCreateViewed, traceAiOptimizeViewed, traceAiAnalyzeViewed, traceAiInterviewViewed]);
-
 
   const handleApplySectionAndClose = (newSections: Section) => {
     onApplySectionChanges(newSections);

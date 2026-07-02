@@ -27,7 +27,6 @@ import {
 } from "@/components/ui/dialog";
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { useTranslation, Trans } from 'react-i18next';
-import { useTrace } from '@/hooks/useTrace';
 import { McpAccessSection } from './_components/McpAccessSection';
 import { isCloudMode } from '@/lib/config/app';
 
@@ -51,20 +50,17 @@ export default function Settings() {
     resetSettings,
     loadSettings,
   } = useSettingStore();
-  const { traceSettingsViewed, traceSettingsSaved } = useTrace();
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     loadSettings();
-    traceSettingsViewed();
-  }, [loadSettings, traceSettingsViewed]);
+  }, [loadSettings]);
 
 
   const handleSave = () => {
     saveSettings();
-    traceSettingsSaved({ model });
     toast.success(t('settings.notifications.settingsSaved'));
   };
 

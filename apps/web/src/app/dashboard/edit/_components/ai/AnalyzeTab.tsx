@@ -1,11 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Resume } from '@/types/frontend/resume';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Sparkles, BarChart3, RotateCw, Code2, Briefcase, Users, Cpu } from 'lucide-react';
 import MultiPersonaAnalysisReport from '@/components/features/resume/MultiPersonaAnalysisReport';
 import { useMultiPersonaAnalyzer } from '@/hooks/useMultiPersonaAnalyzer';
-import { useTrace } from '@/hooks/useTrace';
 import { motion, AnimatePresence } from 'framer-motion';
 
 type AnalyzeTabProps = {
@@ -83,23 +82,12 @@ function LoadingState() {
 export default function AnalyzeTab({ resumeData, isAiJobRunning, setIsAiJobRunning }: AnalyzeTabProps) {
   const { t } = useTranslation();
   const { isAnalyzing, analysisResult, runAnalysis, resetAnalysis } = useMultiPersonaAnalyzer();
-  const { traceAiAnalysisStarted, traceAiAnalysisSucceeded } = useTrace();
-  const hasTrackedSuccessRef = useRef(false);
 
   useEffect(() => {
     setIsAiJobRunning(isAnalyzing);
   }, [isAnalyzing, setIsAiJobRunning]);
 
-  useEffect(() => {
-    if (analysisResult && !hasTrackedSuccessRef.current) {
-      hasTrackedSuccessRef.current = true;
-      traceAiAnalysisSucceeded();
-    }
-  }, [analysisResult, traceAiAnalysisSucceeded]);
-
   const handleAnalyze = () => {
-    hasTrackedSuccessRef.current = false;
-    traceAiAnalysisStarted();
     runAnalysis({ resumeData });
   };
   

@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Paperclip, Wand2, Loader2, CheckCircle, Eye, Code, Zap, Brain, Minimize2 } from 'lucide-react';
 import { useResumeOptimizer } from '@/hooks/useResumeOptimizer';
 import ResumePreview from '../preview/ResumePreview';
-import { useTrace } from '@/hooks/useTrace';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
 
@@ -27,7 +26,6 @@ type OptimizeTabProps = {
 
 export default function OptimizeTab({ resumeData, onApplyChanges, templateId, setIsAiJobRunning }: OptimizeTabProps) {
   const { t } = useTranslation();
-  const { traceAiOptimizationStarted, traceAiOptimizationApplied } = useTrace();
   const [viewMode, setViewMode] = useState<'preview' | 'json' | 'diff'>('preview'); // State for optimizer
   const [mounted, setMounted] = useState(false);
 
@@ -78,18 +76,12 @@ const {
     setViewMode('preview');
     setIsMinimized(false);
 
-    traceAiOptimizationStarted(!!jd);
-
     // V7: Include company name and job title
     runOptimization({ jd, resumeData, companyName, jobTitle });
   };
 
   const handleApply = () => {
     if (optimizedResume) {
-      traceAiOptimizationApplied({
-        sectionsOptimized: Object.keys(optimizedResume.sections || {}).length,
-      });
-
       onApplyChanges(optimizedResume.sections);
     }
   };
