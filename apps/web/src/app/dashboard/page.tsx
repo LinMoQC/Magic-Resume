@@ -7,13 +7,12 @@ import { useResumeStore } from '@/store/useResumeStore';
 import { useSettingStore } from '@/store/useSettingStore';
 import ResumeList from './_components/ResumeList';
 import RenameResumeDialog from './_components/RenameResumeDialog';
-import { useTrace } from '@/hooks/useTrace';
+import { appLifecycle } from '@/lib/extensions/app-lifecycle';
 
 export default function Dashboard() {
   const router = useRouter();
   const { resumes, deleteResume, duplicateResume, loadResumes, renameResume } = useResumeStore();
   const { loadSettings } = useSettingStore();
-  const { traceDashboardViewed, traceCreateResume, traceImportResume } = useTrace();
 
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [resumeToRename, setResumeToRename] = useState<Resume | null>(null);
@@ -31,7 +30,7 @@ export default function Dashboard() {
         setIsLoading(true);
         await Promise.all([loadResumes(), loadSettings()]);
         const currentResumes = useResumeStore.getState().resumes;
-        traceDashboardViewed(currentResumes.length);
+        appLifecycle.dashboardViewed({ resumeCount: currentResumes.length });
       } catch (error) {
         console.error('Failed to initialize dashboard:', error);
       } finally {
@@ -40,7 +39,7 @@ export default function Dashboard() {
     };
 
     initializeDashboard();
-  }, [loadResumes, loadSettings, traceDashboardViewed]);
+  }, [loadResumes, loadSettings]);
 
   const handleOpenRenameDialog = useCallback((resume: Resume) => {
     setResumeToRename(resume);
@@ -57,14 +56,14 @@ export default function Dashboard() {
   }, [resumeToRename, newName, renameResume]);
 
   const handleAdd = useCallback(() => {
-    traceCreateResume();
+    appLifecycle.resumeCreateRequested();
     router.push('/dashboard/new');
-  }, [traceCreateResume, router]);
+  }, [router]);
 
   const handleImport = useCallback(() => {
-    traceImportResume();
+    appLifecycle.resumeImportRequested();
     router.push('/dashboard/import');
-  }, [traceImportResume, router]);
+  }, [router]);
 
   const handleResumeDelete = useCallback(async (id: string) => {
     await deleteResume(id);

@@ -5,22 +5,18 @@ import { useResumeStore, getSanitizedResume } from '@/store/useResumeStore';
 import JsonModal from '@/app/dashboard/edit/_components/modals/JsonModal';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { useTrace } from '@/hooks/useTrace';
+import { appLifecycle } from '@/lib/extensions/app-lifecycle';
 
 export default function JsonModalPage() {
   const router = useRouter();
   const { activeResume } = useResumeStore();
   const { t } = useTranslation();
-  const { traceDownloadJson } = useTrace();
 
   const handleClose = () => router.back();
 
   const handleDownloadJson = () => {
     if (activeResume) {
-      traceDownloadJson({
-        resumeId: activeResume.id,
-        resumeName: activeResume.name
-      });
+      appLifecycle.resumeJsonDownloaded({ source: 'json_modal' });
     }
     if (!activeResume) return;
     const sanitized = getSanitizedResume(activeResume);
