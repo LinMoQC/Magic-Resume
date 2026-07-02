@@ -8,6 +8,12 @@ const appRoot = path.resolve(__dirname, '..');
 const read = (relativePath) =>
   fs.readFileSync(path.join(appRoot, relativePath), 'utf8');
 
+const readOptional = (relativePath) => {
+  const fullPath = path.join(appRoot, relativePath);
+  if (!fs.existsSync(fullPath)) return undefined;
+  return fs.readFileSync(fullPath, 'utf8');
+};
+
 const failures = [];
 
 const assertNotContains = (label, content, patterns) => {
@@ -34,15 +40,18 @@ assertNotContains('package dependencies', dependencyText, [
   /@vercel\/analytics/,
 ]);
 
-assertNotContains('analytics facade', read('src/lib/analytics/core-events.ts'), [
-  /sendBeacon/,
-  /\/api\/analytics\/events/,
-  /magic_resume_anonymous_id/,
-  /magic_resume_session/,
-  /localStorage/,
-  /document\.referrer/,
-  /window\.location\.search/,
-]);
+const analyticsFacade = readOptional('src/lib/analytics/core-events.ts');
+if (analyticsFacade) {
+  assertNotContains('analytics facade', analyticsFacade, [
+    /sendBeacon/,
+    /\/api\/analytics\/events/,
+    /magic_resume_anonymous_id/,
+    /magic_resume_session/,
+    /localStorage/,
+    /document\.referrer/,
+    /window\.location\.search/,
+  ]);
+}
 
 assertNotContains('root layout', read('src/app/layout.tsx'), [
   /PageViewTracker/,
