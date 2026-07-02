@@ -1,0 +1,17 @@
+.git
+.github
+.next
+.turbo
+node_modules
+**/node_modules
+**/.next
+**/.turbo
+**/dist
+**/coverage
+.env
+.env.*
+!.env.example
+npm-debug.log*
+pnpm-debug.log*
+Dockerfile
+docker-compose*.yml
