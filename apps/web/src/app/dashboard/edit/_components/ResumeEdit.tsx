@@ -1,14 +1,14 @@
 "use client";
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Section, SectionItem } from '@/types/frontend/resume';
 import { useResumeStore, getSanitizedResume } from '@/store/useResumeStore';
 import { useSettingStore } from '@/store/useSettingStore';
 import debounce from 'lodash/debounce';
-import { FaUser } from 'react-icons/fa';
 import BasicForm from './forms/BasicForm';
 import sidebarMenu from '@/lib/constants/sidebarMenu';
 import dynamic from 'next/dynamic';
 import SectionListWithModal from './forms/SectionListWithModal';
+import FormSection from './forms/FormSection';
 import { dynamicFormFields } from '@/lib/constants/dynamicFormFields';
 import {
   DndContext,
@@ -21,14 +21,13 @@ import {
 import {
   SortableContext,
   arrayMove,
-  useSortable,
   verticalListSortingStrategy
 } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import { toast } from 'sonner';
 import ResumeEditSkeleton from './layout/ResumeEditSkeleton';
-import TemplatePanel from './templates/TemplatePanel';
-import ResumeContent from './layout/ResumeContent';
+import TemplatePanel, { rightPanelWidth } from './templates/TemplatePanel';
+import EditorFormPanel from './layout/EditorFormPanel';
+import { sectionMeta, leftPanelWidth } from './layout/OutlineRail';
 import useMobile from '@/hooks/useMobile';
 import MobileResumEdit from './mobile/MobileResumEdit';
 import { useTranslation } from 'react-i18next';
@@ -50,20 +49,7 @@ type ResumeEditProps = {
   id: string;
 };
 
-function SortableSection({ id, children, disabled }: { id: string, children: React.ReactNode, disabled?: boolean }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id, disabled });
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-    cursor: disabled ? 'default' : 'grab'
-  };
-  return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      {children}
-    </div>
-  );
-}
+const MIN_EDITOR_STAGE_WIDTH = 420;
 
 export default function ResumeEdit({ id }: ResumeEditProps) {
   const {
@@ -77,7 +63,10 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     updateTemplate,
     rightCollapsed,
     setRightCollapsed,
+    leftCollapsed,
+    setLeftCollapsed,
     activeSection,
+    setActiveSection,
     isStoreLoading,
     resumes,
     syncStatus,
@@ -88,25 +77,74 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
 
   const cloudSync = useSettingStore(state => state.cloudSync);
 
-
   const { isMobile } = useMobile();
 
+  const [viewportWidth, setViewportWidth] = useState(0);
   const [leftPanelOpen, setLeftPanelOpen] = useState(false);
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
   const [isAnyModalOpen, setIsAnyModalOpen] = useState(false);
   const [currentTemplateId, setCurrentTemplateId] = useState(activeResume?.template || 'classic');
   const [resumeNotFound, setResumeNotFound] = useState(false);
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
 
-  const [previewScale, setPreviewScale] = useState(1);
   const openJsonModal = () => router.push(`/dashboard/edit/${id}/json`);
 
-  const openAIModal = () => router.push(`/dashboard/edit/${id}/ai-lab`);
+  const openAIModal = async () => {
+    // The AI agent reads the resume from the cloud DB (read_resume tool), so push
+    // the latest editor state first (best-effort; no-ops if cloud sync is off).
+    try {
+      await syncToCloud();
+    } catch {
+      // Open the lab regardless — read_resume degrades gracefully if unsynced.
+    }
+    router.push(`/dashboard/edit/${id}/ai-lab`);
+  };
   const [isSaving, setIsSaving] = useState(false);
 
   const openVersionHistory = () => router.push(`/dashboard/edit/${id}/history`);
   const openShareModal = () => router.push(`/dashboard/edit/${id}/share`);
+  const openFeedback = () => router.push(`/dashboard/edit/${id}/feedback`);
 
   const { t } = useTranslation();
+
+  useEffect(() => {
+    const updateViewportWidth = () => setViewportWidth(window.innerWidth);
+    updateViewportWidth();
+    window.addEventListener('resize', updateViewportWidth);
+
+    return () => {
+      window.removeEventListener('resize', updateViewportWidth);
+    };
+  }, []);
+
+  const narrowWorkspace =
+    !isMobile &&
+    viewportWidth > 0 &&
+    viewportWidth <
+      leftPanelWidth(false) +
+        rightPanelWidth(false) +
+        MIN_EDITOR_STAGE_WIDTH;
+
+  const rightWorkspaceInset =
+    rightPanelWidth(rightCollapsed) + (rightCollapsed ? 0 : 1);
+
+  const toggleLeftPanel = useCallback(() => {
+    const nextCollapsed = !leftCollapsed;
+    if (!nextCollapsed && narrowWorkspace && !rightCollapsed) {
+      setRightCollapsed(true);
+    }
+    setLeftCollapsed(nextCollapsed);
+  }, [leftCollapsed, narrowWorkspace, rightCollapsed, setLeftCollapsed, setRightCollapsed]);
+
+  const setRightPanelCollapsed = useCallback(
+    (collapsed: boolean) => {
+      if (!collapsed && narrowWorkspace && !leftCollapsed) {
+        setLeftCollapsed(true);
+      }
+      setRightCollapsed(collapsed);
+    },
+    [leftCollapsed, narrowWorkspace, setLeftCollapsed, setRightCollapsed],
+  );
 
   const handleDownloadJson = () => {
     if (activeResume) {
@@ -131,33 +169,25 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
   const sectionItems = activeResume?.sections;
   const sectionOrder = activeResume?.sectionOrder;
 
-  // 简历模块的refs
-  const sectionRefs = useMemo(() => {
-    const refs: Record<string, React.RefObject<HTMLDivElement | null>> = {
-      basics: React.createRef<HTMLDivElement>(),
-      summary: React.createRef<HTMLDivElement>(),
-      projects: React.createRef<HTMLDivElement>(),
-      education: React.createRef<HTMLDivElement>(),
-      skills: React.createRef<HTMLDivElement>(),
-      languages: React.createRef<HTMLDivElement>(),
-      certificates: React.createRef<HTMLDivElement>(),
-      experience: React.createRef<HTMLDivElement>(),
-      profiles: React.createRef<HTMLDivElement>(),
-    };
-    return refs;
-  }, []);
+  // 简历模块的 refs(供大纲轨跳转 / 滚动高亮)
+  const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
+  const leftScrollRef = useRef<HTMLDivElement | null>(null);
+  const suppressNextScroll = useRef(false);
 
   // 拖拽排序的传感器
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
 
-  // 监听activeSection变化，滚动到对应的简历模块
+  // activeSection 变化 → 滚动到对应模块(外部导航 / 轨跳转);scroll-spy 触发的变化跳过,避免回环
   useEffect(() => {
-    if (activeSection && sectionRefs[activeSection]?.current) {
-      sectionRefs[activeSection].current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (suppressNextScroll.current) {
+      suppressNextScroll.current = false;
+      return;
     }
-  }, [activeSection, sectionRefs]);
+    const el = sectionRefs.current[activeSection];
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [activeSection]);
 
   // 监听store loading状态和resumes变化，确保数据加载完成后能正确加载简历
   useEffect(() => {
@@ -174,6 +204,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
           router.prefetch(`/dashboard/edit/${id}/history`);
           router.prefetch(`/dashboard/edit/${id}/json`);
           router.prefetch(`/dashboard/edit/${id}/share`);
+          router.prefetch(`/dashboard/edit/${id}/feedback`);
         }
       }
 
@@ -202,6 +233,12 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
       setCurrentTemplateId(activeResume.template);
     }
   }, [activeResume?.template, currentTemplateId]);
+
+  useEffect(() => {
+    if (narrowWorkspace && !leftCollapsed && !rightCollapsed) {
+      setLeftCollapsed(true);
+    }
+  }, [leftCollapsed, narrowWorkspace, rightCollapsed, setLeftCollapsed]);
 
   // 保存简历
   const handleSave = async () => {
@@ -275,6 +312,37 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     };
   }, [activeResume, cloudSync, isStoreLoading, debouncedSync]);
 
+  // 折叠分区 / 大纲轨跳转 / 滚动高亮
+  const toggleSection = useCallback((key: string) => {
+    setOpenSections(prev => ({ ...prev, [key]: !(prev[key] ?? true) }));
+  }, []);
+
+  const jumpToSection = useCallback((key: string) => {
+    setOpenSections(prev => ({ ...prev, [key]: true }));
+    if (leftCollapsed) {
+      if (narrowWorkspace && !rightCollapsed) {
+        setRightCollapsed(true);
+      }
+      setLeftCollapsed(false);
+    }
+    setActiveSection(key);
+  }, [leftCollapsed, narrowWorkspace, rightCollapsed, setLeftCollapsed, setRightCollapsed, setActiveSection]);
+
+  const handleLeftScroll = useCallback(() => {
+    const container = leftScrollRef.current;
+    if (!container) return;
+    const top = container.getBoundingClientRect().top;
+    let current = sectionOrder?.[0]?.key ?? 'basics';
+    (sectionOrder || []).forEach(({ key }) => {
+      const el = sectionRefs.current[key];
+      if (el && el.getBoundingClientRect().top - top <= 28) current = key;
+    });
+    if (current !== activeSection) {
+      suppressNextScroll.current = true;
+      setActiveSection(current);
+    }
+  }, [sectionOrder, activeSection, setActiveSection]);
+
   // 选择模板
   const handleSelectTemplate = useCallback((templateId: string) => {
     if (activeResume) {
@@ -335,39 +403,42 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
         onDragEnd={handleDragEnd}
       >
         <SortableContext items={sectionOrder?.map(s => s.key) || []} strategy={verticalListSortingStrategy}>
-          {(sectionOrder || []).map(({ key }, index) => {
-            const isLast = index === (sectionOrder?.length || 0) - 1;
+          {(sectionOrder || []).map(({ key }) => {
+            const meta = sectionMeta(key);
+            const Icon = meta.icon;
+            const title = meta.labelKey ? t(meta.labelKey) : key;
             return (
-              <SortableSection key={key} id={key} disabled={key === 'basics' || isAnyModalOpen}>
-                {key === 'basics' && (
-                  <div ref={sectionRefs.basics} className={`scroll-mt-24 ${isLast ? '' : 'mb-8'}`} id="basics">
-                    <h2 className="text-2xl font-bold flex items-center gap-3 mb-8"><FaUser className="text-[16px]" /> {t('editPage.sections.basics')}</h2>
-                    <BasicForm
-                      info={info!}
-                      updateInfo={updateInfo}
-                      enableCustomFields={activeResume?.template === 'product-ops-focus'}
-                    />
-                  </div>
+              <FormSection
+                key={key}
+                sectionId={key}
+                icon={<Icon size={15} />}
+                title={title}
+                open={openSections[key] ?? true}
+                onToggle={() => toggleSection(key)}
+                registerRef={(el) => { sectionRefs.current[key] = el; }}
+                disabled={key === 'basics' || isAnyModalOpen}
+              >
+                {key === 'basics' ? (
+                  <BasicForm
+                    info={info!}
+                    updateInfo={updateInfo}
+                    enableCustomFields={activeResume?.template === 'product-ops-focus'}
+                  />
+                ) : (
+                  <SectionListWithModal
+                    label={meta.labelKey || key}
+                    fields={(dynamicFormFields[key as keyof typeof dynamicFormFields] || []).map(f => ({ name: f.key, label: t(f.labelKey), placeholder: f.placeholderKey ? t(f.placeholderKey) : '', required: f.required }))}
+                    richtextKey="summary"
+                    richtextPlaceholder="..."
+                    /* eslint-disable @typescript-eslint/no-explicit-any */
+                    itemRender={sidebarMenu.find(s => s.key === key)?.itemRender as any}
+                    /* eslint-disable @typescript-eslint/no-explicit-any */
+                    items={(sectionItems?.[key as keyof Section] ?? []).map((item: { id: any; }) => ({ ...item, id: String(item.id) })) as any}
+                    setItems={(items) => updateSectionItems(key, items as SectionItem[])}
+                    onModalStateChange={setIsAnyModalOpen}
+                  />
                 )}
-                {key !== 'basics' && (
-                  <div ref={sectionRefs[key as keyof typeof sectionRefs]} key={key} id={key} className="scroll-mt-24 pl-1">
-                    <SectionListWithModal
-                      icon={sidebarMenu.find(s => s.key === key)?.icon || FaUser}
-                      label={sidebarMenu.find(s => s.key === key)?.label || ''}
-                      fields={(dynamicFormFields[key as keyof typeof dynamicFormFields] || []).map(f => ({ name: f.key, label: t(f.labelKey), placeholder: f.placeholderKey ? t(f.placeholderKey) : '', required: f.required }))}
-                      richtextKey="summary"
-                      richtextPlaceholder="..."
-                      /* eslint-disable @typescript-eslint/no-explicit-any */
-                      itemRender={sidebarMenu.find(s => s.key === key)?.itemRender as any}
-                      /* eslint-disable @typescript-eslint/no-explicit-any */
-                      items={(sectionItems?.[key as keyof Section] ?? []).map((item: { id: any; }) => ({ ...item, id: String(item.id) })) as any}
-                      setItems={(items) => updateSectionItems(key, items as SectionItem[])}
-                      className={isLast ? 'mb-0' : ''}
-                      onModalStateChange={setIsAnyModalOpen}
-                    />
-                  </div>
-                )}
-              </SortableSection>
+              </FormSection>
             );
           })}
         </SortableContext>
@@ -380,7 +451,6 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     return (
       <MobileResumEdit
         activeResume={activeResume}
-        setPreviewScale={setPreviewScale}
         leftPanelOpen={leftPanelOpen}
         setLeftPanelOpen={setLeftPanelOpen}
         rightPanelOpen={rightPanelOpen}
@@ -402,37 +472,38 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
 
   return (
     <>
-      <main className="flex h-screen bg-black text-white flex-1">
-        {/* 左侧简历内容 */}
-        <div className="w-[300px] transition-all duration-300 bg-transparent h-full">
-          <ResumeContent
-            renderSections={renderSections}
-            handleSave={handleSave}
-            onShowJson={openJsonModal}
-            isSaving={isSaving}
-          />
-        </div>
+      <main className="flex h-screen min-w-0 overflow-hidden bg-black text-white flex-1">
+        {/* 左侧:大纲轨 + 可折叠表单面板 */}
+        <EditorFormPanel
+          renderSections={renderSections}
+          sectionOrder={(sectionOrder || []).map(s => ({ key: s.key, label: s.label }))}
+          activeSection={activeSection}
+          collapsed={leftCollapsed}
+          onToggleCollapse={toggleLeftPanel}
+          onJump={jumpToSection}
+          scrollRef={leftScrollRef}
+          onScroll={handleLeftScroll}
+        />
         <div
-          className='flex-1 flex items-center justify-center bg-black relative transition-all duration-300'
+          className='min-w-0 flex-1 flex items-center justify-center bg-black relative overflow-hidden transition-all duration-300'
           style={{
-            marginRight: rightCollapsed ? '56px' : '280px'
+            marginLeft: leftPanelWidth(leftCollapsed),
+            marginRight: rightWorkspaceInset
           }}
         >
           <HeaderTab
-            title={activeResume?.name}
             updatedAt={activeResume?.updatedAt}
             syncStatus={syncStatus}
+            onVersionClick={openVersionHistory}
+            onFeedbackClick={openFeedback}
           />
           {/* 简历预览面板 */}
           <ResumePreviewPanel
             activeResume={activeResume}
-            previewScale={previewScale}
-            setPreviewScale={setPreviewScale}
             onShowAI={openAIModal}
-            onVersionClick={openVersionHistory}
             isAiJobRunning={isAiGenerating}
-            rightCollapsed={rightCollapsed}
             onShareClick={openShareModal}
+            onJsonClick={openJsonModal}
           />
         </div>
       </main>
@@ -440,7 +511,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
       {/* 模板面板 */}
       <TemplatePanel
         rightCollapsed={rightCollapsed}
-        setRightCollapsed={setRightCollapsed}
+        setRightCollapsed={setRightPanelCollapsed}
         onSelectTemplate={handleSelectTemplate}
         currentTemplateId={currentTemplateId}
       />

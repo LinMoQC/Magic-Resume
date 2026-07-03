@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "docs front-matter",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["title", "type", "status", "owner", "created", "updated", "repos"],
+  "properties": {
+    "title": { "type": "string", "minLength": 1 },
+    "type": { "enum": ["adr", "spec", "architecture", "reference", "review"] },
+    "status": {
+      "enum": ["Draft", "Proposed", "Accepted", "Implemented", "Living", "Superseded", "Deprecated"]
+    },
+    "owner": { "type": "string", "minLength": 1 },
+    "created": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "updated": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "summary": { "type": "string" },
+    "scope": { "type": "array", "items": { "type": "string" } },
+    "repos": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "supersedes": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^adr-\\d{4}$|^specs/[a-z0-9-]+$" }
+    },
+    "superseded_by": { "type": "string", "pattern": "^adr-\\d{4}$|^specs/[a-z0-9-]+$" },
+    "related": { "type": "array", "items": { "type": "string" } }
+  }
+}

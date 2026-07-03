@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { AudioRecorder, AudioPlayer } from '@/lib/utils/audio-utils';
 import { nanoid } from 'nanoid';
+import { API_ORIGIN } from '@/lib/api/routes';
 
 type RealtimeStatus = 'idle' | 'connecting' | 'connected' | 'error';
 
@@ -175,19 +176,13 @@ export function useRealtimeInterview() {
             await recorderRef.current.start();
             addLog("🎙️ Audio Capture Started");
 
-            // Connect WebSocket - Direct connection to backend (bypasses Next.js rewrites)
-            // Next.js rewrites don't support WebSocket protocol upgrades on Vercel
-            const backendUrl = process.env.BACKEND_URL || 'http://localhost:8000';
-            const backendHost = backendUrl.replace(/^https?:\/\//, ''); // Remove protocol
-            const protocol = backendUrl.startsWith('https') ? 'wss:' : 'ws:';
-            let wsUrl = `${protocol}//${backendHost}/api/interview/realtime/${sid}`;
+            // Connect WebSocket to the configured API origin. http→ws, https→wss.
+            const wsBase = API_ORIGIN.replace(/^http/, 'ws');
+            let wsUrl = `${wsBase}/api/interview/realtime/${sid}`;
 
-            // Append Query Params
+            // Realtime interview does not send provider credentials over the socket.
             const params = new URLSearchParams();
-            if (config?.apiKey) params.append('api_key', config.apiKey);
-            if (config?.baseUrl) params.append('base_url', config.baseUrl);
             if (config?.model) params.append('model', config.model);
-            
             if (params.toString()) {
                 wsUrl += `?${params.toString()}`;
             }

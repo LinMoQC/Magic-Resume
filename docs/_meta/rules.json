@@ -1,0 +1,42 @@
+{
+  "$comment": "Machine-readable docs rules mirrored from Magic-Resume-Core and adjusted for Magic-Resume.",
+  "types": ["adr", "spec", "architecture", "reference", "review"],
+  "dir": {
+    "adr": "adr",
+    "spec": "specs",
+    "architecture": "architecture",
+    "reference": "reference",
+    "review": "reviews"
+  },
+  "statusByType": {
+    "adr": ["Draft", "Proposed", "Accepted", "Implemented", "Superseded", "Deprecated"],
+    "spec": ["Draft", "Proposed", "Accepted", "Implemented", "Superseded", "Deprecated"],
+    "architecture": ["Living", "Deprecated"],
+    "reference": ["Living", "Deprecated"],
+    "review": ["Accepted", "Deprecated"]
+  },
+  "transitions": {
+    "Draft": ["Proposed", "Deprecated"],
+    "Proposed": ["Accepted", "Draft", "Deprecated"],
+    "Accepted": ["Implemented", "Superseded", "Deprecated"],
+    "Implemented": ["Living", "Superseded", "Deprecated"],
+    "Living": ["Superseded", "Deprecated"],
+    "Superseded": [],
+    "Deprecated": []
+  },
+  "archiveStatuses": ["Superseded", "Deprecated"],
+  "archiveDir": "archive",
+  "defaultStatus": {
+    "adr": "Proposed",
+    "spec": "Draft",
+    "architecture": "Living",
+    "reference": "Living",
+    "review": "Accepted"
+  },
+  "naming": {
+    "adr": "^\\d{4}-[a-z0-9-]+\\.md$",
+    "spec": "^[a-z0-9-]+/(spec|design|tasks)\\.md$",
+    "default": "^[a-z0-9-]+\\.md$"
+  },
+  "exempt": ["README.md", "CONVENTIONS.md"]
+}

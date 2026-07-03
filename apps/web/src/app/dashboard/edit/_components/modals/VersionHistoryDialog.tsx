@@ -1,12 +1,14 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { 
-    History, 
-    Clock, 
-    Bookmark, 
-    RotateCcw, 
-    Loader2, 
-    Trash2, 
-    X 
+import React, { useState, useEffect, useMemo, useRef, useLayoutEffect } from 'react';
+import {
+    History,
+    Clock,
+    Bookmark,
+    RotateCcw,
+    Loader2,
+    Trash2,
+    Code2,
+    Eye,
+    X
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,31 +17,17 @@ import { EditorComponents } from "@/lib/utils/componentOptimization";
 import { Resume, ResumeVersion } from '@/types/frontend/resume';
 import { getSanitizedResume } from '@/store/useResumeStore';
 import { useSettingStore } from '@/store/useSettingStore';
+import { formatCompactDateTime } from '@/lib/utils/dateTime';
+import { generateShortHash } from '@/lib/utils/hash';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
+import ResumePreview from '../preview/ResumePreview';
+import { workbenchJsonTheme } from './jsonTheme';
 
 const ReactJsonView = EditorComponents.JsonViewer;
 
-// --- Helper Utilities (Extracted outside to avoid re-creation) ---
-
-const formatTime = (timestamp: number) => {
-    return new Date(timestamp).toLocaleString('zh-CN', {
-        month: 'numeric',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-};
-
-// Generate a deterministic 7-char hash from string
-const generateHash = (str: string) => {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        const char = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash;
-    }
-    return Math.abs(hash).toString(16).substring(0, 7).padEnd(7, '0');
-};
+// Natural width every template renders at (A4 @ 96dpi); the render preview
+// scales down to fit the column so the resume is never clipped horizontally.
+const PAPER_WIDTH = 794;
 
 type VersionHistoryDialogProps = {
     isOpen: boolean;
@@ -54,6 +42,7 @@ export default function VersionHistoryDialog({ isOpen, onClose, onRestore, onDel
     const { t } = useTranslation();
     const [selectedVersionId, setSelectedVersionId] = useState<string>('');
     const [confirmId, setConfirmId] = useState<string | null>(null);
+    const [viewMode, setViewMode] = useState<'render' | 'json'>('render');
 
     // Sync selectedVersionId with the latest version when opening or when versions change
     useEffect(() => {
@@ -64,14 +53,53 @@ export default function VersionHistoryDialog({ isOpen, onClose, onRestore, onDel
         }
     }, [isOpen, versions, selectedVersionId]);
 
-    // Debug: Track confirmId changes
-    useEffect(() => {
-        console.log('[VersionHistoryDialog] confirmId changed to:', confirmId);
-    }, [confirmId]);
-
-    const selectedVersion = useMemo(() => 
+    const selectedVersion = useMemo(() =>
         versions.find(v => v.id === selectedVersionId),
     [versions, selectedVersionId]);
+
+    // Resolve the version payload into a clean Resume (tolerating legacy rows
+    // that stored a double-encoded `content` string). Shared by both view modes.
+    const resolvedResume = useMemo<Resume | null>(() => {
+        const data = selectedVersion?.data as unknown as (Resume & { content?: unknown }) | undefined;
+        if (!data) return null;
+        if (data.content && typeof data.content === 'string') {
+            try {
+                const parsed = JSON.parse(data.content);
+                return (typeof parsed === 'object' ? parsed : data) as Resume;
+            } catch {
+                return data as Resume;
+            }
+        }
+        return getSanitizedResume(data) as Resume;
+    }, [selectedVersion]);
+
+    // Fit the fixed-width (794px) resume paper into the preview column with a
+    // transform. `scale` fits the width; `paperH` (natural height × scale, measured
+    // off the untransformed layout box) reserves the scrolled height so only the
+    // vertical axis scrolls and nothing is clipped, at any column width.
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const paperRef = useRef<HTMLDivElement>(null);
+    const [scale, setScale] = useState(0.75);
+    const [paperH, setPaperH] = useState(0);
+    useLayoutEffect(() => {
+        if (viewMode !== 'render') return;
+        const cont = scrollRef.current;
+        if (!cont) return;
+        const recompute = () => {
+            const inner = cont.clientWidth - 32; // p-4 gutters
+            const s = Math.max(0.1, Math.min(1, inner / PAPER_WIDTH));
+            setScale(s);
+            const paper = paperRef.current;
+            if (paper) setPaperH(paper.offsetHeight * s);
+        };
+        recompute();
+        const roC = new ResizeObserver(recompute);
+        roC.observe(cont);
+        const paper = paperRef.current;
+        const roP = paper ? new ResizeObserver(recompute) : null;
+        if (paper && roP) roP.observe(paper);
+        return () => { roC.disconnect(); roP?.disconnect(); };
+    }, [viewMode, selectedVersionId, isOpen, resolvedResume]);
 
     return (
         <AnimatePresence>
@@ -82,41 +110,42 @@ export default function VersionHistoryDialog({ isOpen, onClose, onRestore, onDel
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="fixed inset-0 bg-black/60 z-100 backdrop-blur-md cursor-pointer"
+                        className="fixed inset-0 bg-black/70 z-100 backdrop-blur-sm cursor-pointer"
                     />
                     <div className="fixed inset-0 z-101 flex items-center justify-center p-4 pointer-events-none">
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                        initial={{ opacity: 0, scale: 0.98, y: 12 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        className="w-full max-w-5xl h-[80vh] bg-[#0A0A0A] border border-neutral-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden focus:outline-none pointer-events-auto"
+                        exit={{ opacity: 0, scale: 0.98, y: 12 }}
+                        transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                        className="flex h-[80vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-[#0e0f11] shadow-[0_24px_70px_-20px_rgb(0_0_0/0.8)] ring-1 ring-white/[0.07] focus:outline-none pointer-events-auto"
                     >
-                        <div className="flex items-center justify-between p-6 border-b border-neutral-800 bg-neutral-900/20">
+                        <div className="flex items-center justify-between px-6 py-4">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-2xl bg-sky-500/10 flex items-center justify-center text-sky-400 border border-sky-500/20">
-                                    <History size={22} />
+                                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-400/10 text-sky-400 ring-1 ring-sky-400/20">
+                                    <History size={18} />
                                 </div>
                                 <div>
-                                    <h2 className="text-xl font-bold text-white tracking-tight">{t('modals.versionHistory.title')}</h2>
-                                    <p className="text-xs text-neutral-500 mt-0.5">{t('modals.versionHistory.subtitle')}</p>
+                                    <h2 className="text-[15px] font-semibold tracking-tight text-white">{t('modals.versionHistory.title')}</h2>
+                                    <p className="mt-0.5 text-[13px] text-neutral-500">{t('modals.versionHistory.subtitle')}</p>
                                 </div>
                             </div>
                             <button
                                 onClick={onClose}
-                                className="p-2 rounded-full hover:bg-neutral-800 text-neutral-500 hover:text-white transition-all active:scale-95 cursor-pointer"
+                                className="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-500 hover:bg-white/5 hover:text-white transition-colors cursor-pointer"
                                 type="button"
                             >
-                                <X size={22} />
+                                <X size={18} />
                             </button>
                         </div>
 
-                        <div className="flex-1 flex overflow-hidden">
+                        <div className="flex flex-1 overflow-hidden border-t border-white/[0.06]">
                             {/* Left: Timeline List */}
-                            <div className="w-1/3 border-r border-neutral-800 overflow-y-auto custom-scrollbar bg-neutral-900/10">
+                            <div className="w-1/3 overflow-y-auto custom-scrollbar border-r border-white/[0.06]">
                                 <div className="p-4 space-y-2">
                                     {isLoading ? (
                                         <div className="h-full flex flex-col items-center justify-center p-8 text-neutral-500 space-y-3">
-                                            <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+                                            <Loader2 className="h-7 w-7 animate-spin text-sky-400" />
                                             <p className="text-sm font-medium">{t('modals.versionHistory.loading')}</p>
                                         </div>
                                     ) : versions.length > 0 ? (
@@ -132,48 +161,45 @@ export default function VersionHistoryDialog({ isOpen, onClose, onRestore, onDel
                                                     }
                                                 }}
                                                 className={cn(
-                                                    "w-full text-left p-4 rounded-xl transition-all duration-200 group relative outline-none cursor-pointer",
-                                                    selectedVersionId === version.id 
-                                                        ? "bg-indigo-500/10 border border-indigo-500/30" 
-                                                        : "hover:bg-neutral-900/50 border border-transparent"
+                                                    "group relative w-full cursor-pointer rounded-xl p-4 text-left outline-none transition-colors duration-200",
+                                                    selectedVersionId === version.id
+                                                        ? "bg-sky-400/[0.08] ring-1 ring-sky-400/25"
+                                                        : "ring-1 ring-transparent hover:bg-white/[0.03]"
                                                 )}
                                             >
                                                 <div className="flex items-start gap-3">
                                                     <div className={cn(
-                                                        "mt-1 p-1.5 rounded-lg shrink-0",
-                                                        version.type === 'manual' ? "bg-indigo-500/20 text-indigo-400" : "bg-neutral-800 text-neutral-400"
+                                                        "mt-0.5 shrink-0 rounded-lg p-1.5",
+                                                        version.type === 'manual' ? "bg-sky-400/15 text-sky-300" : "bg-white/5 text-neutral-400"
                                                     )}>
                                                         {version.type === 'manual' ? <Bookmark size={14} /> : <Clock size={14} />}
                                                     </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="flex items-center justify-between mb-1">
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="text-xs font-mono text-neutral-500">{formatTime(version.updatedAt)}</span>
-                                                            </div>
+                                                    <div className="min-w-0 flex-1">
+                                                        <div className="mb-1 flex items-center justify-between">
+                                                            <span className="font-mono text-xs text-neutral-500">{formatCompactDateTime(version.updatedAt)}</span>
                                                             {selectedVersionId === version.id && (
-                                                                <motion.div layoutId="active-indicator" className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                                                                <motion.div layoutId="active-indicator" className="h-1.5 w-1.5 rounded-full bg-sky-400" />
                                                             )}
                                                         </div>
                                                         <p className={cn(
-                                                            "text-sm font-medium truncate",
-                                                            selectedVersionId === version.id ? "text-indigo-200" : "text-neutral-300"
+                                                            "truncate text-sm font-medium",
+                                                            selectedVersionId === version.id ? "text-white" : "text-neutral-300"
                                                         )}>
                                                             {version.name || (version.type === 'manual' ? t('common.manualSave') : t('common.autoSave'))}
                                                         </p>
                                                     </div>
                                                 </div>
-                                                
+
                                                 {/* Delete Button */}
                                                 <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        console.log('[VersionHistoryDialog] Delete button clicked for version:', version.id);
                                                         setConfirmId(version.id);
                                                     }}
-                                                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg text-neutral-400 opacity-0 group-hover:opacity-100 hover:text-red-500 hover:bg-red-500/10 transition-all duration-200"
+                                                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-neutral-500 opacity-0 transition-all duration-200 hover:bg-red-500/10 hover:text-red-400 group-hover:opacity-100"
                                                     title={t('common.delete')}
                                                 >
-                                                    <Trash2 size={16} />
+                                                    <Trash2 size={15} />
                                                 </button>
                                             </div>
                                         ))
@@ -187,93 +213,122 @@ export default function VersionHistoryDialog({ isOpen, onClose, onRestore, onDel
                             </div>
 
                             {/* Right: Version Preview & Restoration */}
-                            <div className="flex-1 bg-neutral-900/10 flex flex-col relative">
-                                <AnimatePresence mode="wait">
-                                    {isLoading ? (
-                                        <motion.div
-                                            key="loading-right"
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            exit={{ opacity: 0 }}
-                                            className="flex-1 flex items-center justify-center text-neutral-500"
-                                        >
-                                            <div className="flex flex-col items-center gap-2 opacity-50">
-                                                <Loader2 className="h-6 w-6 animate-spin text-neutral-600" />
-                                                <span className="text-xs uppercase tracking-widest">{t('header.syncing')}</span>
+                            <div className="relative flex min-w-0 flex-1 flex-col">
+                                {isLoading ? (
+                                    <div className="flex flex-1 items-center justify-center text-neutral-500">
+                                        <div className="flex flex-col items-center gap-2 opacity-60">
+                                            <Loader2 className="h-6 w-6 animate-spin text-sky-400" />
+                                            <span className="text-xs uppercase tracking-widest">{t('header.syncing')}</span>
+                                        </div>
+                                    </div>
+                                ) : selectedVersion ? (
+                                    <>
+                                        {/* Preview toolbar: identity · mode toggle · restore */}
+                                        <div className="flex shrink-0 items-center justify-between gap-3 px-5 py-3">
+                                            <div className="flex items-center gap-2 min-w-0">
+                                                <span className="font-mono text-[11px] text-neutral-500">{formatCompactDateTime(selectedVersion.updatedAt)}</span>
+                                                <span className="rounded bg-white/[0.05] px-1.5 py-0.5 font-mono text-[10px] font-medium text-neutral-400 ring-1 ring-white/[0.06]">
+                                                    {generateShortHash(selectedVersion.id + selectedVersion.updatedAt)}
+                                                </span>
                                             </div>
-                                        </motion.div>
-                                    ) : selectedVersion ? (
-                                        <motion.div
-                                            key={selectedVersionId}
-                                            initial={{ opacity: 0, x: 10 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            exit={{ opacity: 0, x: -10 }}
-                                            transition={{ duration: 0.2 }}
-                                            className="p-8 flex-1 flex flex-col overflow-y-auto custom-scrollbar min-h-0"
-                                        >
-                                            {/* Version JSON Data View */}
-                                            <div className="flex-1 bg-[#13111c] rounded-2xl border border-neutral-800 p-0 relative overflow-hidden group min-h-[300px]">
-                                                <div className="absolute inset-x-0 top-0 h-10 bg-neutral-900/50 backdrop-blur-md border-b border-neutral-800 flex items-center px-4 justify-between z-10">
-                                                    <div className="flex items-center gap-1.5 font-mono">
-                                                        <div className="flex gap-1.5 mr-2">
-                                                            <div className="w-2.5 h-2.5 rounded-full bg-red-500/20 border border-red-500/40" />
-                                                            <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/20 border border-yellow-500/40" />
-                                                            <div className="w-2.5 h-2.5 rounded-full bg-green-500/20 border border-green-500/40" />
-                                                        </div>
-                                                        <span className="ml-2 text-[10px] font-mono font-medium text-neutral-400 bg-neutral-800/50 border border-neutral-800 px-1.5 py-0.5 rounded">
-                                                            {generateHash(selectedVersion.id + selectedVersion.updatedAt)}
-                                                        </span>
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex items-center gap-0.5 rounded-lg bg-white/[0.04] p-0.5 ring-1 ring-white/[0.06]">
+                                                    {([
+                                                        { id: 'render' as const, icon: Eye, label: t('modals.versionHistory.viewRender') },
+                                                        { id: 'json' as const, icon: Code2, label: t('modals.versionHistory.viewJson') },
+                                                    ]).map(({ id, icon: Icon, label }) => (
+                                                        <button
+                                                            key={id}
+                                                            type="button"
+                                                            onClick={() => setViewMode(id)}
+                                                            className={cn(
+                                                                "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer",
+                                                                viewMode === id ? "bg-sky-400/12 text-sky-300 ring-1 ring-sky-400/25" : "text-neutral-400 hover:text-white"
+                                                            )}
+                                                        >
+                                                            <Icon size={13} />
+                                                            {label}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                                <button
+                                                    onClick={() => onRestore(selectedVersionId)}
+                                                    className="flex items-center gap-1.5 rounded-lg bg-sky-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-sky-400 cursor-pointer"
+                                                >
+                                                    <RotateCcw size={13} />
+                                                    {t('modals.versionHistory.restore')}
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* Content */}
+                                        <div className="min-h-0 flex-1 px-5 pb-5">
+                                            {/* Panes are keyed by view mode only (never by version): the
+                                                measured scroll/paper nodes stay mounted across version switches,
+                                                so their ResizeObserver never fires against a detached node and
+                                                the fit scale can't collapse to the 0.1 floor. Switching versions
+                                                just updates ResumePreview's props in place. */}
+                                            {viewMode === 'json' ? (
+                                                <motion.div
+                                                    key="json"
+                                                    initial={{ opacity: 0 }}
+                                                    animate={{ opacity: 1 }}
+                                                    transition={{ duration: 0.15 }}
+                                                    className="h-full overflow-hidden rounded-xl bg-[#0a0b0d] ring-1 ring-white/[0.06]"
+                                                >
+                                                    <div className="h-full overflow-y-auto p-5 font-mono text-[11px] leading-relaxed [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                                                        {resolvedResume && (
+                                                            <ReactJsonView
+                                                                src={resolvedResume}
+                                                                theme={workbenchJsonTheme}
+                                                                displayDataTypes={false}
+                                                                enableClipboard={false}
+                                                                style={{ backgroundColor: 'transparent', fontSize: '11px', lineHeight: '1.7' }}
+                                                            />
+                                                        )}
                                                     </div>
-                                                    
-                                                    <button 
-                                                        onClick={() => onRestore(selectedVersionId)}
-                                                        className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-lg shadow-indigo-500/20 active:scale-95"
-                                                    >
-                                                        <RotateCcw size={14} />
-                                                        {t('modals.versionHistory.restore')}
-                                                    </button>
-                                                </div>
-                                                <div className="p-6 pt-14 h-full overflow-y-auto font-mono text-[11px] leading-relaxed [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                                                    <ReactJsonView 
-                                                        src={(() => {
-                                                            const data = selectedVersion?.data as unknown as Resume & { content?: unknown };
-                                                            // Handle legacy dirty data: if 'content' string exists, parse it
-                                                            if (data?.content && typeof data.content === 'string') {
-                                                                try {
-                                                                    const parsed = JSON.parse(data.content);
-                                                                    // Fallback: if parsed is just a string (double encoded), return it or object
-                                                                    return typeof parsed === 'object' ? parsed : data;
-                                                                } catch {
-                                                                    return data || {};
-                                                                }
-                                                            }
-                                                            // Clean data: return sanitized version
-                                                            return getSanitizedResume(data);
-                                                        })()} 
-                                                        theme="monokai"
-                                                        displayDataTypes={false}
-                                                        enableClipboard={false}
-                                                        style={{ backgroundColor: 'transparent', fontSize: '11px' }}
-                                                    />
-                                                </div>
-                                                <div className="absolute inset-0 bg-indigo-500/5 pointer-events-none" />
-                                            </div>
-                                        </motion.div>
-                                    ) : (
-                                        <motion.div
-                                            key="no-selection"
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            exit={{ opacity: 0 }}
-                                            className="flex-1 flex items-center justify-center text-neutral-500"
-                                        >
-                                            <div className="flex flex-col items-center gap-2 opacity-50">
-                                                <History size={32} />
-                                                <p className="text-sm">{t('header.noHistory')}</p>
-                                            </div>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
+                                                </motion.div>
+                                            ) : (
+                                                <motion.div
+                                                    key="render"
+                                                    ref={scrollRef}
+                                                    initial={{ opacity: 0 }}
+                                                    animate={{ opacity: 1 }}
+                                                    transition={{ duration: 0.15 }}
+                                                    className="h-full overflow-y-auto overflow-x-hidden custom-scrollbar rounded-xl bg-neutral-500/10 p-4 ring-1 ring-white/[0.06]"
+                                                >
+                                                    {resolvedResume && (
+                                                        <div
+                                                            className="mx-auto overflow-hidden"
+                                                            style={{ width: PAPER_WIDTH * scale, height: paperH || undefined }}
+                                                        >
+                                                            <div
+                                                                ref={paperRef}
+                                                                className="overflow-hidden rounded-md bg-white shadow-xl"
+                                                                style={{ width: PAPER_WIDTH, transform: `scale(${scale})`, transformOrigin: 'top left' }}
+                                                            >
+                                                                <ResumePreview
+                                                                    info={resolvedResume.info}
+                                                                    sections={resolvedResume.sections}
+                                                                    sectionOrder={(resolvedResume.sectionOrder || []).map((s) => s.key)}
+                                                                    templateId={resolvedResume.template}
+                                                                    customTemplate={resolvedResume.customTemplate}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </motion.div>
+                                            )}
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="flex flex-1 items-center justify-center text-neutral-500">
+                                        <div className="flex flex-col items-center gap-2 opacity-60">
+                                            <History size={30} />
+                                            <p className="text-sm">{t('modals.versionHistory.empty')}</p>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </motion.div>
@@ -283,7 +338,6 @@ export default function VersionHistoryDialog({ isOpen, onClose, onRestore, onDel
                         isOpen={!!confirmId}
                         onClose={() => setConfirmId(null)}
                         onConfirm={() => {
-                            console.log('[VersionHistoryDialog] Confirm button clicked, calling onDelete for:', confirmId);
                             if (confirmId) onDelete(confirmId);
                         }}
                         title={t('common.confirmDeleteVersion')}

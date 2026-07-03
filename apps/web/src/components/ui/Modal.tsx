@@ -40,7 +40,7 @@ const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
             onClick={onClose}
             className="text-neutral-400 hover:text-white transition-colors cursor-pointer"
           >
-            &times;
+            {'×'}
           </button>
         </div>
         <div className="flex-1 overflow-y-auto">

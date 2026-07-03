@@ -1,0 +1,64 @@
+---
+import type { Copy } from '@/i18n/ui';
+import { APP_LINKS, GITHUB } from '@/consts';
+import { formatStars } from '@/lib/github';
+import Icon from '@/components/Icon.astro';
+import LangSwitcher from '@/components/LangSwitcher.astro';
+
+interface Props {
+  copy: Copy;
+  stars: number | null;
+}
+const { copy, stars } = Astro.props;
+const nav = copy.nav;
+---
+
+<header
+  class="fixed inset-x-0 top-0 z-50 border-b border-hair bg-workbench/75 backdrop-blur-xl"
+>
+  <div class="mx-auto flex h-14 max-w-[1120px] items-center justify-between gap-4 px-5 md:px-6">
+    <a href="#top" class="flex items-center gap-2">
+      <span
+        class="flex h-7 w-7 items-center justify-center"
+      >
+        <img
+          src="/magic-resume-mark.png"
+          alt=""
+          aria-hidden="true"
+          class="h-7 w-7 object-contain"
+        />
+      </span>
+      <span class="font-display text-[14px] font-semibold tracking-tight text-ink">
+        Magic Resume
+      </span>
+    </a>
+
+    <nav class="hidden items-center gap-6 text-[13px] font-medium text-muted md:flex">
+      <a class="transition-colors hover:text-ink" href="#features">{nav.features}</a>
+      <a class="transition-colors hover:text-ink" href="#workflow">{nav.workflow}</a>
+      <a class="transition-colors hover:text-ink" href="#sync">{nav.sync}</a>
+      <a class="transition-colors hover:text-ink" href="#open-source">{nav.openSource}</a>
+      <a class="transition-colors hover:text-ink" href="#faq">{nav.faq}</a>
+    </nav>
+
+    <div class="flex items-center gap-2">
+      <a
+        href={GITHUB.repo}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={nav.starOnGithub}
+        class="hidden items-center gap-1.5 rounded-md px-2 py-1.5 text-[13px] text-muted transition-colors hover:text-ink sm:flex"
+      >
+        <Icon name="github" size={15} />
+        {stars !== null && <span class="font-mono text-xs tabular-nums">{formatStars(stars)}</span>}
+      </a>
+      <LangSwitcher />
+      <a
+        href={APP_LINKS.dashboard}
+        class="flex items-center gap-1 rounded-md bg-ink px-3 py-1.5 text-[13px] font-semibold text-workbench transition-opacity hover:opacity-85"
+      >
+        {nav.goToApp}
+      </a>
+    </div>
+  </div>
+</header>

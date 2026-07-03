@@ -1,12 +1,9 @@
 "use client";
 import React from 'react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
 import type { InfoType } from '@/types/frontend/resume';
-import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
 import { Plus, Trash2 } from 'lucide-react';
+import { TextField, AvatarField, FieldLabel, fieldInputClass } from './fields';
 
 type BasicFormProps = {
   info: InfoType;
@@ -14,8 +11,8 @@ type BasicFormProps = {
   enableCustomFields?: boolean;
 };
 
-export default function BasicForm({ 
-  info, 
+export default function BasicForm({
+  info,
   updateInfo,
   enableCustomFields = false,
 }: BasicFormProps) {
@@ -48,7 +45,7 @@ export default function BasicForm({
       customFields: customFields.filter(field => field.id !== id),
     });
   };
-  
+
   type BasicField = {
     name: keyof Omit<InfoType, 'customFields'>;
     label: string;
@@ -56,8 +53,7 @@ export default function BasicForm({
     placeholder?: string;
   };
 
-  const basicFields: BasicField[] = [
-    { name: 'avatar', label: t('basicForm.fields.avatar'), placeholder: 'https://...' },
+  const textFields: BasicField[] = [
     { name: 'fullName', label: t('basicForm.fields.fullName') },
     { name: 'headline', label: t('basicForm.fields.headline') },
     { name: 'email', label: t('basicForm.fields.email'), type: 'email' },
@@ -68,88 +64,67 @@ export default function BasicForm({
 
   return (
     <div className="flex flex-col gap-4">
-      {basicFields.map((field) => {
-        if (field.name === 'avatar') {
-          return (
-            <div key={field.name} className="flex flex-col gap-3">
-              <div className="flex items-center gap-4">
-                {info.avatar ? <Image
-                  src={info.avatar}
-                  alt={t('basicForm.avatarAlt')}
-                  width={40}
-                  height={40}
-                  className="w-10 h-10 rounded-full object-cover bg-neutral-200"
-                  unoptimized
-                /> : <div className="w-10 h-10 rounded-full bg-neutral-200" />}
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  type={field.type || 'text'}
-                  value={info[field.name]}
-                  onChange={handleInfoChange}
-                  placeholder={field.placeholder}
-                  className="flex-1"
-                />
-              </div>
-            </div>
-          );
-        }
-        return (
-          <div key={field.name} className="flex flex-col gap-3">
-            <Label htmlFor={field.name}>{field.label}</Label>
-            <Input
-              id={field.name}
-              name={field.name}
-              type={field.type || 'text'}
-              value={info[field.name]}
-              onChange={handleInfoChange}
-              placeholder={field.placeholder}
-            />
-          </div>
-        );
-      })}
+      <div className="flex flex-col gap-1.5">
+        <FieldLabel htmlFor="avatar">{t('basicForm.fields.avatar')}</FieldLabel>
+        <AvatarField
+          value={info.avatar}
+          onChange={handleInfoChange}
+          alt={t('basicForm.avatarAlt')}
+        />
+      </div>
+
+      {textFields.map((field) => (
+        <TextField
+          key={field.name}
+          name={field.name}
+          label={field.label}
+          type={field.type}
+          value={info[field.name]}
+          onChange={handleInfoChange}
+          placeholder={field.placeholder}
+        />
+      ))}
 
       {enableCustomFields && (
-        <div className="flex flex-col gap-3 pt-2">
-          <Label>{t('basicForm.customFields.title')}</Label>
+        <div className="flex flex-col gap-2.5 pt-1">
+          <FieldLabel>{t('basicForm.customFields.title')}</FieldLabel>
           <div className="flex flex-col gap-2">
             {customFields.map(field => (
-              <div key={field.id} className="grid grid-cols-[1fr_1fr_auto] gap-2 items-center">
-                <Input
+              <div key={field.id} className="grid grid-cols-[1fr_1fr_auto] items-center gap-2">
+                <input
                   value={field.name}
                   onChange={(e) => handleCustomFieldChange(field.id, 'name', e.target.value)}
                   placeholder={t('basicForm.customFields.namePlaceholder')}
+                  className={fieldInputClass}
                 />
-                <Input
+                <input
                   value={field.value}
                   onChange={(e) => handleCustomFieldChange(field.id, 'value', e.target.value)}
                   placeholder={t('basicForm.customFields.valuePlaceholder')}
+                  className={fieldInputClass}
                 />
-                <Button
+                <button
                   type="button"
-                  variant="ghost"
-                  size="icon"
                   onClick={() => handleRemoveCustomField(field.id)}
                   aria-label={t('common.delete')}
                   title={t('common.delete')}
-                  className="h-10 w-10 border border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-neutral-400 transition-colors duration-150 hover:border-red-500/40 hover:text-red-400"
                 >
                   <Trash2 size={14} />
-                </Button>
+                </button>
               </div>
             ))}
           </div>
-          <Button
+          <button
             type="button"
-            variant="ghost"
             onClick={handleAddCustomField}
-            className="w-fit border border-zinc-700 bg-zinc-900 text-zinc-100 hover:bg-zinc-800"
+            className="flex w-fit items-center gap-2 rounded-lg border border-dashed border-white/15 bg-white/[0.02] px-3 py-2 text-[12.5px] font-medium text-neutral-300 transition-colors duration-150 hover:border-sky-400/40 hover:text-white"
           >
-            <Plus size={14} className="mr-2" />
+            <Plus size={14} />
             {t('basicForm.customFields.addButton')}
-          </Button>
+          </button>
         </div>
       )}
     </div>
   );
-} 
+}

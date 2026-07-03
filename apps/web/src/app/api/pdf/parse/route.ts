@@ -1,4 +1,5 @@
 import { getServerUserId } from '@/lib/auth/server';
+import { serverFetchBackend } from '@/lib/auth/serverFetchBackend';
 
 export async function POST(request: Request) {
   try {
@@ -14,8 +15,7 @@ export async function POST(request: Request) {
     // 透传前端的 FormData（包含 file + config）给 Python 后端
     const formData = await request.formData();
 
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:8000';
-    const backendResponse = await fetch(`${backendUrl}/api/pdf/parse`, {
+    const backendResponse = await serverFetchBackend('/api/pdf/parse', {
       method: 'POST',
       body: formData,
     });

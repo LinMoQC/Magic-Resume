@@ -3,6 +3,7 @@ import { InfoType } from '../types/resume';
 import { MapPin, Phone, Mail, Globe } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
+import { Editable } from '../renderer/EditableCanvas';
 
 interface Props {
   data: InfoType;
@@ -140,7 +141,10 @@ export const Header = React.memo(function Header({
         </div>
         {info.headline && (
           <div className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-            {info.headline}
+            <Editable
+              target={{ sectionKey: 'info', itemId: '', fieldKey: 'headline', kind: 'text', label: '个人摘要' }}
+              text={info.headline}
+            />
           </div>
         )}
         {contactStyle === 'label' ? (

@@ -13,6 +13,7 @@ import { Timeline } from '../templateLayout/Timeline';
 import { Layout } from '../templateLayout/Layout';
 import { TwoColumnLayout } from '../templateLayout/TwoColumnLayout';
 import { getSectionIcon } from '../templateLayout/utils';
+import { getWebFontStack } from '../font-family';
 
 const componentRegistry = {
   Header,
@@ -63,6 +64,10 @@ const ZH_TITLE_BY_ENGLISH: Record<string, string> = {
 };
 
 function getSectionData(data: Resume, dataBinding: string) {
+  // Defensive: a malformed resume (no `sections`/`info`) must render empty, not
+  // throw and white-screen the whole app. The caller treats `undefined` as
+  // "skip this section".
+  if (!data || typeof data !== 'object') return undefined;
   if (dataBinding === 'info') {
     return data.info;
   }
@@ -75,7 +80,7 @@ function getSectionData(data: Resume, dataBinding: string) {
 
   if (dataBinding.startsWith('sections.')) {
     const sectionKey = dataBinding.replace('sections.', '');
-    const sectionItems = data.sections[sectionKey as keyof typeof data.sections];
+    const sectionItems = data.sections?.[sectionKey as keyof typeof data.sections];
     if (Array.isArray(sectionItems)) {
       return sectionItems.filter(isVisible);
     }
@@ -97,7 +102,7 @@ function generateCSSVariables(designTokens: MagicTemplateDSL['designTokens'], la
     '--color-text-secondary': designTokens.colors.textSecondary,
     '--color-background': designTokens.colors.background,
     '--color-border': designTokens.colors.border,
-    '--font-family-primary': designTokens.typography.fontFamily.primary,
+    '--font-family-primary': getWebFontStack(designTokens.typography.fontFamily.primary),
     '--font-size-xs': designTokens.typography.fontSize.xs,
     '--font-size-sm': designTokens.typography.fontSize.sm,
     '--font-size-md': designTokens.typography.fontSize.md,
@@ -245,6 +250,7 @@ export const MagicResumeRenderer = React.memo(({ template, data, locale }: Props
             ...component.props,
             title: resolvedTitle,
             titleIcon: getSectionIcon(sectionKey, rawTitle),
+            sectionKey,
           };
 
           return (

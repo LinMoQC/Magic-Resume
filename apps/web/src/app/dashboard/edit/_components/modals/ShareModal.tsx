@@ -77,51 +77,52 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/50 z-100 backdrop-blur-sm cursor-pointer"
+            className="fixed inset-0 bg-black/70 z-100 backdrop-blur-sm cursor-pointer"
           />
           <div className="fixed inset-0 z-101 flex items-center justify-center p-4 pointer-events-none">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              initial={{ opacity: 0, scale: 0.98, y: 12 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="w-full max-w-md bg-[#1C1C1E] border border-neutral-800 rounded-2xl shadow-2xl p-6 pointer-events-auto"
+              exit={{ opacity: 0, scale: 0.98, y: 12 }}
+              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              className="w-full max-w-md rounded-2xl bg-[#0e0f11] p-6 shadow-[0_24px_70px_-20px_rgb(0_0_0/0.8)] ring-1 ring-white/[0.07] pointer-events-auto"
             >
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-start justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
-                  <Globe size={20} />
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-400/10 text-sky-400 ring-1 ring-sky-400/20">
+                  <Globe size={17} />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-white">{t('modals.share.title')}</h2>
-                  <p className="text-sm text-neutral-400">{t('modals.share.subtitle')}</p>
+                  <h2 className="text-[15px] font-semibold tracking-tight text-white">{t('modals.share.title')}</h2>
+                  <p className="mt-0.5 text-[13px] text-neutral-500">{t('modals.share.subtitle')}</p>
                 </div>
               </div>
               <button
                 onClick={onClose}
-                className="text-neutral-500 hover:text-white transition-colors cursor-pointer"
+                className="-mr-1 -mt-1 flex h-8 w-8 items-center justify-center rounded-lg text-neutral-500 hover:bg-white/5 hover:text-white transition-colors cursor-pointer"
                 type="button"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4">
               {/* Public Toggle */}
-              <div className="flex items-center justify-between p-4 rounded-xl bg-neutral-900/50 border border-neutral-800">
+              <div className="flex items-center justify-between gap-4 rounded-xl bg-white/[0.02] p-4 ring-1 ring-white/[0.06]">
                 <div className="flex gap-3">
-                    <div className={cn("mt-1", isPublic ? "text-green-500" : "text-neutral-500")}>
-                        {isPublic ? <Globe size={18} /> : <Lock size={18} />}
+                    <div className={cn("mt-0.5", isPublic ? "text-sky-400" : "text-neutral-500")}>
+                        {isPublic ? <Globe size={17} /> : <Lock size={17} />}
                     </div>
                     <div>
                         <h3 className="text-sm font-medium text-white">{t('modals.share.publicAccess')}</h3>
-                        <p className="text-xs text-neutral-400 mt-1">
+                        <p className="mt-1 text-xs text-neutral-500">
                             {isSyncing ? t('modals.share.syncing') : (isPublic ? t('modals.share.publicAccessDesc') : t('modals.share.privateAccessDesc'))}
                         </p>
                     </div>
                 </div>
-                    <div 
+                    <div
                         className={cn(
-                            "relative inline-flex items-center cursor-pointer group",
+                            "relative inline-flex shrink-0 items-center cursor-pointer group",
                             (loading || isSyncing) && "opacity-50 cursor-not-allowed pointer-events-none"
                         )}
                         onClick={() => !loading && !isSyncing && handleTogglePublic(!isPublic)}
@@ -129,38 +130,40 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
                         aria-checked={isPublic}
                     >
                         <div className={cn(
-                            "w-11 h-6 rounded-full transition-colors duration-200 ease-in-out",
-                            isPublic ? "bg-green-500" : "bg-neutral-600"
+                            "h-6 w-11 rounded-full transition-colors duration-200 ease-out",
+                            isPublic ? "bg-sky-500" : "bg-white/10"
                         )}>
                             <div className={cn(
-                                "absolute top-1 left-1 bg-white w-4 h-4 rounded-full shadow transition-transform duration-200 ease-in-out flex items-center justify-center",
+                                "absolute left-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-white shadow-sm transition-transform duration-200 ease-out",
                                 isPublic ? "translate-x-5" : "translate-x-0"
                             )}>
-                                {(loading || isSyncing) && <div className="w-2 h-2 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />}
+                                {(loading || isSyncing) && <div className="h-2 w-2 animate-spin rounded-full border-2 border-sky-500 border-t-transparent" />}
                             </div>
                         </div>
                     </div>
               </div>
 
               {/* Link Section (Only if Public) */}
-              <AnimatePresence>
+              <AnimatePresence initial={false}>
                 {isPublic && (
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden space-y-4"
+                    transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                    className="overflow-hidden"
                   >
+                    <div className="space-y-3 pt-1">
                     {/* Permissions */}
-                    <div className="grid grid-cols-2 gap-2 p-1 bg-neutral-900 rounded-lg">
+                    <div className="grid grid-cols-2 gap-1 rounded-lg bg-white/[0.03] p-1 ring-1 ring-white/[0.05]">
                         <button
                             type="button"
                             onClick={() => handleRoleChange('VIEWER')}
                             className={cn(
-                                "py-2 px-3 text-sm font-medium rounded-md transition-all",
-                                shareRole === 'VIEWER' 
-                                    ? "bg-neutral-800 text-white shadow-sm" 
-                                    : "text-neutral-400 hover:text-neutral-200"
+                                "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                                shareRole === 'VIEWER'
+                                    ? "bg-sky-400/12 text-sky-300 ring-1 ring-sky-400/25"
+                                    : "text-neutral-400 hover:text-white"
                             )}
                         >
                             {t('modals.share.readOnly')}
@@ -169,10 +172,10 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
                             type="button"
                             onClick={() => handleRoleChange('COMMENTER')}
                             className={cn(
-                                "py-2 px-3 text-sm font-medium rounded-md transition-all",
-                                shareRole === 'COMMENTER' 
-                                    ? "bg-neutral-800 text-white shadow-sm" 
-                                    : "text-neutral-400 hover:text-neutral-200"
+                                "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                                shareRole === 'COMMENTER'
+                                    ? "bg-sky-400/12 text-sky-300 ring-1 ring-sky-400/25"
+                                    : "text-neutral-400 hover:text-white"
                             )}
                         >
                             {t('modals.share.allowComments')}
@@ -181,28 +184,29 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
 
                     {/* Link Copy */}
                     <div className="relative">
-                        <div className="flex items-center bg-neutral-950 border border-neutral-800 rounded-lg p-3 pr-12">
-                            <Link size={16} className="text-neutral-500 min-w-[16px]" />
-                            <input 
+                        <div className="flex items-center rounded-lg bg-black/40 p-3 pr-12 ring-1 ring-white/[0.06] focus-within:ring-sky-400/40 transition-shadow">
+                            <Link size={15} className="min-w-[15px] text-neutral-500" />
+                            <input
                                 readOnly
                                 value={shareUrl}
-                                className="bg-transparent border-none text-sm text-neutral-300 ml-3 w-full focus:outline-none truncate"
+                                className="ml-3 w-full truncate border-none bg-transparent text-sm text-neutral-300 focus:outline-none"
                             />
                         </div>
                         <button
-                            className="absolute right-1 top-1 h-8 w-8 flex items-center justify-center rounded hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                            className="absolute right-1.5 top-1.5 flex h-8 w-8 items-center justify-center rounded-md text-neutral-400 hover:bg-white/5 hover:text-white transition-colors cursor-pointer"
                             onClick={copyToClipboard}
                         >
-                            {copied ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
+                            {copied ? <Check size={14} className="text-sky-400" /> : <Copy size={14} />}
                         </button>
+                    </div>
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
-            
-            <div className="mt-6 pt-4 border-t border-neutral-800 flex justify-end">
-                <button onClick={onClose} className="px-4 py-2 text-sm text-neutral-400 hover:text-white transition-colors cursor-pointer">
+
+            <div className="mt-6 flex justify-end border-t border-white/[0.06] pt-4">
+                <button onClick={onClose} className="rounded-lg bg-white/[0.06] px-4 py-2 text-sm font-medium text-neutral-200 ring-1 ring-white/[0.08] hover:bg-white/10 transition-colors cursor-pointer">
                     {t('common.done')}
                 </button>
             </div>

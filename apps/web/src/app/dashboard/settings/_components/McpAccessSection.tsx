@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useAppAuth } from '@/lib/auth';
-import { Check, Copy, KeyRound, Plus, RefreshCw, Terminal, Trash2 } from 'lucide-react';
+import { Check, Copy, KeyRound, RefreshCw, Terminal, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { AxiosError } from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -17,14 +17,18 @@ import {
 } from '@/components/ui/select';
 import { resumeApi } from '@/lib/api/resume';
 import { mcpApi, PersonalAccessToken } from '@/lib/api/mcp';
+import {
+  formatMcpDate,
+  getApiErrorMessage,
+  getMcpApiUrl,
+  normalizeCloudResumes,
+  shellQuote,
+  type CloudResumeOption,
+} from '@/lib/settings/mcpAccess';
 
-type CloudResumeOption = {
-  id: string;
-  title: string;
-};
-
-export function McpAccessSection() {
+export function McpAccessSection({ showHeader = true }: { showHeader?: boolean } = {}) {
   const { t } = useTranslation();
+  const reduce = useReducedMotion();
   const { isSignedIn } = useAppAuth();
   const [tokens, setTokens] = useState<PersonalAccessToken[]>([]);
   const [resumes, setResumes] = useState<CloudResumeOption[]>([]);
@@ -112,212 +116,180 @@ export function McpAccessSection() {
     window.setTimeout(() => setCopiedKey(null), 1600);
   };
 
+  const activeCount = tokens.filter((token) => !token.revokedAt).length;
+
+  const inputClass =
+    'h-10 rounded-lg border border-white/[0.07] bg-black/20 px-3.5 text-neutral-100 placeholder:text-neutral-600 transition-colors focus-visible:border-sky-500/40 focus-visible:ring-1 focus-visible:ring-sky-500/25 focus-visible:ring-offset-0';
+
   return (
-    <section id="mcp-access">
-      <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-        <div className="w-1.5 h-6 bg-emerald-500 rounded-full" />
-        {t('settings.mcp.title')}
-      </h2>
+    <section id="mcp-access" className="mx-auto max-w-[760px]">
+      {showHeader && (
+        <header className="mb-8">
+          <h2 className="text-[22px] font-semibold tracking-tight text-neutral-50">{t('settings.mcp.title')}</h2>
+          <p className="mt-2 max-w-[58ch] text-[13px] leading-relaxed text-neutral-500">
+            {t('settings.mcp.description')}
+          </p>
+        </header>
+      )}
 
-      <div className="border border-neutral-800/50 bg-neutral-900/50 backdrop-blur-sm rounded-2xl p-6">
-        <div className="flex flex-col gap-5">
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-neutral-100">
-                <KeyRound className="w-5 h-5 text-emerald-400" />
-                <h3 className="text-lg font-semibold">{t('settings.mcp.accessTitle')}</h3>
-              </div>
-              <p className="text-sm text-neutral-400 leading-relaxed max-w-2xl">
-                {t('settings.mcp.description')}
-              </p>
-            </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={loadMcpAccess}
-              loading={isLoading}
-              className="shrink-0 rounded-full border border-neutral-800 bg-neutral-950/50 hover:bg-neutral-800"
-            >
-              <RefreshCw className="w-4 h-4 mr-2" />
-              {t('settings.mcp.refresh')}
-            </Button>
-          </div>
+      {/* Connect console — name + default resume + create, one focused surface */}
+      <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 sm:p-5">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,190px)_auto]">
+          <Input
+            value={newTokenName}
+            onChange={(event) => setNewTokenName(event.target.value)}
+            placeholder={t('settings.mcp.tokenNamePlaceholder')}
+            className={inputClass}
+          />
+          <Select value={selectedResumeId} onValueChange={setSelectedResumeId}>
+            <SelectTrigger className="h-10 w-full rounded-lg border border-white/[0.07] bg-black/20 px-3.5 text-neutral-100 transition-colors data-[size=default]:h-10 data-[placeholder]:text-neutral-500 focus-visible:border-sky-500/40 focus-visible:ring-1 focus-visible:ring-sky-500/25">
+              <SelectValue placeholder={t('settings.mcp.defaultResumePlaceholder')} />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl border-white/[0.08] bg-neutral-950 text-white shadow-2xl shadow-black/50">
+              {resumes.map((resume) => (
+                <SelectItem key={resume.id} value={resume.id} className="rounded-lg focus:bg-white/[0.06] focus:text-sky-300">
+                  {resume.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            type="button"
+            onClick={handleCreateToken}
+            loading={isCreating}
+            disabled={!isSignedIn}
+            className="h-10 rounded-lg bg-sky-500 px-5 text-sm font-medium text-white transition-colors hover:bg-sky-400 focus-visible:ring-sky-400/50"
+          >
+            {t('settings.mcp.enable')}
+          </Button>
+        </div>
+        {!plainToken && (
+          <p className="mt-3.5 flex items-center gap-2 text-[12px] leading-relaxed text-neutral-500">
+            <Terminal className="h-3.5 w-3.5 shrink-0 text-neutral-600" />
+            {t('settings.mcp.commandEmpty')}
+          </p>
+        )}
+      </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_240px_auto] gap-3">
-            <Input
-              value={newTokenName}
-              onChange={(event) => setNewTokenName(event.target.value)}
-              placeholder={t('settings.mcp.tokenNamePlaceholder')}
-              className="bg-neutral-950/50 border-neutral-800 focus:ring-emerald-500/50"
-            />
-            <Select value={selectedResumeId} onValueChange={setSelectedResumeId}>
-              <SelectTrigger className="bg-neutral-950/50 border-neutral-800">
-                <SelectValue placeholder={t('settings.mcp.defaultResumePlaceholder')} />
-              </SelectTrigger>
-              <SelectContent className="bg-neutral-900 border-neutral-800 text-white">
-                {resumes.map((resume) => (
-                  <SelectItem key={resume.id} value={resume.id} className="focus:bg-neutral-800 focus:text-emerald-400">
-                    {resume.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button
-              type="button"
-              onClick={handleCreateToken}
-              loading={isCreating}
-              disabled={!isSignedIn}
-              className="rounded-full bg-emerald-500 hover:bg-emerald-400 text-white font-semibold px-5"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              {t('settings.mcp.enable')}
-            </Button>
-          </div>
-
-          {plainToken && (
-            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 space-y-4">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-emerald-200">{t('settings.mcp.tokenCreatedTitle')}</p>
-                  <p className="text-xs text-emerald-100/70 mt-1">{t('settings.mcp.tokenCreatedDescription')}</p>
+      {/* Payoff — the one-time token + paste-ready command, only after creation */}
+      <AnimatePresence initial={false}>
+        {plainToken && (
+          <motion.div
+            key="mcp-reveal"
+            initial={reduce ? { opacity: 0 } : { opacity: 0, y: 8 }}
+            animate={reduce ? { opacity: 1 } : { opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            className="mt-4 space-y-5 rounded-2xl border border-sky-400/25 bg-sky-400/[0.05] p-4 sm:p-5"
+          >
+            <div>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-sky-100">{t('settings.mcp.tokenCreatedTitle')}</p>
+                  <p className="mt-1 max-w-[52ch] text-xs leading-relaxed text-sky-100/70">{t('settings.mcp.tokenCreatedDescription')}</p>
                 </div>
                 <Button
                   type="button"
                   size="sm"
                   onClick={() => copyText(plainToken, 'token')}
-                  className="rounded-full bg-emerald-500 hover:bg-emerald-400"
+                  className="shrink-0 rounded-lg bg-sky-500 text-white hover:bg-sky-400"
                 >
-                  {copiedKey === 'token' ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
+                  {copiedKey === 'token' ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
                   {t('settings.mcp.copyToken')}
                 </Button>
               </div>
-              <div className="rounded-lg bg-neutral-950/80 border border-neutral-800 p-3 font-mono text-xs text-emerald-100 break-all">
+              <div className="mt-3 break-all rounded-lg border border-sky-400/15 bg-black/40 p-3 font-mono text-xs text-sky-100">
                 {plainToken}
               </div>
             </div>
-          )}
 
-          <div className="rounded-xl border border-neutral-800 bg-neutral-950/50 p-4 space-y-3">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-              <div className="flex items-center gap-2 text-neutral-200">
-                <Terminal className="w-4 h-4 text-emerald-400" />
-                <p className="text-sm font-medium">{t('settings.mcp.commandTitle')}</p>
+            <div>
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 text-neutral-200">
+                  <Terminal className="h-4 w-4 text-sky-300" />
+                  <p className="text-[13px] font-medium">{t('settings.mcp.commandTitle')}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => copyText(mcpCommand, 'command')}
+                  className="inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[12.5px] text-neutral-300 transition-colors hover:bg-white/[0.06] hover:text-white"
+                >
+                  {copiedKey === 'command' ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                  {t('settings.mcp.copyCommand')}
+                </button>
               </div>
-              <Button
-                type="button"
-                size="sm"
-                disabled={!mcpCommand}
-                onClick={() => copyText(mcpCommand, 'command')}
-                className="rounded-full bg-neutral-800 hover:bg-neutral-700"
-              >
-                {copiedKey === 'command' ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
-                {t('settings.mcp.copyCommand')}
-              </Button>
+              <pre className="overflow-x-auto whitespace-pre-wrap rounded-lg border border-white/[0.06] bg-black/50 p-3.5 font-mono text-xs leading-relaxed text-neutral-300">
+                {mcpCommand}
+              </pre>
             </div>
-            <pre className="min-h-[88px] overflow-x-auto whitespace-pre-wrap rounded-lg bg-black/40 border border-neutral-800 p-3 font-mono text-xs text-neutral-300">
-              {mcpCommand || t('settings.mcp.commandEmpty')}
-            </pre>
-          </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-          <div className="space-y-2">
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-sm font-medium text-neutral-300">{t('settings.mcp.activeTokens')}</p>
-              <span className="text-xs text-neutral-500">{tokens.filter((token) => !token.revokedAt).length}</span>
-            </div>
-            <div className="rounded-xl border border-neutral-800 overflow-hidden">
-              {tokens.length === 0 ? (
-                <div className="px-4 py-5 text-sm text-neutral-500">{t('settings.mcp.emptyTokens')}</div>
-              ) : (
-                tokens.map((token) => (
-                  <div key={token.id} className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 px-4 py-3 border-b border-neutral-800 last:border-b-0">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-medium text-neutral-100 truncate">{token.name}</p>
-                        <span className={token.revokedAt ? 'text-[11px] text-red-300 bg-red-500/10 px-2 py-0.5 rounded-full' : 'text-[11px] text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded-full'}>
-                          {token.revokedAt ? t('settings.mcp.revoked') : t('settings.mcp.active')}
-                        </span>
-                      </div>
-                      <p className="text-xs text-neutral-500 font-mono mt-1">{token.tokenPreview}</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <p className="text-xs text-neutral-500 whitespace-nowrap">
-                        {token.lastUsedAt ? t('settings.mcp.lastUsed', { date: formatDate(token.lastUsedAt) }) : t('settings.mcp.neverUsed')}
-                      </p>
-                      <Button
-                        type="button"
-                        size="icon"
-                        disabled={Boolean(token.revokedAt)}
-                        onClick={() => handleRevokeToken(token.id)}
-                        className="h-9 w-9 rounded-full bg-neutral-800 hover:bg-red-500/20 hover:text-red-200"
-                        aria-label={t('settings.mcp.revoke')}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
+      {/* Tokens management */}
+      <div className="mt-8">
+        <div className="mb-1 flex items-center justify-between gap-3">
+          <div className="flex items-baseline gap-2">
+            <p className="text-[13px] font-medium text-neutral-300">{t('settings.mcp.activeTokens')}</p>
+            <span className="font-mono text-xs tabular-nums text-neutral-600">{activeCount}</span>
           </div>
+          <button
+            type="button"
+            onClick={loadMcpAccess}
+            disabled={isLoading}
+            className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-[12.5px] text-neutral-400 transition-colors hover:bg-white/[0.05] hover:text-neutral-100 disabled:opacity-50"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+            {t('settings.mcp.refresh')}
+          </button>
         </div>
+        {tokens.length === 0 ? (
+          <div className="flex items-center gap-2.5 py-5 text-sm text-neutral-500">
+            <KeyRound className="h-4 w-4 shrink-0 text-neutral-600" />
+            {t('settings.mcp.emptyTokens')}
+          </div>
+        ) : (
+          <div className="divide-y divide-white/[0.06] border-t border-white/[0.06]">
+            {tokens.map((token) => (
+              <div
+                key={token.id}
+                className="flex flex-col gap-3 py-3.5 md:flex-row md:items-center md:justify-between"
+              >
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="truncate text-sm font-medium text-neutral-100">{token.name}</p>
+                    <span
+                      className={
+                        token.revokedAt
+                          ? 'rounded-full bg-red-500/10 px-2 py-0.5 text-[11px] text-red-300'
+                          : 'rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] text-emerald-300'
+                      }
+                    >
+                      {token.revokedAt ? t('settings.mcp.revoked') : t('settings.mcp.active')}
+                    </span>
+                  </div>
+                  <p className="mt-1 font-mono text-xs text-neutral-500">{token.tokenPreview}</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <p className="whitespace-nowrap text-xs text-neutral-500">
+                    {token.lastUsedAt ? t('settings.mcp.lastUsed', { date: formatMcpDate(token.lastUsedAt) }) : t('settings.mcp.neverUsed')}
+                  </p>
+                  <Button
+                    type="button"
+                    size="icon"
+                    disabled={Boolean(token.revokedAt)}
+                    onClick={() => handleRevokeToken(token.id)}
+                    className="h-9 w-9 rounded-full bg-white/[0.04] text-neutral-400 hover:bg-red-500/15 hover:text-red-200"
+                    aria-label={t('settings.mcp.revoke')}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
-}
-
-function getMcpApiUrl(): string {
-  const baseUrl = process.env.NEXT_PUBLIC_CLOUD_API_URL || 'http://localhost:3111';
-  const normalized = baseUrl.replace(/\/+$/, '');
-  return normalized.endsWith('/api') ? normalized : `${normalized}/api`;
-}
-
-function normalizeCloudResumes(value: unknown): CloudResumeOption[] {
-  const maybeData = value as { data?: unknown };
-  const list = Array.isArray(value)
-    ? value
-    : Array.isArray(maybeData?.data)
-      ? maybeData.data
-      : Array.isArray((maybeData?.data as { data?: unknown })?.data)
-        ? (maybeData.data as { data: unknown[] }).data
-        : [];
-
-  return list
-    .map((item) => {
-      const resume = item as { id?: string; title?: string; name?: string };
-      if (!resume.id) return null;
-      return {
-        id: resume.id,
-        title: resume.title || resume.name || resume.id,
-      };
-    })
-    .filter((item): item is CloudResumeOption => Boolean(item));
-}
-
-function shellQuote(value: string): string {
-  return `'${value.replace(/'/g, "'\\''")}'`;
-}
-
-function formatDate(value: string): string {
-  return new Intl.DateTimeFormat(undefined, {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(value));
-}
-
-function getApiErrorMessage(error: unknown): string | null {
-  if (!isAxiosError(error)) return null;
-
-  const data = error.response?.data as { message?: unknown } | undefined;
-  if (typeof data?.message === 'string') {
-    return data.message;
-  }
-
-  return null;
-}
-
-function isAxiosError(error: unknown): error is AxiosError {
-  return Boolean(error && typeof error === 'object' && 'isAxiosError' in error);
 }

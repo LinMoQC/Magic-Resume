@@ -1,4 +1,91 @@
 {
+  "comingSoon": {
+    "title": "好东西,马上就来",
+    "subtitle": "Magic Resume 正在内测。我们正为你的 AI 简历工作台做最后打磨,公开上线近在眼前。",
+    "launched": "已上线",
+    "countdownLabel": "距离公开上线",
+    "enterCta": "进入 Magic Resume",
+    "reserveCta": "预约体验",
+    "reserveNote": "内测名额有限,预约后我们第一时间通知你。",
+    "noDate": "距离公开上线只差最后一步,敬请期待。",
+    "signOut": "退出登录",
+    "days": "天",
+    "hours": "时",
+    "minutes": "分",
+    "seconds": "秒"
+  },
+  "account": {
+    "menu": {
+      "title": "账户",
+      "upgrade": "升级到 Pro",
+      "upgradeHint": "解锁全部 AI 能力",
+      "upgradeSoon": "即将推出",
+      "profile": "个人资料",
+      "settings": "设置",
+      "language": "语言",
+      "signOut": "退出登录"
+    },
+    "modal": {
+      "title": "账户"
+    },
+    "profile": {
+      "tabs": { "profile": "资料", "security": "安全", "activity": "活动" },
+      "personalInfo": "个人信息",
+      "firstName": "名字",
+      "lastName": "姓氏",
+      "username": "用户名",
+      "emails": "邮箱地址",
+      "social": "社交账户",
+      "phones": "手机号",
+      "primary": "主邮箱",
+      "verified": "已验证",
+      "unverified": "未验证",
+      "security": "安全设置",
+      "password": "密码登录",
+      "twoFactor": "2FA",
+      "totp": "TOTP",
+      "backupCodes": "备用代码",
+      "enabled": "已启用",
+      "disabled": "未启用",
+      "stats": { "resumes": "简历数", "social": "社交账户", "days": "加入天数" },
+      "recentResumes": "最近简历",
+      "noResumes": "暂无简历",
+      "untitled": "未命名",
+      "side": { "userId": "用户 ID", "primaryEmail": "主邮箱", "joinedAt": "加入时间", "updatedAt": "最后更新", "lastSignIn": "最后登录" },
+      "never": "从未",
+      "activeToday": "今日活跃",
+      "activeYesterday": "昨日活跃",
+      "activeDaysAgo": "{{count}} 天前活跃",
+      "neverActive": "从未活跃",
+      "heatmap": {
+        "title": "活跃热力图",
+        "summary": "{{total}} 次编辑 · {{days}} 天活跃(过去 365 天)",
+        "less": "少",
+        "more": "多",
+        "edits": "次编辑"
+      },
+      "loadFailed": "无法加载账户信息"
+    },
+    "settings": {
+      "title": "设置",
+      "nav": {
+        "general": "常规",
+        "model": "模型",
+        "cloudSync": "云同步",
+        "mcp": "MCP"
+      },
+      "general": {
+        "description": "偏好设置保持克制，只保留会影响日常创作的选项。",
+        "appearance": "外观",
+        "appearanceDescription": "Magic Resume 目前固定为深色工作台，减少长时间编辑时的视觉干扰。",
+        "appearanceDark": "深色",
+        "appearanceLight": "浅色",
+        "comingSoon": "即将推出",
+        "language": "语言",
+        "languageDescription": "切换界面语言，不影响简历内容本身。"
+      }
+    }
+  },
   "notificationsPage": {
     "title": "通知中心",
     "unread": "{{count}} 条未读",
@@ -14,25 +101,42 @@
       "view": "查看详情",
       "markRead": "标记为已读"
     },
+    "notificationUpdateFailed": "更新通知失败",
     "someone": "某人"
   },
   "settings": {
     "title": "设置",
     "llm": {
-      "title": "OpenAI/Ollama 集成",
-      "description1": "您可以利用 OpenAI API 来帮助您生成内容，或在撰写简历时改进您的写作。",
-      "description2": "您可以选择<1>获取您自己的 OpenAI API 密钥</1>。此密钥使您能够根据需要利用 API。或者，如果您希望完全禁用 Reactive Resume 中的 AI 功能，您可以从设置中删除该密钥。",
-      "description3": "您还可以通过将 API 密钥设置为 `sk-1234567890abcdef` 并将 Base URL 设置为您的 Ollama URL（即 `http://localhost:11434/v1`）来与 Ollama 集成。您还可以根据自己的喜好选择模型并设置最大令牌数。",
-      "apiKeyLabel": "OpenAI/Ollama API 密钥",
-      "baseUrlLabel": "基础 URL",
+      "title": "模型配置",
+      "description": "选择服务商、粘贴你自己的 API Key 即可启用 AI。密钥只保存在你的浏览器本地，不会上传。",
+      "providerLabel": "API 提供商",
+      "providerPlaceholder": "选择服务商",
+      "apiKeyLabel": "API 密钥",
+      "getKeyLink": "获取 API Key",
       "modelLabel": "模型",
+      "modelPlaceholder": "选择模型",
+      "modelCustomPlaceholder": "输入模型名称，如 llama3",
+      "selectProviderFirst": "请先选择服务商",
+      "baseUrlLabel": "Base URL",
       "maxTokensLabel": "最大令牌数",
-      "modelPlaceholder": "选择一个模型"
+      "advanced": "高级设置",
+      "statusReady": "AI 已就绪",
+      "statusNotConfigured": "未配置",
+      "testConnection": "测试连接",
+      "testing": "测试中…",
+      "testConnected": "连接成功",
+      "testFailed": "连接失败",
+      "showKey": "显示密钥",
+      "hideKey": "隐藏密钥"
     },
     "cloudSync": {
       "title": "云端同步",
       "description": "在不同设备间同步您的简历数据。您的数据将安全地存储在云端。",
       "toggleLabel": "启用云端同步",
+      "enabled": "已开启",
+      "disabled": "未开启",
+      "statusOn": "当前设备的简历改动会同步到云端，便于跨设备继续编辑。",
+      "statusOff": "简历数据仅保存在当前浏览器，开启前会先确认数据上传说明。",
       "disclaimer": {
         "title": "云端同步免责声明",
         "description": "在开启云端同步前，请阅读并同意以下条款：",
@@ -83,126 +187,6 @@
     },
     "goToApp": "进入应用",
     "starOnGithub": "在 GitHub 上点赞"
-  },
-  "landing": {
-    "nav": {
-      "goToApp": "进入应用",
-      "starOnGithub": "在 GitHub 上点赞"
-    },
-    "tags": {
-      "aiSmart": "AI 智能",
-      "freeForever": "完全免费",
-      "dataSecurity": "数据安全",
-      "aiEnhancement": "AI 智能加持",
-      "dataSecurityGuarantee": "隐私数据安全保证"
-    },
-    "buttons": {
-      "learnMore": "了解更多",
-      "experienceAI": "体验 AI 加持",
-      "experienceNow": "立即体验",
-      "starOnGithub": "在 GitHub 上点赞"
-    },
-    "hero": {
-      "brandName": "Magic Resume",
-      "title": "Magic Resume 是一款为您提供 AI 加持的简历构建工具",
-      "subtitle": "用 AI 的力量打造完美的简历。简单、智能、安全。",
-      "previewAlt": "Magic Resume 预览",
-      "getStarted": "开始使用",
-      "browseTemplates": "浏览模板",
-      "tag": "Magic Resume V1.0",
-      "texts": [
-        "AI 驱动的简历优化与建议",
-        "专业精美的模板，即开即用",
-        "100% 免费开源，注重隐私，数据本地存储",
-        "一键导出 PDF，ATS 友好"
-      ],
-      "featureTags": {
-        "ai": "AI 驱动",
-        "local": "隐私优先",
-        "openSource": "开源项目"
-      },
-      "macbookSubtitle": "AI 驱动的简历生成器",
-      "badge": "由 AI 驱动的求职神器",
-      "primaryButton": "立即开始免费体验",
-      "secondaryButton": "在 GitHub 上关注我们"
-    },
-    "morphingTexts": {
-      "simpleAndSmart": "简单 & 智能",
-      "aiPowered": "AI 驱动",
-      "beautifulTemplates": "精美模板",
-      "freeAndSecure": "免费 & 安全",
-      "modernResume": "现代简历",
-      "getStarted": "立即开始",
-      "standOut": "脱颖而出"
-    },
-    "features": {
-      "main": {
-        "title": "为什么选择 Magic Resume？",
-        "subtitle": "我们提供一站式简历解决方案，让您的求职之旅更顺畅"
-      },
-      "ai": {
-        "tag": {
-          "name": "AI",
-          "description": "智能润色"
-        },
-        "title": "智能检测，专业建议",
-        "description": "内置智能语法检查，自动识别不当表述，提供专业修改建议，让您的简历更出色。",
-        "benefit1": "智能增强",
-        "benefit2": "语法检查",
-        "alt": "AI 增强预览"
-      },
-      "export": {
-        "tag": "导出多种格式",
-        "description": "支持多种格式导出，方便分享和备份。",
-        "alt": "导出格式示例"
-      },
-      "privacy": {
-        "tag": {
-          "name": "安全",
-          "description": "数据安全，隐私至上"
-        },
-        "description": "所有简历数据完全本地存储，无需担心隐私泄露。支持数据导出备份，确保您的简历数据永远可用。",
-        "benefit1": "本地文件存储",
-        "benefit2": "多种导出格式"
-      },
-      "preview": {
-        "title": "实时预览",
-        "description": "在您输入时实时查看更改效果。不再需要猜测最终简历的外观。"
-      },
-      "dnd": {
-        "title": "拖拽界面",
-        "description": "通过直观的拖拽界面轻松重新排序章节，突出您的优势。"
-      }
-    },
-    "contact": {
-      "title": "联系我们",
-      "subtitle": "有任何问题或反馈吗？我们很乐意倾听您的声音。请联系我们，我们会尽快给您回复。",
-      "button": "发送消息",
-      "form": {
-        "name": {
-          "label": "姓名",
-          "placeholder": "您的真实姓名"
-        },
-        "email": {
-          "label": "邮箱",
-          "placeholder": "您的电子邮箱地址"
-        },
-        "content": {
-          "label": "留言内容",
-          "placeholder": "请输入您想对我们说的话..."
-        }
-      }
-    },
-    "footer": {
-      "brandSubtitle": "下一代 AI 简历平台，让招聘变得简单。",
-      "product": "产品",
-      "builder": "在线制作",
-      "project": "项目",
-      "github": "GitHub",
-      "issues": "问题反馈",
-      "contributors": "贡献者",
-      "copyright": "© {{year}} Magic Resume. 保留所有权利。"
-    }
   },
   "modals": {
     "dynamicForm": {
@@ -645,7 +629,10 @@
       "title": "版本记录",
       "subtitle": "恢复您简历之前的版本",
       "restore": "恢复",
-      "loading": "加载中..."
+      "loading": "加载中...",
+      "viewRender": "渲染",
+      "viewJson": "JSON",
+      "empty": "还没有历史版本"
     }
   },
   "sharedPage": {
@@ -706,9 +693,13 @@
   },
   "tools": {
     "aiAssistant": "AI 助手",
+    "polaris": "北极星",
     "share": "分享",
     "feedback": "反馈",
     "exportPDF": "导出 PDF",
+    "exportingPDF": "正在本地生成 PDF...",
+    "exportPDFSuccess": "PDF 导出成功。",
+    "exportPDFError": "PDF 导出失败，请重试。",
     "zoomIn": "放大",
     "zoomOut": "缩小",
     "resetZoom": "重置缩放",
@@ -741,6 +732,7 @@
     "certificates": "证书",
     "experience": "经历",
     "profiles": "个人资料",
+    "summary": "个人简介",
     "shared": {
       "untitled": "无标题",
       "visible": "可见",
@@ -787,12 +779,16 @@
   "header": {
     "version": "版本管理",
     "versionHistory": "历史版本",
-    "synced": "已同步云端",
+    "synced": "已同步",
     "syncing": "同步中...",
+    "pendingSync": "待同步",
+    "backToDashboard": "返回工作台",
     "localOnly": "本地模式",
     "syncError": "同步失败",
     "lastUpdated": "最后更新于",
-    "noHistory": "暂无历史版本"
+    "noHistory": "暂无历史版本",
+    "switchResume": "切换简历",
+    "untitled": "未命名简历"
   },
   "mobileEdit": {
     "jsonData": "简历 JSON 数据",
@@ -814,8 +810,13 @@
       "goBack": "返回"
     }
   },
+  "outline": {
+    "title": "内容"
+  },
   "templatePanel": {
     "title": "选择模板",
+    "customizeTitle": "自定义",
+    "change": "更换模板",
     "placeholder": "模板 {{index}}",
     "layoutTwoColumn": "双栏",
     "layoutSingleColumn": "单栏",
@@ -824,8 +825,20 @@
     "retry": "重试",
     "none": "未找到模板"
   },
+  "templateStore": {
+    "title": "模板商店",
+    "subtitle": "挑一个起点,你的内容会自动保留。",
+    "search": "搜索模板",
+    "empty": "没有匹配的模板"
+  },
   "templateCustomizer": {
     "title": "自定义模板",
+    "sections": {
+      "template": "模板",
+      "layout": "布局",
+      "typography": "排版",
+      "colors": "配色"
+    },
     "tabs": {
       "colors": "颜色",
       "typography": "字体",
@@ -855,6 +868,11 @@
       "containerWidth": "容器宽度",
       "padding": "内边距",
       "gap": "模块间距",
+      "borderRadius": "圆角",
+      "density": "疏密",
+      "densityCompact": "紧凑",
+      "densityNormal": "标准",
+      "densityRelaxed": "宽松",
       "textSettings": "文本设置",
       "lineHeight": "行高倍数",
       "letterSpacing": "字符间距",
@@ -867,7 +885,8 @@
       "titleIconDesc": "在章节标题前显示图标"
     },
     "buttons": {
-      "backToTemplates": "返回模板列表"
+      "backToTemplates": "返回模板列表",
+      "reset": "恢复模板默认"
     }
   },
   "resumeContent": {
@@ -901,7 +920,30 @@
       "lastUpdated": "最后更新于 {{time}}",
       "rename": "重命名",
       "duplicate": "复制",
-      "delete": "删除"
+      "delete": "删除",
+      "more": "更多操作"
+    },
+    "library": {
+      "title": "简历库",
+      "count": "{{count}} 份",
+      "count_one": "{{count}} 份",
+      "count_other": "{{count}} 份",
+      "storageCloud": "云端同步",
+      "storageLocal": "本地存储",
+      "enableSync": "开启同步"
+    },
+    "create": {
+      "title": "创建新简历",
+      "description": "从模板搭一份,开始打磨",
+      "cta": "开始创建"
+    },
+    "import": {
+      "title": "导入现有",
+      "description": "JSON 或 PDF"
+    },
+    "empty": {
+      "title": "还没有简历",
+      "description": "从模板创建第一份,或导入现有的 JSON / PDF。"
     }
   },
   "sidebar": {
@@ -914,6 +956,8 @@
   "importDialog": {
     "title": "导入简历",
     "description": "在下方选择或拖放 JSON / PDF 文件以创建新简历。",
+    "typeLabel": "类型",
+    "typePlaceholder": "选择文件类型...",
     "dropzone": {
       "active": "在此处放下文件...",
       "default": "将文件拖放到此处，或点击选择文件",
@@ -925,7 +969,9 @@
       "invalidFormat": "无效的简历格式。",
       "parseFailed": "解析文件失败。",
       "unsupportedFormat": "请上传 PDF 或 JSON 文件。",
-      "noApiKey": "请先在「设置」中配置 AI 模型的 API Key，才能导入 PDF 简历。"
+      "noApiKey": "使用 PDF 导入需要先完成大模型配置（API Key、Base URL、模型、Max Tokens），请前往",
+      "noApiKeyLink": "设置",
+      "noApiKeySuffix": "完成配置后再试。"
     },
     "success": "简历导入成功！",
     "cancel": "取消",
@@ -1146,7 +1192,120 @@
     "delete": "删除",
     "done": "完成",
     "cancel": "取消",
+    "back": "返回",
     "confirm": "确定"
+  },
+  "aiLab": {
+    "configGate": {
+      "title": "先连一个模型",
+      "description": "选择服务商、粘贴你的 API Key 就能开始。密钥只保存在你的浏览器本地。",
+      "later": "稍后",
+      "saveAndContinue": "保存并继续"
+    },
+    "draft": {
+      "ready": "已根据对话生成简历草稿",
+      "apply": "应用到简历"
+    },
+    "run": {
+      "stop": "停止生成"
+    },
+    "header": {
+      "title": "AI 实验室",
+      "liveCanvas": "实时画布",
+      "liveCanvasTitle": "在简历上直接让 AI 改",
+      "newChat": "新对话"
+    },
+    "reset": {
+      "title": "开启新对话？",
+      "descriptionRunning": "当前生成会被停止，并清空这份简历的 AI 对话记录、分析结果和画布状态。此操作无法撤销。",
+      "descriptionIdle": "将清空这份简历的 AI 对话记录、分析结果和画布状态，并开启一个新的会话。此操作无法撤销。",
+      "confirm": "开启新对话"
+    },
+    "greeting": {
+      "title": "今天想怎么打磨简历？",
+      "description": "描述你的需求，我会调用合适的技能来完成"
+    },
+    "artifact": {
+      "emptyAnalysis": "暂无分析结果。",
+      "summary": "三位虚拟面试官（同行 / 用人主管 / HRBP）综合评估。",
+      "strengths": "亮点",
+      "improvements": "待改进",
+      "exportReport": "导出报告",
+      "applied": "已应用到简历",
+      "pendingChanges": "{{count}} 处改动待应用",
+      "discard": "放弃",
+      "applyChanges": "应用更改",
+      "personas": {
+        "peer": "同行专家",
+        "leader": "用人主管",
+        "hrbp": "HRBP"
+      },
+      "scoreBand": {
+        "excellent": "综合竞争力优秀",
+        "good": "综合竞争力良好",
+        "medium": "综合竞争力中等",
+        "needsWork": "竞争力有待提升"
+      }
+    },
+    "chat": {
+      "done": "完成",
+      "running": "正在执行…",
+      "collapse": "收起",
+      "view": "查看",
+      "subagent": "子代理",
+      "taskList": "任务清单",
+      "working": "工作中",
+      "backToChange": "回到这处改动",
+      "approval": {
+        "defaultMessage": "想读取你的简历来给建议",
+        "allow": "允许",
+        "deny": "拒绝",
+        "denied": "已拒绝",
+        "read": "已读取简历",
+        "reading": "正在读取简历…",
+        "allowed": "已允许读取"
+      }
+    },
+    "composer": {
+      "skills": "技能",
+      "switch": "切换",
+      "select": "选择",
+      "exit": "退出",
+      "placeholderQuoted": "就选中这段告诉 AI 怎么改…",
+      "placeholderSkill": "补充说明（可选），回车运行「{{skill}}」…",
+      "placeholderDefault": "描述需求，或输入 / 调用技能…"
+    },
+    "widgets": {
+      "unsupported": "（无法渲染的卡片：{{kind}}）",
+      "form": {
+        "defaultTitle": "请补充信息",
+        "submitted": "已提交",
+        "cancelled": "已取消",
+        "submit": "提交"
+      }
+    },
+    "interview": {
+      "title": "模拟面试 · 前端专家",
+      "prompt": "“能聊聊你在项目里最有挑战的一次性能优化吗？”",
+      "microphone": "麦克风",
+      "end": "结束面试"
+    },
+    "living": {
+      "askPolarisDetail": "询问 Polaris · 说说怎么改",
+      "askPolaris": "询问 Polaris",
+      "allChanges": "全部改动",
+      "changeCountShort": "{{count}} 处",
+      "inserted": "新增",
+      "emptyChanges": "暂无待评审改动",
+      "discardAll": "全部放弃",
+      "acceptAll": "全部接受",
+      "pendingReviewCount": "{{count}} 处改动待评审",
+      "previous": "上一处",
+      "next": "下一处",
+      "addSectionContent": "补充这段",
+      "reorder": "调整顺序",
+      "acceptedChangesLog": "已接受 {{count}} 处改动"
+    }
   },
   "report": {
     "title": "简历分析报告",

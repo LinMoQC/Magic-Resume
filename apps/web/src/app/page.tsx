@@ -1,22 +1,20 @@
-import { Header } from '@/components/features/landing/Header';
-import { HeroSection } from '@/components/features/landing/HeroSection';
-import { FeatureSections } from '@/components/features/landing/FeatureSections';
-import { Footer } from '@/components/features/landing/Footer';
-import { Suspense } from 'react';
+import { redirect } from 'next/navigation';
+import { auth } from '@clerk/nextjs/server';
+import { isCloudMode } from '@/lib/config/app';
+import { hasBetaAccess } from '@/lib/auth/betaAccess';
 
-export default async function LandingPage() {
-  return (
-    <div className="min-h-screen bg-black text-white font-sans">
-      <div className="relative z-10 isolate">
-        <Header />
-        <main className="pt-10 md:pt-14">
-          <HeroSection />
-          <FeatureSections />
-        </main>
-        <Suspense fallback={<div>Loading...</div>}>
-          <Footer />
-        </Suspense>
-      </div>
-    </div>
-  );
+// The public marketing site lives in the standalone Astro app (apps/landing).
+// The Next.js app is app-only and requires sign-in, so route the root to:
+//   self-hosted                → /dashboard (open)
+//   cloud, signed out          → /sign-in
+//   cloud, whitelisted / admin → /dashboard
+//   cloud, signed-in others    → /coming-soon (countdown + reserve)
+export default async function Home() {
+  if (isCloudMode) {
+    const { userId } = await auth();
+    if (!userId) redirect('/sign-in');
+    if (await hasBetaAccess()) redirect('/dashboard');
+    redirect('/coming-soon');
+  }
+  redirect('/dashboard');
 }

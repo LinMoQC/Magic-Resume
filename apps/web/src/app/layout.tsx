@@ -1,6 +1,15 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Sora } from "next/font/google";
 import { ClerkProvider } from '@clerk/nextjs';
+
+// Brand typeface — Latin only, exposed as --font-brand for the logomark wordmark.
+const brandFont = Sora({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  variable: "--font-brand",
+  display: "swap",
+});
 import { Fragment } from "react";
 import { Theme } from "@radix-ui/themes";
 import { Toaster } from "sonner";
@@ -29,20 +38,17 @@ export const metadata: Metadata = {
 const AuthWrapper = isCloudMode ? ClerkProvider : Fragment;
 const AuthBridge = isCloudMode ? CloudAuthBridge : Fragment;
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
-  params,
 }: Readonly<{
   children: React.ReactNode;
-  params: Promise<{ lang: string }>;
 }>) {
-  const { lang } = await params;
   return (
     <AuthWrapper>
       <AuthBridge>
         <HttpClientProvider>
-          <html lang={lang} className="hide-scrollbar">
-            <body className="font-sans">
+          <html lang="zh-CN" className="hide-scrollbar">
+            <body className={`font-sans ${brandFont.variable}`}>
               <CommercialRuntimeProvider>
                 <I18nProvider>
                   <Theme appearance="dark">

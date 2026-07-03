@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerUserId } from '@/lib/auth/server';
+import { serverFetchBackend } from '@/lib/auth/serverFetchBackend';
 
 export async function POST(req: NextRequest) {
     try {
@@ -9,20 +10,13 @@ export async function POST(req: NextRequest) {
         }
 
         const body = await req.json();
-        const { messages, config} = body;
 
-        // 转发请求到Python后端
-        const backendUrl = `${process.env.BACKEND_URL}/api/chat`;
-
-        const backendResponse = await fetch(backendUrl, {
+        // Forward the chat request through the shared API helper. Pass req.signal
+        // so browser disconnect / modal close can cancel upstream work promptly.
+        const backendResponse = await serverFetchBackend('/api/chat', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                messages,
-                config
-            }),
+            body: JSON.stringify(body),
+            signal: req.signal,
         });
 
         if (!backendResponse.ok) {
@@ -39,25 +33,28 @@ export async function POST(req: NextRequest) {
                 throw new Error('No response body');
             }
 
+            // Hoisted so cancel() can tear down the upstream read when the client
+            // disconnects (closed modal / stop).
+            let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
             const readable = new ReadableStream({
                 async start(controller) {
-                    const reader = backendResponse.body!.getReader();
+                    reader = backendResponse.body!.getReader();
                     const decoder = new TextDecoder();
                     let buffer = '';
-                    
+
                     try {
                         while (true) {
                             const { done, value } = await reader.read();
                             if (done) break;
-                            
+
                             // 解码数据并按行分割
                             const text = decoder.decode(value, { stream: true });
                             buffer += text;
-                            
+
                             // 处理完整的lines
                             const lines = buffer.split('\n');
                             buffer = lines.pop() || ''; // 保留最后一个可能不完整的行
-                            
+
                             for (const line of lines) {
                                 if (line.trim()) {
                                     // 立即发送每一行
@@ -66,19 +63,29 @@ export async function POST(req: NextRequest) {
                                 }
                             }
                         }
-                        
+
                         // 发送剩余的buffer
                         if (buffer.trim()) {
                             const chunk = new TextEncoder().encode(buffer);
                             controller.enqueue(chunk);
                         }
-                    } catch (error) {
-                        console.error('Stream error:', error);
-                        controller.error(error);
-                    } finally {
                         controller.close();
+                    } catch (error) {
+                        // A client/upstream abort surfaces as AbortError once req.signal
+                        // fires — that's an expected cancel, not a stream failure.
+                        if ((error as Error)?.name === 'AbortError') {
+                            controller.close();
+                        } else {
+                            console.error('Stream error:', error);
+                            controller.error(error);
+                        }
                     }
-                }
+                },
+                cancel(reason) {
+                    // Consumer (browser) cancelled: release the upstream read so
+                    // the request can abort promptly.
+                    reader?.cancel(reason).catch(() => {});
+                },
             });
 
             return new Response(readable, {

@@ -2,11 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
 const APP_MODE = process.env.NEXT_PUBLIC_APP_MODE || 'self-hosted';
-const isProtectedRoute = createRouteMatcher(['/dashboard(.*)']);
+// Both the app and the coming-soon/reservation page require a signed-in user.
+// The whitelist gate (whitelisted → app, else → /coming-soon) runs in the
+// server components; middleware only enforces "must be logged in".
+const isProtectedRoute = createRouteMatcher(['/dashboard(.*)', '/coming-soon(.*)']);
 
-// cloud: Clerk protects /dashboard routes
+// cloud: unauthenticated users on protected routes go to the sign-in page
+// (unauthenticatedUrl avoids Clerk's default 404 on protect).
 const cloudHandler = clerkMiddleware(async (auth, req) => {
-  if (isProtectedRoute(req)) await auth.protect();
+  if (isProtectedRoute(req)) {
+    await auth.protect({
+      unauthenticatedUrl: new URL('/sign-in', req.url).toString(),
+    });
+  }
 });
 
 // self-hosted: all routes open, no auth required

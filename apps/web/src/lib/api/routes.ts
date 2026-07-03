@@ -1,5 +1,14 @@
 /**
- * Core API routes (httpClient.api → NestJS backend)
+ * The single API origin — the whole frontend talks to ONE configured address.
+ * ONE variable only (`NEXT_PUBLIC_API_URL`, resolved identically in browser +
+ * server); no legacy per-service fallback.
+ * Lives in this dep-free module so both client and server can import it without
+ * pulling axios in via httpClient.
+ */
+export const API_ORIGIN = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3110';
+
+/**
+ * Product API routes.
  */
 export const API_ROUTES = {
   resumes: {
@@ -27,7 +36,7 @@ export const API_ROUTES = {
 } as const;
 
 /**
- * Agent API routes (httpClient.agent → Python backend)
+ * AI-related API routes.
  */
 export const AGENT_ROUTES = {
   interview: {
@@ -35,8 +44,15 @@ export const AGENT_ROUTES = {
     chat:    '/api/interview/chat',
     session: (sessionId: string) => `/api/interview/session/${sessionId}`,
   },
-  translate: {
-    text:   '/api/translate/text',
-    stream: '/api/translate/stream',
-  },
+} as const;
+
+/**
+ * Web-side AI route handlers. Centralizes the paths the AI Lab service layer
+ * (`ai/lib/services`) calls so they aren't hardcoded inline.
+ */
+export const WEB_AGENT_ROUTES = {
+  chat:             '/api/chat-agent',
+  chatApprove:      '/api/chat-agent/approve',
+  chatSession:      '/api/chat-agent/session',
+  chatEdit:         '/api/chat-agent/edit',
 } as const;

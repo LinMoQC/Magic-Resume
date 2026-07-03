@@ -125,7 +125,7 @@ export type Resume = {
   shareRole?: 'VIEWER' | 'COMMENTER' | 'EDITOR';
 };
 
-// Types mapping backend Prisma model
+// Cloud version shape returned by the API.
 export interface CloudVersion {
   id: string;
   createdAt?: string;

@@ -2,5 +2,17 @@ packages:
   - apps/*
   - packages/*
 
+allowBuilds:
+  '@clerk/shared': set this to true or false
+  esbuild: set this to true or false
+  sharp: set this to true or false
+  unrs-resolver: set this to true or false
+
+onlyBuiltDependencies:
+  - '@clerk/shared'
+  - esbuild
+  - sharp
+  - unrs-resolver
+
 patchedDependencies:
   nextra-theme-docs@4.3.0: patches/nextra-theme-docs@4.3.0.patch

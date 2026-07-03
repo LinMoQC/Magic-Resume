@@ -1,4 +1,91 @@
 {
+  "comingSoon": {
+    "title": "Something great is on the way",
+    "subtitle": "Magic Resume is in private beta. We're putting the finishing touches on your AI resume workspace — the public launch is close.",
+    "launched": "We're live",
+    "countdownLabel": "Until public launch",
+    "enterCta": "Enter Magic Resume",
+    "reserveCta": "Reserve early access",
+    "reserveNote": "Beta seats are limited — reserve now and we'll ping you the moment it opens.",
+    "noDate": "The public launch is one step away. Stay tuned.",
+    "signOut": "Sign out",
+    "days": "Days",
+    "hours": "Hours",
+    "minutes": "Minutes",
+    "seconds": "Seconds"
+  },
+  "account": {
+    "menu": {
+      "title": "Account",
+      "upgrade": "Upgrade to Pro",
+      "upgradeHint": "Unlock every AI capability",
+      "upgradeSoon": "Coming soon",
+      "profile": "Profile",
+      "settings": "Settings",
+      "language": "Language",
+      "signOut": "Sign out"
+    },
+    "modal": {
+      "title": "Account"
+    },
+    "profile": {
+      "tabs": { "profile": "Profile", "security": "Security", "activity": "Activity" },
+      "personalInfo": "Personal information",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "username": "Username",
+      "emails": "Email addresses",
+      "social": "Social accounts",
+      "phones": "Phone numbers",
+      "primary": "Primary",
+      "verified": "Verified",
+      "unverified": "Unverified",
+      "security": "Security",
+      "password": "Password",
+      "twoFactor": "2FA",
+      "totp": "TOTP",
+      "backupCodes": "Backup codes",
+      "enabled": "Enabled",
+      "disabled": "Off",
+      "stats": { "resumes": "Resumes", "social": "Social", "days": "Member days" },
+      "recentResumes": "Recent resumes",
+      "noResumes": "No resumes yet",
+      "untitled": "Untitled",
+      "side": { "userId": "User ID", "primaryEmail": "Primary email", "joinedAt": "User since", "updatedAt": "Profile updated", "lastSignIn": "Last sign-in" },
+      "never": "Never",
+      "activeToday": "Last active today",
+      "activeYesterday": "Last active yesterday",
+      "activeDaysAgo": "Last active {{count}} days ago",
+      "neverActive": "Never active",
+      "heatmap": {
+        "title": "Activity heatmap",
+        "summary": "{{total}} edits · {{days}} active days (last 365 days)",
+        "less": "Less",
+        "more": "More",
+        "edits": "edits"
+      },
+      "loadFailed": "Could not load account info"
+    },
+    "settings": {
+      "title": "Settings",
+      "nav": {
+        "general": "General",
+        "model": "Model",
+        "cloudSync": "Cloud Sync",
+        "mcp": "MCP"
+      },
+      "general": {
+        "description": "Preferences stay quiet and focused on choices that affect everyday editing.",
+        "appearance": "Appearance",
+        "appearanceDescription": "Magic Resume currently stays in the dark workbench to reduce visual noise during long editing sessions.",
+        "appearanceDark": "Dark",
+        "appearanceLight": "Light",
+        "comingSoon": "Coming soon",
+        "language": "Language",
+        "languageDescription": "Change the interface language without changing resume content."
+      }
+    }
+  },
   "notificationsPage": {
     "title": "Notifications",
     "unread": "{{count}} unread",
@@ -20,20 +107,36 @@
   "settings": {
     "title": "Settings",
     "llm": {
-      "title": "OpenAI/Ollama Integration",
-      "description1": "You can make use of the OpenAI API to help you generate content, or improve your writing while composing your resume.",
-      "description2": "You have the option to <1>obtain your own OpenAI API key</1>. This key empowers you to leverage the API as you see fit. Alternatively, if you wish to disable the AI features in Reactive Resume altogether, you can simply remove the key from your settings.",
-      "description3": "You can also integrate with Ollama simply by setting the API key to `sk-1234567890abcdef` and the Base URL to your Ollama URL, i.e. `http://localhost:11434/v1`. You can also pick and choose models and set the max tokens as per your preference.",
-      "apiKeyLabel": "OpenAI/Ollama API Key",
-      "baseUrlLabel": "Base URL",
+      "title": "Model Configuration",
+      "description": "Pick a provider and paste your own API key to enable AI. Your key is stored only in this browser and never uploaded.",
+      "providerLabel": "API Provider",
+      "providerPlaceholder": "Select a provider",
+      "apiKeyLabel": "API Key",
+      "getKeyLink": "Get an API key",
       "modelLabel": "Model",
+      "modelPlaceholder": "Select a model",
+      "modelCustomPlaceholder": "Enter a model name, e.g. llama3",
+      "selectProviderFirst": "Select a provider first",
+      "baseUrlLabel": "Base URL",
       "maxTokensLabel": "Max Tokens",
-      "modelPlaceholder": "Select a model"
+      "advanced": "Advanced",
+      "statusReady": "AI ready",
+      "statusNotConfigured": "Not configured",
+      "testConnection": "Test connection",
+      "testing": "Testing…",
+      "testConnected": "Connected",
+      "testFailed": "Connection failed",
+      "showKey": "Show key",
+      "hideKey": "Hide key"
     },
     "cloudSync": {
       "title": "Cloud Sync",
       "description": "Sync your resume data across devices. Your data will be stored securely in the cloud.",
       "toggleLabel": "Enable Cloud Sync",
+      "enabled": "On",
+      "disabled": "Off",
+      "statusOn": "Resume changes from this device will sync to the cloud so you can continue across devices.",
+      "statusOff": "Resume data stays in this browser. You will review the upload notice before enabling sync.",
       "disclaimer": {
         "title": "Cloud Sync Disclaimer",
         "description": "Please read and agree to the following terms before enabling cloud sync:",
@@ -84,126 +187,6 @@
     },
     "goToApp": "Go to App",
     "starOnGithub": "Star on GitHub"
-  },
-  "landing": {
-    "nav": {
-      "goToApp": "Go to App",
-      "starOnGithub": "Star on GitHub"
-    },
-    "tags": {
-      "aiEnhancement": "AI Enhancement",
-      "dataSecurityGuarantee": "Privacy & Data Security"
-    },
-    "buttons": {
-      "experienceAI": "Experience AI Assistant",
-      "experienceNow": "Experience Now",
-      "starOnGithub": "Star on GitHub"
-    },
-    "hero": {
-      "brandName": "Magic Resume",
-      "title": "Magic Resume is an AI-powered tool for building resumes",
-      "subtitle": "Craft your perfect resume with the power of AI. Simple, smart, and secure.",
-      "previewAlt": "Magic Resume Preview",
-      "getStarted": "Get Started",
-      "browseTemplates": "Browse Templates",
-      "tag": "Magic Resume V1.0",
-      "texts": [
-        "AI-powered resume optimization and suggestions",
-        "Beautiful, professional templates ready to use",
-        "100% free and privacy-focused, data stays local",
-        "Export to PDF with one click, ATS-friendly"
-      ],
-      "featureTags": {
-        "ai": "AI Powered",
-        "local": "Local First",
-        "openSource": "Open Source"
-      },
-      "macbookSubtitle": "AI-Powered Builder",
-      "badge": "AI-Powered Job Hunting Suite",
-      "primaryButton": "Get Started for Free",
-      "secondaryButton": "Star on GitHub",
-      "macbookTitle": "This Macbook is built with Tailwindcss. <br /> No kidding."
-    },
-    "morphingTexts": {
-      "simpleAndSmart": "Simple & Smart",
-      "aiPowered": "AI-Powered",
-      "beautifulTemplates": "Beautiful Templates",
-      "freeAndSecure": "Free & Secure",
-      "modernResume": "Modern Resumes",
-      "getStarted": "Get Started Now",
-      "standOut": "Stand Out"
-    },
-    "features": {
-      "main": {
-        "title": "Why Choose Magic Resume?",
-        "subtitle": "We provide an all-in-one resume solution to make your job search journey smoother"
-      },
-      "ai": {
-        "tag": {
-          "name": "AI",
-          "description": "Smart Polish"
-        },
-        "title": "Smart Detection, Professional Advice",
-        "description": "Built-in smart grammar check, automatically identifies inappropriate expressions, provides professional modification suggestions, making your resume more outstanding.",
-        "benefit1": "Intelligent enhancement",
-        "benefit2": "Grammar check",
-        "alt": "AI Enhancement Preview"
-      },
-      "export": {
-        "tag": "Export to Multiple Formats",
-        "description": "Supports exporting in multiple formats for easy sharing and backup.",
-        "alt": "Export format illustration"
-      },
-      "privacy": {
-        "tag": {
-          "name": "Secure",
-          "description": "Data Security, Privacy First"
-        },
-        "description": "All resume data is fully stored locally, no need to worry about privacy leaks. Support data export backup, ensure your resume data is always available.",
-        "benefit1": "Local file storage",
-        "benefit2": "Multiple export formats"
-      },
-      "preview": {
-        "title": "Live Preview",
-        "description": "See your changes in real-time as you type. No more guessing how your final resume will look."
-      },
-      "dnd": {
-        "title": "Drag & Drop Interface",
-        "description": "Effortlessly reorder sections to highlight your strengths with an intuitive drag-and-drop interface."
-      }
-    },
-    "contact": {
-      "title": "Connect with Us",
-      "subtitle": "Have questions or feedback? We'd love to hear from you. Reach out to us and we'll get back to you as soon as possible.",
-      "button": "Send Message",
-      "form": {
-        "name": {
-          "label": "Name",
-          "placeholder": "Your full name"
-        },
-        "email": {
-          "label": "Email",
-          "placeholder": "Your email address"
-        },
-        "content": {
-          "label": "Message",
-          "placeholder": "Tell us what you'd like to say..."
-        }
-      }
-    },
-    "footer": {
-      "brandSubtitle": "The next-gen AI resume platform that makes hiring simple.",
-      "product": "Product",
-      "builder": "Online Builder",
-      "project": "Project",
-      "github": "GitHub",
-      "issues": "Issues",
-      "contributors": "Contributors",
-      "copyright": "© {{year}} Magic Resume. All rights reserved."
-    },
-    "header": {
-      "dashboard": "Go to Dashboard"
-    }
   },
   "modals": {
     "dynamicForm": {
@@ -258,11 +241,17 @@
         "neuralEngine": {
             "title": "Neural Engine",
             "subtitle": "Multi-Agent Collaboration • Real-time Optimization",
+            "processing": "Processing",
             "minimize": "Minimize",
             "progress": {
                 "title": "Neural Optimization in Progress",
                 "description": "The AI agents are restructuring your resume content in the background.",
                 "showButton": "Show Neural Engine"
+            },
+            "stats": {
+                "coreStatus": "Core Status",
+                "agentCount": "Agents",
+                "activeChannels": "Active Channels"
             },
             "console": {
                 "initiating": "> Deconstructing task logic...",
@@ -292,6 +281,7 @@
           "steps": {
           "preparer": {
             "title": "Preparing Inputs",
+            "personality": "Input Preprocessor",
             "in_progress": "Preparing your resume and job description...",
             "completed": "Input data is ready."
           },
@@ -306,36 +296,43 @@
           },
           "combiner": {
             "title": "Combine Analysis Report",
+            "personality": "Report Combiner",
             "in_progress": "Generating a comprehensive analysis report...",
             "completed": "Analysis report generated."
           },
           "jd_analyzer": {
             "title": "Analyzing Job Description",
+            "personality": "JD Feature Extractor",
             "in_progress": "Analyzing the job description...",
             "completed": "Job description analysis complete."
           },
           "prepare_research": {
             "title": "Preparing Research",
+            "personality": "Research Planner",
             "in_progress": "Preparing for web research based on JD...",
             "completed": "Research plan is ready."
           },
           "query_writer": {
             "title": "Generating Search Queries",
+            "personality": "Query Writer",
             "in_progress": "Generating intelligent search queries...",
             "completed": "Search queries generated."
           },
           "web_searcher": {
             "title": "Performing Web Research",
+            "personality": "Deep Searcher",
             "in_progress": "Searching the web for key information...",
             "completed": "Web research complete."
           },
           "reflection": {
             "title": "Reflecting on Search Results",
+            "personality": "Critic and Refiner",
             "in_progress": "Analyzing search results and identifying gaps...",
             "completed": "Reflection complete, planning next steps."
           },
           "final_answer": {
             "title": "Synthesizing Research Findings",
+            "personality": "Final Synthesizer",
             "in_progress": "Synthesizing research findings into a summary...",
             "completed": "Research summary complete."
           },
@@ -346,11 +343,13 @@
           },
           "prepare_rewriter": {
             "title": "Preparing Rewrite Tasks",
+            "personality": "Strategy Planner",
             "in_progress": "Preparing for section-by-section rewriting...",
             "completed": "Switched to step-by-step optimization mode."
           },
           "rewrite_section": {
             "title": "Step-by-Step Optimization",
+            "personality": "Section Rewriter",
             "in_progress": "Optimizing in progress...",
             "completed": "All sections have been optimized!"
           },
@@ -364,58 +363,74 @@
           },
           "company_analysis": {
             "title": "Company Deep-Dive",
+            "personality": "Company Knowledge Graph",
             "in_progress": "Analyzing company culture and tech stack...",
             "completed": "Company analysis complete."
           },
           "adversarial_critique": {
             "title": "Recruiter Critique",
+            "personality": "Adversarial Evaluator",
             "in_progress": "Recruiter AI is evaluating your resume...",
             "completed": "Evaluation complete."
           },
           "resume_analyzer": {
             "title": "Resume Feature Extractor",
+            "personality": "Resume Feature Extractor",
             "in_progress": "Evaluating resume strengths and weaknesses...",
             "completed": "Resume evaluation complete."
           },
           "resume_web_search": {
             "title": "Resume Market Research",
+            "personality": "Resume Market Researcher",
             "in_progress": "Researching similar candidates in the market...",
             "completed": "Market research complete."
           },
           "jd_web_search": {
             "title": "Job Market Research",
+            "personality": "Job Market Researcher",
             "in_progress": "Analyzing hiring trends for this position...",
             "completed": "Trend analysis complete."
           },
           "company_interview_search": {
             "title": "Interview Intel Collector",
+            "personality": "Interview Intel Collector",
             "in_progress": "Collecting company interview questions and intel...",
             "completed": "Intel collection complete."
           },
           "research_combiner": {
             "title": "Multi-Source Aggregator",
+            "personality": "Multi-Source Aggregator",
             "in_progress": "Synthesizing all research intelligence...",
             "completed": "Strategy formulation complete."
           },
           "rewrite_sections_parent": {
             "title": "Optimization Orchestrator",
+            "personality": "Smart Orchestrator",
             "in_progress": "Orchestrating parallel section optimization...",
             "completed": "All sections optimized in parallel."
           },
           "route_next_rewrite": {
             "title": "Rewrite Planner",
+            "personality": "Task Router",
             "in_progress": "Planning the next section to optimize...",
             "completed": "Planning complete."
           },
           "combine_sections": {
             "title": "Content Assembler",
+            "personality": "Content Assembler",
             "in_progress": "Reassembling optimized sections...",
             "completed": "Resume assembly complete."
           },
           "strategic_analyzer": {
             "title": "Strategy Engine",
+            "personality": "Optimization Strategy Engine",
             "in_progress": "Analyzing strategic gaps between resume and job...",
             "completed": "Gap analysis complete."
+          },
+          "microEvents": {
+            "thinking": "Designing optimization strategy...",
+            "searching": "Running deep search: {{tool}}...",
+            "tool_complete": "Search complete. Organizing data..."
           }
         },
         "optimizationProgress": {
@@ -614,7 +629,10 @@
       "title": "Version History",
       "subtitle": "Restore previous versions of your resume",
       "restore": "Restore",
-      "loading": "Loading..."
+      "loading": "Loading...",
+      "viewRender": "Preview",
+      "viewJson": "JSON",
+      "empty": "No versions yet"
     }
   },
   "sharedPage": {
@@ -675,9 +693,13 @@
   },
   "tools": {
     "aiAssistant": "AI Assistant",
+    "polaris": "Polaris",
     "share": "Share",
     "feedback": "Feedback",
     "exportPDF": "Export PDF",
+    "exportingPDF": "Generating PDF locally...",
+    "exportPDFSuccess": "PDF exported successfully.",
+    "exportPDFError": "PDF export failed. Please try again.",
     "zoomIn": "Zoom In",
     "zoomOut": "Zoom Out",
     "resetZoom": "Reset Zoom",
@@ -710,6 +732,7 @@
     "certificates": "Certificates",
     "experience": "Experience",
     "profiles": "Profiles",
+    "summary": "Summary",
     "shared": {
       "untitled": "Untitled",
       "visible": "Visible",
@@ -756,12 +779,16 @@
   "header": {
     "version": "Version Management",
     "versionHistory": "Version History",
-    "synced": "Synced to Cloud",
+    "synced": "Synced",
     "syncing": "Syncing...",
+    "pendingSync": "Pending",
+    "backToDashboard": "Back to dashboard",
     "localOnly": "Local Only",
     "syncError": "Sync Error",
     "lastUpdated": "Last Update",
-    "noHistory": "No version history"
+    "noHistory": "No version history",
+    "switchResume": "Switch resume",
+    "untitled": "Untitled Resume"
   },
   "mobileEdit": {
     "jsonData": "Resume JSON Data",
@@ -783,8 +810,13 @@
       "goBack": "Go Back"
     }
   },
+  "outline": {
+    "title": "Content"
+  },
   "templatePanel": {
     "title": "Template",
+    "customizeTitle": "Customize",
+    "change": "Change template",
     "placeholder": "Template {{index}}",
     "layoutTwoColumn": "Two Column",
     "layoutSingleColumn": "Single Column",
@@ -793,8 +825,20 @@
     "retry": "Retry",
     "none": "No templates found"
   },
+  "templateStore": {
+    "title": "Template store",
+    "subtitle": "Pick a starting point — your content carries over.",
+    "search": "Search templates",
+    "empty": "No matching templates"
+  },
   "templateCustomizer": {
     "title": "Custom Template",
+    "sections": {
+      "template": "Template",
+      "layout": "Layout",
+      "typography": "Typography",
+      "colors": "Colors"
+    },
     "tabs": {
       "colors": "Colors",
       "typography": "Font",
@@ -824,6 +868,11 @@
       "containerWidth": "Container Width",
       "padding": "Padding",
       "gap": "Gap",
+      "borderRadius": "Corner Radius",
+      "density": "Density",
+      "densityCompact": "Compact",
+      "densityNormal": "Default",
+      "densityRelaxed": "Relaxed",
       "textSettings": "Text Settings",
       "lineHeight": "Line Height",
       "letterSpacing": "Letter Spacing",
@@ -836,7 +885,8 @@
       "titleIconDesc": "Show icon before section titles"
     },
     "buttons": {
-      "backToTemplates": "Back to Templates"
+      "backToTemplates": "Back to Templates",
+      "reset": "Reset to template"
     }
   },
   "resumeContent": {
@@ -870,7 +920,30 @@
       "lastUpdated": "Last updated {{time}}",
       "rename": "Rename",
       "duplicate": "Duplicate",
-      "delete": "Delete"
+      "delete": "Delete",
+      "more": "More actions"
+    },
+    "library": {
+      "title": "Resumes",
+      "count": "{{count}} resumes",
+      "count_one": "{{count}} resume",
+      "count_other": "{{count}} resumes",
+      "storageCloud": "Cloud sync",
+      "storageLocal": "Local only",
+      "enableSync": "Enable sync"
+    },
+    "create": {
+      "title": "New resume",
+      "description": "Build from a template, then refine",
+      "cta": "Get started"
+    },
+    "import": {
+      "title": "Import",
+      "description": "JSON or PDF"
+    },
+    "empty": {
+      "title": "No resumes yet",
+      "description": "Create your first from a template, or import an existing JSON / PDF."
     }
   },
   "sidebar": {
@@ -883,6 +956,8 @@
   "importDialog": {
     "title": "Import Resume",
     "description": "Select or drop a JSON or PDF file below to create a new resume.",
+    "typeLabel": "File type",
+    "typePlaceholder": "Select a file type...",
     "dropzone": {
       "active": "Drop the file here...",
       "default": "Drag 'n' drop a file here, or click to select",
@@ -894,7 +969,9 @@
       "invalidFormat": "Invalid resume format.",
       "parseFailed": "Failed to parse file.",
       "unsupportedFormat": "Please upload a PDF or JSON file.",
-      "noApiKey": "Please configure your AI model API key in Settings before importing PDF files."
+      "noApiKey": "PDF import requires AI model configuration (API Key, Base URL, model, and Max Tokens). Go to",
+      "noApiKeyLink": "Settings",
+      "noApiKeySuffix": "and try again after saving."
     },
     "success": "Resume imported successfully!",
     "cancel": "Cancel",
@@ -1001,7 +1078,10 @@
       "resumePublished": "Resume published!",
       "resumeUnpublished": "Resume unpublished",
       "sharingUpdateFailed": "Failed to update sharing settings",
-      "cloudSyncFailed": "Cloud sync failed. Please check your connection."
+      "cloudSyncFailed": "Cloud sync failed. Please check your connection.",
+      "duplicatingInCloud": "Duplicating in cloud...",
+      "duplicateCloudSuccess": "Resume duplicated in cloud",
+      "duplicateCloudError": "Failed to duplicate in cloud"
     }
   },
   "common": {
@@ -1043,7 +1123,120 @@
     "delete": "Delete",
     "done": "Done",
     "cancel": "Cancel",
+    "back": "Back",
     "confirm": "Confirm"
+  },
+  "aiLab": {
+    "configGate": {
+      "title": "Connect a model first",
+      "description": "Choose a provider and paste your API key to begin. The key is stored only in your browser.",
+      "later": "Later",
+      "saveAndContinue": "Save and continue"
+    },
+    "draft": {
+      "ready": "A resume draft has been generated from the conversation",
+      "apply": "Apply to resume"
+    },
+    "run": {
+      "stop": "Stop generation"
+    },
+    "header": {
+      "title": "AI Lab",
+      "liveCanvas": "Live canvas",
+      "liveCanvasTitle": "Edit directly on the resume with AI",
+      "newChat": "New chat"
+    },
+    "reset": {
+      "title": "Start a new chat?",
+      "descriptionRunning": "The current generation will stop, and this resume's AI chat history, analysis, and canvas state will be cleared. This cannot be undone.",
+      "descriptionIdle": "This will clear this resume's AI chat history, analysis, and canvas state, then start a new session. This cannot be undone.",
+      "confirm": "Start new chat"
+    },
+    "greeting": {
+      "title": "How should we improve this resume today?",
+      "description": "Describe what you need, and I will call the right skill to help"
+    },
+    "artifact": {
+      "emptyAnalysis": "No analysis result yet.",
+      "summary": "Combined assessment from three virtual interviewers (peer / hiring manager / HRBP).",
+      "strengths": "Strengths",
+      "improvements": "Improvements",
+      "exportReport": "Export report",
+      "applied": "Applied to resume",
+      "pendingChanges": "{{count}} changes pending",
+      "discard": "Discard",
+      "applyChanges": "Apply changes",
+      "personas": {
+        "peer": "Peer expert",
+        "leader": "Hiring manager",
+        "hrbp": "HRBP"
+      },
+      "scoreBand": {
+        "excellent": "Overall competitiveness is excellent",
+        "good": "Overall competitiveness is good",
+        "medium": "Overall competitiveness is moderate",
+        "needsWork": "Competitiveness needs improvement"
+      }
+    },
+    "chat": {
+      "done": "Done",
+      "running": "Running...",
+      "collapse": "Collapse",
+      "view": "View",
+      "subagent": "Subagent",
+      "taskList": "Task list",
+      "working": "Working",
+      "backToChange": "Back to this change",
+      "approval": {
+        "defaultMessage": "I would like to read your resume to make suggestions",
+        "allow": "Allow",
+        "deny": "Deny",
+        "denied": "Denied",
+        "read": "Resume read",
+        "reading": "Reading resume...",
+        "allowed": "Read allowed"
+      }
+    },
+    "composer": {
+      "skills": "Skills",
+      "switch": "Switch",
+      "select": "Select",
+      "exit": "Exit",
+      "placeholderQuoted": "Tell AI how to change the selected text...",
+      "placeholderSkill": "Add optional context, then press Enter to run \"{{skill}}\"...",
+      "placeholderDefault": "Describe a request, or type / to call a skill..."
+    },
+    "widgets": {
+      "unsupported": "(Unable to render card: {{kind}})",
+      "form": {
+        "defaultTitle": "Please provide more information",
+        "submitted": "Submitted",
+        "cancelled": "Cancelled",
+        "submit": "Submit"
+      }
+    },
+    "interview": {
+      "title": "Mock interview · Frontend expert",
+      "prompt": "\"Could you talk about your most challenging performance optimization project?\"",
+      "microphone": "Microphone",
+      "end": "End interview"
+    },
+    "living": {
+      "askPolarisDetail": "Ask Polaris · explain how to improve it",
+      "askPolaris": "Ask Polaris",
+      "allChanges": "All changes",
+      "changeCountShort": "{{count}} changes",
+      "inserted": "New",
+      "emptyChanges": "No changes awaiting review",
+      "discardAll": "Discard all",
+      "acceptAll": "Accept all",
+      "pendingReviewCount": "{{count}} changes to review",
+      "previous": "Previous change",
+      "next": "Next change",
+      "addSectionContent": "Add to this section",
+      "reorder": "Reorder",
+      "acceptedChangesLog": "Accepted {{count}} changes"
+    }
   },
   "report": {
     "title": "Resume Analysis Report",

@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { cn } from "@/lib/utils";
 import { Comment } from '../_types';
 import { useTranslation } from 'react-i18next';
+import { formatCommentDate } from '@/lib/utils/dateTime';
 
 interface CommentSidebarProps {
     isOpen: boolean;
@@ -16,22 +17,6 @@ interface CommentSidebarProps {
     onReply: (commentId: string, content: string) => Promise<void>;
     currentUserId?: string;
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const formatDate = (dateStr: string, t: any) => {
-    if (!dateStr || dateStr === 'Just now') return t('sharedPage.comments.justNow');
-    try {
-        const date = new Date(dateStr);
-        return date.toLocaleDateString(undefined, { 
-            month: 'short', 
-            day: 'numeric', 
-            hour: '2-digit', 
-            minute: '2-digit' 
-        });
-    } catch {
-        return dateStr;
-    }
-};
 
 const CommentItem = React.memo(({ 
     comment, 
@@ -106,12 +91,12 @@ const CommentItem = React.memo(({
                         </div>
                     )}
                 </div>
-                <span className="text-[10px] text-neutral-500">{formatDate(comment.createdAt, t)}</span>
+                <span className="text-[10px] text-neutral-500">{formatCommentDate(comment.createdAt, t)}</span>
             </div>
 
             {comment.selectedText && (
                 <div className="mb-2 px-2 py-1 bg-white/5 border-l-2 border-indigo-500/50 rounded-r text-[11px] text-neutral-400 italic line-clamp-2">
-                    &quot;{comment.selectedText}&quot;
+                    {`"${comment.selectedText}"`}
                 </div>
             )}
 
@@ -161,7 +146,7 @@ const CommentItem = React.memo(({
                                         </div>
                                     )}
                                 </div>
-                                <span className="text-[9px] text-neutral-500">{formatDate(reply.createdAt, t)}</span>
+                                <span className="text-[9px] text-neutral-500">{formatCommentDate(reply.createdAt, t)}</span>
                             </div>
                             <p className="text-[12px] text-neutral-400 leading-relaxed">
                                 {reply.content}

@@ -12,12 +12,13 @@ export default function AIModalPage() {
   const id = params.id as string;
 
 
-  const { 
-    activeResume, 
+  const {
+    activeResume,
     loadResumeForEdit,
-    updateSections, 
-    applyFullResume, 
-    isAiGenerating, 
+    updateSections,
+    updateInfo,
+    applyFullResume,
+    isAiGenerating,
     setIsAiGenerating,
   } = useResumeStore();
   
@@ -47,6 +48,7 @@ export default function AIModalPage() {
           onClose={() => handleOpenChange(false)}
           resumeData={activeResume}
           onApplySectionChanges={updateSections}
+          onApplyInfo={updateInfo}
           onApplyFullResume={applyFullResume}
           templateId={templateId}
           isAiJobRunning={isAiGenerating}

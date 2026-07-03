@@ -1,0 +1,153 @@
+---
+import type { Copy } from '@/i18n/ui';
+import Icon from '@/components/Icon.astro';
+
+interface Props {
+  copy: Copy;
+}
+const { copy } = Astro.props;
+const s = copy.sync;
+
+// device chips: icon path + vertical position, sync pulse staggered per device
+const devices = [
+  { name: s.devices[0], icon: 'M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9H4V6zM2 18h20l-1.6 2H3.6L2 18z', delay: 0 },
+  { name: s.devices[1], icon: 'M8 3h8a1.5 1.5 0 0 1 1.5 1.5v15A1.5 1.5 0 0 1 16 21H8a1.5 1.5 0 0 1-1.5-1.5v-15A1.5 1.5 0 0 1 8 3zM11 18h2', delay: 1.1 },
+  { name: s.devices[2], icon: 'M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zM9 20h6', delay: 2.2 },
+];
+---
+
+<section id="sync" class="relative border-t border-hair py-24 md:py-32">
+  <div class="mx-auto grid max-w-[1120px] items-center gap-14 px-5 md:px-6 lg:grid-cols-2 lg:gap-20">
+    <div class="reveal">
+      <p class="eyebrow">{s.eyebrow}</p>
+      <h2 class="mt-4 max-w-lg font-display text-[clamp(1.7rem,3.6vw,2.4rem)] font-semibold leading-tight tracking-[-0.02em] text-ink">
+        {s.title}
+      </h2>
+      <p class="mt-4 max-w-lg text-[15px] leading-relaxed text-muted md:text-base">{s.subtitle}</p>
+
+      <ul class="mt-8 space-y-3.5">
+        {
+          s.points.map((point) => (
+            <li class="flex items-start gap-3 text-[14.5px] text-ink">
+              <span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-sky-400/10 text-sky-400">
+                <Icon name="check" size={12} />
+              </span>
+              {point}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <!-- sync constellation: resume card → flowing lines → devices come alive -->
+    <div class="reveal flex justify-center lg:justify-end" style="--reveal-delay:1">
+      <div class="sync-scene relative h-[320px] w-full max-w-[460px]">
+        <div aria-hidden="true" class="absolute -inset-10 -z-10 rounded-[3rem] bg-sky-500/[0.06] blur-3xl"></div>
+
+        <!-- flowing connection lines -->
+        <svg
+          class="absolute inset-0 h-full w-full"
+          viewBox="0 0 460 320"
+          fill="none"
+          aria-hidden="true"
+          preserveAspectRatio="none"
+        >
+          <path class="sync-line" style="animation-delay:0s" d="M170 160 C 250 160, 260 62, 330 62" />
+          <path class="sync-line" style="animation-delay:1.1s" d="M170 160 C 260 160, 260 160, 330 160" />
+          <path class="sync-line" style="animation-delay:2.2s" d="M170 160 C 250 160, 260 258, 330 258" />
+        </svg>
+
+        <!-- resume card (source of truth) -->
+        <div class="absolute left-0 top-1/2 w-[180px] -translate-y-1/2">
+          <div aria-hidden="true" class="sync-halo absolute -inset-3 rounded-2xl bg-sky-400/10"></div>
+          <div class="relative rounded-xl bg-paper p-3.5 text-paper-ink shadow-[0_18px_50px_-16px_rgb(0_0_0/0.8)]">
+            <div class="text-[12px] font-semibold">李 明</div>
+            <div class="text-[9px] text-paper-muted">Frontend Engineer</div>
+            <div class="mt-2.5 space-y-1.5">
+              <div class="h-1.5 w-full rounded-full bg-paper-ink/10"></div>
+              <div class="h-1.5 w-5/6 rounded-full bg-paper-ink/10"></div>
+              <div class="h-1.5 w-11/12 rounded-full bg-paper-ink/10"></div>
+              <div class="h-1.5 w-2/3 rounded-full bg-paper-ink/10"></div>
+            </div>
+            <div class="mt-3 flex items-center gap-1.5 text-[9px] text-sky-700">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18a4.5 4.5 0 1 1 .9-8.9A6 6 0 0 1 19.5 10 4 4 0 0 1 18 17.9H7z"/></svg>
+              {s.doc}
+            </div>
+          </div>
+        </div>
+
+        <!-- devices -->
+        {
+          devices.map((d, i) => (
+            <div
+              class="sync-device absolute right-0 flex w-[130px] items-center gap-2.5 rounded-xl bg-surface px-3 py-2.5 shadow-lg shadow-black/40 ring-1 ring-white/[0.06]"
+              style={`top:${[36, 134, 232][i]}px; --sync-delay:${d.delay}s`}
+            >
+              <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white/[0.05] text-muted">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d={d.icon} /></svg>
+              </span>
+              <span class="min-w-0">
+                <span class="block truncate text-[11px] font-medium text-ink/90">{d.name}</span>
+                <span class="sync-status flex items-center gap-1 text-[9.5px] text-faint">
+                  <span class="sync-dot h-1 w-1 rounded-full bg-faint" />
+                  {s.synced} · {s.justNow}
+                </span>
+              </span>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* dashes flow from the card toward each device, staggered */
+  .sync-line {
+    stroke: color-mix(in srgb, var(--color-sky-400) 45%, transparent);
+    stroke-width: 1.2;
+    stroke-dasharray: 3 7;
+    animation: sync-flow 3.3s linear infinite;
+  }
+  @keyframes sync-flow {
+    to {
+      stroke-dashoffset: -60;
+    }
+  }
+
+  /* the source card breathes */
+  .sync-halo {
+    animation: sync-halo 3.3s ease-in-out infinite;
+  }
+  @keyframes sync-halo {
+    0%, 100% { opacity: 0.35; transform: scale(0.99); }
+    50% { opacity: 1; transform: scale(1.015); }
+  }
+
+  /* each device "receives" on its own beat: dot + text flash sky */
+  .sync-device .sync-dot {
+    animation: sync-dot 3.3s ease-in-out infinite;
+    animation-delay: var(--sync-delay);
+  }
+  .sync-device .sync-status {
+    animation: sync-text 3.3s ease-in-out infinite;
+    animation-delay: var(--sync-delay);
+  }
+  @keyframes sync-dot {
+    0%, 55%, 100% { background: var(--color-faint); box-shadow: none; }
+    12%, 40% { background: var(--color-sky-400); box-shadow: 0 0 8px color-mix(in srgb, var(--color-sky-400) 80%, transparent); }
+  }
+  @keyframes sync-text {
+    0%, 55%, 100% { color: var(--color-faint); }
+    12%, 40% { color: var(--color-sky-300, #7dd3fc); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sync-line,
+    .sync-halo,
+    .sync-device .sync-dot,
+    .sync-device .sync-status {
+      animation: none;
+    }
+  }
+</style>

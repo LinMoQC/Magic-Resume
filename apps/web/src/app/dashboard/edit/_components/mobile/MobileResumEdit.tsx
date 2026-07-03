@@ -18,7 +18,6 @@ const ReactJsonView = EditorComponents.JsonViewer;
 
 interface MobileResumEditProps {
     activeResume: Resume | null;
-    setPreviewScale: (scale: number) => void;
     leftPanelOpen: boolean;
     setLeftPanelOpen: (open: boolean) => void;
     rightPanelOpen: boolean;
@@ -39,7 +38,6 @@ interface MobileResumEditProps {
 
 export default function MobileResumEdit({
     activeResume,
-    setPreviewScale,
     leftPanelOpen,
     setLeftPanelOpen,
     rightPanelOpen,
@@ -63,19 +61,18 @@ export default function MobileResumEdit({
         <div className='flex-1 flex items-center justify-center bg-black relative'>
             <ResumePreviewPanel
                 activeResume={activeResume}
-                previewScale={0.8}
-                setPreviewScale={setPreviewScale}
                 onShowAI={onShowAI}
                 isAiJobRunning={isAiJobRunning}
                 onShareClick={onShareClick}
                 onFeedbackClick={onFeedbackClick}
+                onJsonClick={openJsonModal}
             />
         </div>
 
         <div className="fixed w-[90vw] top-6 left-1/2 -translate-x-1/2 z-10 flex items-center justify-between gap-4">
             <Button onClick={() => setLeftPanelOpen(true)} className="rounded-full h-12 w-12"><FiEdit /></Button>
             <Link href="/dashboard" className="rounded-full h-12 w-12 flex items-center justify-center">
-                <Image src="/simple-logo.png" alt={t('common.logoAlt')} width={50} height={50} />
+                <Image src="/magic-resume-mark.png" alt={t('common.logoAlt')} width={50} height={50} />
             </Link>
             <Button onClick={() => setRightPanelOpen(true)} className="rounded-full h-12 w-12"><FiLayout /></Button>
         </div>
@@ -121,13 +118,14 @@ export default function MobileResumEdit({
                         animate={{ x: 0 }}
                         exit={{ x: '100%' }}
                         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                        className="fixed top-0 right-0 h-full w-[280px] z-30"
+                        className="fixed top-0 right-0 h-full w-[340px] max-w-[88vw] z-30"
                     >
                         <TemplatePanel
                             rightCollapsed={false}
                             setRightCollapsed={() => { }}
                             onSelectTemplate={onSelectTemplate}
                             currentTemplateId={currentTemplateId}
+                            embedded
                         />
                     </motion.div>
                 </>

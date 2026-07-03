@@ -1,0 +1,337 @@
+@import "tailwindcss";
+
+/* Self-hosted brand display face (Latin). CJK falls back to system faces. */
+@import "@fontsource-variable/sora";
+
+/*
+  Design tokens — Linear-grade restraint on the Magic Resume brand.
+  Near-black neutral base (barely tinted toward the sky hue), hairline borders,
+  near-white ink, one accent: sky-400 (#38bdf8). Everything else earns its
+  contrast through typography and spacing, not color.
+*/
+@theme {
+  --font-display: "Sora Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "PingFang SC",
+    "Microsoft YaHei", "Source Han Sans SC", "Noto Sans CJK SC", sans-serif;
+
+  /* Surfaces: #0a0b0c-ish, one step apart, all tinted 0.004 toward sky. */
+  --color-workbench: oklch(0.138 0.004 240);
+  --color-surface: oklch(0.168 0.005 240);
+  --color-surface-2: oklch(0.205 0.006 240);
+  --color-hairline: oklch(0.28 0.006 240);
+  /* Ink ramp: #f7f8f8 → #8a8f98 → #5e646d */
+  --color-ink: oklch(0.975 0.002 240);
+  --color-muted: oklch(0.68 0.008 245);
+  --color-faint: oklch(0.53 0.009 245);
+
+  /* The resume document is light "paper" floating on the dark workbench. */
+  --color-paper: oklch(0.975 0.003 95);
+  --color-paper-ink: oklch(0.28 0.01 260);
+  --color-paper-muted: oklch(0.62 0.01 260);
+  /* Revision diff marks — brand red delete / green add. */
+  --color-del: #dc2626;
+  --color-add: #15803d;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--color-workbench);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: color-mix(in oklch, var(--color-sky-400) 30%, transparent);
+  color: #fff;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-hairline) transparent;
+}
+
+/* In @layer base so Tailwind utilities (a later layer) can always override —
+   unlayered rules would beat every utility regardless of specificity. */
+@layer base {
+  :where(:focus-visible) {
+    outline: 2px solid var(--color-sky-400);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* Even line fills for display text — matters double for CJK headlines. */
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Utilities
+--------------------------------------------------------------------------- */
+
+/* Hairline border color used everywhere — 1px, white at 8%. */
+@utility ring-hair {
+  --tw-ring-color: color-mix(in srgb, #fff 8%, transparent);
+}
+@utility border-hair {
+  border-color: color-mix(in srgb, #fff 8%, transparent);
+}
+
+/* Eyebrow label: small caps, wide tracking, faint. */
+.eyebrow {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--color-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.eyebrow::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--color-sky-400);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--color-sky-400) 80%, transparent);
+}
+
+/* Product frame: hairline ring + inner top light, like a screenshot on glass. */
+/* Linear-style gloss, carried entirely by the panel's own border: a crisp
+   lit top edge + hairline ring + layered depth. No backing plate, no padding —
+   inset shadows paint over the panel background but under its content. */
+.linear-frame {
+  position: relative;
+  border-radius: 14px;
+}
+.linear-frame > :first-child {
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow:
+    /* top gloss line — light catching the upper edge */
+    inset 0 1px 0 color-mix(in srgb, #fff 12%, transparent),
+    /* faint bottom lip */
+    inset 0 -1px 0 color-mix(in srgb, #fff 3%, transparent),
+    /* hairline ring */
+    inset 0 0 0 1px color-mix(in srgb, #fff 7%, transparent),
+    /* dark rim separating panel from page */
+    0 0 0 1px rgb(0 0 0 / 0.5),
+    /* layered depth: ambient + contact */
+    0 32px 80px -24px rgb(0 0 0 / 0.7),
+    0 6px 20px -8px rgb(0 0 0 / 0.55);
+}
+
+/* Linear-like product frame: layered material, gradient hairlines, no hard plate. */
+.linear-frame {
+  position: relative;
+  isolation: isolate;
+  border-radius: 14px;
+  background:
+    radial-gradient(
+      130% 120% at 50% 0%,
+      color-mix(in srgb, #fff 2.2%, transparent),
+      transparent 38%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, #fff 1.2%, transparent),
+      color-mix(in srgb, #000 7%, transparent)
+    );
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 10%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, #fff 2%, transparent),
+    0 0 0 1px color-mix(in srgb, #fff 7%, transparent),
+    0 28px 90px -42px rgb(0 0 0 / 0.95);
+}
+.linear-frame::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, #fff 3.5%, transparent),
+      transparent 18%,
+      transparent 82%,
+      color-mix(in srgb, #fff 2.5%, transparent)
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, #fff 4.5%, transparent),
+      transparent 10%
+    );
+  opacity: 0.46;
+}
+.linear-frame::after {
+  content: "";
+  position: absolute;
+  inset: -36px -44px;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 32px;
+  background:
+    radial-gradient(
+      55% 42% at 50% 0%,
+      color-mix(in srgb, #fff 7%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      60% 50% at 50% 100%,
+      color-mix(in srgb, var(--color-sky-400) 5%, transparent),
+      transparent 72%
+    );
+  filter: blur(28px);
+  opacity: 0.38;
+}
+.linear-frame > * {
+  position: relative;
+  z-index: 1;
+}
+
+.linear-window {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, #fff 1.1%, transparent),
+      color-mix(in srgb, #fff 0.35%, transparent) 14%,
+      color-mix(in srgb, #000 6%, transparent)
+    );
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 5.5%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, #fff 2%, transparent);
+}
+.linear-chrome {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, #fff 1.5%, transparent),
+      color-mix(in srgb, #fff 0.35%, transparent)
+    );
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 4%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, #fff 5.5%, transparent);
+}
+.linear-pane {
+  background:
+    radial-gradient(
+      90% 70% at 50% 0%,
+      color-mix(in srgb, #fff 1%, transparent),
+      transparent 60%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, #fff 0.4%, transparent),
+      color-mix(in srgb, #000 7%, transparent)
+    );
+}
+.linear-panel,
+.linear-card,
+.linear-field {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, #fff 2.4%, transparent),
+      color-mix(in srgb, #fff 0.9%, transparent)
+    );
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 4.5%, transparent),
+    0 0 0 1px color-mix(in srgb, #fff 4.8%, transparent);
+}
+.linear-card {
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 5%, transparent),
+    0 0 0 1px color-mix(in srgb, #fff 5.2%, transparent),
+    0 12px 26px -22px rgb(0 0 0 / 0.9);
+}
+.linear-field {
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 3.2%, transparent),
+    0 0 0 1px color-mix(in srgb, #fff 4.2%, transparent);
+}
+
+/* Bento card. Hover: hairline brightens, faint sky wash rises from the top. */
+.bento {
+  position: relative;
+  border-radius: 14px;
+  background: var(--color-surface);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 5%, transparent),
+    0 0 0 1px color-mix(in srgb, #fff 6%, transparent);
+  overflow: hidden;
+  transition: box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.bento::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    120% 60% at 50% 0%,
+    color-mix(in srgb, var(--color-sky-400) 7%, transparent),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.bento:hover {
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 8%, transparent),
+    0 0 0 1px color-mix(in srgb, #fff 12%, transparent);
+}
+.bento:hover::after {
+  opacity: 1;
+}
+
+/* Hero backdrop: one restrained sky bloom + hairline horizon. */
+.hero-bloom {
+  background: radial-gradient(
+    50% 42% at 50% 0%,
+    color-mix(in srgb, var(--color-sky-500) 13%, transparent),
+    transparent 72%
+  );
+}
+
+/* Scroll-reveal: transform + opacity only, exponential ease-out, no bounce. */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc(var(--reveal-delay, 0) * 70ms);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+/* No-JS / crawler fallback: content must never be trapped hidden. */
+html:not(.js) .reveal {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

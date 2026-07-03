@@ -1,0 +1,76 @@
+---
+import type { Copy } from '@/i18n/ui';
+import { GITHUB } from '@/consts';
+import { formatStars } from '@/lib/github';
+import Icon from '@/components/Icon.astro';
+
+interface Props {
+  copy: Copy;
+  stars: number | null;
+}
+const { copy, stars } = Astro.props;
+const o = copy.openSource;
+---
+
+<section id="open-source" class="relative border-t border-hair py-24 md:py-32">
+  <div class="mx-auto max-w-[1120px] px-5 md:px-6">
+    <div class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-16">
+      <div class="reveal max-w-xl">
+        <p class="eyebrow">{o.eyebrow}</p>
+        <h2 class="mt-4 font-display text-[clamp(1.7rem,3.6vw,2.4rem)] font-semibold tracking-[-0.02em] text-ink">
+          {o.title}
+        </h2>
+        <p class="mt-4 text-[15px] leading-relaxed text-muted md:text-base">{o.desc}</p>
+
+        <div class="mt-8">
+          <a
+            href={GITHUB.repo}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 rounded-lg border border-hair bg-surface/50 px-5 py-2.5 text-[14px] font-medium text-ink transition-colors hover:border-sky-400/30"
+          >
+            <Icon name="star" size={16} class="text-sky-400" />
+            {o.starCta}
+            {
+              stars !== null && (
+                <span class="ml-1 rounded-md bg-surface-2 px-2 py-0.5 font-mono text-[12px] tabular-nums text-muted">
+                  {formatStars(stars)}
+                </span>
+              )
+            }
+          </a>
+        </div>
+      </div>
+
+      <div class="reveal" style="--reveal-delay:1">
+        {
+          stars !== null && (
+            <div class="flex items-baseline gap-2">
+              <span class="font-display text-6xl font-semibold tabular-nums tracking-tight text-ink md:text-7xl">
+                {formatStars(stars)}
+              </span>
+              <span class="text-sm text-faint">{o.starsLabel}</span>
+            </div>
+          )
+        }
+      </div>
+    </div>
+
+    <div class="reveal mt-14 border-t border-hair pt-8" style="--reveal-delay:1">
+      <p class="mb-4 text-[13px] text-faint">{o.contributorsLabel}</p>
+      <a
+        href={GITHUB.contributors}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-block transition-opacity hover:opacity-80"
+      >
+        <img
+          src={GITHUB.contribImage}
+          alt={o.contributorsLabel}
+          loading="lazy"
+          class="h-9 w-auto md:h-10"
+        />
+      </a>
+    </div>
+  </div>
+</section>

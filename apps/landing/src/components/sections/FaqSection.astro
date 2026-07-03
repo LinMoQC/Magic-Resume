@@ -1,0 +1,25 @@
+---
+import type { Copy } from '@/i18n/ui';
+import Faq from '@/components/islands/Faq';
+
+interface Props {
+  copy: Copy;
+}
+const { copy } = Astro.props;
+const f = copy.faq;
+---
+
+<section id="faq" class="relative border-t border-hair py-24 md:py-32">
+  <div class="mx-auto grid max-w-[1120px] gap-10 px-5 md:px-6 lg:grid-cols-[minmax(0,4fr)_minmax(0,7fr)] lg:gap-20">
+    <div class="reveal">
+      <p class="eyebrow">{f.eyebrow}</p>
+      <h2 class="mt-4 font-display text-[clamp(1.7rem,3.6vw,2.4rem)] font-semibold tracking-[-0.02em] text-ink">
+        {f.title}
+      </h2>
+    </div>
+
+    <div class="reveal" style="--reveal-delay:1">
+      <Faq client:visible items={f.items} />
+    </div>
+  </div>
+</section>

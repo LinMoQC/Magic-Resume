@@ -186,9 +186,9 @@ function IconContainer({
   }
 
   return (
-    <button 
-        onClick={onClick} 
-        type="button" 
+    <button
+        onClick={onClick}
+        type="button"
         className="bg-transparent border-none p-0 cursor-pointer focus:outline-none"
     >
         {content}

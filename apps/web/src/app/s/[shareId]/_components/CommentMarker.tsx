@@ -127,7 +127,7 @@ export const CommentMarker = ({
                 <Plus size={16} strokeWidth={3} />
             ) : avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={avatarUrl} alt="User" className="w-full h-full rounded-full object-cover" />
+                <img src={avatarUrl} alt="" className="w-full h-full rounded-full object-cover" />
             ) : (
                 <span className="text-xs font-bold">{index || 1}</span>
             )}

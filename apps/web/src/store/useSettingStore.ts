@@ -1,5 +1,12 @@
 import { create } from 'zustand';
 import { dbClient } from '@/lib/api/IndexDBClient';
+import { isCloudMode } from '@/lib/config/app';
+import {
+  CUSTOM_PROVIDER_ID,
+  DEFAULT_MAX_TOKENS,
+  deriveProviderId,
+  getProvider,
+} from '@/lib/constants/modals';
 
 // 移除立即初始化，改为懒加载
 let dbInitialized = false;
@@ -15,6 +22,8 @@ const ensureDbInitialized = async () => {
 };
 
 interface SettingsData {
+  /** selected provider id (see MODEL_PROVIDERS); '' until the user picks one. */
+  provider: string;
   apiKey: string;
   baseUrl: string;
   model: string;
@@ -26,31 +35,58 @@ interface SettingsData {
 interface SettingsState extends SettingsData {
   initialSettings: SettingsData;
   isDirty: boolean;
+  /** Pick a provider; preset providers auto-fill baseUrl/model/maxTokens. */
+  setProvider: (provider: string) => void;
   setApiKey: (apiKey: string) => void;
   setBaseUrl: (baseUrl: string) => void;
   setModel: (model: string) => void;
   setMaxTokens: (maxTokens: number) => void;
   setCloudSync: (cloudSync: boolean) => void;
   setSyncDisclaimerAgreed: (agreed: boolean) => void;
+  /** True when provider + key + baseUrl + model + maxTokens are all set — AI is usable. */
+  hasLlmConfig: () => boolean;
   saveSettings: () => Promise<void>;
   resetSettings: () => void;
   loadSettings: () => Promise<void>;
 }
 
 const defaultSettings: SettingsData = {
+  // No preset provider/url/model: the user picks a provider first, which fills the rest.
+  provider: '',
   apiKey: '',
-  baseUrl: 'http://localhost:11434/v1',
-  model: 'gpt-3.5-turbo',
-  maxTokens: 1024,
-  cloudSync: false,
+  baseUrl: '',
+  model: '',
+  // 8192 (was 1024): long resume optimize / translate / create outputs were being
+  // silently truncated at 1024 tokens (CC7).
+  maxTokens: DEFAULT_MAX_TOKENS,
+  // Cloud-sync-first: default on in cloud mode (opt-out — users can disable it in
+  // settings). Self-hosted has no backend, so it must stay off. Existing users keep
+  // their saved preference (loadSettings merges saved values over this default).
+  cloudSync: isCloudMode,
   syncDisclaimerAgreed: false,
 };
+
+const isNonEmpty = (value: unknown) => String(value ?? '').trim().length > 0;
 
 export const useSettingStore = create<SettingsState>((set, get) => ({
   ...defaultSettings,
   initialSettings: { ...defaultSettings },
   isDirty: false,
-  
+
+  setProvider: (provider) => {
+    const meta = getProvider(provider);
+    // Preset providers fill in base URL / model / max tokens so the user only
+    // needs a key. Custom keeps the user's existing fields (don't wipe them).
+    const patch: Partial<SettingsData> = { provider };
+    if (meta && provider !== CUSTOM_PROVIDER_ID) {
+      patch.baseUrl = meta.baseUrl;
+      patch.model = meta.defaultModel;
+      patch.maxTokens = meta.defaultMaxTokens;
+    }
+    const currentState = { ...get(), ...patch };
+    const { initialSettings, ...currentSettings } = currentState;
+    set({ ...patch, isDirty: JSON.stringify(currentSettings) !== JSON.stringify(initialSettings) });
+  },
   setApiKey: (apiKey) => {
     const currentState = { ...get(), apiKey };
     const { initialSettings, ...currentSettings } = currentState;
@@ -81,11 +117,22 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
     const { initialSettings, ...currentSettings } = currentState;
     set({ syncDisclaimerAgreed, isDirty: JSON.stringify(currentSettings) !== JSON.stringify(initialSettings) });
   },
-  
+
+  hasLlmConfig: () => {
+    const { provider, apiKey, baseUrl, model, maxTokens } = get();
+    const tokens = Number(maxTokens);
+    return isNonEmpty(provider)
+      && isNonEmpty(apiKey)
+      && isNonEmpty(baseUrl)
+      && isNonEmpty(model)
+      && Number.isFinite(tokens)
+      && tokens > 0;
+  },
+
   saveSettings: async () => {
     await ensureDbInitialized();
-    const { apiKey, baseUrl, model, maxTokens, cloudSync, syncDisclaimerAgreed } = get();
-    const newSettings = { apiKey, baseUrl, model, maxTokens, cloudSync, syncDisclaimerAgreed };
+    const { provider, apiKey, baseUrl, model, maxTokens, cloudSync, syncDisclaimerAgreed } = get();
+    const newSettings = { provider, apiKey, baseUrl, model, maxTokens, cloudSync, syncDisclaimerAgreed };
     await dbClient.setItem('settings', newSettings);
     set({ initialSettings: newSettings, isDirty: false });
   },
@@ -99,9 +146,15 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
 
   loadSettings: async () => {
     await ensureDbInitialized();
-    const savedSettings = await dbClient.getItem('settings') as SettingsData | null;
+    const savedSettings = await dbClient.getItem('settings') as Partial<SettingsData> | null;
     if (savedSettings) {
-      set({ ...savedSettings, initialSettings: { ...savedSettings }, isDirty: false });
+      // Migrate legacy settings (pre-`provider`): reverse-derive the provider from
+      // the saved base URL so old users keep working without re-configuring.
+      const provider = isNonEmpty(savedSettings.provider)
+        ? (savedSettings.provider as string)
+        : (savedSettings.baseUrl ? deriveProviderId(savedSettings.baseUrl) : '');
+      const merged: SettingsData = { ...defaultSettings, ...savedSettings, provider };
+      set({ ...merged, initialSettings: { ...merged }, isDirty: false });
     }
   },
 }));
@@ -109,4 +162,4 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
 // 恢复为了确保全局可用性的自动加载，但仅在客户端执行
 if (typeof window !== 'undefined') {
   useSettingStore.getState().loadSettings();
-} 
+}
