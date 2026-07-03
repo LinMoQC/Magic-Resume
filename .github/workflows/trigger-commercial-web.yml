@@ -1,0 +1,55 @@
+name: Trigger Commercial Web Build
+
+on:
+  workflow_run:
+    workflows: ["Build and Push Docker Image"]
+    branches: ["master"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      magic_resume_ref:
+        description: Public Magic-Resume branch, tag, or SHA to build
+        required: false
+        default: master
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: trigger-commercial-web-${{ github.event.workflow_run.head_sha || inputs.magic_resume_ref || 'master' }}
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create commercial repository token
+        id: commercial-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.COMMERCIAL_BUILD_APP_ID }}
+          private-key: ${{ secrets.COMMERCIAL_BUILD_APP_PRIVATE_KEY }}
+          owner: Magic-Resume
+          repositories: Magic-Resume-Commercial
+
+      - name: Resolve public source ref
+        id: source
+        env:
+          AUTOMATIC_REF: ${{ github.event.workflow_run.head_sha }}
+          MANUAL_REF: ${{ inputs.magic_resume_ref }}
+        run: |
+          source_ref="${AUTOMATIC_REF:-${MANUAL_REF:-master}}"
+          echo "ref=$source_ref" >> "$GITHUB_OUTPUT"
+
+      - name: Dispatch commercial build
+        env:
+          GH_TOKEN: ${{ steps.commercial-token.outputs.token }}
+          MAGIC_RESUME_REF: ${{ steps.source.outputs.ref }}
+        run: |
+          gh workflow run commercial-web.yml \
+            --repo Magic-Resume/Magic-Resume-Commercial \
+            --ref main \
+            --field magic_resume_ref="$MAGIC_RESUME_REF" \
+            --field publish_latest=true
