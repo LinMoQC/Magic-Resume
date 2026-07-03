@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, Clock, User, Mic } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 type InterviewOverlayProps = {
   open: boolean;
@@ -11,6 +12,8 @@ type InterviewOverlayProps = {
 };
 
 export default function InterviewOverlay({ open, onBack, onEnd }: InterviewOverlayProps) {
+  const { t } = useTranslation();
+
   return (
     <AnimatePresence>
       {open && (
@@ -24,12 +27,12 @@ export default function InterviewOverlay({ open, onBack, onEnd }: InterviewOverl
             <button
               type="button"
               onClick={onBack}
-              aria-label="返回"
+              aria-label={t('common.back')}
               className="text-neutral-400 hover:text-white transition-colors cursor-pointer"
             >
               <ChevronLeft size={20} />
             </button>
-            <span className="text-sm font-medium text-white">模拟面试 · 前端专家</span>
+            <span className="text-sm font-medium text-white">{t('aiLab.interview.title')}</span>
             <span className="ml-auto inline-flex items-center gap-1.5 text-xs text-neutral-400">
               <Clock size={14} />
               02:14
@@ -52,14 +55,14 @@ export default function InterviewOverlay({ open, onBack, onEnd }: InterviewOverl
               ))}
             </div>
             <p className="text-sm text-neutral-400 max-w-xs text-center">
-              “能聊聊你在项目里最有挑战的一次性能优化吗？”
+              {t('aiLab.interview.prompt')}
             </p>
           </div>
 
           <div className="flex items-center justify-center gap-3 py-6">
             <button
               type="button"
-              aria-label="麦克风"
+              aria-label={t('aiLab.interview.microphone')}
               className="w-12 h-12 rounded-full border border-neutral-700 text-neutral-300 flex items-center justify-center hover:bg-neutral-800 transition-colors cursor-pointer"
             >
               <Mic size={20} />
@@ -69,7 +72,7 @@ export default function InterviewOverlay({ open, onBack, onEnd }: InterviewOverl
               onClick={onEnd}
               className="px-6 py-2.5 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-300 text-sm hover:bg-rose-500/25 transition-colors cursor-pointer"
             >
-              结束面试
+              {t('aiLab.interview.end')}
             </button>
           </div>
         </motion.div>

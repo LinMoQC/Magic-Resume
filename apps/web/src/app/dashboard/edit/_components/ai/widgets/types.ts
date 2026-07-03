@@ -1,5 +1,5 @@
 /**
- * GenUI widget contract (design/genui-systematization.md). The agent surfaces an
+ * GenUI widget contract (docs/specs/genui-systematization/design.md). The agent surfaces an
  * interactive card by calling a tool (interruptOn path) or pushing a `ui_widget`
  * event (escape-hatch); both become one `widget` chat message that the registry
  * renders. New cards = a component + one registry entry, not 7 hardcoded switches.

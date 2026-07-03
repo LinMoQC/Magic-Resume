@@ -3,11 +3,8 @@ import { getServerUserId } from '@/lib/auth/server';
 import { serverFetchBackend } from '@/lib/auth/serverFetchBackend';
 
 /**
- * Human-in-the-loop tool-approval reply (native HITL). Forwards the user's
- * decision to the agent-service, which resumes the paused thread
- * (`Command({ resume })`) and **streams the continuation** as SSE. So unlike the
- * old JSON reply, this proxies the streamed body through unchanged — exactly like
- * the /api/chat-agent route (Magic-Core docs/agent-architecture-deepagents.md §6).
+ * Human-in-the-loop tool-approval reply. Forwards the user's decision and proxies
+ * the streamed continuation through unchanged, just like the main chat route.
  */
 export async function POST(req: NextRequest) {
   try {

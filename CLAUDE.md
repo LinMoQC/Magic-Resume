@@ -121,7 +121,7 @@ Format: `<emoji> <type>(<scope>?): <subject>` — e.g. `:sparkles: feat(web): ad
 
 ## Design Context
 
-> Full version + design principles live in `.impeccable.md` (project root); read it before any UI / UX work. Source: `design/ai-lab-living-canvas.md`.
+> Full version + design principles live in `.impeccable.md` (project root); read it before any UI / UX work. Source: `docs/specs/ai-lab-living-canvas/design.md`.
 
 - **Users**: 求职者(中文市场为主),为某个目标岗位搭建 / 打磨简历。`create`(引导创建)服务"从零 / 另起一份"的人——含经验少需引导者与求快出稿者;其余能力面向已有简历、准备投递的人。
 - **Personality**: 锐利、协作、有主见的"搭档"(Codex / Claude 式 agentic),不是被动工具。文案简短、动词开头、不复述用户已见。让用户有掌控感与被理解感。

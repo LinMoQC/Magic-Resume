@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { dbClient } from '@/lib/api/IndexDBClient';
+import { isCloudMode } from '@/lib/config/app';
 import {
   CUSTOM_PROVIDER_ID,
   DEFAULT_MAX_TOKENS,
@@ -58,7 +59,10 @@ const defaultSettings: SettingsData = {
   // 8192 (was 1024): long resume optimize / translate / create outputs were being
   // silently truncated at 1024 tokens (CC7).
   maxTokens: DEFAULT_MAX_TOKENS,
-  cloudSync: false,
+  // Cloud-sync-first: default on in cloud mode (opt-out — users can disable it in
+  // settings). Self-hosted has no backend, so it must stay off. Existing users keep
+  // their saved preference (loadSettings merges saved values over this default).
+  cloudSync: isCloudMode,
   syncDisclaimerAgreed: false,
 };
 

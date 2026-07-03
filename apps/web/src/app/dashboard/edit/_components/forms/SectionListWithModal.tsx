@@ -29,8 +29,8 @@ const TiptapEditor = EditorComponents.TiptapEditor;
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import { Label } from '@/components/ui/label';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
+import { ModalShell } from '@/components/ui/ModalShell';
 
 import { useResumeStore } from '@/store/useResumeStore';
 
@@ -97,9 +97,9 @@ function SortableItem<T extends BaseItem>({ id, item, index, handleEdit, handleD
   ];
 
   return (
-    <div ref={setNodeRef} style={style} className={cn("relative flex items-center gap-2 mb-2 p-3 bg-neutral-900 rounded-md border border-zinc-800",isDragging ? 'opacity-50' : 'opacity-100', item.visible === false && "opacity-50")}>
-      <div {...attributes} {...listeners} className={cn("p-2", disabled ? "cursor-default" : "cursor-grab")}>
-        <FaGripVertical />
+    <div ref={setNodeRef} style={style} className={cn("group relative mb-2 flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] p-2.5 transition-colors duration-150 hover:border-white/20", isDragging ? 'opacity-50' : 'opacity-100', item.visible === false && "opacity-50")}>
+      <div {...attributes} {...listeners} className={cn("flex h-8 w-5 items-center justify-center text-neutral-600 transition-colors duration-150 hover:text-neutral-300", disabled ? "cursor-default" : "cursor-grab active:cursor-grabbing")}>
+        <FaGripVertical size={12} />
       </div>
       <div className="grow">
         {itemRender ? itemRender(item) : (
@@ -135,7 +135,6 @@ function SortableItem<T extends BaseItem>({ id, item, index, handleEdit, handleD
 type Field = { name: string; label: string; placeholder: string; required?: boolean };
 
 interface SectionListWithModalProps<T extends BaseItem> {
-  icon: React.ElementType;
   label: string;
   fields: Field[];
   richtextKey: string;
@@ -148,7 +147,6 @@ interface SectionListWithModalProps<T extends BaseItem> {
 }
 
 export default function SectionListWithModal<T extends BaseItem>({
-  icon,
   label,
   fields,
   richtextKey,
@@ -269,17 +267,9 @@ export default function SectionListWithModal<T extends BaseItem>({
     }
   }, [currentItem, richtextKey]);
 
-  const baseButtonClasses = "inline-flex items-center justify-center rounded-sm text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border bg-transparent hover:bg-accent hover:text-accent-foreground active:scale-95";
-
   return (
-    <div className={cn("mb-8", className)}>
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold flex items-center gap-3">
-          {React.createElement(icon, { className: "w-4 h-4" })} {translatedLabel}
-        </h2>
-      </div>
-
-      <div className="mt-4">
+    <div className={cn(className)}>
+      <div className="mt-1">
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={items} strategy={verticalListSortingStrategy}>
             {items.map((item, index) => (
@@ -302,111 +292,89 @@ export default function SectionListWithModal<T extends BaseItem>({
       </div>
 
       {items.length > 0 ? (
-        <div className="flex justify-end mt-4">
-          <Button
-            variant="outline"
+        <div className="mt-3 flex justify-end">
+          <button
+            type="button"
             onClick={() => handleOpenModal(null, null)}
-            className={cn(baseButtonClasses, "h-9 px-4 py-2 gap-x-2 border border-zinc-800")}
+            className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-[12.5px] font-medium text-neutral-300 transition-colors duration-150 hover:border-sky-400/40 hover:text-white"
           >
-            <FaPlus className="mr-2" />
+            <FaPlus size={11} />
             {t('sections.shared.addItem')}
-          </Button>
+          </button>
         </div>
       ) : (
-        <Button
-          variant="outline"
+        <button
+          type="button"
           onClick={() => handleOpenModal(null, null)}
-          className={cn(baseButtonClasses, "w-full mt-4 h-auto px-5 gap-x-2 border-dashed py-3 leading-relaxed border border-zinc-600")}
+          className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 bg-white/[0.02] py-3 text-[12.5px] font-medium text-neutral-300 transition-colors duration-150 hover:border-sky-400/40 hover:text-white"
         >
-          <FaPlus className="mr-2" />
+          <FaPlus size={11} />
           {t('sections.shared.addItem')}
-        </Button>
+        </button>
       )}
-      <AnimatePresence>
-        {isOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={handleCloseModal}
-              className="fixed inset-0 bg-black/60 z-100 backdrop-blur-md"
-            />
-            <div className="fixed inset-0 z-101 flex items-center justify-center p-4 pointer-events-none">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className="w-full max-w-2xl max-h-[90vh] bg-[#0A0A0A] border border-neutral-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden focus:outline-none pointer-events-auto"
-              >
-              <div className="flex items-center justify-between p-6 border-b border-neutral-800 bg-neutral-900/20">
-                <h2 className="text-xl font-bold text-white tracking-tight">
-                    {currentIndex !== null ? t('sections.shared.editTitle', { label: translatedLabel }) : t('sections.shared.addTitle', { label: translatedLabel })}
-                </h2>
-                <button
-                    onClick={handleCloseModal}
-                    className="p-2 rounded-full hover:bg-neutral-800 text-neutral-500 hover:text-white transition-all active:scale-90"
-                    type="button"
-                >
-                    <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto hide-scrollbar p-6 space-y-6">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  {fields.map((field) => (
-                    <div key={field.name} className="space-y-2">
-                      <Label className="text-neutral-400 text-xs font-semibold ml-1" htmlFor={field.name}>
-                        {field.label}
-                      </Label>
-                      <Input
-                        id={field.name}
-                        name={field.name}
-                        placeholder={field.placeholder}
-                        value={(currentItem?.[field.name] as string) || ''}
-                        onChange={handleInputChange}
-                        className="bg-neutral-900 border-neutral-800 rounded-xl h-11 focus:ring-2 focus:ring-sky-500/20 transition-all text-white placeholder:text-neutral-500"
-                      />
-                    </div>
-                  ))}
+      <ModalShell
+        open={isOpen}
+        onOpenChange={(open) => !open && handleCloseModal()}
+        title={
+          currentIndex !== null
+            ? t('sections.shared.editTitle', { label: translatedLabel })
+            : t('sections.shared.addTitle', { label: translatedLabel })
+        }
+        className="max-h-[88vh] w-[min(680px,92vw)]"
+      >
+        <div className="min-h-0 flex-1 space-y-6 overflow-y-auto scrollbar-hide px-6 py-6">
+          {fields.length > 0 && (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {fields.map((field) => (
+                <div key={field.name} className="space-y-2">
+                  <Label htmlFor={field.name} className="text-[13px] font-medium text-neutral-300">
+                    {field.label}
+                  </Label>
+                  <Input
+                    id={field.name}
+                    name={field.name}
+                    placeholder={field.placeholder}
+                    value={(currentItem?.[field.name] as string) || ''}
+                    onChange={handleInputChange}
+                    className="h-10 rounded-lg border border-white/[0.07] bg-black/20 px-3.5 text-neutral-100 placeholder:text-neutral-600 transition-colors focus-visible:border-sky-500/40 focus-visible:ring-1 focus-visible:ring-sky-500/25 focus-visible:ring-offset-0"
+                  />
                 </div>
-                <div className="space-y-3">
-                    <Label className="text-neutral-400 text-xs font-semibold ml-1">
-                        {t('modals.dynamicForm.descriptionLabel')}
-                    </Label>
-                    <div className="rounded-2xl border border-neutral-800 overflow-hidden bg-neutral-900/30">
-                        <TiptapEditor
-                            content={(currentItem?.[richtextKey] as string) || ''}
-                            onChange={handleQuillChange}
-                            placeholder={richtextPlaceholder}
-                            isPolishing={isPolishing}
-                            setIsPolishing={setIsPolishing}
-                            themeColor={activeResume?.themeColor}
-                        />
-                    </div>
-                </div>
-              </div>
-              
-              <div className="p-6 border-t border-neutral-800 bg-neutral-900/20 flex justify-end gap-3 px-8">
-                <Button 
-                    variant="ghost" 
-                    onClick={handleCloseModal}
-                    className="text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-xl px-6"
-                >
-                    {t('modals.dynamicForm.cancelButton')}
-                </Button>
-                <Button 
-                    onClick={handleSave}
-                    className="bg-sky-600 hover:bg-sky-500 text-white rounded-xl px-8 font-bold shadow-lg shadow-sky-500/20 transition-all active:scale-95"
-                >
-                    {t('modals.dynamicForm.saveButton')}
-                </Button>
-              </div>
-            </motion.div>
+              ))}
+            </div>
+          )}
+          <div className="space-y-2">
+            <Label className="text-[13px] font-medium text-neutral-300">
+              {t('modals.dynamicForm.descriptionLabel')}
+            </Label>
+            <div className="overflow-hidden rounded-lg border border-white/[0.07] bg-black/20">
+              <TiptapEditor
+                content={(currentItem?.[richtextKey] as string) || ''}
+                onChange={handleQuillChange}
+                placeholder={richtextPlaceholder}
+                isPolishing={isPolishing}
+                setIsPolishing={setIsPolishing}
+                themeColor={activeResume?.themeColor}
+              />
+            </div>
           </div>
-          </>
-        )}
-      </AnimatePresence>
+        </div>
+        <div className="flex shrink-0 items-center justify-end gap-2 border-t border-white/[0.06] px-6 py-4">
+          <button
+            type="button"
+            onClick={handleCloseModal}
+            className="h-9 rounded-lg px-4 text-[13px] text-neutral-400 transition-colors hover:bg-white/[0.06] hover:text-neutral-100"
+          >
+            {t('modals.dynamicForm.cancelButton')}
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            className="h-9 rounded-lg bg-sky-500 px-5 text-[13px] font-medium text-white transition-colors hover:bg-sky-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/50"
+          >
+            {t('modals.dynamicForm.saveButton')}
+          </button>
+        </div>
+      </ModalShell>
     </div>
   );
 } 

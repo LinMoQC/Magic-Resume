@@ -1,0 +1,250 @@
+{
+  "meta": {
+    "title": "Magic Resume — the AI resume workbench",
+    "description": "A resume workbench where AI proposes edits in place and you decide. Guided drafting, role-match analysis, mock interviews — open-source core, cloud sync."
+  },
+  "logoAlt": "Magic Resume",
+  "nav": {
+    "features": "Features",
+    "workflow": "How it works",
+    "sync": "Cloud sync",
+    "openSource": "Open source",
+    "faq": "FAQ",
+    "goToApp": "Open app",
+    "starOnGithub": "Star on GitHub"
+  },
+  "hero": {
+    "pill": "V1.0 · Open-source core",
+    "title": "The resume workbench built for your target role",
+    "titleAccent": "your target role",
+    "subtitle": "AI proposes edits right on the page — accept what fits, skip the rest. Every change syncs to all your devices, instantly.",
+    "ctaPrimary": "Start building",
+    "ctaSecondary": "Star on GitHub",
+    "previewAlt": "The Magic Resume editor",
+    "trust": ["Open-source MIT core", "Real-time cloud sync", "AI-native workbench"],
+    "mockup": {
+      "doc": "Kairo Chen's Resume",
+      "synced": "Synced",
+      "content": "Content",
+      "basics": "Basics",
+      "avatar": "Avatar",
+      "name": "Name",
+      "title": "Title",
+      "email": "Email",
+      "website": "Website",
+      "phone": "Phone",
+      "location": "Location",
+      "experience": "Experience",
+      "customize": "Customize",
+      "template": "Template",
+      "layout": "Layout",
+      "typography": "Typography",
+      "colors": "Colors",
+      "quickThemes": "Quick themes",
+      "customColors": "Custom colors",
+      "primary": "Primary",
+      "secondary": "Secondary",
+      "changeTemplate": "Change template",
+      "proposal": "AI proposal",
+      "proposalHint": "Quantify this bullet…",
+      "accept": "Accept",
+      "skip": "Skip"
+    }
+  },
+  "bento": {
+    "eyebrow": "Capabilities",
+    "title": "Six modes. One workbench.",
+    "subtitle": "Everything between a blank page and a sent application. Try it below — the skills run right on this page, with mock data.",
+    "window": {
+      "title": "AI Lab",
+      "doc": "Kairo Chen's Resume",
+      "liveCanvas": "Live canvas",
+      "stop": "Stop generating"
+    },
+    "welcome": {
+      "title": "How shall we polish your resume today?",
+      "sub": "Describe what you need — I'll pick the right skill.",
+      "hint": "Type / to browse skills",
+      "placeholder": "Describe a task, or type / to call a skill…"
+    },
+    "chat": {
+      "mockReply": "This is a demo playground, so I'll keep your data untouched. In the real app I'd pick the right skill and run it on your resume — type / to try one →",
+      "send": "Send",
+      "menuTitle": "Skills",
+      "toggleCanvas": "Toggle live canvas"
+    },
+    "chips": [
+      {
+        "id": "optimize",
+        "tag": "Smart Optimize",
+        "ask": "Optimize my projects, highlight quantified impact",
+        "label": "Optimize my projects"
+      },
+      {
+        "id": "analyze",
+        "tag": "Resume Analysis",
+        "ask": "Run a competitiveness check on my resume",
+        "label": "Run a competitiveness check"
+      },
+      {
+        "id": "translate",
+        "tag": "Translate",
+        "ask": "Translate my resume to Chinese",
+        "label": "Translate to Chinese"
+      },
+      {
+        "id": "interview",
+        "tag": "Mock Interview",
+        "ask": "Grill me on this resume",
+        "label": "Mock a technical interview"
+      }
+    ],
+    "flows": {
+      "optimize": {
+        "reply": "Before rewriting, let's lock the target role so every edit aims the right way. Fill in the target role:",
+        "formTitle": "Target role",
+        "jd": "Target JD",
+        "jdPh": "Paste the job description — AI will steer the rewrite…",
+        "company": "Company",
+        "companyPh": "e.g. ByteDance",
+        "role": "Role",
+        "rolePh": "e.g. Senior Product Manager",
+        "cancel": "Cancel",
+        "submit": "Submit",
+        "applied": "Done — rewrote one bullet toward the target JD. Applied on the canvas →"
+      },
+      "analyze": {
+        "cardTitle": "Multi-role resume review",
+        "steps": [
+          "Reading resume",
+          "Peer review",
+          "Hiring-manager review",
+          "HRBP review",
+          "Scoring competitiveness"
+        ],
+        "result": "Overall competitiveness 86/100 — strongest signal: quantified impact. Two gaps flagged on the canvas →"
+      },
+      "translate": {
+        "reply": "Translated to Chinese — layout intact. See the canvas →"
+      },
+      "interview": {
+        "reply": "Reading your resume… let's start with the Google internship:",
+        "question": "“You cut memory leaks by 25% — how did you find them, and how did you verify the fix?”",
+        "hint": "The related bullet is highlighted on the canvas →"
+      }
+    },
+    "modes": [
+      { "id": "create", "title": "Create", "desc": "Guided drafts from a blank page" },
+      { "id": "optimize", "title": "Optimize", "desc": "Inline proposals — accept or skip" },
+      { "id": "analyze", "title": "Analyze", "desc": "Match score against any JD" },
+      { "id": "translate", "title": "Translate", "desc": "Bilingual in one click" },
+      { "id": "interview", "title": "Interview", "desc": "Rehearse resume-based questions" },
+      { "id": "export", "title": "Export", "desc": "ATS-friendly PDF, JSON backup" }
+    ]
+  },
+  "workflow": {
+    "eyebrow": "How it works",
+    "title": "AI proposes. You decide.",
+    "subtitle": "No black-box rewrites. Every change is a reasoned proposal — red for cuts, green for adds, fully traceable — and nothing lands until you say so.",
+    "points": [
+      "Edits are proposed in place, never applied silently",
+      "Each proposal comes with a reason",
+      "Skip anything; the resume stays yours"
+    ],
+    "stream": {
+      "doc": "your-resume.pdf",
+      "status": "AI collaborating",
+      "proposal": "Proposal",
+      "reason": "Why",
+      "accept": "Accept",
+      "skip": "Skip",
+      "accepted": "Accepted",
+      "skipped": "Skipped",
+      "pending": "Pending",
+      "upcoming": "more queued…",
+      "ledger": "Audit log",
+      "zeroLine": "Unconfirmed changes: 0",
+      "items": [
+        {
+          "reason": "Vague wording",
+          "before": "Responsible for the frontend team.",
+          "after": "Led a 5-engineer frontend team, shipping 3 products in a year."
+        },
+        {
+          "reason": "No numbers",
+          "before": "Improved website performance.",
+          "after": "Cut page load time 42%, lifting conversion 18%."
+        },
+        {
+          "reason": "Loose summary",
+          "before": "Hard-working developer looking for work.",
+          "after": "Full-stack engineer who ships fast and sweats the details."
+        }
+      ]
+    }
+  },
+  "sync": {
+    "eyebrow": "Cloud sync",
+    "title": "Edit once. Everywhere at once.",
+    "subtitle": "Cloud sync is on by default — every word you change at your desk is already on your phone. Full version history: roll back or export anytime.",
+    "points": [
+      "Real-time across all your devices",
+      "Version history with one-click rollback",
+      "Self-host the open-source core, or use the cloud"
+    ],
+    "synced": "Synced",
+    "justNow": "just now",
+    "doc": "Li Ming's Resume",
+    "devices": ["MacBook Pro", "iPhone", "iPad"]
+  },
+  "openSource": {
+    "eyebrow": "Open source",
+    "title": "Built in the open",
+    "desc": "The Magic Resume core is MIT-licensed and built with its community. Read the code, file an issue, or star the repo.",
+    "starCta": "Star on GitHub",
+    "starsLabel": "stars",
+    "contributorsLabel": "Contributors"
+  },
+  "faq": {
+    "eyebrow": "FAQ",
+    "title": "Questions, answered",
+    "items": [
+      {
+        "q": "Is Magic Resume free?",
+        "a": "The open-source edition is free forever and self-hostable. The cloud edition adds sync and built-in AI with a generous free tier — upgrade when you need more."
+      },
+      {
+        "q": "Is my resume data safe?",
+        "a": "Sync is encrypted in transit and at rest, the data stays yours, and you can export everything anytime. Want fully offline? Self-host the open-source edition."
+      },
+      {
+        "q": "Will AI change my resume without asking?",
+        "a": "Never. Every edit arrives as a proposal — red cuts, green adds, with a reason — and nothing applies until you accept it."
+      },
+      {
+        "q": "What can I export?",
+        "a": "One-click ATS-friendly PDF, plus JSON in and out for backup and migration."
+      },
+      {
+        "q": "How is it different from other resume builders?",
+        "a": "It's not a form filler — it's a workbench that knows your target role: create, optimize, analyze, translate and rehearse, all on one canvas."
+      }
+    ]
+  },
+  "cta": {
+    "title": "From blank page to sent application",
+    "subtitle": "Build a resume that knows the role you're aiming for.",
+    "button": "Start building",
+    "note": "Open-source core · Cloud sync · Export anytime"
+  },
+  "footer": {
+    "brandSubtitle": "The AI resume workbench that makes a job search feel simple.",
+    "product": "Product",
+    "builder": "Online builder",
+    "project": "Project",
+    "github": "GitHub",
+    "issues": "Issues",
+    "contributors": "Contributors",
+    "copyright": "© {year} Magic Resume. All rights reserved."
+  }
+}

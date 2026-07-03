@@ -10,7 +10,7 @@ import { AppAuthContext, AppUser } from './context';
 export function CloudAuthBridge({ children }: { children: React.ReactNode }) {
   const { isSignedIn, userId, getToken } = useAuth();
   const { user } = useUser();
-  const { redirectToSignIn } = useClerk();
+  const { redirectToSignIn, signOut } = useClerk();
 
   const appUser: AppUser | null = user
     ? {
@@ -30,6 +30,7 @@ export function CloudAuthBridge({ children }: { children: React.ReactNode }) {
         getToken: () => getToken(),
         user: appUser,
         redirectToSignIn,
+        signOut: () => signOut({ redirectUrl: '/' }),
       }}
     >
       {children}

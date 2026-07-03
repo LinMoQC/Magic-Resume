@@ -3,6 +3,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, ArrowDownUp } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const WIDTH = 200;
 
@@ -21,6 +22,7 @@ export default function SectionActionPopover({
   onReorder,
   onClose,
 }: SectionActionPopoverProps) {
+  const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState({ top: anchorRect.bottom + 8, left: anchorRect.left });
 
@@ -61,7 +63,7 @@ export default function SectionActionPopover({
         className="w-full flex items-center gap-2 text-xs text-neutral-200 hover:bg-neutral-800 rounded-lg px-2.5 py-2 transition-colors cursor-pointer"
       >
         <Plus size={14} className="text-sky-400" />
-        补充这段
+        {t('aiLab.living.addSectionContent')}
       </button>
       <button
         type="button"
@@ -69,7 +71,7 @@ export default function SectionActionPopover({
         className="w-full flex items-center gap-2 text-xs text-neutral-200 hover:bg-neutral-800 rounded-lg px-2.5 py-2 transition-colors cursor-pointer"
       >
         <ArrowDownUp size={14} className="text-violet-400" />
-        调整顺序
+        {t('aiLab.living.reorder')}
       </button>
     </motion.div>
   );

@@ -2,9 +2,10 @@
 
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowUp } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { EditableTarget } from '../../lib/editableCanvas';
 import { actionsForTarget, type QuickActionId } from '../../lib/changeModel';
+import { PolarisGlyph } from '../../PolarisMark';
 
 const POPOVER_WIDTH = 288;
 
@@ -16,9 +17,8 @@ type ActionPopoverProps = {
 };
 
 export default function ActionPopover({ target, anchorRect, onRun, onClose }: ActionPopoverProps) {
+  const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [free, setFree] = useState('');
   const [pos, setPos] = useState<{ top: number; left: number }>({
     top: anchorRect.bottom + 8,
     left: anchorRect.left,
@@ -59,12 +59,6 @@ export default function ActionPopover({ target, anchorRect, onRun, onClose }: Ac
 
   const actions = actionsForTarget(target);
 
-  const submitFree = () => {
-    const text = free.trim();
-    if (!text) return;
-    onRun('free', text);
-  };
-
   return (
     <motion.div
       ref={ref}
@@ -88,30 +82,15 @@ export default function ActionPopover({ target, anchorRect, onRun, onClose }: Ac
           </button>
         ))}
       </div>
-      <div className="mt-2.5 flex items-center gap-1.5 rounded-xl bg-neutral-800/70 border border-neutral-800 focus-within:border-sky-500/40 transition-colors pl-3 pr-1.5 py-1">
-        <input
-          ref={inputRef}
-          value={free}
-          onChange={(e) => setFree(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              submitFree();
-            }
-          }}
-          placeholder="告诉 AI 怎么改这一条…"
-          className="flex-1 bg-transparent text-xs text-neutral-200 placeholder:text-neutral-600 outline-none py-1"
-        />
-        <button
-          type="button"
-          onClick={submitFree}
-          disabled={!free.trim()}
-          aria-label="发送指令"
-          className="w-6 h-6 shrink-0 rounded-lg bg-sky-500/90 hover:bg-sky-400 disabled:bg-neutral-700 disabled:text-neutral-500 text-white flex items-center justify-center transition-colors cursor-pointer disabled:cursor-not-allowed"
-        >
-          <ArrowUp size={13} strokeWidth={2.5} />
-        </button>
-      </div>
+      {/* 询问 Polaris lifts this element into the chat composer for a freeform instruction (Track B). */}
+      <button
+        type="button"
+        onClick={() => onRun('free')}
+        className="mt-2.5 w-full inline-flex items-center gap-1.5 rounded-xl bg-neutral-800/70 border border-neutral-800 hover:border-sky-500/40 hover:bg-neutral-800 px-3 py-2 text-xs text-neutral-300 hover:text-neutral-100 transition-colors cursor-pointer"
+      >
+        <PolarisGlyph size={12} className="text-sky-400 shrink-0" />
+        {t('aiLab.living.askPolarisDetail')}
+      </button>
     </motion.div>
   );
 }

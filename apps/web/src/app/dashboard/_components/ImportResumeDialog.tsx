@@ -12,71 +12,17 @@ import {
 import { Resume } from '@/types/frontend/resume';
 import { useResumeStore } from '@/store/useResumeStore';
 import { useSettingStore } from '@/store/useSettingStore';
+import { useAccountUiStore } from '@/store/useAccountUiStore';
 import { toast } from 'sonner';
 import { FaFileUpload } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { z } from 'zod';
-import Link from 'next/link';
-import { appLifecycle, type FileSizeBucket } from '@/lib/extensions/app-lifecycle';
-
-// ─── Zod 校验 Schema ───
-
-const InfoSchema = z.object({
-  fullName: z.string().default(''),
-  headline: z.string().default(''),
-  email: z.string().default(''),
-  phoneNumber: z.string().default(''),
-  address: z.string().default(''),
-  website: z.string().default(''),
-  avatar: z.string().default(''),
-});
-
-// 统一的 SectionItem schema — 所有字段都是 string | null, id 和 visible 必须
-const SectionItemSchema = z.object({
-  id: z.string(),
-  visible: z.boolean().default(true),
-  company: z.string().nullable().default(null),
-  position: z.string().nullable().default(null),
-  date: z.string().nullable().default(null),
-  location: z.string().nullable().default(null),
-  website: z.string().nullable().default(null),
-  summary: z.string().nullable().default(null),
-  name: z.string().nullable().default(null),
-  role: z.string().nullable().default(null),
-  link: z.string().nullable().default(null),
-  school: z.string().nullable().default(null),
-  degree: z.string().nullable().default(null),
-  major: z.string().nullable().default(null),
-  level: z.string().nullable().default(null),
-  language: z.string().nullable().default(null),
-  issuer: z.string().nullable().default(null),
-  platform: z.string().nullable().default(null),
-  url: z.string().nullable().default(null),
-  description: z.string().nullable().default(null),
-}).passthrough(); // 允许额外字段
-
-const SectionOrderItemSchema = z.object({
-  key: z.string(),
-  label: z.string(),
-});
-
-// 标准 sections — 每个 key 都必须是数组（可以为空）
-const SectionsSchema = z.object({
-  experience: z.array(SectionItemSchema).default([]),
-  education: z.array(SectionItemSchema).default([]),
-  projects: z.array(SectionItemSchema).default([]),
-  skills: z.array(SectionItemSchema).default([]),
-  languages: z.array(SectionItemSchema).default([]),
-  certificates: z.array(SectionItemSchema).default([]),
-}).passthrough(); // 允许额外的自定义 section
-
-// 完整的解析结果 schema
-const ParsedResumeSchema = z.object({
-  info: InfoSchema,
-  sections: SectionsSchema,
-  sectionOrder: z.array(SectionOrderItemSchema).min(1),
-});
+import { appLifecycle } from '@/lib/extensions/app-lifecycle';
+import { getFileSizeBucket } from '@/lib/utils/fileSize';
+import {
+  formatResumeImportError,
+  validateAndNormalizeImportedResume,
+} from '@/lib/validation/importResume';
 
 type FileType = 'json' | 'pdf' | null;
 
@@ -85,15 +31,10 @@ type ImportResumeDialogProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-const getFileSizeBucket = (bytes: number): FileSizeBucket => {
-  if (bytes < 512 * 1024) return 'small';
-  if (bytes < 2 * 1024 * 1024) return 'medium';
-  return 'large';
-};
-
 export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeDialogProps) {
   const { importResume } = useResumeStore();
   const { apiKey, baseUrl, model, maxTokens, cloudSync, hasLlmConfig: hasLlmConfigFn } = useSettingStore();
+  const openSettings = useAccountUiStore((s) => s.openSettings);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [llmConfigMissing, setLlmConfigMissing] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
@@ -120,24 +61,6 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
     setLlmConfigMissing(type === 'pdf' && !hasLlmConfig);
   }, [hasLlmConfig]);
 
-  // ─── 校验并规范化简历数据 ───
-  const validateAndNormalize = useCallback((data: unknown) => {
-    const parsed = ParsedResumeSchema.parse(data);
-
-    // 移除后端专属字段
-    const raw = { ...(data as Record<string, unknown>) };
-    delete raw.isPublic;
-    delete raw.shareId;
-    delete raw.shareRole;
-
-    return {
-      ...raw,
-      info: parsed.info,
-      sections: parsed.sections,
-      sectionOrder: parsed.sectionOrder,
-    };
-  }, []);
-
   // ─── JSON 文件处理 ───
   const handleJsonFile = useCallback(async (file: File) => {
     const reader = new FileReader();
@@ -151,8 +74,8 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
 
     const content = await readFile();
     const result = JSON.parse(content);
-    return validateAndNormalize(result);
-  }, [t, validateAndNormalize]);
+    return validateAndNormalizeImportedResume(result);
+  }, [t]);
 
   // ─── PDF 文件处理（前端传递 LLM 配置）───
   const handlePdfFile = useCallback(async (file: File) => {
@@ -179,8 +102,8 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
     }
 
     const result = await response.json();
-    return validateAndNormalize(result);
-  }, [apiKey, baseUrl, model, maxTokens, t, validateAndNormalize]);
+    return validateAndNormalizeImportedResume(result);
+  }, [apiKey, baseUrl, model, maxTokens, t]);
 
   // ─── 统一文件处理 ───
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
@@ -231,13 +154,7 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
       );
       handleClose(false);
     } catch (e) {
-      let message: string;
-      if (e instanceof z.ZodError) {
-        const issues = e.issues.map(i => `${i.path.join('.')}: ${i.message}`).join('; ');
-        message = `Invalid resume format: ${issues}`;
-      } else {
-        message = e instanceof Error ? e.message : t('importDialog.errors.parseFailed');
-      }
+      const message = formatResumeImportError(e, t('importDialog.errors.parseFailed'));
       toast.error(message);
       setUploadError(message);
     } finally {
@@ -312,7 +229,7 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
                     >
                       <span className="flex items-center gap-2">
                         <FileJson size={15} className="text-sky-400 shrink-0" />
-                        Magic Resume JSON
+                        {'Magic Resume JSON'}
                       </span>
                     </SelectItem>
                     <SelectItem
@@ -321,9 +238,9 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
                     >
                       <span className="flex items-center gap-2">
                         <FileText size={15} className="text-sky-400 shrink-0" />
-                        PDF
+                        {'PDF'}
                         <span className="inline-flex items-center text-[10px] font-semibold text-sky-400 bg-sky-500/15 border border-sky-500/30 px-1.5 py-0.5 rounded-full leading-none">
-                          AI
+                          {'AI'}
                         </span>
                       </span>
                     </SelectItem>
@@ -345,13 +262,16 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
                       <AlertTriangle size={15} className="mt-0.5 shrink-0" />
                       <span>
                         {t('importDialog.errors.noApiKey', { defaultValue: '使用 PDF 导入需要先完成大模型配置（API Key、Base URL、模型、Max Tokens），请前往' })}{' '}
-                        <Link
-                          href="/dashboard/settings"
-                          onClick={() => handleClose(false)}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            handleClose(false);
+                            openSettings('model');
+                          }}
                           className="underline underline-offset-2 hover:text-amber-300 font-medium"
                         >
                           {t('importDialog.errors.noApiKeyLink', { defaultValue: '设置' })}
-                        </Link>
+                        </button>
                         {' '}{t('importDialog.errors.noApiKeySuffix', { defaultValue: '完成配置后再试。' })}
                       </span>
                     </div>

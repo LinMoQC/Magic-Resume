@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
+  Boxes,
   ChevronDown,
   ExternalLink,
   Eye,
@@ -27,12 +28,33 @@ import {
 
 type TestState = 'idle' | 'testing' | 'ok' | 'error';
 
-/** Small brand-colored dot shown beside a provider name. */
-function ProviderDot({ color }: { color: string }) {
+/** Provider ids that have a brand mark under /public/providers/{id}.svg. */
+const PROVIDER_LOGO_IDS = new Set(['openai', 'anthropic', 'google', 'deepseek']);
+
+/**
+ * Ink for a provider mark. OpenAI's current logo is monochrome — its legacy green
+ * reads wrong on the dark surface — so it takes a neutral tint; the rest keep their
+ * brand hue.
+ */
+function providerLogoColor(id: string, brandColor: string): string {
+  return id === 'openai' ? '#e5e5e5' : brandColor;
+}
+
+/**
+ * Brand logo beside a provider name. The SVG lives as a static asset in
+ * /public/providers and is tinted here via CSS mask, so no markup is inlined and
+ * the color stays data-driven. Providers without a mark fall back to a generic glyph.
+ */
+function ProviderLogo({ id, color }: { id: string; color: string }) {
+  if (!PROVIDER_LOGO_IDS.has(id)) {
+    return <Boxes className="h-4 w-4 shrink-0 text-neutral-400" />;
+  }
+  const mask = `url(/providers/${id}.svg) center / contain no-repeat`;
   return (
     <span
-      className="inline-block w-2 h-2 rounded-full shrink-0"
-      style={{ backgroundColor: color, boxShadow: `0 0 6px ${color}66` }}
+      aria-hidden="true"
+      className="h-4 w-4 shrink-0"
+      style={{ backgroundColor: providerLogoColor(id, color), mask, WebkitMask: mask }}
     />
   );
 }
@@ -98,29 +120,31 @@ export function ModelConfigFields() {
   };
 
   const inputClass =
-    'bg-neutral-950/50 border-neutral-800 focus:ring-sky-500/50 transition-all placeholder:text-neutral-600';
+    'h-11 rounded-xl border-white/[0.08] bg-black/25 text-neutral-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] transition-all placeholder:text-neutral-700 focus-visible:ring-sky-500/30 focus-visible:ring-offset-0';
+  const selectTriggerClass =
+    'h-11 w-full rounded-xl border-white/[0.08] bg-black/25 text-neutral-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] transition-all focus:ring-sky-500/30';
 
   return (
-    <div className="space-y-4">
+    <div className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
       {/* Provider + Model on one row — both are short selects, so this fills the
           width and keeps the form compact instead of a sparse vertical stack. */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <label className="text-sm font-medium text-neutral-300">
+          <label className="text-[13px] font-medium text-neutral-300">
             {t('settings.llm.providerLabel')}
           </label>
           <Select value={provider} onValueChange={setProvider}>
-            <SelectTrigger className="bg-neutral-950/50 border-neutral-800">
+            <SelectTrigger className={selectTriggerClass}>
               <SelectValue placeholder={t('settings.llm.providerPlaceholder')} />
             </SelectTrigger>
-            <SelectContent className="bg-neutral-900 border-neutral-800 text-white">
+            <SelectContent className="rounded-xl border-white/[0.08] bg-neutral-950 text-white shadow-2xl shadow-black/50">
               {MODEL_PROVIDERS.map((p) => (
                 <SelectItem
                   key={p.id}
                   value={p.id}
-                  className="focus:bg-neutral-800 focus:text-sky-400 transition-colors"
+                  className="rounded-lg transition-colors focus:bg-white/[0.06] focus:text-sky-300"
                 >
-                  <ProviderDot color={p.brandColor} />
+                  <ProviderLogo id={p.id} color={p.brandColor} />
                   {p.label}
                 </SelectItem>
               ))}
@@ -129,7 +153,7 @@ export function ModelConfigFields() {
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="model" className="text-sm font-medium text-neutral-300">
+          <label htmlFor="model" className="text-[13px] font-medium text-neutral-300">
             {t('settings.llm.modelLabel')}
           </label>
           {isCustom ? (
@@ -143,7 +167,7 @@ export function ModelConfigFields() {
             />
           ) : (
             <Select value={model} onValueChange={setModel} disabled={!meta}>
-              <SelectTrigger className="bg-neutral-950/50 border-neutral-800">
+              <SelectTrigger className={selectTriggerClass}>
                 <SelectValue
                   placeholder={
                     meta
@@ -152,12 +176,12 @@ export function ModelConfigFields() {
                   }
                 />
               </SelectTrigger>
-              <SelectContent className="bg-neutral-900 border-neutral-800 text-white">
+              <SelectContent className="rounded-xl border-white/[0.08] bg-neutral-950 text-white shadow-2xl shadow-black/50">
                 {meta?.models.map((m) => (
                   <SelectItem
                     key={m}
                     value={m}
-                    className="focus:bg-neutral-800 focus:text-sky-400 transition-colors"
+                    className="rounded-lg transition-colors focus:bg-white/[0.06] focus:text-sky-300"
                   >
                     {m}
                   </SelectItem>
@@ -170,12 +194,12 @@ export function ModelConfigFields() {
 
       {/* API key + connection test side by side — keeps the key input a sane width
           in a wide card instead of stretching it across the whole row. */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1.35fr)_minmax(220px,0.65fr)]">
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-2 min-h-[1.25rem]">
             <label
               htmlFor="apiKey"
-              className="text-sm font-medium text-neutral-300 flex items-center gap-2"
+              className="flex items-center gap-2 text-[13px] font-medium text-neutral-300"
             >
               <LockClosedIcon className="w-3.5 h-3.5" />
               {t('settings.llm.apiKeyLabel')}
@@ -185,7 +209,7 @@ export function ModelConfigFields() {
                 href={meta.keyUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-sky-400 hover:underline inline-flex items-center gap-1"
+                className="inline-flex items-center gap-1 text-xs text-sky-300 transition-colors hover:text-sky-200"
               >
                 {t('settings.llm.getKeyLink')}
                 <ExternalLink className="w-3 h-3" />
@@ -198,7 +222,7 @@ export function ModelConfigFields() {
               type={showKey ? 'text' : 'password'}
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
-              placeholder="sk-..."
+              placeholder={'sk-...'}
               className={`${inputClass} pr-10`}
             />
             <button
@@ -212,14 +236,14 @@ export function ModelConfigFields() {
           </div>
         </div>
 
-        <div className="space-y-2 min-w-0">
+        <div className="min-w-0 space-y-2">
           <span className="block min-h-[1.25rem]" aria-hidden="true" />
-          <div className="flex items-center gap-2 h-9 min-w-0">
+          <div className="flex h-11 min-w-0 items-center gap-2">
             <button
               type="button"
               onClick={handleTest}
               disabled={!canTest || testState === 'testing'}
-              className="shrink-0 inline-flex items-center justify-center gap-1.5 rounded-lg border border-neutral-700 bg-neutral-900/60 h-9 px-3 text-xs text-neutral-300 hover:text-white hover:border-neutral-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              className="inline-flex h-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.035] px-4 text-xs font-medium text-neutral-300 transition-colors hover:border-sky-400/20 hover:bg-sky-400/[0.06] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
             >
               {testState === 'testing' ? (
                 <Loader2 size={13} className="animate-spin" />
@@ -248,12 +272,12 @@ export function ModelConfigFields() {
       </div>
 
       {/* Advanced — Base URL + Max Tokens, prefilled. Collapsed for presets. */}
-      <div className="pt-0.5">
+      <div className="mt-5 border-t border-white/[0.06] pt-4">
         {!isCustom && (
           <button
             type="button"
             onClick={() => setAdvancedOpen((v) => !v)}
-            className="text-xs text-neutral-400 hover:text-neutral-200 inline-flex items-center gap-1 transition-colors cursor-pointer"
+            className="inline-flex cursor-pointer items-center gap-1 text-xs text-neutral-500 transition-colors hover:text-neutral-200"
           >
             <ChevronDown
               className={`w-3.5 h-3.5 transition-transform ${showAdvanced ? 'rotate-180' : ''}`}
@@ -269,10 +293,10 @@ export function ModelConfigFields() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.18, ease: 'easeOut' }}
-              className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3"
+              className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2"
             >
               <div className="space-y-2">
-                <label htmlFor="baseUrl" className="text-sm font-medium text-neutral-300">
+                <label htmlFor="baseUrl" className="text-[13px] font-medium text-neutral-300">
                   {t('settings.llm.baseUrlLabel')}
                 </label>
                 <Input
@@ -280,12 +304,12 @@ export function ModelConfigFields() {
                   type="text"
                   value={baseUrl}
                   onChange={(e) => setBaseUrl(e.target.value)}
-                  placeholder="https://api.openai.com/v1"
+                  placeholder={'https://api.openai.com/v1'}
                   className={inputClass}
                 />
               </div>
               <div className="space-y-2">
-                <label htmlFor="maxTokens" className="text-sm font-medium text-neutral-300">
+                <label htmlFor="maxTokens" className="text-[13px] font-medium text-neutral-300">
                   {t('settings.llm.maxTokensLabel')}
                 </label>
                 <Input

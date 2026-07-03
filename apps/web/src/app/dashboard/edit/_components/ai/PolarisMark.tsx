@@ -8,6 +8,27 @@ export const POLARIS_STAR_D =
 export const POLARIS_TWINKLE_D =
   'M18.5 3.5C18.7 5.2 19.3 5.8 21 6C19.3 6.2 18.7 6.8 18.5 8.5C18.3 6.8 17.7 6.2 16 6C17.7 5.8 18.3 5.2 18.5 3.5Z';
 
+export function PolarisGlyph({
+  size = 24,
+  className,
+}: {
+  size?: number;
+  className?: string;
+}) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      className={className}
+    >
+      <path d={POLARIS_STAR_D} fill="currentColor" />
+    </svg>
+  );
+}
+
 /**
  * Polaris — the lab's guiding-star mark (北极星). A four-pointed north star with
  * a faint twinkle, replacing the old generic robot face. Inherits color from

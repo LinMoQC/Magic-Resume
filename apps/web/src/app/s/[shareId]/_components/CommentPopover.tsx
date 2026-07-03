@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Send, Trash2, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
+import { formatCommentDate } from '@/lib/utils/dateTime';
 
 interface CommentPopoverProps {
     x: number;
@@ -25,21 +26,6 @@ interface CommentPopoverProps {
     readOnly?: boolean;
     isLoading?: boolean;
 }
-
-const formatDate = (dateStr: string, t: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
-    if (!dateStr || dateStr === 'Just now') return t('sharedPage.comments.justNow');
-    try {
-        const date = new Date(dateStr);
-        return date.toLocaleDateString(undefined, { 
-            month: 'short', 
-            day: 'numeric', 
-            hour: '2-digit', 
-            minute: '2-digit' 
-        });
-    } catch {
-        return dateStr;
-    }
-};
 
 const COLORS = [
     { name: 'yellow', value: '#fbbf24' },
@@ -128,7 +114,7 @@ export const CommentPopover = ({
                                        </span>
                                    )}
                                </div>
-                               <span className="text-[10px] text-neutral-500">{formatDate(createdAt, t)}</span>
+                               <span className="text-[10px] text-neutral-500">{formatCommentDate(createdAt, t)}</span>
                            </div>
                        </div>
                        {!isDraft && onDelete && !readOnly && (
@@ -144,7 +130,7 @@ export const CommentPopover = ({
                         {selectedText && (
                             <div className="mb-2 pl-2 border-l-2 border-blue-500 bg-neutral-50 dark:bg-neutral-800/50 py-1">
                                 <p className="text-xs text-neutral-500 dark:text-neutral-400 italic line-clamp-3">
-                                    &quot;{selectedText}&quot;
+                                    {`"${selectedText}"`}
                                 </p>
                             </div>
                         )}

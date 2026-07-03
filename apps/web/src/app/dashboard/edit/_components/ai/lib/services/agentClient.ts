@@ -2,13 +2,12 @@ import { WEB_AGENT_ROUTES } from '@/lib/api/routes';
 import type { AgentLlmConfig, AgentSseEvent } from './types';
 
 /**
- * The AI Lab's single backend client. Calls go through the Next.js route handlers
- * (the gateway that proxies to the Magic-Core agent-service — design §3.8), so this
- * speaks relative `/api/...` paths and inherits the server-side auth check.
+ * The AI Lab's single service client. Calls go through Next.js route handlers, so
+ * this speaks relative `/api/...` paths and inherits server-side auth handling.
  *
  * P0 wires `analyze` (JSON). The streaming helper below is the foundation the later
  * phases (optimize / translate / create) build on; it parses the normalized
- * `AgentSseEvent` schema (design §3.2).
+ * `AgentSseEvent` schema.
  */
 
 async function readError(res: Response): Promise<string> {
@@ -75,36 +74,32 @@ export interface ChatStreamParams {
   messages: { role: 'system' | 'user' | 'assistant'; content: string }[];
   mode?: 'create' | 'optimize' | 'analyze' | 'translate' | 'interview' | 'general';
   /**
-   * Conversation/session id (= LangGraph thread, namespaced by user server-side).
-   * One conversation = one sessionId; "new chat" mints a new one. Persists history
-   * across turns via the checkpointer and reattaches HITL approvals to the thread
-   * (Magic-Core docs/agent-architecture-deepagents.md §2).
+   * Conversation/session id. One conversation = one sessionId; "new chat" mints
+   * a new one. The server can use it to resume context across turns.
    */
   sessionId?: string;
   /**
-   * id of the resume this session is scoped to. The agent pulls it on demand via
-   * its `read_resume` tool (ReAct) instead of the client pushing a full snapshot.
+   * id of the resume this session is scoped to. The client sends an id instead of
+   * pushing a full resume snapshot into every chat turn.
    */
   resumeId?: string;
   /**
-   * BYOK: the full client LLM config (apiKey / baseUrl / modelName / maxTokens) is
-   * forwarded so the backend can initialize the per-session agent with it. There is
-   * no server-side key — every AI session is driven by the user's own config (§3.11).
+   * User-provided model config for this AI request.
    */
   config?: AgentLlmConfig;
   signal?: AbortSignal;
 }
 
-/** Conversational chat stream (create / general) via the Next gateway route. */
+/** Conversational chat stream (create / general) via the web route handler. */
 export function streamChat({ signal, ...body }: ChatStreamParams): AsyncGenerator<AgentSseEvent> {
   return streamAgent(WEB_AGENT_ROUTES.chat, body, signal);
 }
 
 /**
- * Reclaim the backend session thread when the conversation ends (modal close /
- * new chat) — the ephemeral-data lifecycle (Magic-Core adr-0010 D4). Best-effort
- * and `keepalive` so it survives an unmount/tab close; failures are swallowed (the
- * TTL sweeper is the backstop). Carries only the sessionId, never the BYOK key.
+ * Reclaim server-side session resources when the user explicitly starts a new chat.
+ * Modal close only puts the AI Lab away; the transcript + sessionId are locally
+ * resumable and the server-side TTL sweeper remains the backstop.
+ * Carries only the sessionId, never the user's model key.
  */
 export async function endSessionThread(sessionId: string): Promise<void> {
   if (!sessionId) return;
@@ -132,20 +127,19 @@ export interface HitlDecision {
 }
 
 export interface ApproveToolParams {
-  /** the paused conversation thread to resume */
+  /** the paused conversation session to resume */
   sessionId: string;
   /** one decision per pending action request (read_resume → a single decision) */
   decisions: HitlDecision[];
-  /** re-sent so the resumed agent re-binds read_resume and uses the same model */
+  /** re-sent so the resumed session keeps the same scope and model settings */
   resumeId?: string;
   config?: AgentLlmConfig;
   signal?: AbortSignal;
 }
 
 /**
- * Reply to a paused `tool_approval_request` (native HITL). The approve endpoint
- * now resumes the thread (`Command({ resume })`) and **streams the continuation**,
- * so this returns the resumed SSE stream — consume it like {@link streamChat}.
+ * Reply to a paused tool-approval request. The route streams the continuation, so
+ * consume it like {@link streamChat}.
  */
 export function approveTool({
   signal,

@@ -8,6 +8,7 @@ import { MagicResumeRenderer } from '@magic-resume/resume-templates/renderer/Mag
 import { getMagicTemplateById, getDefaultMagicTemplate } from '@magic-resume/resume-templates/config/magic-templates';
 import { MagicTemplateDSL } from '@magic-resume/resume-templates/types/magic-dsl';
 
+import { shallowEqualArray } from '@/lib/utils/array';
 import { mergeTemplateConfig } from '@/lib/utils/templateUtils';
 import { useTranslation } from 'react-i18next';
 
@@ -102,14 +103,15 @@ function ResumePreview({ info, sections, sectionOrder, templateId, customTemplat
   return <MagicResumeRenderer template={template} data={resumeData} locale={i18n.resolvedLanguage || i18n.language} />;
 }
 
-// 导出 memo 化的预览组件，避开非核心数据导致的重渲染
+// 导出 memo 化的预览组件，避开非核心数据导致的重渲染。
+// info / sections / customTemplate 均来自 zustand+immer store，未变更时引用保持不变，
+// 因此按引用比较即可精确判断内容是否变化，避免每次 keystroke 全量序列化整份简历。
 export default React.memo(ResumePreview, (prevProps, nextProps) => {
-  // 深度检查核心内容是否有变化
   return (
     prevProps.templateId === nextProps.templateId &&
-    JSON.stringify(prevProps.info) === JSON.stringify(nextProps.info) &&
-    JSON.stringify(prevProps.sections) === JSON.stringify(nextProps.sections) &&
-    JSON.stringify(prevProps.sectionOrder) === JSON.stringify(nextProps.sectionOrder) &&
-    JSON.stringify(prevProps.customTemplate) === JSON.stringify(nextProps.customTemplate)
+    prevProps.info === nextProps.info &&
+    prevProps.sections === nextProps.sections &&
+    prevProps.customTemplate === nextProps.customTemplate &&
+    shallowEqualArray(prevProps.sectionOrder, nextProps.sectionOrder)
   );
 });

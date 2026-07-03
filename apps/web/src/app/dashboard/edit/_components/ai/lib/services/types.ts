@@ -1,8 +1,6 @@
 /**
- * Frontend mirror of the Magic-Core agent-service streaming contract (design §3.2).
- * The agent-service wraps every task in a normalized SSE event; this is the typed
- * shape the AI Lab's service layer parses. JSON skills (analyze) don't use it, but
- * the streaming skills (optimize / translate / create) will.
+ * Frontend mirror of the normalized AI streaming events consumed by the UI.
+ * JSON skills (analyze) don't use it, but streaming skills do.
  */
 export type AgentEventType =
   | 'run_started'
@@ -46,7 +44,7 @@ export interface AgentSseEvent {
   error?: string;
 }
 
-/** BYOK LLM config carried in request bodies (design §3.11). */
+/** User-provided model config carried in request bodies. */
 export interface AgentLlmConfig {
   apiKey?: string;
   baseUrl?: string;

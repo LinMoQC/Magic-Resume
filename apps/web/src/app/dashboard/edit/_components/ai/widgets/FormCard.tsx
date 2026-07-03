@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Check, X, ClipboardList } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import type { WidgetProps } from './registry';
 import type { WidgetFormField } from './types';
@@ -18,13 +19,14 @@ function initialValues(fields: WidgetFormField[]): Record<string, string> {
 }
 
 /**
- * The generic GenUI form card (design/genui-systematization.md, first widget). The
+ * The generic GenUI form card (docs/specs/genui-systematization/design.md, first widget). The
  * agent calls `request_form({ formKind })` when it needs structured input (JD /
  * company / title, target language); the user fills it inline and submits — the
  * values resume the paused run and the agent continues. Tone matches the task card:
  * neutral surface + a single accent icon in the header.
  */
 export default function FormCard({ instance, onAction }: WidgetProps) {
+  const { t } = useTranslation();
   const props = instance.props as {
     title?: string;
     message?: string;
@@ -41,7 +43,7 @@ export default function FormCard({ instance, onAction }: WidgetProps) {
         <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0 bg-sky-500/[0.12]">
           <ClipboardList size={14} className="text-sky-400" />
         </div>
-        <span className="text-[13px] font-medium text-white">{props.title || '请补充信息'}</span>
+        <span className="text-[13px] font-medium text-white">{props.title || t('aiLab.widgets.form.defaultTitle')}</span>
         {resolved && (
           <span
             className={cn(
@@ -52,7 +54,7 @@ export default function FormCard({ instance, onAction }: WidgetProps) {
             )}
           >
             {instance.status === 'submitted' ? <Check size={12} /> : <X size={12} />}
-            {instance.status === 'submitted' ? '已提交' : '已取消'}
+            {instance.status === 'submitted' ? t('aiLab.widgets.form.submitted') : t('aiLab.widgets.form.cancelled')}
           </span>
         )}
       </div>
@@ -104,7 +106,7 @@ export default function FormCard({ instance, onAction }: WidgetProps) {
               onClick={() => onAction({ type: 'cancel' })}
               className="rounded-lg px-3 py-1.5 text-xs text-neutral-500 hover:text-neutral-200 transition-colors cursor-pointer"
             >
-              取消
+              {t('common.cancel')}
             </button>
             <button
               type="button"
@@ -112,7 +114,7 @@ export default function FormCard({ instance, onAction }: WidgetProps) {
               className="inline-flex items-center gap-1.5 rounded-lg bg-sky-500 hover:bg-sky-600 px-3.5 py-1.5 text-xs font-medium text-white transition-colors cursor-pointer"
             >
               <Check size={13} />
-              提交
+              {t('aiLab.widgets.form.submit')}
             </button>
           </div>
         </>

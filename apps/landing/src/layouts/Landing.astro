@@ -1,0 +1,85 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import '@/styles/global.css';
+import type { Locale } from '@/i18n/ui';
+
+interface Props {
+  locale: Locale;
+  title: string;
+  description: string;
+}
+const { locale, title, description } = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const altEn = new URL('/en', Astro.site).href;
+const altZh = new URL('/zh', Astro.site).href;
+const htmlLang = locale === 'zh' ? 'zh-CN' : 'en';
+const ogImage = new URL('/magic-resume-preview.png', Astro.site).href;
+---
+
+<!doctype html>
+<html lang={htmlLang} class="scroll-smooth scroll-pt-20">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/magic-resume-mark.png" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="en" href={altEn} />
+    <link rel="alternate" hreflang="zh-CN" href={altZh} />
+    <link rel="alternate" hreflang="x-default" href={altEn} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <meta name="theme-color" content="#0a0b0c" />
+    <meta name="generator" content={Astro.generator} />
+    <ClientRouter />
+
+    <script>
+      // Mark JS availability ASAP so .reveal only hides when it can un-hide.
+      document.documentElement.classList.add('js');
+    </script>
+  </head>
+  <body class="min-h-screen antialiased">
+    <slot />
+
+    <script>
+      const win = window as typeof window & { __magicResumeRevealBound?: boolean };
+
+      const initReveal = () => {
+        // Scroll-reveal: add .is-visible when elements enter the viewport once.
+        const els = document.querySelectorAll<HTMLElement>('.reveal:not(.is-visible)');
+        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduce || !('IntersectionObserver' in window)) {
+          els.forEach((el) => el.classList.add('is-visible'));
+          return;
+        }
+
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const e of entries) {
+              if (e.isIntersecting) {
+                e.target.classList.add('is-visible');
+                io.unobserve(e.target);
+              }
+            }
+          },
+          { rootMargin: '0px 0px -10% 0px', threshold: 0.08 },
+        );
+        els.forEach((el) => io.observe(el));
+      };
+
+      if (!win.__magicResumeRevealBound) {
+        win.__magicResumeRevealBound = true;
+        document.addEventListener('astro:page-load', initReveal);
+      }
+      initReveal();
+    </script>
+  </body>
+</html>

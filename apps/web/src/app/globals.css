@@ -435,78 +435,51 @@ button {
 
 .polaris-fab {
   --polaris-sky: 56, 189, 248;
+  --orb-speed: 1;
   isolation: isolate;
 }
 
-.polaris-fab-flow {
-  position: absolute;
-  inset: -5px;
-  z-index: 0;
-  border-radius: 9999px;
-  padding: 1px;
-  background: conic-gradient(
-    from 0deg,
-    rgba(var(--polaris-sky), 0),
-    rgba(var(--polaris-sky), 0.72) 16%,
-    rgba(103, 232, 249, 0.42) 28%,
-    rgba(129, 140, 248, 0.2) 42%,
-    rgba(var(--polaris-sky), 0) 68%,
-    rgba(var(--polaris-sky), 0)
-  );
-  opacity: 0.45;
-  transform-origin: 50% 50%;
-  animation: polaris-fab-flow 7.5s linear infinite;
-  will-change: transform, opacity;
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-}
-
-.polaris-fab-breath {
+/* 球外呼吸光晕:环境光落在深色画布上,hover / 生成中变亮 */
+.polaris-fab__halo {
   position: absolute;
   inset: -12px;
-  z-index: 0;
+  z-index: -1;
   border-radius: 9999px;
   background: radial-gradient(
-    circle at 50% 50%,
-    rgba(var(--polaris-sky), 0.28),
-    rgba(var(--polaris-sky), 0.11) 44%,
-    transparent 72%
+    circle at 50% 46%,
+    rgba(120, 150, 255, 0.5),
+    rgba(var(--polaris-sky), 0.22) 48%,
+    transparent 74%
   );
-  filter: blur(10px);
-  opacity: 0.34;
-  transform: scale(0.92);
-  animation: polaris-fab-breath 4.8s ease-in-out infinite;
+  filter: blur(11px);
+  opacity: 0.38;
+  transition: opacity 0.2s ease-out;
+  animation: polaris-halo calc(5.5s * var(--orb-speed, 1)) ease-in-out infinite;
   will-change: transform, opacity;
 }
 
-.polaris-fab:hover .polaris-fab-flow {
-  opacity: 0.76;
+.polaris-fab:hover .polaris-fab__halo {
+  opacity: 0.62;
 }
 
-.polaris-fab[data-running="true"] .polaris-fab-flow {
-  opacity: 0.92;
-  animation-duration: 3.6s;
+@keyframes polaris-halo {
+  0%,
+  100% {
+    transform: scale(0.93);
+  }
+  50% {
+    transform: scale(1.06);
+  }
 }
 
-.polaris-fab[data-running="true"] .polaris-fab-breath {
-  opacity: 0.82;
-  animation-duration: 2.4s;
-}
-
-/* Siri 风格玻璃球 + 北极星:玻璃壳下多片彩色流光各自不同速度公转(交叠叠成亮光),星在球心 */
+/* Siri 风格玻璃光球:玻璃壳下彩色液滴各自沿不同路径漂移 + 呼吸缩放,
+   交叠不断变化 = 液态流动;底层 conic 色环慢转提供角向环流,缘光沿球缘环行 */
 .polaris-orb {
   position: relative;
   width: 3.5rem;
   height: 3.5rem;
   border-radius: 9999px;
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  --orb-speed: 1;
   background: radial-gradient(circle at 50% 52%, #1b2668 0%, #141a48 55%, #090c28 100%);
   box-shadow:
     0 14px 30px -12px rgba(0, 0, 0, 0.9),
@@ -514,59 +487,120 @@ button {
     0 0 0 1px rgba(120, 150, 255, 0.12);
 }
 
+/* 流光容器:统一柔化 / 提饱和,子层只动 transform */
 .polaris-orb__light {
   position: absolute;
-  inset: -12%;
-  filter: blur(6px) saturate(1.4);
+  inset: -10%;
+  filter: blur(4.5px) saturate(1.35);
 }
 
-/* 每片色光各自不同速度/方向公转 → 交叠不断变化 = 流动 */
-.polaris-orb__rib {
+/* 底层环流:conic 色环慢转 = 永不停的角向流动 */
+.polaris-orb__flow {
   position: absolute;
-  inset: 0;
+  inset: -22%;
   border-radius: 9999px;
-  transform-origin: 50% 50%;
+  opacity: 0.38;
+  background: conic-gradient(
+    from 220deg,
+    rgba(56, 120, 255, 0),
+    rgba(168, 110, 255, 0.55) 12%,
+    rgba(255, 64, 156, 0.6) 30%,
+    rgba(120, 90, 255, 0.4) 46%,
+    rgba(40, 222, 240, 0.6) 64%,
+    rgba(40, 224, 170, 0.42) 78%,
+    rgba(56, 120, 255, 0)
+  );
+  animation: polaris-orb-spin calc(18s * var(--orb-speed, 1)) linear infinite;
+  will-change: transform;
+}
+
+/* 彩色液滴:screen 叠色,漂移路径 / 时长 / 方向各不相同 → 交叠持续变化 */
+.polaris-orb__blob {
+  position: absolute;
+  border-radius: 9999px;
   mix-blend-mode: screen;
   will-change: transform;
 }
-.polaris-orb__rib--violet { background: radial-gradient(ellipse 36% 24% at 50% 34%, rgba(168, 110, 255, 0.75), transparent 64%); animation: polaris-orb-spin calc(11s * var(--orb-speed)) linear infinite; }
-.polaris-orb__rib--magenta { background: radial-gradient(ellipse 52% 30% at 38% 42%, rgba(255, 64, 156, 0.95), transparent 66%); animation: polaris-orb-spin calc(9s * var(--orb-speed)) linear infinite reverse; }
-.polaris-orb__rib--blue { background: radial-gradient(ellipse 50% 34% at 60% 60%, rgba(56, 120, 255, 0.92), transparent 66%); animation: polaris-orb-spin calc(13s * var(--orb-speed)) linear infinite; }
-.polaris-orb__rib--cyan { background: radial-gradient(ellipse 40% 26% at 63% 42%, rgba(40, 222, 240, 0.9), transparent 64%); animation: polaris-orb-spin calc(8s * var(--orb-speed)) linear infinite reverse; }
-.polaris-orb__rib--teal { background: radial-gradient(ellipse 44% 28% at 40% 60%, rgba(40, 224, 170, 0.82), transparent 66%); animation: polaris-orb-spin calc(10s * var(--orb-speed)) linear infinite; }
+.polaris-orb__blob--magenta { left: 4%; top: 8%; width: 56%; height: 56%; background: radial-gradient(circle at 40% 38%, rgba(255, 64, 156, 0.9), rgba(255, 64, 156, 0.3) 52%, transparent 68%); animation: polaris-orb-drift-a calc(9s * var(--orb-speed, 1)) ease-in-out infinite; }
+.polaris-orb__blob--blue { left: 40%; top: 42%; width: 60%; height: 60%; background: radial-gradient(circle at 42% 40%, rgba(56, 120, 255, 0.9), rgba(56, 120, 255, 0.3) 52%, transparent 68%); animation: polaris-orb-drift-b calc(12s * var(--orb-speed, 1)) ease-in-out infinite; }
+.polaris-orb__blob--cyan { left: 54%; top: 10%; width: 44%; height: 44%; background: radial-gradient(circle at 40% 42%, rgba(40, 222, 240, 0.85), rgba(40, 222, 240, 0.26) 52%, transparent 68%); animation: polaris-orb-drift-c calc(8s * var(--orb-speed, 1)) ease-in-out infinite; }
+.polaris-orb__blob--violet { left: 6%; top: 46%; width: 54%; height: 54%; background: radial-gradient(circle at 44% 40%, rgba(168, 110, 255, 0.85), rgba(168, 110, 255, 0.28) 52%, transparent 68%); animation: polaris-orb-drift-b calc(13.5s * var(--orb-speed, 1)) ease-in-out infinite reverse; }
+.polaris-orb__blob--teal { left: 40%; top: 58%; width: 46%; height: 46%; background: radial-gradient(circle at 42% 40%, rgba(40, 224, 170, 0.8), rgba(40, 224, 170, 0.24) 52%, transparent 68%); animation: polaris-orb-drift-c calc(11s * var(--orb-speed, 1)) ease-in-out infinite reverse; }
 
-.polaris-orb__streak {
-  position: absolute;
-  inset: 0;
-  border-radius: 9999px;
-  transform-origin: 50% 50%;
-  mix-blend-mode: screen;
-  will-change: transform;
+/* 漂移路径:translate 按自身尺寸百分比,幅度小、速度慢 = 轻微但持续 */
+@keyframes polaris-orb-drift-a {
+  0%, 100% { transform: translate3d(-12%, -8%, 0) scale(1); }
+  33% { transform: translate3d(14%, -16%, 0) scale(1.18); }
+  66% { transform: translate3d(8%, 16%, 0) scale(0.86); }
 }
-.polaris-orb__streak--1 { background: radial-gradient(ellipse 66% 8% at 50% 50%, rgba(198, 232, 255, 0.85), transparent 60%); animation: polaris-orb-spin calc(15s * var(--orb-speed)) linear infinite; }
-.polaris-orb__streak--2 { background: radial-gradient(ellipse 58% 7% at 50% 50%, rgba(120, 255, 236, 0.7), transparent 60%); animation: polaris-orb-spin calc(12s * var(--orb-speed)) linear infinite reverse; }
+@keyframes polaris-orb-drift-b {
+  0%, 100% { transform: translate3d(10%, 10%, 0) scale(1); }
+  25% { transform: translate3d(-12%, 4%, 0) scale(1.14); }
+  55% { transform: translate3d(-6%, -14%, 0) scale(0.9); }
+  80% { transform: translate3d(12%, -4%, 0) scale(1.06); }
+}
+@keyframes polaris-orb-drift-c {
+  0%, 100% { transform: translate3d(6%, -10%, 0) scale(0.94); }
+  40% { transform: translate3d(-16%, 6%, 0) scale(1.16); }
+  70% { transform: translate3d(10%, 16%, 0) scale(0.88); }
+}
 
+/* 游动的亮核:在球心附近缓慢游走、呼吸 */
 .polaris-orb__core {
   position: absolute;
-  inset: 36%;
+  left: 30%;
+  top: 30%;
+  width: 40%;
+  height: 40%;
   border-radius: 9999px;
   mix-blend-mode: screen;
-  background: radial-gradient(circle, rgba(160, 210, 255, 0.55), rgba(120, 180, 255, 0.25) 40%, transparent 72%);
+  background: radial-gradient(circle, rgba(190, 225, 255, 0.9), rgba(140, 190, 255, 0.32) 45%, transparent 70%);
   filter: blur(3px);
-  animation: polaris-orb-core 4.5s ease-in-out infinite;
+  animation: polaris-orb-core calc(7s * var(--orb-speed, 1)) ease-in-out infinite;
+}
+
+/* 缘光:两道彗尾光弧沿球缘环行(Apple Intelligence 式) */
+.polaris-orb__rim {
+  position: absolute;
+  inset: 1px;
+  z-index: 1;
+  border-radius: 9999px;
+  mix-blend-mode: screen;
+  opacity: 0.8;
+  transition: opacity 0.2s ease-out;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(190, 240, 255, 0.9) 40deg,
+    rgba(var(--polaris-sky), 0.35) 70deg,
+    transparent 110deg,
+    transparent 180deg,
+    rgba(255, 120, 200, 0.55) 220deg,
+    rgba(168, 110, 255, 0.3) 250deg,
+    transparent 290deg
+  );
+  -webkit-mask: radial-gradient(closest-side, transparent 60%, #000 82%);
+  mask: radial-gradient(closest-side, transparent 60%, #000 82%);
+  filter: blur(1.5px);
+  animation: polaris-orb-spin calc(10s * var(--orb-speed, 1)) linear infinite;
+  will-change: transform;
+}
+
+.polaris-fab:hover .polaris-orb__rim {
+  opacity: 1;
 }
 
 /* 散布的小碎星(星空),错相闪烁 */
 .polaris-orb__stars {
   position: absolute;
   inset: 0;
-  z-index: 2;
+  z-index: 3;
   pointer-events: none;
 }
 .polaris-orb__spark {
   position: absolute;
   transform: translate(-50%, -50%);
-  color: #94e1f6;
+  color: #a8e9fb;
   filter: drop-shadow(0 0 1.5px rgba(148, 225, 246, 0.85));
   animation: polaris-spark 3.6s ease-in-out infinite;
 }
@@ -576,33 +610,38 @@ button {
   height: 100%;
 }
 @keyframes polaris-spark {
-  0%, 100% { opacity: 0.45; transform: translate(-50%, -50%) scale(0.8); }
+  0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) scale(0.78); }
   50% { opacity: 1; transform: translate(-50%, -50%) scale(1.12); }
 }
 
-/* 玻璃壳:固定的高光与边缘,光在其下流动 */
+/* 玻璃壳:固定高光、边缘暗角与内阴影给出球体纵深,光在其下流动 */
 .polaris-orb__glass {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: 2;
   border-radius: 9999px;
   pointer-events: none;
-  background: radial-gradient(ellipse 46% 26% at 36% 20%, rgba(255, 255, 255, 0.38), transparent 60%);
+  background:
+    radial-gradient(ellipse 42% 24% at 34% 18%, rgba(255, 255, 255, 0.4), transparent 62%),
+    radial-gradient(circle at 50% 50%, transparent 56%, rgba(5, 8, 38, 0.52) 97%);
   box-shadow:
     inset 0 2px 3px rgba(255, 255, 255, 0.3),
-    inset 0 -10px 18px rgba(0, 2, 20, 0.45),
+    inset 0 -12px 20px rgba(0, 2, 20, 0.55),
     inset 0 0 0 1px rgba(180, 200, 255, 0.14);
 }
 
-/* 生成中:流光提速一倍 */
-.polaris-fab[data-running="true"] .polaris-orb { --orb-speed: 0.5; }
+/* 生成中:整体提速 + 光更亮 */
+.polaris-fab[data-running="true"] { --orb-speed: 0.45; }
+.polaris-fab[data-running="true"] .polaris-fab__halo { opacity: 0.8; }
+.polaris-fab[data-running="true"] .polaris-orb__rim { opacity: 1; }
 
 @keyframes polaris-orb-spin {
   to { transform: rotate(360deg); }
 }
 @keyframes polaris-orb-core {
-  0%, 100% { opacity: 0.8; transform: scale(0.92); }
-  50% { opacity: 1; transform: scale(1.05); }
+  0%, 100% { transform: translate3d(0, 0, 0) scale(0.9); opacity: 0.75; }
+  30% { transform: translate3d(14%, -8%, 0) scale(1.1); opacity: 1; }
+  65% { transform: translate3d(-10%, 12%, 0) scale(0.95); opacity: 0.85; }
 }
 
 /* Apple Intelligence(iOS 18)式:四边亮起一圈流动的彩色光晕描边。
@@ -868,24 +907,6 @@ button {
   will-change: transform, opacity;
 }
 
-@keyframes polaris-fab-flow {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes polaris-fab-breath {
-  0%,
-  100% {
-    opacity: 0.32;
-    transform: scale(0.9);
-  }
-  50% {
-    opacity: 0.78;
-    transform: scale(1.08);
-  }
-}
-
 @keyframes ai-edge-sweep-x {
   0% {
     opacity: 0;
@@ -1006,11 +1027,11 @@ button {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .polaris-fab-flow,
-  .polaris-fab-breath,
+  .polaris-fab__halo,
   .ai-canvas-edge-flow__spin,
-  .polaris-orb__rib,
-  .polaris-orb__streak,
+  .polaris-orb__flow,
+  .polaris-orb__blob,
+  .polaris-orb__rim,
   .polaris-orb__core,
   .polaris-orb__spark,
   .ai-thinking-overlay__halo,
@@ -1021,8 +1042,7 @@ button {
     animation: none;
   }
 
-  .polaris-fab-flow,
-  .polaris-fab-breath,
+  .polaris-fab__halo,
   .ai-canvas-edge-flow,
   .ai-thinking-overlay__edge {
     opacity: 0.5;
@@ -1533,4 +1553,356 @@ button {
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none;  /* Chrome, Safari and Opera */
+}
+
+/* 自定义面板：sky 主色细滑块（track 填充由内联渐变给出） */
+.range-sky {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 9999px;
+  outline: none;
+  cursor: pointer;
+}
+.range-sky::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: #38bdf8;
+  border: 2px solid #0a0a0a;
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.45);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.range-sky::-webkit-slider-thumb:hover {
+  transform: scale(1.18);
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.18);
+}
+.range-sky::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: #38bdf8;
+  border: 2px solid #0a0a0a;
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.45);
+}
+.range-sky:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.28);
+}
+
+/* ============================================================
+   Coming Soon / 预约门禁页
+   舞台 = 正在被 AI 写出来的简历;前景 = 倒计时 → 预约。
+   仅 transform / opacity 动效,轻、快、不弹跳。
+   ============================================================ */
+.cs-root {
+  --cs-sky: 56, 189, 248;
+}
+
+/* 环境光:两团缓慢漂移的 sky 光晕(不用紫,避免通用 AI 味) */
+.cs-aura {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(120px);
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+.cs-aura--a {
+  top: -20%;
+  left: 50%;
+  width: min(820px, 92vw);
+  height: 460px;
+  background: rgba(var(--cs-sky), 0.13);
+  animation: cs-aura-a 17s ease-in-out infinite;
+}
+.cs-aura--b {
+  bottom: -24%;
+  right: 2%;
+  width: min(600px, 80vw);
+  height: 440px;
+  background: rgba(var(--cs-sky), 0.07);
+  animation: cs-aura-b 21s ease-in-out infinite;
+}
+@keyframes cs-aura-a {
+  0%,
+  100% {
+    transform: translate(-50%, 0) scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: translate(-52%, 5%) scale(1.09);
+    opacity: 1;
+  }
+}
+@keyframes cs-aura-b {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.75;
+  }
+  50% {
+    transform: translate(-5%, -4%) scale(1.12);
+    opacity: 1;
+  }
+}
+
+/* 透视网格:实验台地面,向外柔和淡出 */
+.cs-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.022) 1px, transparent 1px);
+  background-size: 46px 46px;
+  -webkit-mask: radial-gradient(ellipse 92% 72% at 50% 32%, #000 26%, transparent 80%);
+  mask: radial-gradient(ellipse 92% 72% at 50% 32%, #000 26%, transparent 80%);
+  pointer-events: none;
+}
+
+/* 舞台容器:透视景深 */
+.cs-stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  perspective: 1500px;
+  pointer-events: none;
+}
+
+/* 组装中的简历面板:偏右、倾斜、低透明,读作舞台而非内容 */
+.cs-resume {
+  position: absolute;
+  top: 50%;
+  right: -7%;
+  width: min(560px, 54vw);
+  transform-style: preserve-3d;
+  opacity: 0.55;
+  animation: cs-float 13s ease-in-out infinite;
+  will-change: transform;
+}
+.cs-resume--ghost {
+  left: -12%;
+  right: auto;
+  width: min(360px, 40vw);
+  opacity: 0.22;
+  filter: blur(1.5px);
+  animation-duration: 16s;
+  animation-direction: reverse;
+}
+@keyframes cs-float {
+  0%,
+  100% {
+    transform: translateY(-50%) rotateY(-23deg) rotateX(7deg) rotate(2deg);
+  }
+  50% {
+    transform: translateY(-53%) rotateY(-20deg) rotateX(6deg) rotate(2deg);
+  }
+}
+@media (max-width: 640px) {
+  .cs-resume {
+    opacity: 0.3;
+    right: -22%;
+  }
+  .cs-resume--ghost {
+    display: none;
+  }
+}
+
+.cs-panel {
+  position: relative;
+  overflow: hidden;
+  padding: 24px 26px;
+  border-radius: 18px;
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.055),
+    rgba(255, 255, 255, 0.012)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow:
+    0 44px 90px -44px rgba(0, 0, 0, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* AI 写作光标:一道柔光自上而下扫过面板 */
+.cs-scan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -140px;
+  height: 140px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(var(--cs-sky), 0.11),
+    transparent
+  );
+  animation: cs-scan-move 5.6s cubic-bezier(0.45, 0, 0.55, 1) infinite 1.6s;
+  will-change: transform;
+  pointer-events: none;
+}
+@keyframes cs-scan-move {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  16% {
+    opacity: 1;
+  }
+  84% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(640px);
+    opacity: 0;
+  }
+}
+
+/* 骨架条:入场时从左"写"出来(scaleX),一次成型 */
+.cs-bar {
+  height: 8px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.09);
+  transform-origin: left center;
+  animation: cs-write 0.66s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.cs-bar--head {
+  height: 9px;
+  background: rgba(var(--cs-sky), 0.42);
+}
+/* 少数"正在被写"的行:sky 微光持续流动 */
+.cs-bar--active {
+  background: linear-gradient(
+    90deg,
+    rgba(var(--cs-sky), 0.14),
+    rgba(var(--cs-sky), 0.55),
+    rgba(var(--cs-sky), 0.14)
+  );
+  background-size: 220% 100%;
+  animation:
+    cs-write 0.66s cubic-bezier(0.16, 1, 0.3, 1) both,
+    cs-bar-shimmer 3.4s ease-in-out infinite 0.9s;
+}
+@keyframes cs-write {
+  from {
+    opacity: 0;
+    transform: scaleX(0.18);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+@keyframes cs-bar-shimmer {
+  0%,
+  100% {
+    background-position: 190% 0;
+  }
+  50% {
+    background-position: -90% 0;
+  }
+}
+.cs-avatar {
+  animation: cs-write 0.66s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* 前景文字后方的暗晕:压住舞台,保证可读性 */
+.cs-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 60% 52% at 50% 48%,
+    rgba(10, 10, 10, 0.82),
+    rgba(10, 10, 10, 0.4) 46%,
+    transparent 72%
+  );
+  pointer-events: none;
+}
+
+/* 徽章脉冲点 */
+.cs-dot {
+  animation: cs-dot-pulse 2.6s ease-in-out infinite;
+}
+@keyframes cs-dot-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 倒计时分隔冒号:慢速时钟眨动 */
+.cs-colon {
+  animation: cs-colon-blink 2s steps(1, end) infinite;
+}
+@keyframes cs-colon-blink {
+  0%,
+  49% {
+    opacity: 0.5;
+  }
+  50%,
+  100% {
+    opacity: 0.15;
+  }
+}
+
+/* 主 CTA:hover 轻抬 + 一道 sheen 扫过 */
+.cs-cta {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.18s ease,
+    background-color 0.18s ease;
+}
+.cs-cta:hover {
+  transform: translateY(-2px);
+}
+.cs-cta:active {
+  transform: translateY(0);
+}
+.cs-cta::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    transparent 36%,
+    rgba(255, 255, 255, 0.38) 50%,
+    transparent 64%
+  );
+  transform: translateX(-130%);
+  transition: transform 0.6s ease;
+  pointer-events: none;
+}
+.cs-cta:hover::after {
+  transform: translateX(130%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cs-aura--a,
+  .cs-aura--b,
+  .cs-resume,
+  .cs-scan,
+  .cs-bar,
+  .cs-bar--active,
+  .cs-avatar,
+  .cs-dot,
+  .cs-colon {
+    animation: none !important;
+  }
+  .cs-bar,
+  .cs-bar--active,
+  .cs-avatar {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .cs-cta::after {
+    display: none;
+  }
 }

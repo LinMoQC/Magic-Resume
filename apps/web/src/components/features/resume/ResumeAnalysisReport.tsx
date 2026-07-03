@@ -99,7 +99,7 @@ export const ResumeAnalysisReport = ({ analysis }: ResumeAnalysisReportProps) =>
                 </h4>
                 <span className="ml-auto font-bold" style={{ color: getScoreColor(item.score) }}>{item.score}/100</span>
               </div>
-              <p className="text-sm text-neutral-400 italic mb-3">&quot;{item.justification}&quot;</p>
+              <p className="text-sm text-neutral-400 italic mb-3">{`"${item.justification}"`}</p>
               <div className="space-y-2">
                 <h5 className="font-semibold text-sm flex items-center"><Lightbulb className="h-4 w-4 mr-2 text-yellow-300" /> {t('report.suggestions')}</h5>
                 <ul className="list-disc list-inside text-sm text-neutral-300 space-y-1 pl-2">

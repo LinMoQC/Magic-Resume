@@ -14,6 +14,7 @@ export interface AppAuthContextValue {
   getToken: () => Promise<string | null>;
   user: AppUser | null;
   redirectToSignIn: () => void;
+  signOut: () => Promise<void>;
 }
 
 // Default: self-hosted values (no auth, always locally "signed in")
@@ -23,6 +24,7 @@ const defaultValue: AppAuthContextValue = {
   getToken: async () => null,
   user: { fullName: null, primaryEmailAddress: null, imageUrl: null },
   redirectToSignIn: () => {},
+  signOut: async () => {},
 };
 
 export const AppAuthContext = createContext<AppAuthContextValue>(defaultValue);

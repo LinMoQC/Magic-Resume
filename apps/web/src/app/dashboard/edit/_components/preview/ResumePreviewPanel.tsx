@@ -14,8 +14,6 @@ import { isCloudMode } from '@/lib/config/app';
 
 interface ResumePreviewPanelProps {
   activeResume: Resume | null;
-  previewScale: number;
-  setPreviewScale: (scale: number) => void;
   onShowAI: () => void;
   isAiJobRunning: boolean;
   onShareClick?: () => void;
@@ -25,7 +23,6 @@ interface ResumePreviewPanelProps {
 
 const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
   activeResume,
-  setPreviewScale,
   onShowAI,
   isAiJobRunning,
   onShareClick,
@@ -37,7 +34,7 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
 
   if (!activeResume) {
     return (
-      <section className="flex-1 flex items-center justify-center bg-black relative overflow-hidden max-h-screen">
+      <section className="min-w-0 flex-1 flex items-center justify-center bg-black relative overflow-hidden max-h-screen">
         <div className="text-white">{t('common.loading')}</div>
       </section>
     );
@@ -45,7 +42,7 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
 
   return (
     <section
-      className="flex-1 flex items-center justify-center bg-black relative overflow-hidden max-h-screen"
+      className="min-w-0 flex-1 flex items-center justify-center bg-black relative overflow-hidden max-h-screen"
       data-ai-running={isAiJobRunning ? "true" : "false"}
     >
       {isAiJobRunning && (
@@ -59,7 +56,6 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
         minScale={0.5}
         maxScale={2}
         limitToBounds={false}
-        onTransformed={(_ref, state) => setPreviewScale(state.scale)}
         onInit={(controls) => controls.centerView(0.5, 0)}
         onPanningStart={() => document.body.classList.add('grabbing')}
         onPanningStop={() => document.body.classList.remove('grabbing')}

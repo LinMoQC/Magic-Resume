@@ -2,11 +2,22 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Loader2, Check, Eye, EyeOff, ShieldQuestion, X, ListChecks, Circle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import {
+  Loader2,
+  Check,
+  Eye,
+  EyeOff,
+  ShieldQuestion,
+  X,
+  ListChecks,
+  Circle,
+  CornerUpLeft,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SKILLS } from '../skills/registry';
 import Markdown from './Markdown';
-import PolarisMark, { POLARIS_STAR_D } from '../PolarisMark';
+import PolarisMark, { PolarisGlyph } from '../PolarisMark';
 import WidgetHost from './WidgetHost';
 import type { ApprovalRequest, ChatMessage, SkillId } from '../types';
 import type { WidgetActionResult } from '../widgets/types';
@@ -45,18 +56,15 @@ function ThinkingIndicator({ showAvatar }: { showAvatar: boolean }) {
       {/* Polaris-themed loader: three north stars twinkling in sequence. */}
       <div className="flex items-center gap-1.5 pt-2 text-sky-400/80">
         {[0, 1, 2].map((i) => (
-          <motion.svg
+          <motion.span
             key={i}
-            width={12}
-            height={12}
-            viewBox="0 0 24 24"
-            fill="none"
             aria-hidden="true"
+            className="inline-flex"
             animate={{ opacity: [0.2, 1, 0.2], scale: [0.7, 1, 0.7], rotate: [-12, 12, -12] }}
             transition={{ duration: 1.3, repeat: Infinity, delay: i * 0.2, ease: 'easeInOut' }}
           >
-            <path d={POLARIS_STAR_D} fill="currentColor" />
-          </motion.svg>
+            <PolarisGlyph size={12} />
+          </motion.span>
         ))}
       </div>
     </motion.div>
@@ -93,6 +101,7 @@ function ExecCard({
   isCanvasOpen: boolean;
   showAvatar: boolean;
 }) {
+  const { t } = useTranslation();
   const skill = message.skillId ? SKILLS[message.skillId] : null;
   if (!skill) return null;
   const Icon = skill.icon;
@@ -114,16 +123,16 @@ function ExecCard({
         ) : (
           <span className="ml-auto inline-flex items-center gap-1 text-[11px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
             <Check size={12} />
-            完成
+            {t('aiLab.chat.done')}
           </span>
         )}
       </div>
       <div className="mt-2.5 flex items-center justify-between gap-3">
-        <span className="text-xs text-neutral-500 truncate">{running ? '正在执行…' : skill.doneSummary}</span>
+        <span className="text-xs text-neutral-500 truncate">{running ? t('aiLab.chat.running') : skill.doneSummary}</span>
         {clickable && (
           <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-sky-400 bg-sky-500/10 group-hover:bg-sky-500/20 rounded-full px-2.5 py-1 shrink-0 transition-colors">
             {isCanvasOpen ? <EyeOff size={12} /> : <Eye size={12} />}
-            {isCanvasOpen ? '收起' : '查看'}
+            {isCanvasOpen ? t('aiLab.chat.collapse') : t('aiLab.chat.view')}
           </span>
         )}
       </div>
@@ -165,6 +174,7 @@ function PlanCard({
   onToggleCanvas: (id: SkillId) => void;
   isCanvasOpen: boolean;
 }) {
+  const { t } = useTranslation();
   const todos = message.todos ?? [];
   const total = todos.length;
   const done = todos.filter((t) => t.status === 'completed').length;
@@ -180,25 +190,25 @@ function PlanCard({
           </div>
           {message.subagentName ? (
             <span className="text-[13px] font-medium text-white">
-              <span className="text-sky-400">子代理</span>
+              <span className="text-sky-400">{t('aiLab.chat.subagent')}</span>
               {message.subagentName !== '子代理' && message.subagentName !== 'general-purpose'
                 ? ` · ${message.subagentName}`
                 : ''}
             </span>
           ) : (
-            <span className="text-[13px] font-medium text-white">{message.content || '任务清单'}</span>
+            <span className="text-[13px] font-medium text-white">{message.content || t('aiLab.chat.taskList')}</span>
           )}
           {message.status === 'done' || allDone ? (
             <span className="ml-auto inline-flex items-center gap-1 text-[11px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
               <Check size={12} />
-              完成
+              {t('aiLab.chat.done')}
             </span>
           ) : total > 0 ? (
             <span className="ml-auto text-[11px] text-neutral-500 tabular-nums">{done}/{total}</span>
           ) : (
             <span className="ml-auto inline-flex items-center gap-1 text-[11px] text-neutral-500">
               <Loader2 size={11} className="animate-spin" />
-              工作中
+              {t('aiLab.chat.working')}
             </span>
           )}
         </div>
@@ -233,7 +243,7 @@ function PlanCard({
                   className="ml-auto shrink-0 inline-flex items-center gap-1.5 text-[11px] font-medium text-sky-400 bg-sky-500/10 hover:bg-sky-500/20 rounded-full px-2.5 py-1 transition-colors cursor-pointer"
                 >
                   {isCanvasOpen ? <EyeOff size={12} /> : <Eye size={12} />}
-                  {isCanvasOpen ? '收起' : '查看'}
+                  {isCanvasOpen ? t('aiLab.chat.collapse') : t('aiLab.chat.view')}
                 </button>
               )}
             </li>
@@ -284,8 +294,8 @@ function TypewriterText({ text }: { text: string }) {
 }
 
 /**
- * Human-in-the-loop tool-approval prompt (design §6.5). The agent paused before a
- * sensitive tool (read_resume); the user must allow / deny before it runs.
+ * Human-in-the-loop approval prompt. The assistant asks before a sensitive action;
+ * the user must allow / deny before it continues.
  */
 function ApprovalCard({
   message,
@@ -296,6 +306,7 @@ function ApprovalCard({
   onApproval?: ApprovalDecision;
   showAvatar: boolean;
 }) {
+  const { t } = useTranslation();
   const a = message.approval as ApprovalRequest | undefined;
   if (!a) return null;
   const decide = (approved: boolean) => onApproval?.(message.id, approved);
@@ -306,7 +317,7 @@ function ApprovalCard({
       <div className="min-w-[260px] max-w-md rounded-2xl border border-sky-500/30 bg-sky-500/[0.07] px-4 py-3.5">
         <div className="flex items-start gap-2 text-[13px] text-sky-100 leading-relaxed">
           <ShieldQuestion size={15} className="text-sky-400 shrink-0 mt-0.5" />
-          <span className="flex-1">{message.content || '想读取你的简历来给建议'}</span>
+          <span className="flex-1">{message.content || t('aiLab.chat.approval.defaultMessage')}</span>
         </div>
         {a.status === 'pending' ? (
           <div className="mt-3 flex items-center gap-2">
@@ -316,7 +327,7 @@ function ApprovalCard({
               className="inline-flex items-center gap-1.5 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 px-3 py-1.5 text-xs font-medium text-sky-100 transition-colors cursor-pointer"
             >
               <Check size={12} />
-              允许
+              {t('aiLab.chat.approval.allow')}
             </button>
             <button
               type="button"
@@ -324,7 +335,7 @@ function ApprovalCard({
               className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs text-neutral-400 hover:text-white transition-colors cursor-pointer"
             >
               <X size={12} />
-              拒绝
+              {t('aiLab.chat.approval.deny')}
             </button>
           </div>
         ) : (
@@ -332,22 +343,22 @@ function ApprovalCard({
             {a.status === 'denied' ? (
               <>
                 <X size={11} />
-                已拒绝
+                {t('aiLab.chat.approval.denied')}
               </>
             ) : a.readState === 'read' ? (
               <>
                 <Check size={11} className="text-emerald-500/80" />
-                已读取简历
+                {t('aiLab.chat.approval.read')}
               </>
             ) : a.readState === 'reading' ? (
               <>
                 <Loader2 size={11} className="animate-spin text-neutral-500" />
-                正在读取简历…
+                {t('aiLab.chat.approval.reading')}
               </>
             ) : (
               <>
                 <Check size={11} className="text-emerald-500/80" />
-                已允许读取
+                {t('aiLab.chat.approval.allowed')}
               </>
             )}
           </div>
@@ -364,6 +375,7 @@ function LogLine({
   message: ChatMessage;
   onLogClick?: (resumePath: string) => void;
 }) {
+  const { t } = useTranslation();
   const clickable = !!message.resumePath && !!onLogClick;
   const className = 'flex items-center gap-2 pl-10 text-[11px] text-neutral-500';
   const body = (
@@ -377,7 +389,7 @@ function LogLine({
     <button
       type="button"
       onClick={() => onLogClick!(message.resumePath!)}
-      title="回到这处改动"
+      title={t('aiLab.chat.backToChange')}
       className={`${className} hover:text-neutral-300 transition-colors cursor-pointer w-full text-left`}
     >
       {body}
@@ -397,6 +409,17 @@ function Bubble({ message, showAvatar }: { message: ChatMessage; showAvatar: boo
               {SkillIcon && <SkillIcon size={11} className={skill.accent} />}
               <span className={cn('text-[11px] font-medium', skill.accent)}>{skill.name}</span>
             </span>
+          )}
+          {message.quote && (
+            <div className="mb-2 flex items-start gap-2 rounded-lg bg-black/25 px-2.5 py-2 text-left ring-1 ring-white/[0.05]">
+              <CornerUpLeft size={12} className="mt-0.5 shrink-0 text-sky-400/80" />
+              <div className="min-w-0 flex-1">
+                <div className="text-[10px] font-medium text-neutral-500">{message.quote.label}</div>
+                <div className="mt-0.5 line-clamp-2 text-[11.5px] leading-snug text-neutral-300">
+                  {message.quote.text}
+                </div>
+              </div>
+            </div>
           )}
           {message.content}
         </div>

@@ -1,3 +1,5 @@
+import type { FileSizeBucket } from '@/lib/utils/fileSize';
+
 export type GithubStarLocation =
   | 'footer'
   | 'hero'
@@ -6,7 +8,6 @@ export type GithubStarLocation =
   | 'footer_mobile';
 
 export type ResumeImportSource = 'json' | 'pdf';
-export type FileSizeBucket = 'small' | 'medium' | 'large';
 
 export type ResumeImportCompletedPayload = {
   source: ResumeImportSource;

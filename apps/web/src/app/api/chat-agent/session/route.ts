@@ -3,12 +3,9 @@ import { getServerUserId } from '@/lib/auth/server';
 import { serverFetchBackend } from '@/lib/auth/serverFetchBackend';
 
 /**
- * Reclaim a chat session's backend thread on conversation end / modal close
- * (ephemeral-data lifecycle, Magic-Core adr-0010 D4 / BP1). Best-effort: fired by
- * the client (often with `keepalive`) when it drops a sessionId, so the backend
- * `deleteThread`s the checkpoint state instead of leaking it. The agent-service
- * derives the thread from the caller's identity + sessionId, so this only carries
- * the sessionId — never the BYOK key.
+ * Reclaim server-side chat session resources on conversation end / explicit new
+ * chat. Best-effort: fired by the client (often with `keepalive`) when it drops a
+ * sessionId. This only carries the sessionId, never the user's model key.
  */
 export async function DELETE(req: NextRequest) {
   try {

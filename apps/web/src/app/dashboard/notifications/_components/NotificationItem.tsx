@@ -2,9 +2,9 @@ import React from 'react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { zhCN, enUS } from 'date-fns/locale';
-import { Mail, MessageSquare, Check } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { MessageSquare, Reply, Check, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { cn } from '@/lib/utils';
 import { Notification } from '@/lib/api/notifications';
 
 interface NotificationItemProps {
@@ -14,95 +14,92 @@ interface NotificationItemProps {
 
 export const NotificationItem = ({ notification, markAsRead }: NotificationItemProps) => {
   const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'zh' ? zhCN : enUS;
 
-  const getDateLocale = () => {
-    return i18n.language === 'zh' ? zhCN : enUS;
-  };
-
-  const getNotificationLink = (notification: Notification) => {
-    if (notification.resume.shareId) {
-      return `/s/${notification.resume.shareId}?commentId=${notification.commentId}`;
-    }
-    return `/dashboard/edit/${notification.resume.id}`;
-  };
+  const unread = !notification.isRead;
+  const isComment = notification.type === 'COMMENT';
+  const href = notification.resume.shareId
+    ? `/s/${notification.resume.shareId}?commentId=${notification.commentId}`
+    : `/dashboard/edit/${notification.resume.id}`;
+  const actorName =
+    notification.actor?.firstName || notification.actor?.username || t('notificationsPage.someone');
 
   return (
-      <div 
-        className={`group relative flex gap-5 p-5 rounded-2xl border transition-all duration-200 ${
-          notification.isRead 
-            ? 'bg-neutral-900/30 border-neutral-800/50' 
-            : 'bg-blue-500/5 border-blue-500/20'
-        }`}
-      >
-        <div className="shrink-0 mt-1 relative">
-          {notification.actor?.imageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img 
-              src={notification.actor.imageUrl} 
-              alt="Actor" 
-              className="w-12 h-12 rounded-full object-cover border-2 border-[#0a0a0a]"
-            />
-          ) : (
-            <div className="w-12 h-12 rounded-full bg-linear-to-br from-neutral-800 to-neutral-700 flex items-center justify-center border-2 border-[#0a0a0a]">
-              <MessageSquare className="w-5 h-5 text-neutral-400" />
-            </div>
-          )}
-          <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border-2 border-[#0a0a0a] ${
-            notification.type === 'COMMENT' ? 'bg-blue-500' : 'bg-purple-500'
-          }`}>
-            {notification.type === 'COMMENT' ? (
-              <MessageSquare className="w-3 h-3 text-white" />
-            ) : (
-              <Mail className="w-3 h-3 text-white" />
-            )}
+    <div
+      className={cn(
+        'group relative flex gap-3.5 rounded-2xl border p-4 transition-colors duration-200',
+        unread
+          ? 'border-sky-400/20 bg-sky-400/[0.05] hover:border-sky-400/30'
+          : 'border-white/[0.06] bg-white/[0.02] hover:border-white/10',
+      )}
+    >
+      {/* actor avatar + type marker — self-start so the column wraps the 44px avatar
+          (not stretched by the row), keeping the badge pinned to the avatar corner */}
+      <div className="relative shrink-0 self-start">
+        {notification.actor?.imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={notification.actor.imageUrl}
+            alt={actorName}
+            referrerPolicy="no-referrer"
+            className="h-11 w-11 rounded-full object-cover ring-1 ring-white/10"
+          />
+        ) : (
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-neutral-800 text-neutral-400 ring-1 ring-white/10">
+            <User size={18} />
           </div>
+        )}
+        <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-sky-500 text-white ring-2 ring-[#0A0A0A]">
+          {isComment ? <MessageSquare size={11} /> : <Reply size={11} />}
+        </span>
+      </div>
+
+      {/* body */}
+      <div className="min-w-0 flex-1">
+        <div className="flex items-start justify-between gap-3">
+          <p className="text-sm leading-relaxed text-neutral-300">
+            <span className="font-semibold text-neutral-50">{actorName}</span>
+            <span className="mx-1.5 text-neutral-500">
+              {isComment ? t('notificationsPage.type.comment') : t('notificationsPage.type.reply')}
+            </span>
+            <Link
+              href={href}
+              className="font-medium text-sky-300 transition-colors hover:text-sky-200"
+            >
+              {notification.resume.title}
+            </Link>
+          </p>
+          {unread && <span aria-hidden className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-sky-400" />}
         </div>
 
-        <div className="flex-1 min-w-0 pt-0.5">
-          <div className="flex justify-between items-start gap-4">
-            <div className="space-y-1">
-              <p className="text-[15px] leading-relaxed text-neutral-300">
-                <span className="font-semibold text-white">
-                  {notification.actor?.firstName || notification.actor?.username || t('notificationsPage.someone')}
-                </span>
-                <span className="text-neutral-500 mx-1.5">
-                  {notification.type === 'COMMENT' ? t('notificationsPage.type.comment') : t('notificationsPage.type.reply')}
-                </span>
-                <Link href={getNotificationLink(notification)} className="font-medium text-blue-400 hover:text-blue-300 transition-colors">
-                  {notification.resume.title}
-                </Link>
-              </p>
-              <p className="text-xs text-neutral-500 font-medium">
-                {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true, locale: getDateLocale() })}
-              </p>
-            </div>
-            
-            <div className="flex items-center gap-2">
-               {!notification.isRead && (
-                <div className="w-2 h-2 bg-blue-500 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
-               )}
-            </div>
-          </div>
-          
-          <div className="mt-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-200 transform translate-y-1 group-hover:translate-y-0">
-            <Link href={getNotificationLink(notification)}>
-              <Button variant="outline" size="sm" className="h-8 text-xs bg-transparent hover:bg-neutral-800 border-neutral-700 text-neutral-300">
-                {t('notificationsPage.action.view')}
-              </Button>
-            </Link>
-            {!notification.isRead && (
-              <Button
-                variant="ghost" 
-                size="sm"
-                onClick={() => markAsRead(notification.id)}
-                className="h-8 text-xs text-neutral-400 hover:text-white hover:bg-white/5"
+        <p className="mt-1 text-[11px] text-neutral-500">
+          {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true, locale })}
+        </p>
+
+        {/* actions — collapsed to zero height until hover (grid-rows reveal, no layout jump) */}
+        <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-200 ease-out group-hover:grid-rows-[1fr] group-focus-within:grid-rows-[1fr]">
+          <div className="overflow-hidden">
+            <div className="mt-3 flex items-center gap-1.5">
+              <Link
+                href={href}
+                className="rounded-full px-2.5 py-1 text-xs text-neutral-300 transition-colors hover:bg-white/[0.06] hover:text-white"
               >
-                <Check className="w-3 h-3 mr-1.5" />
-                {t('notificationsPage.action.markRead')}
-              </Button>
-            )}
+                {t('notificationsPage.action.view')}
+              </Link>
+              {unread && (
+                <button
+                  type="button"
+                  onClick={() => markAsRead(notification.id)}
+                  className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs text-neutral-400 transition-colors hover:bg-white/[0.06] hover:text-sky-200"
+                >
+                  <Check size={12} />
+                  {t('notificationsPage.action.markRead')}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
+    </div>
   );
 };

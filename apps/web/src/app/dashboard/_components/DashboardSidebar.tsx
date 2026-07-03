@@ -1,242 +1,241 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { useAppUser, AppUserButton } from '@/lib/auth';
-import { isCloudMode } from '@/lib/config/app';
-import { motion, AnimatePresence } from 'framer-motion';
-import useMobile from '@/hooks/useMobile';
-import { FiMenu, FiX } from 'react-icons/fi';
-import { FaRegFileAlt, FaCog, FaBell } from 'react-icons/fa';
-import { Skeleton } from '@/components/ui/Skeleton';
-
-import { useResumeStore } from '@/store/useResumeStore';
-import sidebarMenu from '@/lib/constants/sidebarMenu';
-import { Button } from '@/components/ui/button';
+import { useReducedMotion } from 'framer-motion';
+import { FileText, Bell, ChevronLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { SectionOrder } from '@/types/frontend/resume';
-import LanguageSwitcher from '@/components/shared/LanguageSwitcher';
+import { cn } from '@/lib/utils';
+import AccountMenu from '@/components/shared/AccountMenu';
+import { useAppUser } from '@/lib/auth';
+import { isCloudMode } from '@/lib/config/app';
+import { useNotifications } from '@/hooks/useNotifications';
+import { BrandMark, BrandWordmark } from './BrandMark';
 
+const RAIL_WIDTH = 60;
+const PANEL_WIDTH = 232;
+const STORAGE_KEY = 'dashboard:sidebar-collapsed';
+const EASE = 'cubic-bezier(0.22, 1, 0.36, 1)';
+const DUR = 300;
+
+/**
+ * Top-level navigation — one nav model, two forms that morph smoothly between a
+ * 232px labelled panel and a 60px icon rail. The morph is the point: icons live in
+ * fixed 36px columns so they never jump; only the panel width and the label
+ * reveals animate, and they share the same 300ms curve so everything moves as one.
+ * Collapse preference persists; the first paint is transition-free (no collapse
+ * animation on load) and stilled under reduced-motion. Editor pages own their
+ * OutlineRail, so this returns null there.
+ *
+ * The animated `transition` is applied via inline style (not Tailwind arbitrary
+ * classes, which can't be generated from runtime-interpolated strings).
+ */
 export default function DashboardSidebar() {
   const { t } = useTranslation();
-
-  const menuItems = [
-    { href: '/dashboard', label: t('sidebar.resumes'), icon: FaRegFileAlt },
-    ...(isCloudMode
-      ? [
-          { href: '/dashboard/notifications', label: t('sidebar.notifications'), icon: FaBell },
-          { href: '/dashboard/settings', label: t('sidebar.settings'), icon: FaCog },
-        ]
-      : []),
-  ];
-
-  const { isMobile } = useMobile();
-  const [isOpen, setIsOpen] = useState(false);
-  const { user } = useAppUser();
   const pathname = usePathname();
-  const [hasMounted, setHasMounted] = useState(false);
-  const { activeResume, setActiveSection } = useResumeStore();
+  const { user } = useAppUser();
+  const reduce = useReducedMotion();
+
+  const [mounted, setMounted] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+  const [animReady, setAnimReady] = useState(false);
 
   useEffect(() => {
-    setHasMounted(true);
+    setMounted(true);
+    try {
+      if (localStorage.getItem(STORAGE_KEY) === '1') setCollapsed(true);
+    } catch {
+      /* ignore */
+    }
+    // Enable transitions only after the initial (persisted) state has painted, so
+    // reloading with a collapsed pref doesn't animate the collapse on load.
+    const raf = requestAnimationFrame(() => requestAnimationFrame(() => setAnimReady(true)));
+    return () => cancelAnimationFrame(raf);
   }, []);
 
-  const sidebarContent = (
-    <div className="flex flex-col h-full overflow-hidden">
-      {/* Logo Placeholder */}
-      <div className="pt-8 pb-6 flex justify-center shrink-0">
-        <Link href="/dashboard" className="transition-transform active:scale-95">
-          <div className="h-10 flex items-center">
-            <Image 
-              src="/magic-resume-logo.png" 
-              alt={t('common.logoAlt')} 
-              width={150} 
-              height={40} 
-              priority
-              className="object-contain h-10"
-            />
-          </div>
-        </Link>
-      </div>
+  const toggle = () =>
+    setCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(STORAGE_KEY, next ? '1' : '0');
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
 
-      {/* Navigation Area */}
-      <nav className="flex-1 px-4 overflow-y-auto hide-scrollbar">
-        {menuItems.map(({ href, label, icon: Icon }) => (
-          <Link
-            key={href}
-            href={href}
-            className={`flex items-center px-4 mt-2 py-3 text-lg rounded-lg transition-colors ${pathname === href ? 'bg-neutral-700 text-white' : 'text-neutral-400 hover:bg-neutral-800 hover:text-white'}`}
-          >
-            <Icon className="w-5 h-5 mr-4 z-1" />
-            {label}
-          </Link>
-        ))}
-      </nav>
+  if (pathname.includes('/edit')) return null;
 
-      <div className="px-6 pt-4 border-t border-neutral-800 bg-black shrink-0">
-        <LanguageSwitcher compact />
-      </div>
+  const anim = animReady && !reduce;
+  const labelStyle: React.CSSProperties | undefined = anim
+    ? { transition: `max-width ${DUR}ms ${EASE}, opacity ${DUR}ms ${EASE}` }
+    : undefined;
+  // i18n labels resolve client-side; keep them empty until mount so SSR and the
+  // first client render agree (icons are language-independent and render on both).
+  const label = (key: string) => (mounted ? t(key) : undefined);
 
-      {/* Profile Placeholder */}
-      <div className="px-6 pt-4 pb-4 bg-black shrink-0 flex items-center gap-3">
-        <div className="relative w-8 h-8 shrink-0">
-          <div className="absolute inset-0 bg-neutral-800 rounded-full animate-pulse z-0" />
-          <div className="relative z-10 w-8 h-8 flex items-center justify-center">
-            <AppUserButton afterSignOutUrl="/" />
-          </div>
-        </div>
-        <div className='flex flex-col overflow-hidden'>
-          <span className='text-sm font-bold truncate'>{user?.fullName}</span>
-          <span className='text-xs text-neutral-400 truncate'>{user?.primaryEmailAddress?.emailAddress}</span>
-        </div>
-      </div>
-    </div>
-  );
-
-  if (pathname.includes('/edit')) {
-    if (!hasMounted) {
-      return (
-        <aside className="w-20 bg-black border-r border-neutral-800 hidden md:flex flex-col items-center">
-          {/* Logo Placeholder */}
-          <div className="pt-12 pb-8 shrink-0">
-            <Skeleton className="h-10 w-10 rounded-md" />
-          </div>
-          {/* Nav Placeholder */}
-          <div className="flex-1 flex flex-col items-center justify-center gap-4 w-full px-4 py-4">
-            <Skeleton className="h-10 w-full rounded-md shrink-0" />
-            <Skeleton className="h-10 w-full rounded-md shrink-0" />
-            <Skeleton className="h-10 w-full rounded-md shrink-0" />
-            <Skeleton className="h-10 w-full rounded-md shrink-0" />
-          </div>
-          {/* Profile Placeholder */}
-          <div className="pt-4 pb-4 shrink-0">
-            <Skeleton className="h-8 w-8 rounded-full" />
-          </div>
-        </aside>
-      );
-    }
-    return (
-      <aside className="border-r border-neutral-800 bg-neutral-900 w-20 h-full hidden md:flex flex-col items-center">
-        {/* Logo Placeholder */}
-        <div className="pt-6 pb-8 shrink-0">
-          <Link href="/dashboard" className="transition-transform active:scale-95">
-            <Image src="/simple-logo.png" alt={t('common.logoAlt')} width={40} height={40} priority />
-          </Link>
-        </div>
-        
-        <nav className="flex-1 flex flex-col items-center justify-center gap-2 w-full overflow-y-auto hide-scrollbar py-4">
-          {activeResume?.sectionOrder.map((section: SectionOrder) => {
-            const iconItem = sidebarMenu.find((item) => item.key === section.key);
-            if (!iconItem) return null;
-            const Icon = iconItem.icon;
-
-            return (
-              <Button
-                key={section.key}
-                variant="ghost"
-                className='h-12 w-12 hover:bg-neutral-800 bg-transparent z-1 shrink-0'
-                onClick={() => setActiveSection(section.key)}
-                title={t(section.label)}
-              >
-                <Icon className="w-4 h-4" />
-              </Button>
-            );
-          })}
-        </nav>
-
-        <div className="w-full pb-3 shrink-0 flex justify-center">
-          <LanguageSwitcher iconOnly />
-        </div>
-
-        {/* Profile Placeholder */}
-        <div className="pt-4 pb-4 shrink-0">
-          <div className="relative w-8 h-8">
-            <div className="absolute inset-0 bg-neutral-800 rounded-full animate-pulse z-0" />
-            <div className="relative z-10 w-8 h-8 flex items-center justify-center">
-              <AppUserButton afterSignOutUrl="/" />
-            </div>
-          </div>
-        </div>
-      </aside>
-    );
-  }
-
-  if (!hasMounted) {
-    return (
-      <aside className="w-64 bg-black border-r border-neutral-800 hidden md:flex flex-col h-full">
-        {/* Logo Placeholder */}
-        <div className="pt-12 pb-8 flex justify-center shrink-0">
-          <Skeleton className="h-10 w-36 rounded-md" />
-        </div>
-        {/* Nav Placeholder */}
-        <nav className="flex-1 px-4 space-y-2 overflow-hidden pt-4">
-          <Skeleton className="h-10 w-full shrink-0" />
-          <Skeleton className="h-10 w-full shrink-0" />
-          <Skeleton className="h-10 w-full shrink-0" />
-        </nav>
-        {/* Profile Placeholder */}
-        <div className="px-6 pt-6 pb-4 border-t border-neutral-800 bg-black shrink-0 flex items-center gap-3">
-          <Skeleton className="h-8 w-8 rounded-full shrink-0" />
-          <div className="flex-1 space-y-1">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-3 w-32" />
-          </div>
-        </div>
-      </aside>
-    );
-  }
-
-  if (isMobile) {
-    return (
-      <>
-        <button
-          onClick={() => setIsOpen(true)}
-          className="fixed top-4 right-4 p-2 bg-neutral-800 rounded-md z-99 cursor-pointer"
-          aria-label={t('sidebar.open')}
-        >
-          <FiMenu className="h-6 w-6 text-white" />
-        </button>
-        <AnimatePresence>
-          {isOpen && (
-            <>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="fixed inset-0 bg-black/50 z-40 cursor-pointer"
-                onClick={() => setIsOpen(false)}
-              />
-              <motion.aside
-                initial={{ x: '-100%' }}
-                animate={{ x: 0 }}
-                exit={{ x: '-100%' }}
-                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className="fixed top-0 left-0 h-full w-64 bg-black border-r border-neutral-800 flex flex-col z-50"
-              >
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="absolute top-4 right-4 p-2 cursor-pointer"
-                  aria-label={t('sidebar.close')}
-                >
-                  <FiX className="h-6 w-6 text-neutral-400 z-5" />
-                </button>
-                <div className="flex flex-col flex-1">
-                  {sidebarContent}
-                </div>
-              </motion.aside>
-            </>
-          )}
-        </AnimatePresence>
-      </>
-    );
-  }
+  const name = user?.fullName ?? null;
+  const email = user?.primaryEmailAddress?.emailAddress ?? null;
 
   return (
-    <aside className="w-64 bg-black border-r border-neutral-800 flex flex-col">
-      {sidebarContent}
+    <aside
+      className="group relative z-30 h-full shrink-0 border-r border-white/[0.06] bg-[#0A0A0A]"
+      style={{
+        width: collapsed ? RAIL_WIDTH : PANEL_WIDTH,
+        transition: anim ? `width ${DUR}ms ${EASE}` : undefined,
+      }}
+    >
+      <div className="flex h-full flex-col overflow-hidden px-3 py-4">
+        {/* brand */}
+        <Link
+          href="/dashboard"
+          aria-label={label('common.logoAlt')}
+          className="flex items-center rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-sky-400/40"
+        >
+          <span className="grid w-9 shrink-0 place-items-center">
+            <BrandMark size={28} />
+          </span>
+          <span
+            className={cn('overflow-hidden pl-2', collapsed ? 'max-w-0 opacity-0' : 'max-w-[160px] opacity-100')}
+            style={labelStyle}
+          >
+            <BrandWordmark />
+          </span>
+        </Link>
+
+        <div className="my-4 h-px bg-white/[0.06]" />
+
+        {/* nav */}
+        <nav className="flex flex-col gap-1">
+          <NavItem
+            href="/dashboard"
+            label={label('sidebar.resumes')}
+            active={pathname === '/dashboard'}
+            icon={<FileText size={18} />}
+            collapsed={collapsed}
+            labelStyle={labelStyle}
+          />
+          {isCloudMode && (
+            <NavNotifications
+              label={label('sidebar.notifications')}
+              active={pathname === '/dashboard/notifications'}
+              collapsed={collapsed}
+              labelStyle={labelStyle}
+            />
+          )}
+        </nav>
+
+        <div className="flex-1" />
+
+        {/* account — the whole row is the trigger (name/email live inside the button) */}
+        <div className="h-px bg-white/[0.06]" />
+        <div className="mt-3">
+          <AccountMenu
+            placement={collapsed ? 'right' : 'up'}
+            label={
+              !collapsed && (name || email) ? (
+                <span
+                  className="block max-w-[142px] overflow-hidden pl-1 text-left opacity-100"
+                  style={labelStyle}
+                >
+                  {name && <span className="block truncate text-[13px] font-medium text-neutral-100">{name}</span>}
+                  {email && <span className="block truncate text-[11px] text-neutral-500">{email}</span>}
+                </span>
+              ) : undefined
+            }
+          />
+        </div>
+      </div>
+
+      {/* hover-revealed edge toggle — floats on the divider seam, tracks the animating edge */}
+      <button
+        type="button"
+        onClick={toggle}
+        aria-label={label(collapsed ? 'common.expand' : 'common.collapse')}
+        className="absolute right-0 top-[76px] z-40 flex h-6 w-6 -translate-y-1/2 translate-x-1/2 items-center justify-center rounded-full border border-white/10 bg-neutral-900 text-neutral-400 opacity-0 shadow-md shadow-black/50 transition-opacity duration-200 hover:text-sky-300 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/40 group-hover:opacity-100"
+      >
+        <ChevronLeft className={cn('h-3.5 w-3.5 transition-transform duration-300', collapsed && 'rotate-180')} />
+      </button>
     </aside>
+  );
+}
+
+/** One nav destination. Icon lives in a fixed 36px column (never moves); the label
+ *  slides open/closed via max-width so the collapsed pill sizes to the icon alone. */
+function NavItem({
+  href,
+  label,
+  active,
+  icon,
+  collapsed,
+  labelStyle,
+  dot = false,
+}: {
+  href: string;
+  label?: string;
+  active: boolean;
+  icon: React.ReactNode;
+  collapsed: boolean;
+  labelStyle?: React.CSSProperties;
+  dot?: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      title={collapsed ? label : undefined}
+      aria-label={label}
+      className={cn(
+        'group/nav relative flex h-9 items-center rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-sky-400/40',
+        active ? '' : 'hover:bg-white/[0.04]',
+      )}
+    >
+      {active && <span aria-hidden className="absolute inset-0 rounded-xl bg-sky-400/10" />}
+      <span
+        className={cn(
+          'relative z-[1] grid w-9 shrink-0 place-items-center transition-colors duration-150',
+          active ? 'text-sky-300' : 'text-neutral-500 group-hover/nav:text-neutral-200',
+        )}
+      >
+        {icon}
+        {dot && <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-sky-400 ring-2 ring-[#0A0A0A]" />}
+      </span>
+      <span
+        className={cn(
+          'relative z-[1] overflow-hidden whitespace-nowrap pl-1 text-sm',
+          collapsed ? 'max-w-0 opacity-0' : 'max-w-[150px] opacity-100',
+          active ? 'text-sky-200' : 'text-neutral-400 group-hover/nav:text-neutral-100',
+        )}
+        style={labelStyle}
+      >
+        {label}
+      </span>
+    </Link>
+  );
+}
+
+/** Cloud-only: isolates the Clerk-backed useNotifications hook behind an isCloudMode gate. */
+function NavNotifications({
+  label,
+  active,
+  collapsed,
+  labelStyle,
+}: {
+  label?: string;
+  active: boolean;
+  collapsed: boolean;
+  labelStyle?: React.CSSProperties;
+}) {
+  const { unreadCount } = useNotifications();
+  return (
+    <NavItem
+      href="/dashboard/notifications"
+      label={label}
+      active={active}
+      icon={<Bell size={18} />}
+      collapsed={collapsed}
+      dot={unreadCount > 0}
+      labelStyle={labelStyle}
+    />
   );
 }

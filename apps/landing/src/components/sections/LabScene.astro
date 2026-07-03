@@ -1,0 +1,69 @@
+---
+import type { Copy, Locale } from '@/i18n/ui';
+import Icon from '@/components/Icon.astro';
+import AiLabScene from '@/components/islands/AiLabScene';
+
+interface Props {
+  copy: Copy;
+  locale: Locale;
+}
+const { copy, locale } = Astro.props;
+const b = copy.bento;
+
+const modeIcons: Record<string, 'pen' | 'sparkle' | 'target' | 'languages' | 'mic' | 'download'> = {
+  create: 'pen',
+  optimize: 'sparkle',
+  analyze: 'target',
+  translate: 'languages',
+  interview: 'mic',
+  export: 'download',
+};
+---
+
+<section id="features" class="relative py-24 md:py-32">
+  <div class="mx-auto max-w-[1120px] px-5 md:px-6">
+    <div class="reveal max-w-2xl">
+      <p class="eyebrow">{b.eyebrow}</p>
+      <h2 class="mt-4 font-display text-[clamp(1.7rem,3.6vw,2.4rem)] font-semibold tracking-[-0.02em] text-ink">
+        {b.title}
+      </h2>
+      <p class="mt-3 max-w-xl text-[15px] leading-relaxed text-muted md:text-base">
+        {b.subtitle}
+      </p>
+    </div>
+
+    <!-- the interactive AI Lab diorama -->
+    <div class="reveal relative mt-12" style="--reveal-delay:1">
+      <div class="linear-frame">
+        <AiLabScene
+          client:visible
+          lang={locale}
+          labels={{
+            window: b.window,
+            welcome: b.welcome,
+            chat: b.chat,
+            chips: b.chips,
+            flows: b.flows,
+          }}
+        />
+      </div>
+    </div>
+
+    <!-- six-mode strip -->
+    <div class="reveal mt-10 grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-3 lg:grid-cols-6" style="--reveal-delay:2">
+      {
+        b.modes.map((m) => (
+          <div class="flex items-start gap-2.5">
+            <span class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-sky-400/10 text-sky-400 ring-1 ring-sky-400/15">
+              <Icon name={modeIcons[m.id] ?? 'sparkle'} size={14} />
+            </span>
+            <div>
+              <div class="text-[13.5px] font-semibold text-ink">{m.title}</div>
+              <div class="mt-0.5 text-[12px] leading-snug text-faint">{m.desc}</div>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>

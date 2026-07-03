@@ -18,14 +18,18 @@ import {
   SectionOrder, 
   CustomTemplateConfig,
   CloudResume,
-  CloudVersion
+  CloudVersion,
+  ResumeVersion
 } from '@/types/frontend/resume';
+
+const MAX_RESUME_VERSION_HISTORY = 10;
 
 type ResumeState = {
   resumes: Resume[];
   activeResume: Resume | null;
   isStoreLoading: boolean;
   rightCollapsed: boolean;
+  leftCollapsed: boolean;
   activeSection: string;
   syncStatus: 'saved' | 'syncing' | 'modified' | 'local' | 'error';
   isSyncing: boolean;
@@ -53,6 +57,7 @@ type ResumeState = {
   updateThemeColor: (themeColor: string) => void;
   updateTypography: (typography: string) => void;
   setRightCollapsed: (collapsed: boolean) => void;
+  setLeftCollapsed: (collapsed: boolean) => void;
   setActiveSection: (section: string) => void;
   updateSharing: (isPublic: boolean, shareRole: 'VIEWER' | 'COMMENTER' | 'EDITOR' | undefined) => Promise<void>;
   
@@ -115,12 +120,66 @@ export const getSanitizedResumeForLocal = (resume: Resume) => {
   };
 };
 
+const getCloudVersionTimestamp = (version: CloudVersion) => (
+  version.createdAt ? new Date(version.createdAt).getTime() : (version.timestamp || Date.now())
+);
+
+const normalizeResumeVersions = (versions: ResumeVersion[] = []) => (
+  [...versions]
+    .sort((a, b) => b.updatedAt - a.updatedAt)
+    .slice(0, MAX_RESUME_VERSION_HISTORY)
+);
+
+const normalizeCloudVersions = (versions: CloudVersion[] = [], resumeId: string): ResumeVersion[] => (
+  versions
+    .map((version) => {
+      const updatedAt = getCloudVersionTimestamp(version);
+      return {
+        id: version.id,
+        updatedAt,
+        type: (version.changelog === 'Manual Save' ? 'manual' : (version.changelog === 'Auto Save' || version.changelog === 'Initial version' ? 'auto' : (version.type || 'auto'))) as 'manual' | 'auto',
+        name: version.changelog !== 'Manual Save' && version.changelog !== 'Auto Save' && version.changelog !== 'Initial version' ? version.changelog : '',
+        data: (() => {
+          const rawVersion = typeof version.content === 'string' ? JSON.parse(version.content) : version.content;
+          return {
+            ...getSanitizedResume((rawVersion || {}) as Resume),
+            id: resumeId,
+            updatedAt,
+          } as Omit<Resume, 'versions'>;
+        })()
+      };
+    })
+    .sort((a, b) => b.updatedAt - a.updatedAt)
+    .slice(0, MAX_RESUME_VERSION_HISTORY)
+);
+
+const buildResumeFromCloud = (cloudResume: CloudResume, fallbackVersions?: ResumeVersion[]): Resume => {
+  const rawParsed = typeof cloudResume.content === 'string' ? JSON.parse(cloudResume.content) : cloudResume.content;
+  const sanitizedContent = getSanitizedResume({
+    ...((rawParsed || {}) as Resume),
+    name: cloudResume.title,
+    isPublic: cloudResume.isPublic,
+    shareId: cloudResume.shareId,
+    shareRole: cloudResume.shareRole
+  });
+
+  return {
+    id: cloudResume.id,
+    updatedAt: new Date(cloudResume.updatedAt).getTime(),
+    ...sanitizedContent,
+    versions: cloudResume.versions
+      ? normalizeCloudVersions(cloudResume.versions, cloudResume.id)
+      : normalizeResumeVersions(fallbackVersions)
+  };
+};
+
 const useResumeStore = create<ResumeState>()(
   immer((set, get) => ({
     resumes: [],
     activeResume: null,
     isStoreLoading: true,
     rightCollapsed: false,
+    leftCollapsed: false,
     activeSection: 'basics',
     syncStatus: 'saved',
     isSyncing: false,
@@ -163,9 +222,7 @@ const useResumeStore = create<ResumeState>()(
         try {
           const cloudResult = await resumeApi.fetchCloudResumes();
           if (cloudResult && cloudResult.data) {
-            // The response is wrapped by TransformInterceptor: { code: 200, data: { data: [...] }, ... }
-            // So cloudResult.data is the { data: [...], total } object
-            // We need to access cloudResult.data.data for the actual array
+            // Some API responses wrap the useful payload one level deeper.
             const cloudResumes = (Array.isArray(cloudResult.data) 
                 ? cloudResult.data 
                 : (cloudResult.data?.data || [])) as CloudResume[];
@@ -177,37 +234,7 @@ const useResumeStore = create<ResumeState>()(
                 cloudResumes.forEach(cr => {
                   const local = mergedMap.get(cr.id);
                   if (!local || new Date(cr.updatedAt).getTime() > local.updatedAt) {
-                    // Convert cloud structure back to local if necessary
-                    const rawParsed = typeof cr.content === 'string' ? JSON.parse(cr.content) : cr.content;
-                    
-                    // Strict whitelist sanitization using helper
-                    const sanitizedContent = getSanitizedResume({
-                      ...(rawParsed || {}),
-                      name: cr.title,
-                      isPublic: cr.isPublic,
-                      shareId: cr.shareId,
-                      shareRole: cr.shareRole
-                    });
-                    
-                    const mergedResume: Resume = {
-                      id: cr.id,
-                      updatedAt: new Date(cr.updatedAt).getTime(),
-                      ...sanitizedContent,
-                      versions: ((cr.versions || local?.versions || []) as CloudVersion[]).map(v => ({
-                        id: v.id,
-                        updatedAt: v.createdAt ? new Date(v.createdAt).getTime() : (v.timestamp || Date.now()),
-                        type: (v.changelog === 'Manual Save' ? 'manual' : (v.changelog === 'Auto Save' || v.changelog === 'Initial version' ? 'auto' : (v.type || 'auto'))) as 'manual' | 'auto',
-                        name: v.changelog !== 'Manual Save' && v.changelog !== 'Auto Save' && v.changelog !== 'Initial version' ? v.changelog : '',
-                        data: (() => {
-                            const vRaw = typeof v.content === 'string' ? JSON.parse(v.content) : v.content;
-                            return {
-                                ...getSanitizedResume(vRaw || {}),
-                                id: cr.id,
-                                updatedAt: v.createdAt ? new Date(v.createdAt).getTime() : (v.timestamp || Date.now()),
-                            } as Omit<Resume, 'versions'>;
-                        })()
-                      }))
-                    };
+                    const mergedResume = buildResumeFromCloud(cr, local?.versions);
                     mergedMap.set(cr.id, mergedResume);
                   }
                 });
@@ -854,7 +881,9 @@ const useResumeStore = create<ResumeState>()(
   },
 
   setRightCollapsed: (collapsed) => set({ rightCollapsed: collapsed }),
-  
+
+  setLeftCollapsed: (collapsed) => set({ leftCollapsed: collapsed }),
+
   setActiveSection: (section) => set({ activeSection: section }),
 
   updateSharing: async (isPublic, shareRole) => {
@@ -1002,38 +1031,7 @@ const useResumeStore = create<ResumeState>()(
       set({ isSyncing: true, syncStatus: 'syncing' });
       const cloudResume = (await resumeApi.fetchCloudResumeById(id)) as CloudResume;
       if (cloudResume) {
-          const { content: rawContent } = cloudResume;
-          
-          const rawParsed = typeof rawContent === 'string' ? JSON.parse(rawContent) : rawContent;
-          
-          // Strict whitelist sanitization using helper
-          const sanitizedContent = getSanitizedResume({
-            ...(rawParsed || {}),
-            name: cloudResume.title,
-            isPublic: cloudResume.isPublic,
-            shareId: cloudResume.shareId,
-            shareRole: cloudResume.shareRole,
-          });
-          
-          const mergedResume: Resume = {
-            id: cloudResume.id,
-            updatedAt: new Date(cloudResume.updatedAt).getTime(),
-            ...sanitizedContent,
-            versions: (cloudResume.versions || []).map(v => ({
-              id: v.id,
-              updatedAt: v.createdAt ? new Date(v.createdAt).getTime() : (v.timestamp || Date.now()),
-              type: (v.changelog === 'Manual Save' ? 'manual' : (v.changelog === 'Auto Save' || v.changelog === 'Initial version' ? 'auto' : (v.type || 'auto'))) as 'manual' | 'auto',
-              name: v.changelog !== 'Manual Save' && v.changelog !== 'Auto Save' && v.changelog !== 'Initial version' ? v.changelog : '',
-              data: (() => {
-                  const vRaw = typeof v.content === 'string' ? JSON.parse(v.content) : v.content;
-                  return {
-                      ...getSanitizedResume(vRaw || {}),
-                      id: cloudResume.id,
-                      updatedAt: v.createdAt ? new Date(v.createdAt).getTime() : (v.timestamp || Date.now()),
-                  } as Omit<Resume, 'versions'>;
-              })()
-            }))
-          };
+          const mergedResume = buildResumeFromCloud(cloudResume);
 
           const newResumes = get().resumes.map(r => r.id === id ? mergedResume : r);
           set({ 

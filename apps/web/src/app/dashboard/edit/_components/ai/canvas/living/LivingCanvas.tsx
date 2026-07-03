@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { ListChecks } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { InfoType, Resume, Section } from '@/types/frontend/resume';
 import {
   EditableCanvasProvider,
@@ -20,20 +21,25 @@ import ChangesPanel from './ChangesPanel';
 import {
   applyChangeToSections,
   applyInfoChange,
+  buildElementChange,
+  buildInsertChange,
+  buildSelectionChange,
+  finalizeAfter,
+  makeInsertTarget,
   parsePath,
   reorderSection,
   sectionTitle,
+  stripHtml,
+  type ActionKind,
+  type EditResultLike,
   type PendingChange,
   type QuickActionId,
   type SelectionActionId,
 } from '../../lib/changeModel';
-import {
-  createInsertChange,
-  createPendingChange,
-  createSelectionChange,
-  regeneratePendingChange,
-} from '../../lib/mock/changeMock';
-import { diffResumeToChanges, type BatchKind } from '../../lib/diffResume';
+import { requestEdit, type EditParams } from '../../lib/services/editClient';
+import type { AgentLlmConfig } from '../../lib/services/types';
+import { useSettingStore } from '@/store/useSettingStore';
+import { diffResumeToChanges, type BatchKind, type TargetedSelectionDiff } from '../../lib/diffResume';
 
 const PAGE_WIDTH = 794;
 const SCALE = 0.82;
@@ -44,6 +50,8 @@ export type BatchRequest = {
   nonce: number;
   /** The agent's proposed resume (from a `resume_update` event) to diff against current. */
   proposedSections?: Section;
+  /** Present when a chat turn started from a text selection. */
+  targetedSelection?: TargetedSelectionDiff;
 };
 export type FocusRequest = { path: string; nonce: number };
 
@@ -53,12 +61,39 @@ type LivingCanvasProps = {
   onApplySections: (sections: Section) => void;
   onApplyInfo: (info: InfoType) => void;
   onLog: (text: string, resumePath?: string) => void;
+  /** Track B bridge: lift a snippet into the chat composer for a freeform instruction. */
+  onAskWithTarget?: (ctx: { path: string; label: string; text: string; selectionText?: string }) => void;
   batchRequest?: BatchRequest | null;
   focusRequest?: FocusRequest | null;
 };
 
-type SelectionState = { target: EditableTarget; rect: DOMRect; text: string };
+type HighlightRect = { top: number; left: number; width: number; height: number };
+type SelectionState = { target: EditableTarget; rect: DOMRect; rects: HighlightRect[]; text: string };
 type SectionPopoverState = { sectionKey: string; title: string; rect: DOMRect };
+
+// Collapse the raw client rects into one union rect per visual line. Ranges over
+// text with inline elements (code/links) return extra rects that OVERLAP the line
+// rects; stacking two translucent highlights there compounds the alpha into darker
+// patches. Merging every vertically-overlapping rect into a single line rect keeps
+// the highlight one flat, uniform color.
+function mergeSelectionRects(raw: DOMRect[]): HighlightRect[] {
+  const boxes = raw
+    .filter((r) => r.width > 0 && r.height > 0)
+    .sort((a, b) => a.top - b.top || a.left - b.left);
+  const lines: { top: number; bottom: number; left: number; right: number }[] = [];
+  for (const r of boxes) {
+    const line = lines.find((l) => r.top < l.bottom - 1 && r.bottom > l.top + 1);
+    if (line) {
+      line.top = Math.min(line.top, r.top);
+      line.bottom = Math.max(line.bottom, r.bottom);
+      line.left = Math.min(line.left, r.left);
+      line.right = Math.max(line.right, r.right);
+    } else {
+      lines.push({ top: r.top, bottom: r.bottom, left: r.left, right: r.right });
+    }
+  }
+  return lines.map((l) => ({ top: l.top, left: l.left, width: l.right - l.left, height: l.bottom - l.top }));
+}
 
 export default function LivingCanvas({
   resumeData,
@@ -66,9 +101,11 @@ export default function LivingCanvas({
   onApplySections,
   onApplyInfo,
   onLog,
+  onAskWithTarget,
   batchRequest,
   focusRequest,
 }: LivingCanvasProps) {
+  const { t } = useTranslation();
   const [pending, setPending] = useState<Record<string, PendingChange>>({});
   const [order, setOrder] = useState<string[]>([]);
   const [processing, setProcessing] = useState<string[]>([]);
@@ -92,7 +129,25 @@ export default function LivingCanvas({
   infoRef.current = resumeData.info;
   const selectionRef = useRef(selection);
   selectionRef.current = selection;
-  const errorAttemptsRef = useRef<Record<string, PendingChange>>({});
+  // Retry re-runs the exact same edit — stash its params + assembler by path.
+  const errorAttemptsRef = useRef<
+    Record<string, { params: Omit<EditParams, 'config' | 'signal'>; build: (r: EditResultLike) => PendingChange }>
+  >({});
+  // In-flight requests, keyed by path — a new action on a path aborts the prior;
+  // unmount / canvas close aborts them all.
+  const abortRef = useRef<Record<string, AbortController>>({});
+
+  // User model config drives every edit; read live via ref so callbacks don't churn on keystrokes.
+  const { apiKey, baseUrl, model, maxTokens } = useSettingStore();
+  const configRef = useRef<AgentLlmConfig>({ apiKey, baseUrl, modelName: model, maxTokens });
+  configRef.current = { apiKey, baseUrl, modelName: model, maxTokens };
+
+  useEffect(
+    () => () => {
+      Object.values(abortRef.current).forEach((c) => c.abort());
+    },
+    []
+  );
 
   const activePath = popover ? pathOf(popover.target) : null;
 
@@ -146,15 +201,9 @@ export default function LivingCanvas({
     window.setTimeout(() => el.classList.remove('lc-highlight'), 1200);
   }, []);
 
-  // Commit a freshly generated change — or, on a simulated failure, surface a retry.
+  // Commit a freshly generated change onto the canvas as a reviewable proposal.
   const commit = useCallback((change: PendingChange) => {
     const path = pathOf(change.target);
-    const failed = !change.isInsert && change.seed === 0 && Math.random() < 0.15;
-    if (failed) {
-      errorAttemptsRef.current[path] = change;
-      setErrors((prev) => ({ ...prev, [path]: '这处没改成，点一下重试' }));
-      return;
-    }
     delete errorAttemptsRef.current[path];
     setErrors((prev) => {
       if (!prev[path]) return prev;
@@ -165,6 +214,45 @@ export default function LivingCanvas({
     setPending((prev) => ({ ...prev, [path]: change }));
     setOrder((prev) => (prev.includes(path) ? prev : [...prev, path]));
   }, []);
+
+  // The edit round-trip: shimmer the target, call the service with model config,
+  // commit the proposal on success, or surface a retryable error. Shared by element /
+  // selection / insert actions so loading + error + abort behave identically.
+  const runEdit = useCallback(
+    async (
+      path: string,
+      params: Omit<EditParams, 'config' | 'signal'>,
+      build: (r: EditResultLike) => PendingChange
+    ) => {
+      const config = configRef.current;
+      if (!config.apiKey) {
+        setErrors((prev) => ({ ...prev, [path]: '先在设置里配置 AI 服务，再来改这一处' }));
+        return;
+      }
+      errorAttemptsRef.current[path] = { params, build };
+      abortRef.current[path]?.abort();
+      const ctrl = new AbortController();
+      abortRef.current[path] = ctrl;
+      setErrors((prev) => {
+        if (!prev[path]) return prev;
+        const next = { ...prev };
+        delete next[path];
+        return next;
+      });
+      setProcessing((prev) => (prev.includes(path) ? prev : [...prev, path]));
+      try {
+        const result = await requestEdit({ ...params, config, signal: ctrl.signal });
+        commit(build(result));
+      } catch (e) {
+        if ((e as Error)?.name === 'AbortError') return; // user cancelled — stay quiet
+        setErrors((prev) => ({ ...prev, [path]: (e as Error)?.message || '这处没改成，点一下重试' }));
+      } finally {
+        if (abortRef.current[path] === ctrl) delete abortRef.current[path];
+        setProcessing((prev) => prev.filter((p) => p !== path));
+      }
+    },
+    [commit]
+  );
 
   const handleHandleClick = useCallback((target: EditableTarget, anchor: HTMLElement) => {
     setInteracted(true);
@@ -177,17 +265,22 @@ export default function LivingCanvas({
     (action: QuickActionId | 'free', freeText?: string) => {
       if (!popover) return;
       const { target } = popover;
-      const path = pathOf(target);
-      const original = fieldHtml(target);
       setPopover(null);
       setInteracted(true);
-      setProcessing((prev) => (prev.includes(path) ? prev : [...prev, path]));
-      window.setTimeout(() => {
-        setProcessing((prev) => prev.filter((p) => p !== path));
-        commit(createPendingChange(target, original, action, freeText));
-      }, 900);
+      // 询问 Polaris → lift this element into the chat composer (Track B).
+      if (action === 'free' && onAskWithTarget) {
+        onAskWithTarget({ path: pathOf(target), label: target.label, text: stripHtml(fieldHtml(target)) });
+        return;
+      }
+      const path = pathOf(target);
+      const before = fieldHtml(target);
+      void runEdit(
+        path,
+        { action, resumePath: path, before, instruction: freeText },
+        (r) => buildElementChange(target, before, action, r, freeText)
+      );
     },
-    [popover, fieldHtml, commit]
+    [popover, fieldHtml, runEdit, onAskWithTarget]
   );
 
   // P2 · selection-driven. Detect a text selection inside an editable field.
@@ -216,10 +309,20 @@ export default function LivingCanvas({
       kind: parsed.sectionKey === 'info' ? 'text' : 'html',
       label: `选中片段 · ${sectionTitle(parsed.sectionKey)}`,
     };
+    // Snapshot the geometry (one rect per visual line) + text before we drop the
+    // native selection below.
+    const rects = mergeSelectionRects(Array.from(range.getClientRects()));
+    const boundingRect = range.getBoundingClientRect();
+    const text = sel.toString();
     setPopover(null);
     setSectionPopover(null);
     setInteracted(true);
-    setSelection({ target, rect: range.getBoundingClientRect(), text: sel.toString() });
+    setSelection({ target, rect: boundingRect, rects, text });
+    // The browser clears its own selection the moment the cursor moves onto the
+    // floating toolbar, so we don't rely on it: drop it now and paint our own
+    // persistent highlight (SelectionHighlight) from the snapshot instead. The
+    // action still runs off the stored `text`, not the live selection.
+    sel.removeAllRanges();
   }, []);
 
   const runSelectionAction = useCallback(
@@ -227,17 +330,23 @@ export default function LivingCanvas({
       const sel = selectionRef.current;
       if (!sel) return;
       const { target, text } = sel;
+      setSelection(null);
+      // 询问 Polaris → lift the selected snippet into the chat composer, keeping the
+      // selected text as chat context. The chat result is later diffed back onto this
+      // same path as a local preview.
+      if (action === 'free' && onAskWithTarget) {
+        onAskWithTarget({ path: pathOf(target), label: target.label, text, selectionText: text });
+        return;
+      }
       const path = pathOf(target);
       const fullHtml = fieldHtml(target);
-      setSelection(null);
-      window.getSelection()?.removeAllRanges();
-      setProcessing((prev) => (prev.includes(path) ? prev : [...prev, path]));
-      window.setTimeout(() => {
-        setProcessing((prev) => prev.filter((p) => p !== path));
-        commit(createSelectionChange(target, fullHtml, text, action, freeText));
-      }, 900);
+      void runEdit(
+        path,
+        { action, resumePath: path, before: fullHtml, selectionText: text, instruction: freeText },
+        (r) => buildSelectionChange(target, fullHtml, text, action, r, { freeText })
+      );
     },
-    [fieldHtml, commit]
+    [fieldHtml, runEdit, onAskWithTarget]
   );
 
   // §5B · section-title handle → add an item / reorder.
@@ -251,15 +360,20 @@ export default function LivingCanvas({
   const addItem = useCallback(
     (sectionKey: string, title: string) => {
       setSectionPopover(null);
-      const change = createInsertChange(sectionKey, title);
-      const path = pathOf(change.target);
-      setProcessing((prev) => [...prev, path]);
-      window.setTimeout(() => {
-        setProcessing((prev) => prev.filter((p) => p !== path));
-        commit(change);
-      }, 900);
+      const target = makeInsertTarget(sectionKey, title);
+      const path = pathOf(target);
+      void runEdit(
+        path,
+        {
+          action: 'insert',
+          resumePath: `sections.${sectionKey}`,
+          before: '',
+          instruction: `为「${title}」补一条同风格、可量化的新要点`,
+        },
+        (r) => buildInsertChange(target, r)
+      );
     },
-    [commit]
+    [runEdit]
   );
 
   const reorder = useCallback(
@@ -313,28 +427,66 @@ export default function LivingCanvas({
     [dropFromOrder]
   );
 
+  // "再来一版" — re-run the same intent with a "换一种写法" nudge, swapping only the
+  // generated text on the existing proposal (keeps its id / target / path).
   const regenerate = useCallback((path: string) => {
     const change = pendingRef.current[path];
     if (!change) return;
-    setPending((prev) => ({ ...prev, [path]: regeneratePendingChange(change) }));
+    const config = configRef.current;
+    if (!config.apiKey) {
+      setErrors((prev) => ({ ...prev, [path]: '先在设置里配置 AI 服务，再来一版' }));
+      return;
+    }
+    abortRef.current[path]?.abort();
+    const ctrl = new AbortController();
+    abortRef.current[path] = ctrl;
+    setProcessing((prev) => (prev.includes(path) ? prev : [...prev, path]));
+    requestEdit({
+      action: change.isInsert ? 'insert' : (change.action as ActionKind),
+      resumePath: pathOf(change.target),
+      before: change.before,
+      selectionText: change.selectionText,
+      instruction: [change.freeText, '换一种写法'].filter(Boolean).join('；'),
+      lang: change.lang,
+      config,
+      signal: ctrl.signal,
+    })
+      .then((r) => {
+        setPending((prev) =>
+          prev[path]
+            ? {
+                ...prev,
+                [path]: {
+                  ...prev[path],
+                  after: finalizeAfter(change.target.kind, r.after),
+                  rationale: r.rationale,
+                  rationaleDetail: r.rationaleDetail,
+                },
+              }
+            : prev
+        );
+      })
+      .catch((e) => {
+        if ((e as Error)?.name === 'AbortError') return;
+        setErrors((prev) => ({ ...prev, [path]: (e as Error)?.message || '再来一版没成，点一下重试' }));
+      })
+      .finally(() => {
+        if (abortRef.current[path] === ctrl) delete abortRef.current[path];
+        setProcessing((prev) => prev.filter((p) => p !== path));
+      });
   }, []);
 
   const retry = useCallback(
     (path: string) => {
-      const attempt = errorAttemptsRef.current[path];
       setErrors((prev) => {
         const next = { ...prev };
         delete next[path];
         return next;
       });
-      if (!attempt) return;
-      setProcessing((prev) => (prev.includes(path) ? prev : [...prev, path]));
-      window.setTimeout(() => {
-        setProcessing((prev) => prev.filter((p) => p !== path));
-        commit(regeneratePendingChange(attempt)); // seed bumped → recovers
-      }, 700);
+      const attempt = errorAttemptsRef.current[path];
+      if (attempt) void runEdit(path, attempt.params, attempt.build);
     },
-    [commit]
+    [runEdit]
   );
 
   const acceptAll = useCallback(() => {
@@ -353,12 +505,12 @@ export default function LivingCanvas({
     }
     onApplySections(nextSections);
     if (infoTouched) onApplyInfo(nextInfo);
-    onLog(`已接受 ${changes.length} 处改动`);
+    onLog(t('aiLab.living.acceptedChangesLog', { count: changes.length }));
     setPending({});
     setOrder([]);
     setCursor(0);
     setPanelOpen(false);
-  }, [order, onApplySections, onApplyInfo, onLog]);
+  }, [order, onApplySections, onApplyInfo, onLog, t]);
 
   const discardAll = useCallback(() => {
     setPending({});
@@ -413,7 +565,8 @@ export default function LivingCanvas({
       sectionsRef.current,
       batchRequest.proposedSections,
       batchRequest.kind,
-      batchRequest.lang
+      batchRequest.lang,
+      batchRequest.targetedSelection
     );
     if (!changes.length) return;
     const entries = changes.map((c) => ({ path: pathOf(c.target), change: c }));
@@ -452,6 +605,7 @@ export default function LivingCanvas({
     timer = setTimeout(attempt, 60);
     return () => clearTimeout(timer);
   }, [focusRequest, scrollToPath]);
+
 
   // §10 · if the source diverges from a pending change's `before`, the user hand-edited
   // it elsewhere → treat that as discarding the proposal.
@@ -537,7 +691,7 @@ export default function LivingCanvas({
             className="ml-auto inline-flex items-center gap-1.5 text-[11px] text-neutral-300 border border-neutral-800 hover:border-neutral-700 rounded-full px-2.5 py-1 transition-colors cursor-pointer"
           >
             <ListChecks size={12} />
-            {count} 处改动
+            {t('aiLab.living.changeCountShort', { count })}
           </button>
         </div>
       )}
@@ -608,6 +762,27 @@ export default function LivingCanvas({
           />
         )}
       </AnimatePresence>
+
+      {/* Persistent highlight for the captured selection — replaces the native
+          one so the marked snippet stays lit while the cursor is on the toolbar. */}
+      {selection && (
+        <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 115, pointerEvents: 'none' }}>
+          {selection.rects.map((r, i) => (
+            <div
+              key={i}
+              style={{
+                position: 'absolute',
+                top: r.top,
+                left: r.left,
+                width: r.width,
+                height: r.height,
+                background: 'rgba(56,189,248,0.28)',
+                borderRadius: 2,
+              }}
+            />
+          ))}
+        </div>
+      )}
 
       <AnimatePresence>
         {selection && (

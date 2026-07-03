@@ -4,11 +4,12 @@ import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useSettingStore } from '@/store/useSettingStore';
 import { isCloudMode } from '@/lib/config/app';
+import { formatCompactDateTime } from '@/lib/utils/dateTime';
+import ResumeSwitcher from './ResumeSwitcher';
 
 export type SyncStatus = 'saved' | 'syncing' | 'modified' | 'local' | 'error';
 
 interface HeaderTabProps {
-    title?: string;
     updatedAt?: number;
     syncStatus?: SyncStatus;
     onVersionClick?: () => void;
@@ -20,19 +21,9 @@ interface HeaderTabProps {
  * 让 chrome 退入背景(设计原则:画布是舞台、对话是旁白、能力按需浮现)。标题是主角,
  * 文档动作默认低调、靠近才点亮;同步收敛成一颗 sky 状态点 + 短词,完整时间在 hover。
  */
-export default function HeaderTab({ title, updatedAt, syncStatus = 'saved', onVersionClick, onFeedbackClick }: HeaderTabProps) {
+export default function HeaderTab({ updatedAt, syncStatus = 'saved', onVersionClick, onFeedbackClick }: HeaderTabProps) {
     const { t } = useTranslation();
     const cloudSync = useSettingStore((state) => state.cloudSync);
-
-    const formatTime = (timestamp?: number) => {
-        if (!timestamp) return '';
-        return new Date(timestamp).toLocaleString('zh-CN', {
-            month: 'numeric',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-        });
-    };
 
     // 紧凑同步状态:一颗状态点 + 短词;syncing 时呼吸扩散;完整时间在外层 title 里。
     const status = (() => {
@@ -55,7 +46,7 @@ export default function HeaderTab({ title, updatedAt, syncStatus = 'saved', onVe
             initial={{ y: -16, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-            className="pointer-events-none absolute inset-x-0 top-0 z-10 flex h-16 items-center gap-4 bg-gradient-to-b from-black via-black/70 to-transparent px-6"
+            className="pointer-events-none absolute inset-x-0 top-0 z-50 flex h-16 min-w-0 items-center gap-4 overflow-visible bg-gradient-to-b from-black via-black/70 to-transparent px-6"
         >
             {/* 左:返回工作台 + 标题(主角) */}
             <div className="pointer-events-auto flex min-w-0 items-center gap-2">
@@ -67,12 +58,10 @@ export default function HeaderTab({ title, updatedAt, syncStatus = 'saved', onVe
                 >
                     <ChevronLeft size={18} className="transition-transform duration-200 group-hover:-translate-x-0.5" />
                 </Link>
-                <span className="truncate text-[15px] font-semibold tracking-tight text-neutral-100">
-                    {title || '未命名简历'}
-                </span>
+                <ResumeSwitcher />
             </div>
 
-            <div className="flex-1" />
+            <div className="min-w-0 flex-1" />
 
             {/* 右:文档动作(按需浮现)+ 紧凑同步状态 */}
             {(cloudSync || isCloudMode) && (
@@ -86,7 +75,7 @@ export default function HeaderTab({ title, updatedAt, syncStatus = 'saved', onVe
                                 className="group/htip relative flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-white/[0.06] hover:text-neutral-100"
                             >
                                 <History size={16} />
-                                <span className="pointer-events-none absolute left-1/2 top-full z-10 mt-2 -translate-x-1/2 whitespace-nowrap rounded-md border border-neutral-800 bg-neutral-900 px-2 py-0.5 text-xs text-neutral-100 opacity-0 transition-opacity duration-150 group-hover/htip:opacity-100">
+                                <span className="pointer-events-none absolute left-1/2 top-full z-[60] mt-2 -translate-x-1/2 whitespace-nowrap rounded-md border border-neutral-800 bg-neutral-900 px-2 py-0.5 text-xs text-neutral-100 shadow-lg shadow-black/40 opacity-0 transition-opacity duration-150 group-hover/htip:opacity-100">
                                     {t('header.versionHistory')}
                                 </span>
                             </button>
@@ -99,7 +88,7 @@ export default function HeaderTab({ title, updatedAt, syncStatus = 'saved', onVe
                                 className="group/htip relative flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-white/[0.06] hover:text-neutral-100"
                             >
                                 <MessageCircle size={16} />
-                                <span className="pointer-events-none absolute left-1/2 top-full z-10 mt-2 -translate-x-1/2 whitespace-nowrap rounded-md border border-neutral-800 bg-neutral-900 px-2 py-0.5 text-xs text-neutral-100 opacity-0 transition-opacity duration-150 group-hover/htip:opacity-100">
+                                <span className="pointer-events-none absolute left-1/2 top-full z-[60] mt-2 -translate-x-1/2 whitespace-nowrap rounded-md border border-neutral-800 bg-neutral-900 px-2 py-0.5 text-xs text-neutral-100 shadow-lg shadow-black/40 opacity-0 transition-opacity duration-150 group-hover/htip:opacity-100">
                                     {t('tools.feedback')}
                                 </span>
                             </button>
@@ -111,7 +100,7 @@ export default function HeaderTab({ title, updatedAt, syncStatus = 'saved', onVe
                             <span className="h-4 w-px bg-white/10" />
                             <div
                                 className="flex items-center gap-2"
-                                title={updatedAt ? `${t('header.lastUpdated')} ${formatTime(updatedAt)}` : undefined}
+                                title={updatedAt ? `${t('header.lastUpdated')} ${formatCompactDateTime(updatedAt)}` : undefined}
                             >
                                 <span className="relative flex h-1.5 w-1.5 items-center justify-center">
                                     {status.pulse && (

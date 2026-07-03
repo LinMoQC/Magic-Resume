@@ -108,6 +108,8 @@ export interface ChatMessage {
   subagentName?: string;
   /** present when role === 'widget' — a GenUI interactive card (form / decision) */
   widget?: WidgetInstance;
+  /** present when a user message quotes a canvas snippet (「询问 Polaris」bridge) */
+  quote?: { label: string; text: string };
 }
 
 export type CanvasStatus = 'idle' | 'streaming' | 'ready' | 'applied';

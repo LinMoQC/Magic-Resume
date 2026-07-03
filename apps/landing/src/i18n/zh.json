@@ -1,0 +1,250 @@
+{
+  "meta": {
+    "title": "Magic Resume — AI 简历工作台",
+    "description": "AI 在简历上就地提议修改,由你决定采纳与否。引导创建、岗位匹配分析、模拟面试——开源内核,云端同步。"
+  },
+  "logoAlt": "Magic Resume",
+  "nav": {
+    "features": "功能",
+    "workflow": "工作方式",
+    "sync": "云同步",
+    "openSource": "开源",
+    "faq": "常见问题",
+    "goToApp": "进入应用",
+    "starOnGithub": "在 GitHub 点赞"
+  },
+  "hero": {
+    "pill": "V1.0 · 开源内核",
+    "title": "为你的目标岗位而生的简历工作台",
+    "titleAccent": "目标岗位",
+    "subtitle": "AI 在页面上就地提议修改,合适的采纳、其余的跳过。每一处改动,实时同步到你的每一台设备。",
+    "ctaPrimary": "开始使用",
+    "ctaSecondary": "在 GitHub 点赞",
+    "previewAlt": "Magic Resume 编辑器",
+    "trust": ["开源 MIT 内核", "云端实时同步", "AI 原生工作台"],
+    "mockup": {
+      "doc": "Kairo Chen's Resume",
+      "synced": "已同步",
+      "content": "内容",
+      "basics": "基本信息",
+      "avatar": "头像",
+      "name": "名称",
+      "title": "标题",
+      "email": "电子邮件",
+      "website": "网站",
+      "phone": "电话",
+      "location": "地点",
+      "experience": "经历",
+      "customize": "自定义",
+      "template": "模板",
+      "layout": "布局",
+      "typography": "排版",
+      "colors": "配色",
+      "quickThemes": "快速主题",
+      "customColors": "自定义颜色",
+      "primary": "主色调",
+      "secondary": "次色调",
+      "changeTemplate": "更换模板",
+      "proposal": "AI 提议",
+      "proposalHint": "把这条成果量化…",
+      "accept": "采纳",
+      "skip": "跳过"
+    }
+  },
+  "bento": {
+    "eyebrow": "能力",
+    "title": "六种模式,一个工作台",
+    "subtitle": "从空白页到点击投递之间的一切。在下面试试——技能就在这个页面上运行,数据是演示用的。",
+    "window": {
+      "title": "AI 实验室",
+      "doc": "Kairo Chen's Resume",
+      "liveCanvas": "实时画布",
+      "stop": "停止生成"
+    },
+    "welcome": {
+      "title": "今天想怎么打磨简历?",
+      "sub": "描述你的需求,我会调用合适的技能来完成",
+      "hint": "输入 / 唤出技能菜单",
+      "placeholder": "描述需求,或输入 / 调用技能…"
+    },
+    "chat": {
+      "mockReply": "这里是演示环境,不会动真实数据——在正式应用里,我会调用合适的技能直接处理你的需求。输入 / 试试技能 →",
+      "send": "发送",
+      "menuTitle": "技能",
+      "toggleCanvas": "收起/展开实时画布"
+    },
+    "chips": [
+      {
+        "id": "optimize",
+        "tag": "智能优化",
+        "ask": "优化项目经历,突出量化成果",
+        "label": "优化项目经历"
+      },
+      {
+        "id": "analyze",
+        "tag": "简历分析",
+        "ask": "给简历做一次竞争力体检",
+        "label": "给简历做一次竞争力体检"
+      },
+      {
+        "id": "translate",
+        "tag": "简历翻译",
+        "ask": "把简历翻译成英文版",
+        "label": "把简历翻译成英文版"
+      },
+      {
+        "id": "interview",
+        "tag": "模拟面试",
+        "ask": "模拟一场技术面试",
+        "label": "模拟一场技术面试"
+      }
+    ],
+    "flows": {
+      "optimize": {
+        "reply": "优化前先锁定目标岗位,确保改写方向对路。填一下目标岗位信息:",
+        "formTitle": "目标岗位信息",
+        "jd": "目标 JD",
+        "jdPh": "粘贴目标职位描述,AI 将据此定向优化…",
+        "company": "公司",
+        "companyPh": "例如 字节跳动",
+        "role": "岗位",
+        "rolePh": "例如 高级产品经理",
+        "cancel": "取消",
+        "submit": "提交",
+        "applied": "完成——已按目标 JD 定向改写一条成果表述,改动已落在画布上 →"
+      },
+      "analyze": {
+        "cardTitle": "简历多角色评审",
+        "steps": [
+          "读取简历",
+          "同行视角评审",
+          "用人主管视角评审",
+          "HRBP 视角评审",
+          "汇总竞争力评分"
+        ],
+        "result": "综合竞争力 86/100——最强信号:量化成果。两处待补齐差距已标注在画布上 →"
+      },
+      "translate": {
+        "reply": "已生成英文版,排版保持不变。看画布 →"
+      },
+      "interview": {
+        "reply": "正在读你的简历……先从 Google 实习聊起:",
+        "question": "“你把内存泄漏降低了 25%——当时是怎么定位的?又是怎么验证修复效果的?”",
+        "hint": "相关经历已在画布上高亮 →"
+      }
+    },
+    "modes": [
+      { "id": "create", "title": "创建", "desc": "从空白页开始的引导式初稿" },
+      { "id": "optimize", "title": "优化", "desc": "就地提案,采纳或跳过" },
+      { "id": "analyze", "title": "分析", "desc": "对照任意 JD 的匹配评分" },
+      { "id": "translate", "title": "翻译", "desc": "一键中英双语" },
+      { "id": "interview", "title": "面试", "desc": "预演基于简历的追问" },
+      { "id": "export", "title": "导出", "desc": "ATS 友好 PDF,JSON 备份" }
+    ]
+  },
+  "workflow": {
+    "eyebrow": "工作方式",
+    "title": "AI 提议,你来决定",
+    "subtitle": "不做黑箱改写。每处修改都是一条带理由的提案——红色删除、绿色新增、全程可追溯,你点头才生效。",
+    "points": [
+      "修改就地提议,绝不悄悄应用",
+      "每条提案都附带理由",
+      "任何提案都可跳过,简历始终是你的"
+    ],
+    "stream": {
+      "doc": "我的简历.pdf",
+      "status": "AI 协作中",
+      "proposal": "提案",
+      "reason": "理由",
+      "accept": "采纳",
+      "skip": "跳过",
+      "accepted": "已采纳",
+      "skipped": "已跳过",
+      "pending": "待确认",
+      "upcoming": "条提案排队中…",
+      "ledger": "操作日志",
+      "zeroLine": "未经确认的改动:0",
+      "items": [
+        {
+          "reason": "表述空泛",
+          "before": "负责前端团队。",
+          "after": "带领 5 人前端团队,一年交付 3 款产品。"
+        },
+        {
+          "reason": "缺少量化",
+          "before": "优化了网站性能。",
+          "after": "将页面加载时间降低 42%,转化率提升 18%。"
+        },
+        {
+          "reason": "简介松散",
+          "before": "努力工作、正在找工作的开发者。",
+          "after": "交付迅速、注重细节的全栈工程师。"
+        }
+      ]
+    }
+  },
+  "sync": {
+    "eyebrow": "云端同步",
+    "title": "改一处,处处都在",
+    "subtitle": "云端同步默认开启:在工位改的每一个字,回家打开手机就在。版本历史完整保留,随时回滚、随时导出。",
+    "points": [
+      "多设备实时同步",
+      "版本历史,一键回滚",
+      "开源可自部署,云端开箱即用"
+    ],
+    "synced": "已同步",
+    "justNow": "刚刚",
+    "doc": "李明的简历",
+    "devices": ["MacBook Pro", "iPhone", "iPad"]
+  },
+  "openSource": {
+    "eyebrow": "开源",
+    "title": "在开放中构建",
+    "desc": "Magic Resume 内核采用 MIT 协议,与社区一起构建。读代码、提 issue,或给个 star。",
+    "starCta": "在 GitHub 点赞",
+    "starsLabel": "颗星",
+    "contributorsLabel": "贡献者"
+  },
+  "faq": {
+    "eyebrow": "常见问题",
+    "title": "你可能想问",
+    "items": [
+      {
+        "q": "Magic Resume 是免费的吗?",
+        "a": "开源版永久免费,可自部署;云端版内置同步与 AI 能力,提供免费额度,重度使用可升级付费计划。"
+      },
+      {
+        "q": "我的简历数据安全吗?",
+        "a": "云端同步全程加密传输与存储,数据只属于你,随时可以完整导出。在意完全离线?自部署开源版即可。"
+      },
+      {
+        "q": "AI 会不经允许修改我的简历吗?",
+        "a": "不会。所有修改都以提案形式出现——红色删除、绿色新增、附带理由——你点下采纳才会生效。"
+      },
+      {
+        "q": "支持哪些导出格式?",
+        "a": "一键导出 ATS 友好的 PDF;JSON 自由进出,便于备份与迁移。"
+      },
+      {
+        "q": "和其他简历工具有什么不同?",
+        "a": "它不是表单生成器,而是一个懂你目标岗位的工作台:创建、优化、分析、翻译、面试预演,都在同一块画布上完成。"
+      }
+    ]
+  },
+  "cta": {
+    "title": "从空白页,到点击投递",
+    "subtitle": "做一份懂你目标岗位的简历。",
+    "button": "开始使用",
+    "note": "开源内核 · 云端同步 · 随时导出"
+  },
+  "footer": {
+    "brandSubtitle": "让求职变简单的 AI 简历工作台。",
+    "product": "产品",
+    "builder": "在线制作",
+    "project": "项目",
+    "github": "GitHub",
+    "issues": "问题反馈",
+    "contributors": "贡献者",
+    "copyright": "© {year} Magic Resume. 保留所有权利。"
+  }
+}

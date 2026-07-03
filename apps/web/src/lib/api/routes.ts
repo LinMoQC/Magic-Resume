@@ -1,15 +1,14 @@
 /**
- * The single backend origin — the whole frontend talks to ONE API address:
- * Magic-Core's edge gateway (`apps/gateway`), which routes by path prefix to
- * agent-service / platform-api. ONE variable only (`NEXT_PUBLIC_API_URL`,
- * resolved identically in browser + server); no legacy per-service fallback.
+ * The single API origin — the whole frontend talks to ONE configured address.
+ * ONE variable only (`NEXT_PUBLIC_API_URL`, resolved identically in browser +
+ * server); no legacy per-service fallback.
  * Lives in this dep-free module so both client and server can import it without
  * pulling axios in via httpClient.
  */
 export const API_ORIGIN = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3110';
 
 /**
- * Core API routes (httpClient.api → NestJS backend)
+ * Product API routes.
  */
 export const API_ROUTES = {
   resumes: {
@@ -37,7 +36,7 @@ export const API_ROUTES = {
 } as const;
 
 /**
- * Agent API routes (httpClient.agent → Magic-Core agent-service)
+ * AI-related API routes.
  */
 export const AGENT_ROUTES = {
   interview: {
@@ -48,12 +47,12 @@ export const AGENT_ROUTES = {
 } as const;
 
 /**
- * Web-side AI gateway routes — Next.js route handlers that proxy to the
- * Magic-Core agent-service (design §3.8). Centralizes the paths the AI Lab
- * service layer (`ai/lib/services`) calls so they aren't hardcoded inline.
+ * Web-side AI route handlers. Centralizes the paths the AI Lab service layer
+ * (`ai/lib/services`) calls so they aren't hardcoded inline.
  */
 export const WEB_AGENT_ROUTES = {
   chat:             '/api/chat-agent',
   chatApprove:      '/api/chat-agent/approve',
   chatSession:      '/api/chat-agent/session',
+  chatEdit:         '/api/chat-agent/edit',
 } as const;

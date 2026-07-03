@@ -1,0 +1,26 @@
+---
+import { LOCALES, localeLabels, getLocaleFromUrl } from '@/i18n/ui';
+
+const current = getLocaleFromUrl(Astro.url);
+---
+
+<div
+  class="flex items-center rounded-full border border-hairline bg-surface/60 p-0.5 text-[12px]"
+>
+  {
+    LOCALES.map((loc) => (
+      <a
+        href={`/${loc}`}
+        aria-current={loc === current ? 'true' : undefined}
+        class:list={[
+          'rounded-full px-2.5 py-1 font-medium transition-colors',
+          loc === current
+            ? 'bg-ink/10 text-ink'
+            : 'text-faint hover:text-muted',
+        ]}
+      >
+        {localeLabels[loc]}
+      </a>
+    ))
+  }
+</div>

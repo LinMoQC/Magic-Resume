@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { X, Check, CornerDownRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export type ChangeRow = {
   path: string;
@@ -27,6 +28,8 @@ export default function ChangesPanel({
   onDiscardAll,
   onClose,
 }: ChangesPanelProps) {
+  const { t } = useTranslation();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: -6 }}
@@ -36,8 +39,8 @@ export default function ChangesPanel({
       className="absolute right-4 top-12 z-40 w-[300px] max-h-[60%] flex flex-col rounded-2xl bg-neutral-900 border border-neutral-800 shadow-[0_16px_50px_rgba(0,0,0,0.55)] overflow-hidden"
     >
       <div className="flex items-center gap-2 px-3.5 py-2.5 shrink-0">
-        <span className="text-xs font-medium text-white">全部改动</span>
-        <span className="text-[11px] text-neutral-500">{rows.length} 处</span>
+        <span className="text-xs font-medium text-white">{t('aiLab.living.allChanges')}</span>
+        <span className="text-[11px] text-neutral-500">{t('aiLab.living.changeCountShort', { count: rows.length })}</span>
         <button
           type="button"
           onClick={onClose}
@@ -60,14 +63,14 @@ export default function ChangesPanel({
             <div className="min-w-0">
               <div className="text-xs text-neutral-200 truncate">
                 {r.label}
-                {r.isInsert && <span className="ml-1.5 text-[10px] text-emerald-400">新增</span>}
+                {r.isInsert && <span className="ml-1.5 text-[10px] text-emerald-400">{t('aiLab.living.inserted')}</span>}
               </div>
               <div className="text-[11px] text-neutral-500 truncate">{r.rationale}</div>
             </div>
           </button>
         ))}
         {rows.length === 0 && (
-          <div className="px-3 py-6 text-center text-[11px] text-neutral-600">暂无待评审改动</div>
+          <div className="px-3 py-6 text-center text-[11px] text-neutral-600">{t('aiLab.living.emptyChanges')}</div>
         )}
       </div>
 
@@ -78,7 +81,7 @@ export default function ChangesPanel({
             onClick={onDiscardAll}
             className="flex-1 text-xs px-3 py-1.5 rounded-lg text-neutral-400 hover:bg-neutral-800 transition-colors cursor-pointer"
           >
-            全部放弃
+            {t('aiLab.living.discardAll')}
           </button>
           <button
             type="button"
@@ -86,7 +89,7 @@ export default function ChangesPanel({
             className="flex-1 text-xs px-3 py-1.5 rounded-lg bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25 transition-colors cursor-pointer inline-flex items-center justify-center gap-1.5"
           >
             <Check size={13} />
-            全部接受
+            {t('aiLab.living.acceptAll')}
           </button>
         </div>
       )}

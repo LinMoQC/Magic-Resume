@@ -2,19 +2,35 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowUp, X } from 'lucide-react';
+import { ArrowUp, CornerUpLeft, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { SKILLS, SKILL_LIST } from '../skills/registry';
 import type { SkillId } from '../types';
+
+/** A snippet lifted from the canvas ("自定义 / 问 AI"), shown as a quoted chip above the input. */
+export type QuotedContext = { label: string; text: string };
 
 type ComposerProps = {
   /** Run a skill picked via `/`, carrying whatever the user typed after the chip. */
   onRunSkill: (id: SkillId, text: string) => void;
   onSend: (text: string) => void;
+  /** When set, the input shows a quoted chip and sending routes the instruction here. */
+  quotedContext?: QuotedContext | null;
+  onSendWithContext?: (text: string) => void;
+  onClearQuoted?: () => void;
   disabled?: boolean;
 };
 
-export default function Composer({ onRunSkill, onSend, disabled }: ComposerProps) {
+export default function Composer({
+  onRunSkill,
+  onSend,
+  quotedContext,
+  onSendWithContext,
+  onClearQuoted,
+  disabled,
+}: ComposerProps) {
+  const { t } = useTranslation();
   const [value, setValue] = useState('');
   const [highlight, setHighlight] = useState(0);
   // The skill picked from `/`: shown as a highlighted chip in the input. Selecting
@@ -36,11 +52,16 @@ export default function Composer({ onRunSkill, onSend, disabled }: ComposerProps
   const showSlash = slashActive && matches.length > 0;
   const activeMeta = activeSkill ? SKILLS[activeSkill] : null;
   const ActiveIcon = activeMeta?.icon;
-  const canSend = !!activeSkill || !!value.trim();
+  const canSend = !!activeSkill || !!value.trim() || !!quotedContext;
 
   useEffect(() => {
     setHighlight(0);
   }, [value]);
+
+  // Lift focus into the input the moment a canvas snippet is quoted in.
+  useEffect(() => {
+    if (quotedContext) requestAnimationFrame(() => inputRef.current?.focus());
+  }, [quotedContext]);
 
   // Pick a skill → drop it into the input as a chip and keep the cursor for more typing.
   const chooseSkill = (id: SkillId) => {
@@ -58,6 +79,11 @@ export default function Composer({ onRunSkill, onSend, disabled }: ComposerProps
     if (activeSkill) {
       onRunSkill(activeSkill, value.trim());
       setActiveSkill(null);
+      setValue('');
+      return;
+    }
+    if (quotedContext) {
+      onSendWithContext?.(value.trim());
       setValue('');
       return;
     }
@@ -91,11 +117,18 @@ export default function Composer({ onRunSkill, onSend, disabled }: ComposerProps
         return;
       }
     }
-    // Backspace on an empty input pops the skill chip (like deleting a token).
-    if (e.key === 'Backspace' && activeSkill && value === '') {
-      e.preventDefault();
-      setActiveSkill(null);
-      return;
+    // Backspace on an empty input pops the skill chip / quote (like deleting a token).
+    if (e.key === 'Backspace' && value === '') {
+      if (activeSkill) {
+        e.preventDefault();
+        setActiveSkill(null);
+        return;
+      }
+      if (quotedContext) {
+        e.preventDefault();
+        onClearQuoted?.();
+        return;
+      }
     }
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -116,7 +149,7 @@ export default function Composer({ onRunSkill, onSend, disabled }: ComposerProps
               className="absolute left-0 right-0 bottom-[calc(100%+10px)] rounded-2xl bg-neutral-900/95 backdrop-blur-xl border border-neutral-800 p-2 z-20 shadow-2xl shadow-black/60 origin-bottom"
             >
               <div className="px-2 pb-1.5 pt-0.5 text-[10px] font-medium uppercase tracking-wider text-neutral-600">
-                技能
+                {t('aiLab.composer.skills')}
               </div>
               {matches.map((s, i) => {
                 const Icon = s.icon;
@@ -155,18 +188,46 @@ export default function Composer({ onRunSkill, onSend, disabled }: ComposerProps
               })}
               <div className="mt-1.5 flex items-center gap-3 px-2 pt-2 text-[10px] text-neutral-600 border-t border-neutral-800/80">
                 <span className="inline-flex items-center gap-1">
-                  <kbd className="rounded bg-neutral-800 px-1 py-0.5 font-mono text-neutral-400">↑↓</kbd>
-                  切换
+                  <kbd className="rounded bg-neutral-800 px-1 py-0.5 font-mono text-neutral-400">{'↑↓'}</kbd>
+                  {t('aiLab.composer.switch')}
                 </span>
                 <span className="inline-flex items-center gap-1">
-                  <kbd className="rounded bg-neutral-800 px-1 py-0.5 font-mono text-neutral-400">↵</kbd>
-                  选择
+                  <kbd className="rounded bg-neutral-800 px-1 py-0.5 font-mono text-neutral-400">{'↵'}</kbd>
+                  {t('aiLab.composer.select')}
                 </span>
                 <span className="inline-flex items-center gap-1">
-                  <kbd className="rounded bg-neutral-800 px-1 py-0.5 font-mono text-neutral-400">esc</kbd>
-                  退出
+                  <kbd className="rounded bg-neutral-800 px-1 py-0.5 font-mono text-neutral-400">{'esc'}</kbd>
+                  {t('aiLab.composer.exit')}
                 </span>
               </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {quotedContext && (
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 6 }}
+              transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
+              className="mb-2 flex items-start gap-2 rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2"
+            >
+              <CornerUpLeft size={13} className="mt-0.5 shrink-0 text-sky-400" />
+              <div className="min-w-0 flex-1">
+                <div className="text-[10px] font-medium uppercase tracking-wide text-neutral-500">
+                  {quotedContext.label}
+                </div>
+                <div className="truncate text-[12px] text-neutral-300">{quotedContext.text}</div>
+              </div>
+              <button
+                type="button"
+                onClick={onClearQuoted}
+                aria-label="移除引用"
+                className="shrink-0 text-neutral-500 hover:text-neutral-200 transition-colors cursor-pointer"
+              >
+                <X size={13} />
+              </button>
             </motion.div>
           )}
         </AnimatePresence>
@@ -199,9 +260,11 @@ export default function Composer({ onRunSkill, onSend, disabled }: ComposerProps
             onKeyDown={onKeyDown}
             disabled={disabled}
             placeholder={
-              activeMeta
-                ? `补充说明（可选），回车运行「${activeMeta.name}」…`
-                : '描述需求，或输入 / 调用技能…'
+              quotedContext
+                ? t('aiLab.composer.placeholderQuoted')
+                : activeMeta
+                  ? t('aiLab.composer.placeholderSkill', { skill: activeMeta.name })
+                  : t('aiLab.composer.placeholderDefault')
             }
             className="flex-1 bg-transparent text-sm text-neutral-100 placeholder:text-neutral-600 focus:outline-none disabled:opacity-50"
           />

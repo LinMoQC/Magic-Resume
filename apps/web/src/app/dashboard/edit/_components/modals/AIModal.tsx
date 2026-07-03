@@ -27,8 +27,8 @@ export default function AIModal({
   setIsAiJobRunning,
 }: AIModalProps) {
   const handleBackdropClose = () => {
-    // Closing still aborts the backend stream (AiChatShell unmount cleanup), so this
-    // guard only prevents losing an in-flight job to a stray backdrop click.
+    // Closing puts the AI Lab away and preserves the transcript, but an in-flight
+    // stream is still aborted so work does not continue in the background.
     if (
       isAiJobRunning &&
       typeof window !== 'undefined' &&

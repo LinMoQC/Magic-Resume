@@ -1,18 +1,51 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, Settings } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { FaRegClone } from 'react-icons/fa';
-import { useTranslation } from 'react-i18next';
+"use client";
 
-// 使用API获取模板
-import { getTemplateManifestList } from '@magic-resume/resume-templates/config/magic-templates';
-import { MagicTemplateDSL } from '@magic-resume/resume-templates/types/magic-dsl';
-import { motion, AnimatePresence } from 'framer-motion';
-import TemplatePreviewCard from './TemplatePreviewCard';
-import TemplateCustomizer from '@magic-resume/resume-templates/TemplateCustomizer';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Shapes,
+  LayoutGrid,
+  Type,
+  Palette,
+  PanelRight,
+  RotateCcw,
+  ChevronRight,
+} from "lucide-react";
+import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
-import { useResumeStore } from '@/store/useResumeStore';
-import { extractCustomConfig, mergeTemplateConfig } from '@/lib/utils/templateUtils';
+import { getTemplateManifestList } from "@magic-resume/resume-templates/config/magic-templates";
+import { MagicTemplateDSL } from "@magic-resume/resume-templates/types/magic-dsl";
+
+import { useResumeStore } from "@/store/useResumeStore";
+import { extractCustomConfig, mergeTemplateConfig } from "@/lib/utils/templateUtils";
+import { parseCssPixelValue } from "@/lib/utils/css";
+import { cn } from "@/lib/utils";
+import ResumeMiniPreview from "../../../_components/ResumeMiniPreview";
+import TemplateStoreModal from "./TemplateStoreModal";
+import {
+  AccordionSection,
+  ColorField,
+  COLOR_THEMES,
+  FontField,
+  GroupLabel,
+  PANEL_FONTS,
+  PANEL_PRESET_COLORS,
+  SegmentedField,
+  SliderField,
+  ThemeSwatches,
+  ToggleField,
+} from "./controls";
+
+export const RAIL_WIDTH = 52;
+export const PANEL_WIDTH = 360;
+/**
+ * 右侧面板实际宽度 = 画布的 marginRight。不再额外加 gap:
+ * 画布在「左面板边 ~ 右面板边」之间居中,留白由居中自然产生 → 左右外边距对称。
+ */
+export const rightPanelWidth = (collapsed: boolean) =>
+  collapsed ? RAIL_WIDTH : RAIL_WIDTH + PANEL_WIDTH;
+
+type SectionId = "template" | "layout" | "typography" | "colors";
 
 type TemplatePanelProps = {
   rightCollapsed: boolean;
@@ -20,514 +53,576 @@ type TemplatePanelProps = {
   onSelectTemplate: (templateId: string) => void;
   currentTemplateId: string;
   onTemplateUpdate?: (template: MagicTemplateDSL) => void;
+  /** 移动端抽屉内嵌:无固定定位、无图标轨、占满容器 */
+  embedded?: boolean;
 };
 
-// 面板展开/收起动画配置
-const panelVariants = {
-  expanded: {
-    width: 280,
-    transition: {
-      type: "spring" as const,
-      damping: 20,
-      stiffness: 300,
-      duration: 0.6
-    }
-  },
-  collapsed: {
-    width: 56,
-    transition: {
-      type: "spring" as const,
-      damping: 20,
-      stiffness: 300,
-      duration: 0.6
-    }
-  }
-};
-
-// 按钮位置动画配置
-const buttonVariants = {
-  expanded: {
-    right: 264,
-    transition: {
-      type: "spring" as const,
-      damping: 25,
-      stiffness: 400,
-      duration: 0.5
-    }
-  },
-  collapsed: {
-    right: 40,
-    transition: {
-      type: "spring" as const,
-      damping: 25,
-      stiffness: 400,
-      duration: 0.5
-    }
-  }
-};
-
-// 内容动画配置
-const contentVariants = {
-  hidden: {
-    opacity: 0,
-    x: 20,
-    scale: 0.95
-  },
-  show: {
-    opacity: 1,
-    x: 0,
-    scale: 1,
-    transition: {
-      type: "spring" as const,
-      damping: 25,
-      stiffness: 400,
-      duration: 0.4,
-      delay: 0.1
-    }
-  },
-  exit: {
-    opacity: 0,
-    x: 20,
-    scale: 0.95,
-    transition: {
-      duration: 0.2
-    }
-  }
-};
-
-// 模板网格动画配置
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      type: "spring" as const,
-      damping: 30,
-      stiffness: 400,
-      staggerChildren: 0.08,
-      delayChildren: 0.1
-    },
-  },
-};
-
-export default function TemplatePanel({ rightCollapsed, setRightCollapsed, onSelectTemplate, currentTemplateId, onTemplateUpdate }: TemplatePanelProps) {
+export default function TemplatePanel({
+  rightCollapsed,
+  setRightCollapsed,
+  onSelectTemplate,
+  currentTemplateId,
+  onTemplateUpdate,
+  embedded = false,
+}: TemplatePanelProps) {
   const { t } = useTranslation();
   const { updateCustomTemplate, activeResume } = useResumeStore();
-  const [templates, setTemplates] = useState<MagicTemplateDSL[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isCustomizing, setIsCustomizing] = useState(false);
-  const [customizingTemplate, setCustomizingTemplate] = useState<MagicTemplateDSL | null>(null);
 
-  console.log('[TemplatePanel] Component rendered, onSelectTemplate:', typeof onSelectTemplate);
+  const [templates, setTemplates] = useState<MagicTemplateDSL[]>([]);
+  const [storeOpen, setStoreOpen] = useState(false);
+  const [open, setOpen] = useState<Record<SectionId, boolean>>({
+    template: true,
+    layout: false,
+    typography: false,
+    colors: true,
+  });
+  const [active, setActive] = useState<SectionId>("template");
+
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
-    const loadTemplates = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const manifests = getTemplateManifestList();
-        setTemplates(manifests.map((manifest) => ({
-          ...manifest.template,
-          name: manifest.name,
-          description: manifest.description,
-          tags: manifest.tags,
-          status: manifest.status,
-          thumbnailUrl: manifest.thumbnailUrl,
-        })));
-      } catch (err) {
-        console.error('Failed to load templates:', err);
-        setError(t('templatePanel.error'));
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadTemplates();
-  }, [t]);
-
-  // 处理模板自定义
-  const handleCustomizeTemplate = useCallback((template: MagicTemplateDSL) => {
-    // 如果当前简历有自定义配置，合并到基础模板中显示当前状态
-    let templateToCustomize = template;
-
-    if (activeResume?.customTemplate) {
-      templateToCustomize = mergeTemplateConfig(template, activeResume.customTemplate);
-    }
-
-    setCustomizingTemplate(templateToCustomize);
-    setIsCustomizing(true);
-  }, [activeResume?.customTemplate]);
-
-  // 处理模板更新
-  const handleTemplateChange = useCallback((updatedTemplate: MagicTemplateDSL) => {
-    setCustomizingTemplate(updatedTemplate);
-
-    // 从基础模板中提取自定义配置差异
-    const baseTemplate = templates.find(t => t.id === currentTemplateId);
-    if (baseTemplate) {
-      const customConfig = extractCustomConfig(baseTemplate, updatedTemplate);
-      // 实时更新到简历配置中，这样预览会立即显示效果
-      updateCustomTemplate(customConfig || {});
-    }
-
-    if (onTemplateUpdate) {
-      onTemplateUpdate(updatedTemplate);
-    }
-  }, [templates, currentTemplateId, updateCustomTemplate, onTemplateUpdate]);
-
-  // 返回模板列表
-  const handleBackToTemplates = useCallback(() => {
-    setIsCustomizing(false);
-    setCustomizingTemplate(null);
+    const manifests = getTemplateManifestList();
+    setTemplates(
+      manifests.map((m) => ({
+        ...m.template,
+        name: m.name,
+        description: m.description,
+        tags: m.tags,
+        status: m.status,
+        thumbnailUrl: m.thumbnailUrl,
+      })),
+    );
   }, []);
 
-  const renderContent = () => {
-    if (loading) {
-      return (
-        <motion.div
-          key="loading-skeletons"
-          className="grid grid-cols-2 gap-4"
-          variants={containerVariants}
-          initial="hidden"
-          animate="show"
-        >
-          {/* 简化的骨架屏模板卡片 */}
-          {Array.from({ length: 4 }).map((_, index) => (
-            <motion.div
-              key={index}
-              className="relative bg-neutral-800/80 border-2 border-neutral-600 aspect-3/4 rounded-xl overflow-hidden"
-              variants={{
-                hidden: {
-                  opacity: 0,
-                  y: 20,
-                  scale: 0.9
-                },
-                show: {
-                  opacity: 1,
-                  y: 0,
-                  scale: 1,
-                  transition: {
-                    type: "spring" as const,
-                    damping: 25,
-                    stiffness: 500,
-                    delay: index * 0.1
-                  }
-                }
-              }}
-            >
-              {/* 简化的骨架内容 */}
-              <div className="h-full p-3 flex flex-col">
-                {/* 预览区域骨架 */}
-                <motion.div
-                  className="flex-1 mb-3 bg-neutral-700/50 rounded"
-                  animate={{
-                    opacity: [0.5, 0.8, 0.5]
-                  }}
-                  transition={{
-                    duration: 1.5,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                />
+  const baseTemplate = useMemo(
+    () => templates.find((tpl) => tpl.id === currentTemplateId) ?? templates[0],
+    [templates, currentTemplateId],
+  );
 
-                {/* 模板名称骨架 */}
-                <motion.div
-                  className="h-4 bg-neutral-600 rounded w-1/2 mx-auto"
-                  animate={{
-                    opacity: [0.5, 0.8, 0.5]
-                  }}
-                  transition={{
-                    duration: 1.5,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                    delay: 0.2
-                  }}
-                />
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
-      );
-    }
+  // 基础模板叠加用户自定义差异 = 控件实际展示 / 编辑的对象(随 store 实时重算)
+  const working = useMemo(
+    () => (baseTemplate ? mergeTemplateConfig(baseTemplate, activeResume?.customTemplate) : null),
+    [baseTemplate, activeResume?.customTemplate],
+  );
 
-    if (error) {
-      return (
-        <motion.div
-          className="flex flex-col items-center justify-center h-64 text-red-400"
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{
-            type: "spring",
-            damping: 25,
-            stiffness: 400,
-            duration: 0.4
-          }}
-        >
-          <motion.p
-            className="text-sm mb-2"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            {error}
-          </motion.p>
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => window.location.reload()}
-              className="text-xs"
-            >
-              {t('templatePanel.retry')}
-            </Button>
-          </motion.div>
-        </motion.div>
-      );
-    }
+  const hasCustomizations = useMemo(() => {
+    const c = activeResume?.customTemplate;
+    return !!c && Object.keys(c).length > 0;
+  }, [activeResume?.customTemplate]);
 
-    if (templates.length === 0) {
-      return (
-        <motion.div
-          className="flex items-center justify-center h-64 text-neutral-400"
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{
-            type: "spring",
-            damping: 25,
-            stiffness: 400,
-            duration: 0.4
-          }}
-        >
-          <motion.p
-            className="text-sm"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            {t('templatePanel.none')}
-          </motion.p>
-        </motion.div>
-      );
-    }
+  // 把整份模板的改动落成「差异」写回 store(预览即时刷新)
+  const applyTemplate = useCallback(
+    (updated: MagicTemplateDSL) => {
+      if (!baseTemplate) return;
+      updateCustomTemplate(extractCustomConfig(baseTemplate, updated) || {});
+      onTemplateUpdate?.(updated);
+    },
+    [baseTemplate, updateCustomTemplate, onTemplateUpdate],
+  );
 
-    return (
-      <motion.div
-        key="template-grid"
-        className="grid grid-cols-2 gap-4"
-        variants={containerVariants}
-        initial="hidden"
-        animate="show"
+  const updateColors = useCallback(
+    (patch: Partial<MagicTemplateDSL["designTokens"]["colors"]>) => {
+      if (!working) return;
+      applyTemplate({
+        ...working,
+        designTokens: {
+          ...working.designTokens,
+          colors: { ...working.designTokens.colors, ...patch },
+        },
+      });
+    },
+    [working, applyTemplate],
+  );
+
+  const updateTypography = useCallback(
+    (patch: Partial<MagicTemplateDSL["designTokens"]["typography"]>) => {
+      if (!working) return;
+      applyTemplate({
+        ...working,
+        designTokens: {
+          ...working.designTokens,
+          typography: { ...working.designTokens.typography, ...patch },
+        },
+      });
+    },
+    [working, applyTemplate],
+  );
+
+  const updateLayout = useCallback(
+    (patch: Partial<MagicTemplateDSL["layout"]>) => {
+      if (!working) return;
+      applyTemplate({ ...working, layout: { ...working.layout, ...patch } });
+    },
+    [working, applyTemplate],
+  );
+
+  const updateBorderRadius = useCallback(
+    (md: string) => {
+      if (!working) return;
+      applyTemplate({
+        ...working,
+        designTokens: {
+          ...working.designTokens,
+          borderRadius: { ...working.designTokens.borderRadius, md, lg: md },
+        },
+      });
+    },
+    [working, applyTemplate],
+  );
+
+  const updateSpacingScale = useCallback(
+    (baseRem: number) => {
+      if (!working) return;
+      const md = Number(Math.min(3, Math.max(0.5, baseRem)).toFixed(2));
+      const sm = Math.max(0.25, Number((md * 0.67).toFixed(2)));
+      const lg = Math.max(md + 0.25, Number((md * 1.33).toFixed(2)));
+      applyTemplate({
+        ...working,
+        designTokens: {
+          ...working.designTokens,
+          spacing: { ...working.designTokens.spacing, sm: `${sm}rem`, md: `${md}rem`, lg: `${lg}rem` },
+        },
+      });
+    },
+    [working, applyTemplate],
+  );
+
+  const resetCustomizations = useCallback(() => updateCustomTemplate({}), [updateCustomTemplate]);
+
+  const toggleSection = useCallback((id: SectionId) => {
+    setOpen((prev) => ({ ...prev, [id]: !prev[id] }));
+    setActive(id);
+  }, []);
+
+  const jumpTo = useCallback(
+    (id: SectionId) => {
+      const go = () => {
+        setOpen((prev) => ({ ...prev, [id]: true }));
+        setActive(id);
+        requestAnimationFrame(() => {
+          sectionRefs.current[id]?.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      };
+      if (rightCollapsed && !embedded) {
+        setRightCollapsed(false);
+        window.setTimeout(go, 240);
+      } else {
+        go();
+      }
+    },
+    [rightCollapsed, embedded, setRightCollapsed],
+  );
+
+  // 滚动高亮:取顶部最近的分区(用 rect 相对容器,避免 offsetParent 影响)
+  const onScroll = useCallback(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+    const containerTop = container.getBoundingClientRect().top;
+    let current: SectionId = "template";
+    (["template", "layout", "typography", "colors"] as SectionId[]).forEach((id) => {
+      const el = sectionRefs.current[id];
+      if (el && el.getBoundingClientRect().top - containerTop <= 28) current = id;
+    });
+    setActive(current);
+  }, []);
+
+  const railItems: { id: SectionId; icon: React.ReactNode; label: string }[] = [
+    { id: "template", icon: <Shapes size={18} />, label: t("templateCustomizer.sections.template") },
+    { id: "layout", icon: <LayoutGrid size={18} />, label: t("templateCustomizer.sections.layout") },
+    { id: "typography", icon: <Type size={18} />, label: t("templateCustomizer.sections.typography") },
+    { id: "colors", icon: <Palette size={18} />, label: t("templateCustomizer.sections.colors") },
+  ];
+
+  const sectionsContent = working && baseTemplate && (
+    <>
+      {/* Template */}
+      <AccordionSection
+        sectionId="template"
+        icon={<Shapes size={16} />}
+        title={t("templateCustomizer.sections.template")}
+        open={open.template}
+        onToggle={() => toggleSection("template")}
+        registerRef={(el) => (sectionRefs.current.template = el)}
       >
-        {templates.map((template: MagicTemplateDSL) => (
-          <motion.div
-            key={template.id}
-            variants={{
-              hidden: {
-                opacity: 0,
-                y: 20,
-                scale: 0.9
-              },
-              show: {
-                opacity: 1,
-                y: 0,
-                scale: 1,
-                transition: {
-                  type: "spring" as const,
-                  damping: 25,
-                  stiffness: 500,
-                  duration: 0.4
-                }
-              }
+        <button
+          type="button"
+          onClick={() => setStoreOpen(true)}
+          className="group flex w-full items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3 text-left transition-colors duration-150 hover:border-sky-400/40 hover:bg-white/[0.05]"
+        >
+          <div className="h-20 w-[60px] shrink-0 overflow-hidden rounded-md border border-white/10 bg-neutral-900 p-1">
+            <ResumeMiniPreview template={working} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[14px] font-semibold text-white">{baseTemplate.name}</p>
+            <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-neutral-500">
+              {baseTemplate.description}
+            </p>
+            <span className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-medium text-sky-300">
+              {t("templatePanel.change")}
+              <ChevronRight size={12} className="transition-transform duration-150 group-hover:translate-x-0.5" />
+            </span>
+          </div>
+        </button>
+
+        {baseTemplate.tags?.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {baseTemplate.tags.slice(0, 6).map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full bg-white/[0.05] px-2.5 py-1 text-[11px] font-medium text-neutral-400"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+      </AccordionSection>
+
+      {/* Layout */}
+      <AccordionSection
+        sectionId="layout"
+        icon={<LayoutGrid size={16} />}
+        title={t("templateCustomizer.sections.layout")}
+        open={open.layout}
+        onToggle={() => toggleSection("layout")}
+        registerRef={(el) => (sectionRefs.current.layout = el)}
+      >
+        <SegmentedField
+          label={t("templateCustomizer.layout.density")}
+          options={[
+            { label: t("templateCustomizer.layout.densityCompact"), value: 0.5 },
+            { label: t("templateCustomizer.layout.densityNormal"), value: 1 },
+            { label: t("templateCustomizer.layout.densityRelaxed"), value: 1.5 },
+          ]}
+          value={parseFloat(working.designTokens.spacing.md)}
+          onChange={(v) => updateSpacingScale(v)}
+        />
+
+        <SliderField
+          label={t("templateCustomizer.layout.containerWidth")}
+          value={parseCssPixelValue(working.layout.containerWidth)}
+          min={600}
+          max={1000}
+          step={10}
+          display={working.layout.containerWidth}
+          onChange={(v) => updateLayout({ containerWidth: `${v}px` })}
+        />
+        <SliderField
+          label={t("templateCustomizer.layout.padding")}
+          value={parseCssPixelValue(working.layout.padding)}
+          min={8}
+          max={48}
+          step={2}
+          display={working.layout.padding}
+          onChange={(v) => updateLayout({ padding: `${v}px` })}
+        />
+        <SliderField
+          label={t("templateCustomizer.layout.gap")}
+          value={parseCssPixelValue(working.layout.gap)}
+          min={8}
+          max={48}
+          step={2}
+          display={working.layout.gap}
+          onChange={(v) => updateLayout({ gap: `${v}px` })}
+        />
+        <SliderField
+          label={t("templateCustomizer.layout.borderRadius")}
+          value={parseCssPixelValue(working.designTokens.borderRadius.md)}
+          min={0}
+          max={16}
+          step={1}
+          display={working.designTokens.borderRadius.md}
+          onChange={(v) => updateBorderRadius(`${v}px`)}
+        />
+
+        <div className="space-y-4 pt-1">
+          <ToggleField
+            label={t("templateCustomizer.layout.titleDivider")}
+            description={t("templateCustomizer.layout.titleDividerDesc")}
+            checked={working.layout.showTitleDivider !== false}
+            onChange={(v) => updateLayout({ showTitleDivider: v })}
+          />
+          <ToggleField
+            label={t("templateCustomizer.layout.titleIcon")}
+            description={t("templateCustomizer.layout.titleIconDesc")}
+            checked={working.layout.showTitleIcon !== false}
+            onChange={(v) => updateLayout({ showTitleIcon: v })}
+          />
+        </div>
+      </AccordionSection>
+
+      {/* Typography */}
+      <AccordionSection
+        sectionId="typography"
+        icon={<Type size={16} />}
+        title={t("templateCustomizer.sections.typography")}
+        open={open.typography}
+        onToggle={() => toggleSection("typography")}
+        registerRef={(el) => (sectionRefs.current.typography = el)}
+      >
+        <FontField
+          label={t("templateCustomizer.typography.primaryFont")}
+          value={working.designTokens.typography.fontFamily.primary}
+          onChange={(font) =>
+            updateTypography({
+              fontFamily: { ...working.designTokens.typography.fontFamily, primary: font },
+            })
+          }
+          fonts={PANEL_FONTS}
+        />
+        {working.designTokens.typography.fontFamily.secondary && (
+          <FontField
+            label={t("templateCustomizer.typography.secondaryFont")}
+            value={working.designTokens.typography.fontFamily.secondary}
+            onChange={(font) =>
+              updateTypography({
+                fontFamily: { ...working.designTokens.typography.fontFamily, secondary: font },
+              })
+            }
+            fonts={PANEL_FONTS}
+          />
+        )}
+
+        <div className="space-y-5 pt-1">
+          <GroupLabel>{t("templateCustomizer.typography.fontSize")}</GroupLabel>
+          <SliderField
+            label={t("templateCustomizer.typography.titleSize")}
+            value={parseCssPixelValue(working.designTokens.typography.fontSize.lg)}
+            min={8}
+            max={20}
+            step={1}
+            display={working.designTokens.typography.fontSize.lg}
+            onChange={(v) =>
+              updateTypography({
+                fontSize: { ...working.designTokens.typography.fontSize, lg: `${v}px` },
+              })
+            }
+          />
+          <SliderField
+            label={t("templateCustomizer.typography.bodySize")}
+            value={parseCssPixelValue(working.designTokens.typography.fontSize.sm)}
+            min={8}
+            max={16}
+            step={1}
+            display={working.designTokens.typography.fontSize.sm}
+            onChange={(v) =>
+              updateTypography({
+                fontSize: { ...working.designTokens.typography.fontSize, sm: `${v}px` },
+              })
+            }
+          />
+          <SliderField
+            label={t("templateCustomizer.layout.lineHeight")}
+            value={working.designTokens.typography.lineHeight ?? 1.5}
+            min={1}
+            max={2}
+            step={0.1}
+            display={String(working.designTokens.typography.lineHeight ?? 1.5)}
+            onChange={(v) => updateTypography({ lineHeight: v })}
+          />
+          <SliderField
+            label={t("templateCustomizer.layout.letterSpacing")}
+            value={parseFloat(working.designTokens.typography.letterSpacing ?? "0")}
+            min={-1}
+            max={3}
+            step={0.5}
+            display={working.designTokens.typography.letterSpacing ?? "0px"}
+            onChange={(v) => updateTypography({ letterSpacing: `${v}px` })}
+          />
+        </div>
+      </AccordionSection>
+
+      {/* Colors */}
+      <AccordionSection
+        sectionId="colors"
+        icon={<Palette size={16} />}
+        title={t("templateCustomizer.sections.colors")}
+        open={open.colors}
+        onToggle={() => toggleSection("colors")}
+        registerRef={(el) => (sectionRefs.current.colors = el)}
+      >
+        <div className="space-y-2.5">
+          <GroupLabel>{t("templateCustomizer.colors.quickThemes")}</GroupLabel>
+          <ThemeSwatches
+            themes={COLOR_THEMES.map((th) => ({ id: th.id, from: th.from, to: th.to }))}
+            active={COLOR_THEMES.find(
+              (th) => th.colors.primary.toLowerCase() === working.designTokens.colors.primary.toLowerCase(),
+            )?.id}
+            onPick={(id) => {
+              const theme = COLOR_THEMES.find((th) => th.id === id);
+              if (theme) updateColors(theme.colors);
             }}
-            whileHover={{
-              scale: 1.02,
-              transition: {
-                type: "spring",
-                damping: 20,
-                stiffness: 400
-              }
-            }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <TemplatePreviewCard
-              template={template}
-              isSelected={currentTemplateId === template.id}
-              onSelect={() => {
-                console.log('[TemplatePanel] onSelect callback triggered for:', template.id);
-                console.log('[TemplatePanel] About to call onSelectTemplate, type:', typeof onSelectTemplate);
-                onSelectTemplate(template.id);
-                console.log('[TemplatePanel] onSelectTemplate called');
-              }}
-              onCustomize={() => handleCustomizeTemplate(template)}
+          />
+        </div>
+
+        <div className="space-y-5 pt-1">
+          <GroupLabel>{t("templateCustomizer.colors.customColors")}</GroupLabel>
+          <ColorField
+            label={t("templateCustomizer.colors.primary")}
+            value={working.designTokens.colors.primary}
+            onChange={(c) => updateColors({ primary: c })}
+            presets={PANEL_PRESET_COLORS}
+          />
+          <ColorField
+            label={t("templateCustomizer.colors.secondary")}
+            value={working.designTokens.colors.secondary}
+            onChange={(c) => updateColors({ secondary: c })}
+            presets={PANEL_PRESET_COLORS}
+          />
+          <ColorField
+            label={t("templateCustomizer.colors.text")}
+            value={working.designTokens.colors.text}
+            onChange={(c) => updateColors({ text: c })}
+            presets={PANEL_PRESET_COLORS}
+          />
+          <ColorField
+            label={t("templateCustomizer.colors.textSecondary")}
+            value={working.designTokens.colors.textSecondary}
+            onChange={(c) => updateColors({ textSecondary: c })}
+            presets={PANEL_PRESET_COLORS}
+          />
+          {working.designTokens.colors.sidebar && (
+            <ColorField
+              label={t("templateCustomizer.colors.sidebar")}
+              value={working.designTokens.colors.sidebar}
+              onChange={(c) => updateColors({ sidebar: c })}
+              presets={PANEL_PRESET_COLORS}
             />
-          </motion.div>
-        ))}
-      </motion.div>
+          )}
+        </div>
+      </AccordionSection>
+    </>
+  );
+
+  const panelBody = (
+    <div
+      ref={scrollRef}
+      onScroll={onScroll}
+      className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-10 scrollbar-hide"
+    >
+      {sectionsContent}
+
+      {hasCustomizations && (
+        <button
+          type="button"
+          onClick={resetCustomizations}
+          className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.02] py-2.5 text-[12.5px] font-medium text-neutral-400 transition-colors duration-150 hover:border-white/20 hover:text-neutral-200"
+        >
+          <RotateCcw size={13} />
+          {t("templateCustomizer.buttons.reset")}
+        </button>
+      )}
+    </div>
+  );
+
+  const modal = (
+    <TemplateStoreModal
+      open={storeOpen}
+      onOpenChange={setStoreOpen}
+      templates={templates}
+      currentTemplateId={currentTemplateId}
+      onSelect={onSelectTemplate}
+    />
+  );
+
+  // 移动端:抽屉内嵌,无固定定位 / 无图标轨
+  if (embedded) {
+    return (
+      <div className="flex h-full w-full flex-col bg-[#0A0A0A]">
+        <div className="flex items-center gap-3 border-b border-white/[0.06] px-4 py-4">
+          <Shapes size={16} className="text-sky-300" />
+          <h2 className="text-[15px] font-semibold tracking-tight text-white">
+            {t("templatePanel.customizeTitle")}
+          </h2>
+        </div>
+        {panelBody}
+        {modal}
+      </div>
     );
-  };
+  }
 
   return (
     <>
-      <motion.aside
-        className="fixed top-0 right-0 h-screen bg-neutral-900 border-l border-neutral-800 flex justify-center items-start p-2 z-40 overflow-auto scrollbar-hide"
-        variants={panelVariants}
-        animate={rightCollapsed ? 'collapsed' : 'expanded'}
-        initial={rightCollapsed ? 'collapsed' : 'expanded'}
-      >
-        <AnimatePresence mode="wait">
-          {!rightCollapsed && (
-            <motion.div
-              className="w-full h-full flex flex-col"
-              variants={contentVariants}
-              initial="hidden"
-              animate="show"
-              exit="exit"
-              key="panel-content"
-            >
-              {isCustomizing && customizingTemplate ? (
-                // 自定义面板
-                <motion.div
-                  className="h-full flex flex-col"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{
-                    type: "spring",
-                    damping: 25,
-                    stiffness: 400,
-                    duration: 0.4
-                  }}
-                >
-                  <div className="p-4 border-b border-neutral-800">
-                    <motion.h2
-                      className="text-xl font-semibold text-left flex items-center"
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{
-                        delay: 0.1,
-                        type: "spring",
-                        damping: 20,
-                        stiffness: 400
-                      }}
-                    >
-                      <motion.div
-                        className="inline-block mr-3"
-                        animate={{ rotate: [0, 360] }}
-                        transition={{
-                          duration: 0.6,
-                          ease: "easeOut",
-                          delay: 0.2
-                        }}
-                      >
-                        <Settings className="text-[16px]" />
-                      </motion.div>
-                      {t('templateCustomizer.title')}
-                    </motion.h2>
-                  </div>
-                  <motion.div
-                    className="flex-1"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{
-                      delay: 0.2,
-                      type: "spring",
-                      damping: 25,
-                      stiffness: 400
-                    }}
-                  >
-                    <TemplateCustomizer
-                      key={`customizer-${customizingTemplate.id}`}
-                      template={customizingTemplate}
-                      onTemplateChange={handleTemplateChange}
-                      onBack={handleBackToTemplates}
-                    />
-                  </motion.div>
-                </motion.div>
-              ) : (
-                // 模板列表
-                <motion.div
-                  className="p-4"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{
-                    type: "spring",
-                    damping: 25,
-                    stiffness: 400,
-                    duration: 0.4
-                  }}
-                >
-                  <motion.h2
-                    className="text-xl font-semibold mb-6 text-left"
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{
-                      delay: 0.1,
-                      type: "spring",
-                      damping: 20,
-                      stiffness: 400
-                    }}
-                  >
-                    <motion.div
-                      className="inline-block mr-3"
-                      animate={{ scale: [1, 1.1, 1] }}
-                      transition={{
-                        duration: 0.4,
-                        ease: "easeOut",
-                        delay: 0.2
-                      }}
-                    >
-                      <FaRegClone className="text-[16px]" />
-                    </motion.div>
-                    {t('templatePanel.title')}
-                  </motion.h2>
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{
-                      delay: 0.2,
-                      type: "spring",
-                      damping: 25,
-                      stiffness: 400
-                    }}
-                  >
-                    {renderContent()}
-                  </motion.div>
-                </motion.div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.aside>
-
-      <motion.div
-        className="fixed top-1/2 -translate-y-1/2 z-41"
-        variants={buttonVariants}
-        animate={rightCollapsed ? 'collapsed' : 'expanded'}
-        initial={rightCollapsed ? 'collapsed' : 'expanded'}
-      >
-        <Button
-          variant="ghost"
-          size="icon"
-          className="bg-neutral-800 hover:bg-neutral-700 text-white rounded-full h-8 w-8 shadow-lg border border-neutral-600 hover:scale-110 transition-transform duration-200"
-          onClick={() => {
-            setRightCollapsed(!rightCollapsed);
-          }}
-          title={rightCollapsed ? t('common.expand') : t('common.collapse')}
+      <aside className="fixed top-0 right-0 z-40 flex h-screen">
+        <motion.div
+          className="h-full overflow-hidden border-l border-white/[0.06] bg-[#0A0A0A]"
+          animate={{ width: rightCollapsed ? 0 : PANEL_WIDTH }}
+          initial={false}
+          transition={{ type: "spring", stiffness: 320, damping: 32 }}
         >
-          <motion.div
-            animate={{ rotate: rightCollapsed ? 0 : 180 }}
-            transition={{ type: "spring", damping: 20, stiffness: 400 }}
+          <div style={{ width: PANEL_WIDTH }} className="flex h-full flex-col">
+            <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-4">
+              <h2 className="text-[15px] font-semibold tracking-tight text-white">
+                {t("templatePanel.customizeTitle")}
+              </h2>
+            </div>
+            {panelBody}
+          </div>
+        </motion.div>
+
+        {/* 图标轨:折叠开关 + 分区跳转 */}
+        <div
+          className="flex h-full flex-col items-center gap-1 border-l border-white/[0.06] bg-[#0A0A0A] py-3"
+          style={{ width: RAIL_WIDTH }}
+        >
+          <RailButton
+            label={rightCollapsed ? t("common.expand") : t("common.collapse")}
+            active={false}
+            onClick={() => setRightCollapsed(!rightCollapsed)}
           >
-            <ArrowLeft size={16} />
-          </motion.div>
-        </Button>
-      </motion.div>
+            <PanelRight size={18} />
+          </RailButton>
+
+          <div className="my-1.5 h-px w-6 bg-white/[0.08]" />
+
+          {railItems.map((item) => (
+            <RailButton
+              key={item.id}
+              label={item.label}
+              active={!rightCollapsed && active === item.id}
+              onClick={() => jumpTo(item.id)}
+            >
+              {item.icon}
+            </RailButton>
+          ))}
+        </div>
+      </aside>
+
+      {modal}
     </>
   );
-} 
+}
+
+function RailButton({
+  label,
+  active,
+  onClick,
+  children,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={label}
+      aria-label={label}
+      className={cn(
+        "group relative flex h-9 w-9 items-center justify-center rounded-xl transition-colors duration-150",
+        active ? "bg-sky-400/10 text-sky-300" : "text-neutral-500 hover:bg-white/[0.06] hover:text-neutral-200",
+      )}
+    >
+      {children}
+      {active && (
+        <span className="absolute -right-3 top-1/2 h-5 w-1 -translate-y-1/2 rounded-full bg-sky-400" />
+      )}
+      <span className="pointer-events-none absolute right-11 top-1/2 z-50 -translate-y-1/2 whitespace-nowrap rounded-md border border-white/10 bg-neutral-900 px-2 py-1 text-[11px] text-neutral-100 opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100">
+        {label}
+      </span>
+    </button>
+  );
+}

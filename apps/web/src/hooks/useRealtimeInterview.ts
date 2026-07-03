@@ -176,12 +176,11 @@ export function useRealtimeInterview() {
             await recorderRef.current.start();
             addLog("🎙️ Audio Capture Started");
 
-            // Connect WebSocket to the single backend origin (gateway/nginx handles
-            // the upgrade). http→ws, https→wss.
+            // Connect WebSocket to the configured API origin. http→ws, https→wss.
             const wsBase = API_ORIGIN.replace(/^http/, 'ws');
             let wsUrl = `${wsBase}/api/interview/realtime/${sid}`;
 
-            // v2 holds the LLM key server-side — no api_key/base_url over the wire (§3.11).
+            // Realtime interview does not send provider credentials over the socket.
             const params = new URLSearchParams();
             if (config?.model) params.append('model', config.model);
             if (params.toString()) {

@@ -50,8 +50,8 @@ const createClient = (baseURL: string): AxiosInstance => {
   return client;
 };
 
-// Both share the single backend origin; the gateway/nginx splits by path prefix.
-// Two instances kept only for call-site semantics (CRUD vs agent).
+// Both share the single API origin. Two instances are kept for call-site semantics
+// (CRUD vs AI).
 export const httpClient = {
   api:   createClient(API_ORIGIN),
   agent: createClient(API_ORIGIN),

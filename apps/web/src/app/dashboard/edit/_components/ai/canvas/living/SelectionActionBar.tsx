@@ -2,8 +2,9 @@
 
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowUp, Pencil } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { SELECTION_ACTIONS, type SelectionActionId } from '../../lib/changeModel';
+import { PolarisGlyph } from '../../PolarisMark';
 
 const BAR_MAX_WIDTH = 320;
 
@@ -14,9 +15,8 @@ type SelectionActionBarProps = {
 };
 
 export default function SelectionActionBar({ rect, onRun, onClose }: SelectionActionBarProps) {
+  const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
-  const [custom, setCustom] = useState(false);
-  const [free, setFree] = useState('');
   const [pos, setPos] = useState<{ top: number; left: number }>({
     top: rect.top - 48,
     left: rect.left,
@@ -32,7 +32,7 @@ export default function SelectionActionBar({ rect, onRun, onClose }: SelectionAc
     let left = rect.left + rect.width / 2 - width / 2;
     left = Math.max(margin, Math.min(left, window.innerWidth - margin - width));
     setPos({ top, left });
-  }, [rect, custom]);
+  }, [rect]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -41,12 +41,6 @@ export default function SelectionActionBar({ rect, onRun, onClose }: SelectionAc
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
-
-  const submitFree = () => {
-    const text = free.trim();
-    if (!text) return;
-    onRun('free', text);
-  };
 
   return (
     <motion.div
@@ -58,57 +52,27 @@ export default function SelectionActionBar({ rect, onRun, onClose }: SelectionAc
       transition={{ duration: 0.14, ease: 'easeOut' }}
       style={{ position: 'fixed', top: pos.top, left: pos.left, maxWidth: BAR_MAX_WIDTH, zIndex: 120 }}
       className="flex items-center gap-1 rounded-xl bg-neutral-900 border border-neutral-800 shadow-[0_10px_30px_rgba(0,0,0,0.5)] p-1"
-      // keep the text selection alive when interacting with the bar
-      onMouseDown={(e) => e.preventDefault()}
     >
-      {custom ? (
-        <div className="flex items-center gap-1.5 pl-2 pr-1 py-0.5 w-[280px]">
-          <input
-            autoFocus
-            value={free}
-            onChange={(e) => setFree(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                submitFree();
-              }
-            }}
-            placeholder="告诉 AI 怎么改这一段…"
-            className="flex-1 bg-transparent text-xs text-neutral-200 placeholder:text-neutral-600 outline-none py-1"
-          />
-          <button
-            type="button"
-            onClick={submitFree}
-            disabled={!free.trim()}
-            aria-label="发送指令"
-            className="w-6 h-6 shrink-0 rounded-lg bg-sky-500/90 hover:bg-sky-400 disabled:bg-neutral-700 disabled:text-neutral-500 text-white flex items-center justify-center transition-colors cursor-pointer disabled:cursor-not-allowed"
-          >
-            <ArrowUp size={13} strokeWidth={2.5} />
-          </button>
-        </div>
-      ) : (
-        <>
-          {SELECTION_ACTIONS.map((a) => (
-            <button
-              key={a.id}
-              type="button"
-              onClick={() => onRun(a.id)}
-              className="text-xs text-neutral-200 hover:bg-neutral-800 rounded-lg px-2.5 py-1.5 transition-colors cursor-pointer active:scale-95"
-            >
-              {a.label}
-            </button>
-          ))}
-          <div className="w-px h-4 bg-neutral-800 mx-0.5" />
-          <button
-            type="button"
-            onClick={() => setCustom(true)}
-            className="text-xs text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 rounded-lg px-2 py-1.5 transition-colors cursor-pointer inline-flex items-center gap-1"
-          >
-            <Pencil size={11} />
-            自定义
-          </button>
-        </>
-      )}
+      {SELECTION_ACTIONS.map((a) => (
+        <button
+          key={a.id}
+          type="button"
+          onClick={() => onRun(a.id)}
+          className="text-xs text-neutral-200 hover:bg-neutral-800 rounded-lg px-2.5 py-1.5 transition-colors cursor-pointer active:scale-95"
+        >
+          {a.label}
+        </button>
+      ))}
+      <div className="w-px h-4 bg-neutral-800 mx-0.5" />
+      {/* 询问 Polaris lifts the selection into the chat composer for a freeform instruction (Track B). */}
+      <button
+        type="button"
+        onClick={() => onRun('free')}
+        className="text-xs text-neutral-300 hover:text-neutral-100 hover:bg-neutral-800 rounded-lg px-2 py-1.5 transition-colors cursor-pointer inline-flex items-center gap-1"
+      >
+        <PolarisGlyph size={11} className="text-sky-400" />
+        {t('aiLab.living.askPolaris')}
+      </button>
     </motion.div>
   );
 }

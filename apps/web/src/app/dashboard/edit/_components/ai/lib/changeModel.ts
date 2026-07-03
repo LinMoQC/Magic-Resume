@@ -1,3 +1,4 @@
+import { nanoid } from 'nanoid';
 import type { EditableTarget } from './editableCanvas';
 import type { Section } from '@/types/frontend/resume';
 
@@ -95,8 +96,16 @@ export type ActionKind = QuickActionId | SelectionActionId | 'free';
 export interface PendingChange {
   id: string;
   target: EditableTarget;
+  /**
+   * Full field values used when accepting the change. For rich text fields this can
+   * be an entire experience summary containing several bullets.
+   */
   before: string;
   after: string;
+  /** Optional review-only values for selection edits, so the diff card can stay scoped. */
+  previewBefore?: string;
+  previewAfter?: string;
+  previewKind?: EditableTarget['kind'];
   rationale: string;
   /** longer "why", revealed on demand (design §D) */
   rationaleDetail?: string;
@@ -157,6 +166,64 @@ export function stripHtml(html: string): string {
     .trim();
 }
 
+export type SelectionPreview = {
+  previewBefore: string;
+  previewAfter: string;
+  previewKind: 'text';
+};
+
+function extractSelectedReplacement(beforeText: string, afterText: string, selectedText: string): string {
+  const idx = beforeText.indexOf(selectedText);
+  if (idx >= 0) {
+    const prefix = beforeText.slice(0, idx);
+    const suffix = beforeText.slice(idx + selectedText.length);
+    if (afterText.startsWith(prefix) && afterText.endsWith(suffix)) {
+      return afterText.slice(prefix.length, afterText.length - suffix.length).trim();
+    }
+  }
+
+  let start = 0;
+  while (
+    start < beforeText.length &&
+    start < afterText.length &&
+    beforeText[start] === afterText[start]
+  ) {
+    start += 1;
+  }
+
+  let endBefore = beforeText.length;
+  let endAfter = afterText.length;
+  while (
+    endBefore > start &&
+    endAfter > start &&
+    beforeText[endBefore - 1] === afterText[endAfter - 1]
+  ) {
+    endBefore -= 1;
+    endAfter -= 1;
+  }
+
+  return afterText.slice(start, endAfter).trim();
+}
+
+export function buildSelectionPreview(
+  fullBefore: string,
+  fullAfter: string,
+  selectionText: string
+): SelectionPreview | undefined {
+  const selected = stripHtml(selectionText);
+  if (!selected) return undefined;
+
+  const beforeText = stripHtml(fullBefore);
+  const afterText = stripHtml(fullAfter);
+  const replacement = extractSelectedReplacement(beforeText, afterText, selected);
+
+  return {
+    previewBefore: selected,
+    previewAfter: replacement || afterText || selected,
+    previewKind: 'text',
+  };
+}
+
 /** Re-wrap improved text in the same outer structure the field used. */
 export function wrapLike(originalHtml: string, text: string): string {
   if (/<li[\s>]/i.test(originalHtml)) return `<ul><li>${text}</li></ul>`;
@@ -166,6 +233,97 @@ export function wrapLike(originalHtml: string, text: string): string {
 /** Strip the HTML wrapper for plain-text targets (e.g. the header summary). */
 export function finalizeAfter(kind: EditableTarget['kind'], after: string): string {
   return kind === 'text' ? stripHtml(after) : after;
+}
+
+// ----------------------------------------------------------------------------
+// Build a reviewable change from a real service result — backend-agnostic.
+// The mock (`./mock/changeMock`) BOTH generates and assembles; the real service
+// path splits them: the service returns `{ after, rationale }`, and these helpers
+// assemble the identical `PendingChange` shape the review/apply path expects.
+// ----------------------------------------------------------------------------
+
+/** What the edit service hands back (kept local so this module needs no backend import). */
+export interface EditResultLike {
+  after: string;
+  rationale: string;
+  rationaleDetail?: string;
+}
+
+/** Element quick action (ActionPopover) → reviewable change. */
+export function buildElementChange(
+  target: EditableTarget,
+  before: string,
+  action: QuickActionId | 'free',
+  result: EditResultLike,
+  freeText?: string
+): PendingChange {
+  return {
+    id: nanoid(),
+    target,
+    before,
+    after: finalizeAfter(target.kind, result.after),
+    rationale: result.rationale,
+    rationaleDetail: result.rationaleDetail,
+    action,
+    freeText,
+    seed: 0,
+    status: 'pending',
+  };
+}
+
+/** Selection-scoped edit → reviewable change (keeps `selectionText` for regenerate). */
+export function buildSelectionChange(
+  target: EditableTarget,
+  fullHtml: string,
+  selectionText: string,
+  action: SelectionActionId | 'free',
+  result: EditResultLike,
+  opts?: { freeText?: string; lang?: string }
+): PendingChange {
+  const after = finalizeAfter(target.kind, result.after);
+  const preview = buildSelectionPreview(fullHtml, after, selectionText);
+  return {
+    id: nanoid(),
+    target,
+    before: fullHtml,
+    after,
+    ...preview,
+    rationale: result.rationale,
+    rationaleDetail: result.rationaleDetail,
+    action,
+    freeText: opts?.freeText,
+    selectionText,
+    lang: opts?.lang,
+    seed: 0,
+    status: 'pending',
+  };
+}
+
+/** A fresh target for an insert — made by the caller so its path is stable across the async call. */
+export function makeInsertTarget(sectionKey: string, title: string): EditableTarget {
+  return {
+    sectionKey,
+    itemId: `new-${nanoid(6)}`,
+    fieldKey: 'summary',
+    kind: 'html',
+    label: `${title} · 新增一条`,
+  };
+}
+
+/** New-item proposal (green-only insert) → reviewable change. */
+export function buildInsertChange(target: EditableTarget, result: EditResultLike): PendingChange {
+  return {
+    id: nanoid(),
+    target,
+    before: '',
+    after: result.after,
+    rationale: result.rationale,
+    rationaleDetail: result.rationaleDetail,
+    action: 'free',
+    isInsert: true,
+    seed: 0,
+    status: 'pending',
+  };
 }
 
 // ----------------------------------------------------------------------------

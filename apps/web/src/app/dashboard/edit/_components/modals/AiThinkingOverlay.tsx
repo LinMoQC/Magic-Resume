@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { hexToRgb } from '@/lib/utils/color';
 import PolarisMark from '../ai/PolarisMark';
 
 interface AiThinkingOverlayProps {
@@ -17,21 +18,7 @@ const AiThinkingOverlay: React.FC<AiThinkingOverlayProps> = ({
 
   if (!isVisible) return null;
 
-  // 从主题色提取RGB值用于动效
-  const hexToRgb = (hex: string) => {
-    const cleaned = hex.replace('#', '').trim();
-    const normalized = cleaned.length === 3
-      ? cleaned.split('').map((char) => char + char).join('')
-      : cleaned;
-    const result = /^([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(normalized);
-    return result ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16)
-    } : { r: 56, g: 189, b: 248 }; // 默认sky-400
-  };
-
-  const themeRgb = hexToRgb(themeColor);
+  const themeRgb = hexToRgb(themeColor) ?? { r: 56, g: 189, b: 248 };
   const primaryColor = `${themeRgb.r}, ${themeRgb.g}, ${themeRgb.b}`;
   const overlayStyle = {
     '--ai-color': primaryColor,

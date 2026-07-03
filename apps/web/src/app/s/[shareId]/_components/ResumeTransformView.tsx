@@ -52,12 +52,16 @@ export const ResumeTransformView = React.memo(({
                             isCommentMode ? "pointer-events-auto" : "pointer-events-none"
                         )}
                     >
-                        <div 
+                        {/* Transparent positioning box for comment coordinate mapping only.
+                            The white A4 page + shadow are painted by the renderer's own
+                            Layout/TwoColumnLayout, so no background/shadow here — otherwise a
+                            second white board shows behind the resume. Sizing is kept identical
+                            so stored comment positions (% of this box) don't shift. */}
+                        <div
                             ref={resumeContainerRef}
                             className={cn(
-                                "relative w-[210mm] min-w-[210mm] bg-white shadow-2xl transition-shadow duration-300",
-                                "shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)]",
-                                isCommentMode ? "select-text cursor-text" : "select-none" 
+                                "relative w-[210mm] min-w-[210mm]",
+                                isCommentMode ? "select-text cursor-text" : "select-none"
                             )}
                             style={{ minHeight: '297mm' }}
                             onMouseUp={handleResumeMouseUp}

@@ -1,9 +1,9 @@
 import { cn } from "@/lib/utils";
 import { Resume } from '@/types/frontend/resume';
 import { DownloadIcon } from "@radix-ui/react-icons";
-import { Bot, History, Share2, MessageCircle, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import { Bot, History, Share2, MessageCircle, ChevronDown, ChevronUp, Loader2, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
 import { useSettingStore } from "@/store/useSettingStore";
@@ -22,6 +22,30 @@ export type ToolsProps = {
   onShareClick?: () => void;
   onFeedbackClick?: () => void;
 };
+
+type ToolButtonProps = {
+  title: string;
+  children: ReactNode;
+  onClick?: () => void;
+  disabled?: boolean;
+};
+
+const toolButtonClassName =
+  "w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition disabled:opacity-60 disabled:cursor-not-allowed";
+
+function ToolButton({ title, children, onClick, disabled = false }: ToolButtonProps) {
+  return (
+    <button
+      className={toolButtonClassName}
+      onClick={onClick}
+      disabled={disabled}
+      title={title}
+      type="button"
+    >
+      {children}
+    </button>
+  );
+}
 
 export function Tools({ isMobile, zoomIn, zoomOut, resetTransform, resume, onShowAI, onVersionClick, rightCollapsed = false, onShareClick, onFeedbackClick }: ToolsProps){
   const { t, i18n } = useTranslation();
@@ -76,30 +100,25 @@ export function Tools({ isMobile, zoomIn, zoomOut, resetTransform, resume, onSho
       >
         <>
           {!isMobile && isCloudMode && (
-            <button
-              className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"
+            <ToolButton
               title={t('tools.aiAssistant')}
-              type="button"
               onClick={onShowAI}
             >
               <Bot size={18}/>
-            </button>
+            </ToolButton>
           )}
           
           {cloudSync && (
-            <button
-              className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"
+            <ToolButton
               title={t('tools.share', 'Share')}
-              type="button"
               onClick={onShareClick}
             >
               <Share2 size={18}/>
-            </button>
+            </ToolButton>
           )}
 
           {isCloudMode && (
-            <button
-              className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"
+            <ToolButton
               onClick={() => {
                   if (onFeedbackClick) {
                       onFeedbackClick();
@@ -109,67 +128,54 @@ export function Tools({ isMobile, zoomIn, zoomOut, resetTransform, resume, onSho
                   }
               }}
               title={t('tools.feedback', 'Feedback')}
-              type="button"
             >
               <MessageCircle size={18}/>
-            </button>
+            </ToolButton>
           )}
 
           {cloudSync && !isMobile && (
-            <button
-              className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"
+            <ToolButton
               onClick={onVersionClick}
               title={t('header.versionHistory')}
-              type="button"
             >
               <History size={18}/>
-            </button>
+            </ToolButton>
           )}
-          <button
-            className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
+          <ToolButton
             onClick={handleExportPdf}
             disabled={isExporting}
             title={isExporting ? t('tools.exportingPDF') : t('tools.exportPDF')}
-            type="button"
           >
             {isExporting ? <Loader2 size={16} className="animate-spin" /> : <DownloadIcon />}
-          </button>
-          <button
-            className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"
+          </ToolButton>
+          <ToolButton
             onClick={() => zoomIn()}
             title={t('tools.zoomIn')}
-            type="button"
           >
-            <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M12 5v14m7-7H5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
-          </button>
-          <button
-            className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"
+            <ZoomIn size={18} />
+          </ToolButton>
+          <ToolButton
             onClick={() => zoomOut()}
             title={t('tools.zoomOut')}
-            type="button"
           >
-            <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
-          </button>
-          <button
-            className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"
+            <ZoomOut size={18} />
+          </ToolButton>
+          <ToolButton
             onClick={() => resetTransform()}
             title={t('tools.resetZoom')}
-            type="button"
           >
-            <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" stroke="currentColor" strokeWidth="2" /></svg>
-          </button>
+            <RotateCcw size={18} />
+          </ToolButton>
         </>
       </div>
 
       {!isMobile && (
-        <button
-          className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition"
+        <ToolButton
           onClick={toggleCollapsed}
           title={isCollapsed ? t('tools.expand', 'Expand') : t('tools.collapse', 'Collapse')}
-          type="button"
         >
           {isCollapsed ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-        </button>
+        </ToolButton>
       )}
     </div>
   )

@@ -9,10 +9,10 @@ const Logo = () => (
   <div className="flex items-center gap-2">
     <div className="w-8 h-8 flex items-center justify-center">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/simple-logo.png" alt="Magic Resume" className="w-full h-full object-contain" />
+      <img src="/magic-resume-mark.png" alt="" className="w-full h-full object-contain" />
     </div>
     <span className="font-bold text-lg bg-clip-text text-transparent bg-linear-to-r from-white to-white/70">
-      Magic Resume
+      {'Magic Resume'}
     </span>
   </div>
 );

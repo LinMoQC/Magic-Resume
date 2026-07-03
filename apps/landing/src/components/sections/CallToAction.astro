@@ -1,0 +1,37 @@
+---
+import type { Copy } from '@/i18n/ui';
+import { APP_LINKS } from '@/consts';
+import Icon from '@/components/Icon.astro';
+
+interface Props {
+  copy: Copy;
+}
+const { copy } = Astro.props;
+const c = copy.cta;
+---
+
+<section class="relative overflow-hidden border-t border-hair py-28 md:py-36">
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute inset-x-0 bottom-0 h-[420px] [background:radial-gradient(55%_70%_at_50%_100%,color-mix(in_srgb,var(--color-sky-500)_12%,transparent),transparent_72%)]"
+  ></div>
+
+  <div class="reveal relative mx-auto max-w-2xl px-5 text-center md:px-6">
+    <h2 class="font-display text-[clamp(1.9rem,4.6vw,3rem)] font-semibold leading-[1.08] tracking-[-0.025em] text-ink">
+      {c.title}
+    </h2>
+    <p class="mx-auto mt-5 max-w-lg text-[16px] leading-relaxed text-muted">
+      {c.subtitle}
+    </p>
+    <div class="mt-9 flex flex-col items-center gap-4">
+      <a
+        href={APP_LINKS.dashboard}
+        class="group flex items-center gap-2 rounded-lg bg-ink px-7 py-3 text-[15px] font-semibold text-workbench transition-opacity hover:opacity-85"
+      >
+        {c.button}
+        <Icon name="arrow-right" size={17} class="transition-transform group-hover:translate-x-0.5" />
+      </a>
+      <p class="text-[13px] text-faint">{c.note}</p>
+    </div>
+  </div>
+</section>

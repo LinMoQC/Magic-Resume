@@ -1,0 +1,57 @@
+---
+import type { Copy } from '@/i18n/ui';
+import { APP_LINKS, GITHUB } from '@/consts';
+import { interpolate } from '@/i18n/ui';
+
+interface Props {
+  copy: Copy;
+}
+const { copy } = Astro.props;
+const f = copy.footer;
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-hair bg-workbench py-14">
+  <div class="mx-auto max-w-[1120px] px-5 md:px-6">
+    <div class="flex flex-col justify-between gap-10 md:flex-row">
+      <div class="max-w-xs">
+        <div class="flex items-center gap-2">
+          <span class="flex h-7 w-7 items-center justify-center">
+            <img
+              src="/magic-resume-mark.png"
+              alt=""
+              aria-hidden="true"
+              class="h-7 w-7 object-contain"
+            />
+          </span>
+          <span class="font-display text-[14px] font-semibold tracking-tight text-ink">
+            Magic Resume
+          </span>
+        </div>
+        <p class="mt-4 text-[13px] leading-relaxed text-faint">{f.brandSubtitle}</p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-12 sm:gap-16">
+        <div class="flex flex-col gap-3">
+          <h3 class="text-[13px] font-semibold text-ink">{f.product}</h3>
+          <a class="text-[13px] text-faint transition-colors hover:text-ink" href={APP_LINKS.dashboard}>
+            {f.builder}
+          </a>
+        </div>
+        <div class="flex flex-col gap-3">
+          <h3 class="text-[13px] font-semibold text-ink">{f.project}</h3>
+          <a class="text-[13px] text-faint transition-colors hover:text-ink" href={GITHUB.repo} target="_blank" rel="noopener noreferrer">
+            {f.github}
+          </a>
+          <a class="text-[13px] text-faint transition-colors hover:text-ink" href={GITHUB.issues} target="_blank" rel="noopener noreferrer">
+            {f.issues}
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-12 border-t border-hair pt-6">
+      <p class="text-[12px] text-faint">{interpolate(f.copyright, { year })}</p>
+    </div>
+  </div>
+</footer>

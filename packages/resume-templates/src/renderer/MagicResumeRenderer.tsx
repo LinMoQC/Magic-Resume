@@ -64,6 +64,10 @@ const ZH_TITLE_BY_ENGLISH: Record<string, string> = {
 };
 
 function getSectionData(data: Resume, dataBinding: string) {
+  // Defensive: a malformed resume (no `sections`/`info`) must render empty, not
+  // throw and white-screen the whole app. The caller treats `undefined` as
+  // "skip this section".
+  if (!data || typeof data !== 'object') return undefined;
   if (dataBinding === 'info') {
     return data.info;
   }
@@ -76,7 +80,7 @@ function getSectionData(data: Resume, dataBinding: string) {
 
   if (dataBinding.startsWith('sections.')) {
     const sectionKey = dataBinding.replace('sections.', '');
-    const sectionItems = data.sections[sectionKey as keyof typeof data.sections];
+    const sectionItems = data.sections?.[sectionKey as keyof typeof data.sections];
     if (Array.isArray(sectionItems)) {
       return sectionItems.filter(isVisible);
     }
@@ -246,6 +250,7 @@ export const MagicResumeRenderer = React.memo(({ template, data, locale }: Props
             ...component.props,
             title: resolvedTitle,
             titleIcon: getSectionIcon(sectionKey, rawTitle),
+            sectionKey,
           };
 
           return (
