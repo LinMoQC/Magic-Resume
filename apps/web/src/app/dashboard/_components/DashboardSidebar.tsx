@@ -128,23 +128,29 @@ export default function DashboardSidebar() {
 
         <div className="flex-1" />
 
-        {/* account — the whole row is the trigger (name/email live inside the button) */}
+        {/* account — the whole row is the trigger (name/email live inside the button).
+            Cloud mode resolves the user async; show a skeleton row until it lands so
+            the footer never flashes a lone, unlabelled avatar icon. */}
         <div className="h-px bg-white/[0.06]" />
         <div className="mt-3">
-          <AccountMenu
-            placement={collapsed ? 'right' : 'up'}
-            label={
-              !collapsed && (name || email) ? (
-                <span
-                  className="block max-w-[142px] overflow-hidden pl-1 text-left opacity-100"
-                  style={labelStyle}
-                >
-                  {name && <span className="block truncate text-[13px] font-medium text-neutral-100">{name}</span>}
-                  {email && <span className="block truncate text-[11px] text-neutral-500">{email}</span>}
-                </span>
-              ) : undefined
-            }
-          />
+          {isCloudMode && !user ? (
+            <AccountRowSkeleton collapsed={collapsed} labelStyle={labelStyle} />
+          ) : (
+            <AccountMenu
+              placement={collapsed ? 'right' : 'up'}
+              label={
+                !collapsed && (name || email) ? (
+                  <span
+                    className="block max-w-[142px] overflow-hidden pl-1 text-left opacity-100"
+                    style={labelStyle}
+                  >
+                    {name && <span className="block truncate text-[13px] font-medium text-neutral-100">{name}</span>}
+                    {email && <span className="block truncate text-[11px] text-neutral-500">{email}</span>}
+                  </span>
+                ) : undefined
+              }
+            />
+          )}
         </div>
       </div>
 
@@ -158,6 +164,34 @@ export default function DashboardSidebar() {
         <ChevronLeft className={cn('h-3.5 w-3.5 transition-transform duration-300', collapsed && 'rotate-180')} />
       </button>
     </aside>
+  );
+}
+
+/** Placeholder for the account footer while the user resolves. Mirrors the real
+ *  row: avatar in a fixed 36px column + name/email lines that collapse with the panel. */
+function AccountRowSkeleton({
+  collapsed,
+  labelStyle,
+}: {
+  collapsed: boolean;
+  labelStyle?: React.CSSProperties;
+}) {
+  return (
+    <div className="flex h-11 items-center rounded-xl px-2">
+      <span className="grid w-9 shrink-0 place-items-center">
+        <span className="h-8 w-8 animate-pulse rounded-full bg-white/[0.06] ring-1 ring-white/[0.06]" />
+      </span>
+      <span
+        className={cn(
+          'overflow-hidden pl-1',
+          collapsed ? 'max-w-0 opacity-0' : 'max-w-[142px] opacity-100',
+        )}
+        style={labelStyle}
+      >
+        <span className="block h-3 w-24 animate-pulse rounded bg-white/[0.06]" />
+        <span className="mt-1.5 block h-2.5 w-28 animate-pulse rounded bg-white/[0.04]" />
+      </span>
+    </div>
   );
 }
 
