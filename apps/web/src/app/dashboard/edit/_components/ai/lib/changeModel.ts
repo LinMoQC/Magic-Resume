@@ -7,9 +7,8 @@ import type { Section } from '@/types/frontend/resume';
  * action vocabulary, target locating, and the functions that apply an accepted
  * change onto the resume.
  *
- * This half is backend-agnostic and SURVIVES the mock→service swap. The mock text
- * generators live in `./mock/changeMock`; replacing them with a real backend
- * service (design §3.6 / `./services`) leaves everything here untouched.
+ * This half is backend-agnostic: edit providers can change while the review/apply
+ * path here keeps the same shape.
  */
 
 // ----------------------------------------------------------------------------
@@ -236,10 +235,9 @@ export function finalizeAfter(kind: EditableTarget['kind'], after: string): stri
 }
 
 // ----------------------------------------------------------------------------
-// Build a reviewable change from a real service result — backend-agnostic.
-// The mock (`./mock/changeMock`) BOTH generates and assembles; the real service
-// path splits them: the service returns `{ after, rationale }`, and these helpers
-// assemble the identical `PendingChange` shape the review/apply path expects.
+// Build a reviewable change from an edit provider result. The provider returns
+// `{ after, rationale }`, and these helpers assemble the `PendingChange` shape
+// the review/apply path expects.
 // ----------------------------------------------------------------------------
 
 /** What the edit service hands back (kept local so this module needs no backend import). */
