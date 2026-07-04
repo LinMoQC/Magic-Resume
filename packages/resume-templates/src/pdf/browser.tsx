@@ -2,6 +2,7 @@ import React from 'react';
 import { Font, pdf } from '@react-pdf/renderer';
 import type { MagicTemplateDSL } from '../types/magic-dsl';
 import type { Resume } from '../types/resume';
+import { getResumeFontCategory } from '../font-family';
 import { magicPdfHyphenationCallback } from './hyphenation';
 import { MagicResumePdfDocument } from './MagicResumePdfDocument';
 
@@ -12,6 +13,7 @@ export interface CreateMagicResumePdfBlobOptions {
 }
 
 let fontsRegistered = false;
+const warmupPromises = new Map<string, Promise<void>>();
 
 const registerFonts = () => {
   if (fontsRegistered) return;
@@ -38,6 +40,55 @@ const registerFonts = () => {
   });
   Font.registerHyphenationCallback(magicPdfHyphenationCallback);
   fontsRegistered = true;
+};
+
+const getFontUrlsForTemplate = (template?: MagicTemplateDSL): string[] => {
+  if (typeof window === 'undefined') return [];
+
+  const fontFamily = template?.designTokens.typography.fontFamily.primary ?? '';
+  const category = getResumeFontCategory(fontFamily);
+  const baseUrl = window.location.origin;
+
+  return category === 'serif'
+    ? [
+      `${baseUrl}/fonts/SourceHanSerifSC-Regular.woff`,
+      `${baseUrl}/fonts/SourceHanSerifSC-Bold.woff`,
+      `${baseUrl}/fonts/SourceHanSerifSC-RegularOblique.woff`,
+      `${baseUrl}/fonts/SourceHanSerifSC-BoldOblique.woff`,
+    ]
+    : [
+      `${baseUrl}/fonts/SourceHanSansSC-Regular.otf`,
+      `${baseUrl}/fonts/SourceHanSansSC-Bold.otf`,
+      `${baseUrl}/fonts/SourceHanSansSC-RegularOblique.woff`,
+      `${baseUrl}/fonts/SourceHanSansSC-BoldOblique.woff`,
+    ];
+};
+
+const prefetchFont = async (url: string) => {
+  try {
+    await fetch(url, { cache: 'force-cache' });
+  } catch {
+    // Font prefetching is only a latency optimization; export can still load
+    // the font normally if this background request is interrupted.
+  }
+};
+
+export const warmupMagicResumePdfExport = async (template?: MagicTemplateDSL): Promise<void> => {
+  registerFonts();
+
+  const fontFamily = template?.designTokens.typography.fontFamily.primary ?? '';
+  const fontCategory = getResumeFontCategory(fontFamily);
+  const cacheKey = `${window.location.origin}:${fontCategory}`;
+
+  if (!warmupPromises.has(cacheKey)) {
+    warmupPromises.set(cacheKey, Promise
+      .all(getFontUrlsForTemplate(template).map(prefetchFont))
+      .then(() => undefined));
+  }
+
+  return warmupPromises.get(cacheKey) ?? Promise
+    .all(getFontUrlsForTemplate(template).map(prefetchFont))
+      .then(() => undefined);
 };
 
 const blobToDataUrl = (blob: Blob): Promise<string> => new Promise((resolve, reject) => {

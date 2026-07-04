@@ -4,7 +4,7 @@ import { ZoomIn, ZoomOut, RotateCcw, Download, FileJson, Share2, Loader2 } from 
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { useSettingStore } from "@/store/useSettingStore";
-import { exportResumeToPdf } from "@/lib/utils/pdf-export";
+import { exportResumeToPdf, prepareResumePdfExport } from "@/lib/utils/pdf-export";
 import { Resume } from "@/types/frontend/resume";
 
 type EditorDockProps = {
@@ -30,6 +30,12 @@ export function EditorDock({ zoomIn, zoomOut, resetTransform, resume, onShareCli
   const { t, i18n } = useTranslation();
   const [isExporting, setIsExporting] = useState(false);
   const cloudSync = useSettingStore((state) => state.cloudSync);
+
+  const warmupPdfExport = () => {
+    void prepareResumePdfExport(resume, i18n.language).catch(() => {
+      // Best-effort warmup only; export handles real failures.
+    });
+  };
 
   const handleExportPdf = async () => {
     // 客户端用 @react-pdf/renderer 生成矢量、文字可选中(ATS 友好)的多页 A4 PDF。
@@ -86,6 +92,8 @@ export function EditorDock({ zoomIn, zoomOut, resetTransform, resume, onShareCli
               key={item.id}
               type="button"
               onClick={item.onClick}
+              onFocus={item.id === "export-pdf" ? warmupPdfExport : undefined}
+              onPointerEnter={item.id === "export-pdf" ? warmupPdfExport : undefined}
               disabled={item.disabled}
               title={item.title}
               aria-label={item.title}

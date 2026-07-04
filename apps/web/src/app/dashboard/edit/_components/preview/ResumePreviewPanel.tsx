@@ -1,7 +1,6 @@
 "use client";
 
 import React from 'react';
-import ResumePreview from './ResumePreview';
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import { Resume } from '@/types/frontend/resume';
 import useMobile from '@/hooks/useMobile';
@@ -11,6 +10,7 @@ import { AiFab } from '../layout/AiFab';
 import AiThinkingOverlay from '../modals/AiThinkingOverlay';
 import { useTranslation } from 'react-i18next';
 import { isCloudMode } from '@/lib/config/app';
+import { PdfCanvasPreview } from './PdfCanvasPreview';
 
 interface ResumePreviewPanelProps {
   activeResume: Resume | null;
@@ -30,7 +30,7 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
   onJsonClick,
 }) => {
   const { isMobile } = useMobile();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   if (!activeResume) {
     return (
@@ -67,13 +67,7 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
               contentStyle={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', width: '100%', height: '100%', paddingTop: '5rem', paddingBottom: '5rem' }}
             >
               <div className="relative">
-                <ResumePreview
-                  info={activeResume.info}
-                  sections={activeResume.sections}
-                  sectionOrder={activeResume.sectionOrder.map(s => s.key)}
-                  templateId={activeResume.template}
-                  customTemplate={activeResume.customTemplate}
-                />
+                <PdfCanvasPreview resume={activeResume} locale={i18n.resolvedLanguage || i18n.language} />
                 <AiThinkingOverlay
                   isVisible={isAiJobRunning}
                   themeColor={activeResume.themeColor || '#38bdf8'}

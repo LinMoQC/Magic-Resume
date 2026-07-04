@@ -75,6 +75,7 @@
     "motion": "^12.29.3",
     "nanoid": "^5.1.5",
     "next": "15.3.8",
+    "pdfjs-dist": "6.0.227",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-dropzone": "^14.3.8",
