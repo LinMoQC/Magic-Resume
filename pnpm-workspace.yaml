@@ -15,4 +15,5 @@ onlyBuiltDependencies:
   - unrs-resolver
 
 patchedDependencies:
+  '@react-pdf/textkit@6.3.0': patches/@react-pdf__textkit@6.3.0.patch
   nextra-theme-docs@4.3.0: patches/nextra-theme-docs@4.3.0.patch
