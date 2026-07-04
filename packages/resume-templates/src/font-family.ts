@@ -10,8 +10,8 @@ export const getResumeFontCategory = (fontStack: string): ResumeFontCategory => 
 
 export const getPdfFontStack = (fontStack: string): string[] => (
   getResumeFontCategory(fontStack) === 'serif'
-    ? ['Times-Roman', PDF_CJK_SERIF_FAMILY]
-    : ['Helvetica', PDF_CJK_SANS_FAMILY]
+    ? [PDF_CJK_SERIF_FAMILY, 'Times-Roman']
+    : [PDF_CJK_SANS_FAMILY, 'Helvetica']
 );
 
 export const getPdfRichTextFontFamily = (fontStack: string): string => (
