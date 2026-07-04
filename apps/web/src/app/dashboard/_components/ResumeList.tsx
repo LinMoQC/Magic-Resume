@@ -327,6 +327,43 @@ function ResumeCardSkeleton() {
   );
 }
 
+/* ── 全页骨架:挂载 / 首屏加载时替代空白黑屏,结构与真实布局同构
+      (标题 + 创建/导入入口 + 简历栅格),不用 i18n 以避免水合闪烁 ── */
+function DashboardSkeleton() {
+  return (
+    <div className="flex-1 overflow-y-auto bg-[#0A0A0A] [contain:layout_paint]">
+      <div className="mx-auto w-full max-w-[1400px] px-6 py-10 md:px-12">
+        {/* 标题 */}
+        <header className="mb-8 flex items-end justify-between gap-4">
+          <div className="h-7 w-32 animate-pulse rounded-lg bg-white/[0.06]" />
+          <div className="h-6 w-24 animate-pulse rounded-full bg-white/[0.03]" />
+        </header>
+
+        {/* 入口区:主(创建)+ 次(导入) */}
+        <section className="mb-10 grid grid-cols-1 gap-4 md:grid-cols-[1.6fr_1fr]">
+          <div className="h-40 rounded-2xl border border-sky-400/15 bg-sky-400/[0.05] px-6 py-6">
+            <div className="h-9 w-9 animate-pulse rounded-xl bg-sky-400/15" />
+            <div className="mt-4 h-5 w-32 animate-pulse rounded bg-white/[0.06]" />
+            <div className="mt-2 h-3.5 w-40 animate-pulse rounded bg-white/[0.04]" />
+          </div>
+          <div className="h-40 rounded-2xl border border-white/[0.06] bg-white/[0.02] px-6 py-6">
+            <div className="h-9 w-9 animate-pulse rounded-xl bg-white/[0.05]" />
+            <div className="mt-4 h-5 w-28 animate-pulse rounded bg-white/[0.06]" />
+            <div className="mt-2 h-3.5 w-32 animate-pulse rounded bg-white/[0.04]" />
+          </div>
+        </section>
+
+        {/* 简历栅格 */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <ResumeCardSkeleton key={`skeleton-${i}`} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function EmptyState() {
   const { t } = useTranslation();
   return (
@@ -356,8 +393,9 @@ const ResumeList = React.memo(
         .catch((e) => console.error('Failed to load templates for dashboard', e));
     }, []);
 
-    // Prevent SSR/CSR flicker for this client-only list.
-    if (!isMounted) return null;
+    // Prevent SSR/CSR flicker for this client-only list. Render a full-page
+    // skeleton (not a blank screen) until the client mounts and data is ready.
+    if (!isMounted || isLoading) return <DashboardSkeleton />;
 
     return (
       // contain: layout paint — isolate this large subtree so the sidebar's width
@@ -371,7 +409,7 @@ const ResumeList = React.memo(
               <h1 className="text-2xl font-semibold tracking-tight text-neutral-50">
                 {t('dashboard.library.title')}
               </h1>
-              {!isLoading && resumes.length > 0 && (
+              {resumes.length > 0 && (
                 <span className="text-sm text-neutral-500">
                   {t('dashboard.library.count', { count: resumes.length })}
                 </span>
@@ -396,9 +434,7 @@ const ResumeList = React.memo(
             initial="hidden"
             animate="show"
           >
-            {isLoading ? (
-              Array.from({ length: 6 }).map((_, i) => <ResumeCardSkeleton key={`skeleton-${i}`} />)
-            ) : resumes.length === 0 ? (
+            {resumes.length === 0 ? (
               <EmptyState />
             ) : (
               <AnimatePresence>
