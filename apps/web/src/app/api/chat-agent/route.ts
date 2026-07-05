@@ -91,8 +91,15 @@ export async function POST(req: NextRequest) {
             return new Response(readable, {
                 headers: {
                     'Content-Type': 'text/event-stream',
-                    'Cache-Control': 'no-cache',
+                    // no-transform stops any intermediary (nginx/CDN) from gzipping
+                    // the stream (gzip batches chunks and defeats SSE).
+                    'Cache-Control': 'no-cache, no-transform',
                     'Connection': 'keep-alive',
+                    // Tell nginx to disable response buffering for THIS stream even
+                    // if proxy_buffering is on globally (host BaoTa reverse proxy
+                    // defaults to on) — code-level safety net so streaming survives
+                    // an nginx config reset.
+                    'X-Accel-Buffering': 'no',
                 },
             });
         } else {
