@@ -74,8 +74,12 @@ export async function POST(req: NextRequest) {
       return new Response(readable, {
         headers: {
           'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache',
+          // no-transform stops intermediaries gzipping the stream; X-Accel-Buffering
+          // tells nginx not to buffer this response even if proxy_buffering is on
+          // globally (host BaoTa reverse proxy defaults to on).
+          'Cache-Control': 'no-cache, no-transform',
           Connection: 'keep-alive',
+          'X-Accel-Buffering': 'no',
         },
       });
     }
