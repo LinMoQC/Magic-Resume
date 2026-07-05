@@ -23,14 +23,44 @@ export async function POST(request: Request) {
     if (!backendResponse.ok) {
       const errorBody = await backendResponse.text();
       console.error(`[PDF_PARSE] Backend error: ${backendResponse.status} ${errorBody}`);
+      // Surface the backend's human-readable message (the { code, message }
+      // envelope) rather than dumping the raw JSON at the user.
+      let message = errorBody;
+      try {
+        const parsed = JSON.parse(errorBody);
+        message = parsed?.message ?? parsed?.error ?? errorBody;
+      } catch {
+        /* not JSON — use the raw text */
+      }
       return new Response(
-        JSON.stringify({ error: `Backend error: ${errorBody}` }),
+        JSON.stringify({ error: message }),
         { status: backendResponse.status, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
     const result = await backendResponse.json();
-    return new Response(JSON.stringify(result), {
+
+    // The agent-service wraps every response in a { code, data, message }
+    // envelope and nests the parsed resume under `data.resume_json`. Unwrap to
+    // the bare { info, sections, sectionOrder } shape the client-side validator
+    // expects, tolerating an already-bare or differently-shaped response.
+    const payload =
+      result && typeof result === 'object' && 'data' in result
+        ? (result as { data?: unknown }).data
+        : result;
+    const resume =
+      payload && typeof payload === 'object' && 'resume_json' in payload
+        ? (payload as { resume_json?: unknown }).resume_json
+        : payload;
+
+    if (!resume || typeof resume !== 'object') {
+      return new Response(
+        JSON.stringify({ error: 'The AI could not extract a resume from this PDF.' }),
+        { status: 422, headers: { 'Content-Type': 'application/json' } },
+      );
+    }
+
+    return new Response(JSON.stringify(resume), {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error: unknown) {
