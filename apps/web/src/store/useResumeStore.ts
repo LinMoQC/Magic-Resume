@@ -10,6 +10,7 @@ import { resumeApi } from '@/lib/api/resume';
 import { getAuthToken } from '@/lib/api/httpClient';
 import debounce from 'lodash/debounce';
 import isEqual from 'lodash/isEqual';
+import { normalizeResumeSectionOrder } from '@/lib/utils/resumeSectionOrder';
 import { 
   Resume, 
   InfoType, 
@@ -91,10 +92,11 @@ export const initialResume: Omit<Resume, 'id' | 'updatedAt' | 'name'> = {
 
 export const getSanitizedResume = (resume: Resume): Omit<Resume, 'id' | 'updatedAt' | 'versions'> => {
   const r = resume || {};
+  const sections = r.sections || initialResume.sections;
   const sanitized: Omit<Resume, 'id' | 'updatedAt' | 'versions'> = {
     info: r.info || initialResume.info,
-    sections: r.sections || initialResume.sections,
-    sectionOrder: r.sectionOrder || initialResume.sectionOrder,
+    sections,
+    sectionOrder: normalizeResumeSectionOrder(r.sectionOrder, sections),
     template: r.template || initialResume.template,
     themeColor: r.themeColor || initialResume.themeColor,
     typography: r.typography || initialResume.typography,
@@ -731,18 +733,20 @@ const useResumeStore = create<ResumeState>()(
     const { activeResume } = get();
     if (!activeResume) return;
 
-    if (isEqual(activeResume.sectionOrder, sectionOrder)) {
+    const normalizedSectionOrder = normalizeResumeSectionOrder(sectionOrder, activeResume.sections);
+
+    if (isEqual(activeResume.sectionOrder, normalizedSectionOrder)) {
       return;
     }
 
     set(state => {
       if (!state.activeResume) return;
-      state.activeResume.sectionOrder = sectionOrder;
+      state.activeResume.sectionOrder = normalizedSectionOrder;
       state.activeResume.updatedAt = Date.now();
 
       const resumeIndex = state.resumes.findIndex(r => r.id === state.activeResume?.id);
       if (resumeIndex !== -1) {
-        state.resumes[resumeIndex].sectionOrder = sectionOrder;
+        state.resumes[resumeIndex].sectionOrder = normalizedSectionOrder;
         state.resumes[resumeIndex].updatedAt = state.activeResume.updatedAt;
       }
 

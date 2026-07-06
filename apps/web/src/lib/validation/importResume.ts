@@ -1,4 +1,5 @@
 import { z, type ZodError } from 'zod';
+import { normalizeResumeSectionOrder } from '@/lib/utils/resumeSectionOrder';
 
 const importedResumeInfoSchema = z.object({
   fullName: z.string().default(''),
@@ -54,7 +55,7 @@ const importedResumeSectionsSchema = z
 export const importedResumeSchema = z.object({
   info: importedResumeInfoSchema,
   sections: importedResumeSectionsSchema,
-  sectionOrder: z.array(importedResumeSectionOrderItemSchema).min(1),
+  sectionOrder: z.array(importedResumeSectionOrderItemSchema).default([]),
 });
 
 export type ImportedResume = z.infer<typeof importedResumeSchema> & Record<string, unknown>;
@@ -71,7 +72,7 @@ export function validateAndNormalizeImportedResume(data: unknown): ImportedResum
     ...raw,
     info: parsed.info,
     sections: parsed.sections,
-    sectionOrder: parsed.sectionOrder,
+    sectionOrder: normalizeResumeSectionOrder(parsed.sectionOrder, parsed.sections),
   };
 }
 
