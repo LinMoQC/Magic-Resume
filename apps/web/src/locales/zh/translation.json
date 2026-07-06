@@ -978,10 +978,21 @@
     "importing": "正在导入并同步...",
     "defaultName": "导入的简历",
     "pdf": {
-      "extracting": "正在从 PDF 中提取文本...",
-      "analyzing": "AI 正在分析您的简历...",
+      "extracting": "读取 PDF",
+      "analyzing": "解析中",
+      "done": "解析完成",
+      "charUnit": "字",
       "success": "PDF 简历导入成功！",
-      "hint": "PDF 文件将通过 AI 智能解析"
+      "hint": "PDF 文件将通过 AI 智能解析",
+      "sections": {
+        "info": "个人信息",
+        "experience": "工作经历",
+        "education": "教育经历",
+        "projects": "项目经历",
+        "skills": "技能",
+        "languages": "语言能力",
+        "certificates": "证书"
+      }
     }
   },
   "dynamicForm": {
