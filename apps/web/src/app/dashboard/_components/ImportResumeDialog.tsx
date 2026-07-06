@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Loader2, X, FileText, FileJson, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -16,15 +16,192 @@ import { useAccountUiStore } from '@/store/useAccountUiStore';
 import { toast } from 'sonner';
 import { FaFileUpload } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { appLifecycle } from '@/lib/extensions/app-lifecycle';
 import { getFileSizeBucket } from '@/lib/utils/fileSize';
 import {
   formatResumeImportError,
   validateAndNormalizeImportedResume,
 } from '@/lib/validation/importResume';
+import { streamPdfParse } from '@/app/dashboard/edit/_components/ai/lib/services/agentClient';
 
 type FileType = 'json' | 'pdf' | null;
+
+type PdfPhase = 'extracting' | 'analyzing' | null;
+
+/**
+ * Resume sections lit up as the parser streams them, in the order their anchors
+ * appear in the model's JSON (kept in sync with agent-service
+ * `document/lib/pdf-field-progress.ts`). The `key` matches the backend field key.
+ */
+const PDF_SECTIONS: { key: string; labelKey: string; defaultLabel: string }[] = [
+  { key: 'info', labelKey: 'importDialog.pdf.sections.info', defaultLabel: '个人信息' },
+  { key: 'experience', labelKey: 'importDialog.pdf.sections.experience', defaultLabel: '工作经历' },
+  { key: 'education', labelKey: 'importDialog.pdf.sections.education', defaultLabel: '教育经历' },
+  { key: 'projects', labelKey: 'importDialog.pdf.sections.projects', defaultLabel: '项目经历' },
+  { key: 'skills', labelKey: 'importDialog.pdf.sections.skills', defaultLabel: '技能' },
+  { key: 'languages', labelKey: 'importDialog.pdf.sections.languages', defaultLabel: '语言能力' },
+  { key: 'certificates', labelKey: 'importDialog.pdf.sections.certificates', defaultLabel: '证书' },
+];
+
+// ease-out-expo — natural deceleration, no bounce (per design language).
+const EASE_OUT_EXPO = [0.16, 1, 0.3, 1] as const;
+
+/**
+ * Smoothly counts the displayed number toward `value` (ease-out-cubic over 300ms).
+ * A quiet liveness signal while parsing; jumps instantly under reduced motion.
+ */
+function CountUp({ value, animate }: { value: number; animate: boolean }) {
+  const [display, setDisplay] = useState(value);
+  const fromRef = useRef(value);
+
+  useEffect(() => {
+    const from = fromRef.current;
+    const to = value;
+    if (from === to) return;
+    if (!animate) {
+      fromRef.current = to;
+      setDisplay(to);
+      return;
+    }
+    const start = performance.now();
+    const duration = 300;
+    let raf = 0;
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setDisplay(Math.round(from + (to - from) * eased));
+      if (p < 1) raf = requestAnimationFrame(tick);
+      else fromRef.current = to;
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [value, animate]);
+
+  return <>{display.toLocaleString()}</>;
+}
+
+/** A checkmark that draws itself in a single stroke when a section lights up. */
+function SectionCheck({ draw, delay }: { draw: boolean; delay: number }) {
+  return (
+    <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" aria-hidden>
+      <motion.path
+        d="M5 13l4 4L19 7"
+        stroke="currentColor"
+        strokeWidth={3}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        initial={draw ? { pathLength: 0 } : false}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 0.24, ease: 'easeOut', delay }}
+      />
+    </svg>
+  );
+}
+
+/**
+ * PDF parse progress, "scanline" style: a sky band rides the active section (the
+ * frontier of what's been parsed) while each section lights up — sky node + a
+ * drawn check — as its data streams in. No spinner; the scan *is* the progress.
+ */
+function PdfScanProgress({
+  phase,
+  charCount,
+  litFields,
+  complete,
+}: {
+  phase: PdfPhase;
+  charCount: number;
+  litFields: Set<string>;
+  complete: boolean;
+}) {
+  const { t } = useTranslation();
+  const reduceMotion = useReducedMotion();
+  // The active row is the frontier: first section not yet lit. Anchored to real
+  // progress — never a constant-speed fake sweep.
+  const activeIndex = complete
+    ? -1
+    : PDF_SECTIONS.findIndex((s) => !litFields.has(s.key));
+
+  const heading = complete
+    ? t('importDialog.pdf.done', { defaultValue: '解析完成' })
+    : phase === 'analyzing'
+      ? t('importDialog.pdf.analyzing', { defaultValue: '解析中' })
+      : t('importDialog.pdf.extracting', { defaultValue: '读取 PDF' });
+
+  return (
+    <div className="text-left">
+      <div className="mb-4 flex items-baseline justify-between">
+        <span className="text-sm font-medium text-neutral-100">{heading}</span>
+        {phase === 'analyzing' && !complete && charCount > 0 && (
+          <span className="text-xs tabular-nums text-neutral-500">
+            <CountUp value={charCount} animate={!reduceMotion} />{' '}
+            {t('importDialog.pdf.charUnit', { defaultValue: '字' })}
+          </span>
+        )}
+      </div>
+
+      <ul className="relative flex flex-col gap-0.5">
+        {/* Completion sweep: a single sky band runs down the whole list and fades. */}
+        {complete && !reduceMotion && (
+          <motion.div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 top-0 h-full rounded-lg bg-gradient-to-b from-transparent via-sky-500/10 to-transparent"
+            initial={{ y: '-110%', opacity: 0.9 }}
+            animate={{ y: '110%', opacity: 0 }}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
+          />
+        )}
+        {PDF_SECTIONS.map((section, i) => {
+          const lit = litFields.has(section.key) || complete;
+          const active = i === activeIndex;
+          return (
+            <li
+              key={section.key}
+              className="relative flex h-10 items-center gap-3 rounded-lg px-3"
+            >
+              {active && !complete && (
+                <motion.div
+                  layoutId="pdf-scanband"
+                  className="absolute inset-0 rounded-lg bg-sky-500/[0.08] ring-1 ring-inset ring-sky-500/25"
+                  transition={{ duration: 0.32, ease: EASE_OUT_EXPO }}
+                >
+                  {!reduceMotion && (
+                    <motion.span
+                      className="absolute inset-x-3 bottom-0 h-px bg-sky-400"
+                      animate={{ opacity: [0.25, 0.75, 0.25] }}
+                      transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+                    />
+                  )}
+                </motion.div>
+              )}
+              <span
+                className={`relative z-10 flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-colors duration-200 ${
+                  lit
+                    ? 'bg-sky-500 text-neutral-950'
+                    : active
+                      ? 'border border-sky-500/60'
+                      : 'border border-neutral-700'
+                }`}
+                style={complete ? { transitionDelay: `${i * 45}ms` } : undefined}
+              >
+                {lit && <SectionCheck draw={!reduceMotion} delay={complete ? i * 0.045 : 0} />}
+              </span>
+              <span
+                className={`relative z-10 text-sm transition-colors duration-200 ${
+                  lit ? 'text-neutral-100' : active ? 'text-sky-200' : 'text-neutral-500'
+                }`}
+                style={complete ? { transitionDelay: `${i * 45}ms` } : undefined}
+              >
+                {t(section.labelKey, { defaultValue: section.defaultLabel })}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
 
 type ImportResumeDialogProps = {
   open: boolean;
@@ -40,19 +217,39 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
   const [isImporting, setIsImporting] = useState(false);
   const [importStatus, setImportStatus] = useState<string>('');
   const [fileType, setFileType] = useState<FileType>(null);
+  // PDF streaming progress: current phase, running char count, and the set of
+  // sections lit up so far. Decorative — the imported result still comes from the
+  // final `resume_update` + validation.
+  const [pdfPhase, setPdfPhase] = useState<PdfPhase>(null);
+  const [pdfCharCount, setPdfCharCount] = useState(0);
+  const [pdfLitFields, setPdfLitFields] = useState<Set<string>>(new Set());
+  const [pdfComplete, setPdfComplete] = useState(false);
+  const pdfAbortRef = useRef<AbortController | null>(null);
   const { t } = useTranslation();
   // Shared readiness check (provider + key + baseUrl + model + maxTokens) — see useSettingStore.
   const hasLlmConfig = hasLlmConfigFn();
 
+  const resetPdfProgress = useCallback(() => {
+    setPdfPhase(null);
+    setPdfCharCount(0);
+    setPdfLitFields(new Set());
+    setPdfComplete(false);
+  }, []);
+
   const handleClose = useCallback((open: boolean) => {
     if (!open) {
+      // Cancel any in-flight parse so the backend stops generating (no orphaned
+      // token burn) when the user closes mid-import.
+      pdfAbortRef.current?.abort();
+      pdfAbortRef.current = null;
       setFileType(null);
       setUploadError(null);
       setLlmConfigMissing(false);
       setImportStatus('');
+      resetPdfProgress();
     }
     onOpenChange(open);
-  }, [onOpenChange]);
+  }, [onOpenChange, resetPdfProgress]);
 
   const handleSelectType = useCallback((value: string) => {
     const type = value as FileType;
@@ -77,33 +274,56 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
     return validateAndNormalizeImportedResume(result);
   }, [t]);
 
-  // ─── PDF 文件处理（前端传递 LLM 配置）───
+  // ─── PDF 文件处理（流式解析 + 逐板块点亮）───
   const handlePdfFile = useCallback(async (file: File) => {
-    setImportStatus(t('importDialog.pdf.extracting', { defaultValue: 'Extracting text from PDF...' }));
-
     const formData = new FormData();
     formData.append('file', file);
-
     // 传递用户的 LLM 配置
-    const llmConfig = { apiKey, baseUrl, modelName: model, maxTokens };
-    formData.append('config', JSON.stringify(llmConfig));
+    formData.append('config', JSON.stringify({ apiKey, baseUrl, modelName: model, maxTokens }));
 
-    setImportStatus(t('importDialog.pdf.analyzing', { defaultValue: 'AI is analyzing your resume...' }));
+    const controller = new AbortController();
+    pdfAbortRef.current = controller;
 
-    const response = await fetch('/api/pdf/parse', {
-      method: 'POST',
-      body: formData,
-    });
+    resetPdfProgress();
+    setPdfPhase('extracting');
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-      const detail = errorData.detail || errorData.error || `Server error: ${response.status}`;
-      throw new Error(detail);
+    let resume: unknown = null;
+
+    for await (const ev of streamPdfParse(formData, controller.signal)) {
+      if (ev.type === 'tool_result') {
+        const payload = ev.payload as
+          | { kind?: string; phase?: PdfPhase; charCount?: number; fields?: string[] }
+          | undefined;
+        if (payload?.kind !== 'pdf_progress') continue;
+        if (payload.phase) setPdfPhase(payload.phase);
+        if (typeof payload.charCount === 'number') setPdfCharCount(payload.charCount);
+        if (payload.fields?.length) {
+          setPdfLitFields((prev) => {
+            const next = new Set(prev);
+            for (const f of payload.fields!) next.add(f);
+            return next;
+          });
+        }
+      } else if (ev.type === 'resume_update') {
+        // Final product: prefer `data`, fall back to the chat-shaped `payload.resume`.
+        resume = ev.data ?? (ev.payload as { resume?: unknown } | undefined)?.resume ?? null;
+      } else if (ev.type === 'error' || ev.type === 'run_failed') {
+        throw new Error(ev.error || t('importDialog.errors.parseFailed'));
+      }
     }
 
-    const result = await response.json();
-    return validateAndNormalizeImportedResume(result);
-  }, [apiKey, baseUrl, model, maxTokens, t]);
+    if (!resume) {
+      throw new Error(t('importDialog.errors.parseFailed'));
+    }
+
+    // Completion beat: light every section, run the finishing sweep, and hold on
+    // "解析完成" briefly so the user sees the parse land before the dialog closes.
+    setPdfLitFields(new Set(PDF_SECTIONS.map((s) => s.key)));
+    setPdfComplete(true);
+    await new Promise((r) => setTimeout(r, 600));
+
+    return validateAndNormalizeImportedResume(resume);
+  }, [apiKey, baseUrl, model, maxTokens, t, resetPdfProgress]);
 
   // ─── 统一文件处理 ───
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
@@ -160,6 +380,7 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
     } finally {
       setIsImporting(false);
       setImportStatus('');
+      pdfAbortRef.current = null;
     }
   }, [fileType, hasLlmConfig, importResume, handleClose, t, handleJsonFile, handlePdfFile, cloudSync]);
 
@@ -296,7 +517,14 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
                       `}
                     >
                       <input {...getInputProps()} />
-                      {isImporting ? (
+                      {isImporting && fileType === 'pdf' ? (
+                        <PdfScanProgress
+                          phase={pdfPhase}
+                          charCount={pdfCharCount}
+                          litFields={pdfLitFields}
+                          complete={pdfComplete}
+                        />
+                      ) : isImporting ? (
                         <div className="flex flex-col items-center justify-center text-sky-500">
                           <Loader2 className="w-10 h-10 mb-3 animate-spin" />
                           <p className="font-medium text-sm">{importStatus || t('importDialog.importing')}</p>
