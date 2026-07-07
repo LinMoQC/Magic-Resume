@@ -27,7 +27,7 @@ const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-70 z-50 flex justify-center items-start overflow-y-auto p-4 cursor-pointer"
+      className="fixed inset-0 bg-desk bg-opacity-70 z-50 flex justify-center items-start overflow-y-auto p-4 cursor-pointer"
       onClick={onClose}
     >
       <div

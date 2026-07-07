@@ -67,7 +67,7 @@ export default function ActionPopover({ target, anchorRect, onRun, onClose }: Ac
       exit={{ opacity: 0, y: -6 }}
       transition={{ duration: 0.14, ease: 'easeOut' }}
       style={{ position: 'fixed', top: pos.top, left: pos.left, width: POPOVER_WIDTH, zIndex: 120 }}
-      className="rounded-2xl bg-neutral-900 border border-neutral-800 shadow-[0_12px_40px_rgba(0,0,0,0.5)] p-2.5"
+      className="rounded-2xl bg-neutral-900 border border-neutral-800 shadow-[0_10px_30px_rgba(0,0,0,0.14)] p-2.5"
     >
       <div className="px-1.5 pb-2 text-[11px] text-neutral-500 truncate">{target.label}</div>
       <div className="flex flex-wrap gap-1.5">

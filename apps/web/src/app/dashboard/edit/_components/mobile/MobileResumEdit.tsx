@@ -57,8 +57,8 @@ export default function MobileResumEdit({
 }: MobileResumEditProps) {
     const { t } = useTranslation();
 
-    return <main className="flex h-screen bg-black text-white flex-1">
-        <div className='flex-1 flex items-center justify-center bg-black relative'>
+    return <main className="flex h-screen bg-desk text-white flex-1">
+        <div className='flex-1 flex items-center justify-center bg-desk relative'>
             <ResumePreviewPanel
                 activeResume={activeResume}
                 onShowAI={onShowAI}

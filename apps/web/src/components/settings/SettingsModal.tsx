@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useSettingStore } from "@/store/useSettingStore";
+import { useTheme, type ThemePreference } from "@/components/providers/ThemeProvider";
 import { useAccountUiStore, type SettingsSection } from "@/store/useAccountUiStore";
 import { isCloudMode } from "@/lib/config/app";
 import { cn } from "@/lib/utils";
@@ -49,6 +50,7 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 export function SettingsModal() {
   const { t, i18n } = useTranslation();
   const reduce = useReducedMotion();
+  const { theme, setTheme } = useTheme();
   const { settingsOpen, settingsSection, closeSettings, openSettings } = useAccountUiStore();
   const {
     cloudSync,
@@ -167,17 +169,13 @@ export function SettingsModal() {
                       >
                         <Segmented
                           groupId="appearance"
-                          value="dark"
+                          value={theme}
                           reduce={reduce}
-                          onChange={() => {}}
+                          onChange={(next: ThemePreference) => setTheme(next)}
                           options={[
                             { value: "dark", label: t("account.settings.general.appearanceDark") },
-                            {
-                              value: "light",
-                              label: t("account.settings.general.appearanceLight"),
-                              disabled: true,
-                              tag: t("account.settings.general.comingSoon"),
-                            },
+                            { value: "light", label: t("account.settings.general.appearanceLight") },
+                            { value: "system", label: t("account.settings.general.appearanceSystem") },
                           ]}
                         />
                       </SettingRow>
@@ -266,7 +264,7 @@ export function SettingsModal() {
                 <button
                   type="button"
                   onClick={handleSave}
-                  className="h-9 rounded-full bg-sky-500 px-5 text-[13px] font-semibold text-white shadow-lg shadow-sky-500/20 transition-colors hover:bg-sky-400"
+                  className="h-9 rounded-full bg-sky-500 px-5 text-[13px] font-semibold text-[#fff] shadow-lg shadow-sky-500/20 transition-colors hover:bg-sky-400"
                 >
                   {t("settings.buttons.save")}
                 </button>
@@ -301,7 +299,7 @@ export function SettingsModal() {
             </Button>
             <Button
               onClick={handleConfirmDisclaimer}
-              className="rounded-full bg-sky-500 px-6 font-medium text-white hover:bg-sky-400"
+              className="rounded-full bg-sky-500 px-6 font-medium text-[#fff] hover:bg-sky-400"
             >
               {t("settings.cloudSync.disclaimer.agree")}
             </Button>
@@ -394,7 +392,7 @@ function Segmented<T extends string>({
   reduce: boolean | null;
 }) {
   return (
-    <div className="inline-flex items-center gap-0.5 rounded-[10px] bg-black/30 p-1 ring-1 ring-inset ring-white/[0.06]">
+    <div className="inline-flex items-center gap-0.5 rounded-[10px] bg-sunk p-1 ring-1 ring-inset ring-white/[0.06]">
       {options.map((opt) => {
         const isActive = value === opt.value && !opt.disabled;
         return (
@@ -408,7 +406,7 @@ function Segmented<T extends string>({
               opt.disabled
                 ? "cursor-not-allowed text-neutral-600"
                 : isActive
-                  ? "font-medium text-white"
+                  ? "font-medium text-[#fff]"
                   : "text-neutral-400 hover:text-neutral-200",
             )}
           >

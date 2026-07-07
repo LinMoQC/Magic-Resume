@@ -120,9 +120,9 @@ export function ModelConfigFields() {
   };
 
   const inputClass =
-    'h-11 rounded-xl border-white/[0.08] bg-black/25 text-neutral-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] transition-all placeholder:text-neutral-700 focus-visible:ring-sky-500/30 focus-visible:ring-offset-0';
+    'h-11 rounded-xl border-white/[0.08] bg-sunk text-neutral-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] transition-all placeholder:text-neutral-700 focus-visible:ring-sky-500/30 focus-visible:ring-offset-0';
   const selectTriggerClass =
-    'h-11 w-full rounded-xl border-white/[0.08] bg-black/25 text-neutral-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] transition-all focus:ring-sky-500/30';
+    'h-11 w-full rounded-xl border-white/[0.08] bg-sunk text-neutral-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] transition-all focus:ring-sky-500/30';
 
   return (
     <div className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
@@ -243,7 +243,7 @@ export function ModelConfigFields() {
               type="button"
               onClick={handleTest}
               disabled={!canTest || testState === 'testing'}
-              className="inline-flex h-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.035] px-4 text-xs font-medium text-neutral-300 transition-colors hover:border-sky-400/20 hover:bg-sky-400/[0.06] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex h-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.035] px-4 text-xs font-medium text-neutral-300 transition-colors hover:border-sky-400/20 hover:bg-sky-400/[0.06] hover:text-[#fff] disabled:cursor-not-allowed disabled:opacity-40"
             >
               {testState === 'testing' ? (
                 <Loader2 size={13} className="animate-spin" />

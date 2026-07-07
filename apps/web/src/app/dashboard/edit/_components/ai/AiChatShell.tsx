@@ -1091,7 +1091,7 @@ export default function AiChatShell({
                 type="button"
                 onClick={handleGateContinue}
                 disabled={!hasLlmConfig()}
-                className="px-4 py-2 rounded-lg text-xs font-semibold bg-sky-500 text-white hover:bg-sky-400 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                className="px-4 py-2 rounded-lg text-xs font-semibold bg-sky-500 text-[#fff] hover:bg-sky-400 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {t('aiLab.configGate.saveAndContinue')}
               </button>

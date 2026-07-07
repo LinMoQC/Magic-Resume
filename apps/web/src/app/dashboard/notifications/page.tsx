@@ -16,7 +16,7 @@ export default function NotificationsPage() {
   if (!mounted) return null;
 
   return (
-    <div className="flex-1 overflow-y-auto bg-[#0A0A0A]">
+    <div className="flex-1 overflow-y-auto bg-desk">
       {/* same container as the resume library so the two page titles align */}
       <div className="mx-auto w-full max-w-[1400px] px-6 py-10 md:px-12">
         <header className="mb-8 flex items-end justify-between gap-4">

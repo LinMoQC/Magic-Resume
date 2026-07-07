@@ -77,9 +77,10 @@
       "general": {
         "description": "Preferences stay quiet and focused on choices that affect everyday editing.",
         "appearance": "Appearance",
-        "appearanceDescription": "Magic Resume currently stays in the dark workbench to reduce visual noise during long editing sessions.",
+        "appearanceDescription": "Dark is the default workbench for long editing sessions. Switch to light, or follow your system.",
         "appearanceDark": "Dark",
         "appearanceLight": "Light",
+        "appearanceSystem": "System",
         "comingSoon": "Coming soon",
         "language": "Language",
         "languageDescription": "Change the interface language without changing resume content."

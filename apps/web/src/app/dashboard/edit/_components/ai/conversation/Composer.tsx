@@ -161,59 +161,34 @@ export default function Composer({
                     onMouseEnter={() => setHighlight(i)}
                     onClick={() => chooseSkill(s.id)}
                     className={cn(
-                      'group w-full flex items-center gap-3 px-2.5 py-2.5 rounded-xl transition-colors cursor-pointer text-left',
-                      // The single sky accent on the whole surface: only the active row.
-                      active ? 'bg-sky-400/[0.08]' : 'hover:bg-white/[0.04]'
+                      // Codex-style: compact single-line rows, quiet neutral highlight (no color block).
+                      'group w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer text-left',
+                      active ? 'bg-white/[0.07]' : 'hover:bg-white/[0.035]'
                     )}
                   >
-                    <span className="flex items-center justify-center w-7 h-7 shrink-0">
+                    <span className="flex items-center justify-center w-5 h-5 shrink-0">
                       <Icon
-                        size={17}
+                        size={16}
                         className={cn(
                           'transition-colors',
-                          // Neutral at rest (tinted a touch toward sky), sky only when active.
-                          active ? 'text-sky-400' : 'text-neutral-500 group-hover:text-neutral-400'
+                          active ? 'text-neutral-200' : 'text-neutral-500 group-hover:text-neutral-400'
                         )}
                       />
                     </span>
-                    <span className="min-w-0 flex-1">
+                    <span className="min-w-0 flex-1 flex items-baseline gap-2">
                       <span
                         className={cn(
-                          'block text-[13px] font-medium truncate transition-colors',
-                          active ? 'text-neutral-50' : 'text-neutral-300'
+                          'shrink-0 text-[13px] font-medium transition-colors',
+                          active ? 'text-neutral-50' : 'text-neutral-200'
                         )}
                       >
                         {s.name}
                       </span>
-                      <span className="block text-[11px] text-neutral-500 truncate">{s.tagline}</span>
+                      <span className="min-w-0 truncate text-[12px] text-neutral-500">{s.tagline}</span>
                     </span>
-                    <kbd
-                      className={cn(
-                        'shrink-0 rounded-md px-1.5 py-0.5 font-mono text-[10px] leading-none bg-sky-400/15 text-sky-300 transition-opacity',
-                        active ? 'opacity-100' : 'opacity-0'
-                      )}
-                    >
-                      ↵
-                    </kbd>
                   </button>
                 );
               })}
-              <div className="mt-1 flex items-center gap-2 px-2.5 pt-2.5 pb-0.5 text-[10px] text-neutral-600">
-                <span className="inline-flex items-center gap-1.5">
-                  <kbd className="rounded bg-white/[0.05] px-1 py-0.5 font-mono text-neutral-500">{'↑↓'}</kbd>
-                  {t('aiLab.composer.switch')}
-                </span>
-                <span className="text-neutral-700">·</span>
-                <span className="inline-flex items-center gap-1.5">
-                  <kbd className="rounded bg-white/[0.05] px-1 py-0.5 font-mono text-neutral-500">{'↵'}</kbd>
-                  {t('aiLab.composer.select')}
-                </span>
-                <span className="text-neutral-700">·</span>
-                <span className="inline-flex items-center gap-1.5">
-                  <kbd className="rounded bg-white/[0.05] px-1 py-0.5 font-mono text-neutral-500">{'esc'}</kbd>
-                  {t('aiLab.composer.exit')}
-                </span>
-              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -287,7 +262,7 @@ export default function Composer({
             aria-label="发送"
             onClick={submit}
             disabled={disabled || !canSend}
-            className="w-8 h-8 rounded-full bg-sky-500 hover:bg-sky-600 disabled:opacity-40 disabled:hover:bg-sky-500 text-white flex items-center justify-center transition-colors cursor-pointer shrink-0"
+            className="w-8 h-8 rounded-full bg-sky-500 hover:bg-sky-600 disabled:opacity-40 disabled:hover:bg-sky-500 text-[#fff] flex items-center justify-center transition-colors cursor-pointer shrink-0"
           >
             <ArrowUp size={16} />
           </button>

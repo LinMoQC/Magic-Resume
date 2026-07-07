@@ -39,7 +39,7 @@ import { appLifecycle } from '@/lib/extensions/app-lifecycle';
 const ResumePreviewPanel = dynamic(() => import('./preview/ResumePreviewPanel'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full bg-black flex items-center justify-center text-white">
+    <div className="w-full h-full bg-desk flex items-center justify-center text-white">
       <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
     </div>
   )
@@ -371,7 +371,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
   // 如果简历未找到，显示错误信息
   if (resumeNotFound) {
     return (
-      <div className="flex h-screen bg-black text-white items-center justify-center">
+      <div className="flex h-screen bg-desk text-white items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">{t('editPage.errors.resumeNotFound')}</h1>
           <p className="text-neutral-400 mb-8">
@@ -472,7 +472,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
 
   return (
     <>
-      <main className="flex h-screen min-w-0 overflow-hidden bg-black text-white flex-1">
+      <main className="flex h-screen min-w-0 overflow-hidden bg-desk text-white flex-1">
         {/* 左侧:大纲轨 + 可折叠表单面板 */}
         <EditorFormPanel
           renderSections={renderSections}
@@ -485,7 +485,7 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
           onScroll={handleLeftScroll}
         />
         <div
-          className='min-w-0 flex-1 flex items-center justify-center bg-black relative overflow-hidden transition-all duration-300'
+          className='min-w-0 flex-1 flex items-center justify-center bg-desk relative overflow-hidden transition-all duration-300'
           style={{
             marginLeft: leftPanelWidth(leftCollapsed),
             marginRight: rightWorkspaceInset

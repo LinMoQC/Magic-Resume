@@ -119,7 +119,7 @@ export function McpAccessSection({ showHeader = true }: { showHeader?: boolean }
   const activeCount = tokens.filter((token) => !token.revokedAt).length;
 
   const inputClass =
-    'h-10 rounded-lg border border-white/[0.07] bg-black/20 px-3.5 text-neutral-100 placeholder:text-neutral-600 transition-colors focus-visible:border-sky-500/40 focus-visible:ring-1 focus-visible:ring-sky-500/25 focus-visible:ring-offset-0';
+    'h-10 rounded-lg border border-white/[0.07] bg-sunk px-3.5 text-neutral-100 placeholder:text-neutral-600 transition-colors focus-visible:border-sky-500/40 focus-visible:ring-1 focus-visible:ring-sky-500/25 focus-visible:ring-offset-0';
 
   return (
     <section id="mcp-access" className="mx-auto max-w-[760px]">
@@ -142,7 +142,7 @@ export function McpAccessSection({ showHeader = true }: { showHeader?: boolean }
             className={inputClass}
           />
           <Select value={selectedResumeId} onValueChange={setSelectedResumeId}>
-            <SelectTrigger className="h-10 w-full rounded-lg border border-white/[0.07] bg-black/20 px-3.5 text-neutral-100 transition-colors data-[size=default]:h-10 data-[placeholder]:text-neutral-500 focus-visible:border-sky-500/40 focus-visible:ring-1 focus-visible:ring-sky-500/25">
+            <SelectTrigger className="h-10 w-full rounded-lg border border-white/[0.07] bg-sunk px-3.5 text-neutral-100 transition-colors data-[size=default]:h-10 data-[placeholder]:text-neutral-500 focus-visible:border-sky-500/40 focus-visible:ring-1 focus-visible:ring-sky-500/25">
               <SelectValue placeholder={t('settings.mcp.defaultResumePlaceholder')} />
             </SelectTrigger>
             <SelectContent className="rounded-xl border-white/[0.08] bg-neutral-950 text-white shadow-2xl shadow-black/50">
@@ -158,7 +158,7 @@ export function McpAccessSection({ showHeader = true }: { showHeader?: boolean }
             onClick={handleCreateToken}
             loading={isCreating}
             disabled={!isSignedIn}
-            className="h-10 rounded-lg bg-sky-500 px-5 text-sm font-medium text-white transition-colors hover:bg-sky-400 focus-visible:ring-sky-400/50"
+            className="h-10 rounded-lg bg-sky-500 px-5 text-sm font-medium text-[#fff] transition-colors hover:bg-sky-400 focus-visible:ring-sky-400/50"
           >
             {t('settings.mcp.enable')}
           </Button>
@@ -192,13 +192,13 @@ export function McpAccessSection({ showHeader = true }: { showHeader?: boolean }
                   type="button"
                   size="sm"
                   onClick={() => copyText(plainToken, 'token')}
-                  className="shrink-0 rounded-lg bg-sky-500 text-white hover:bg-sky-400"
+                  className="shrink-0 rounded-lg bg-sky-500 text-[#fff] hover:bg-sky-400"
                 >
                   {copiedKey === 'token' ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
                   {t('settings.mcp.copyToken')}
                 </Button>
               </div>
-              <div className="mt-3 break-all rounded-lg border border-sky-400/15 bg-black/40 p-3 font-mono text-xs text-sky-100">
+              <div className="mt-3 break-all rounded-lg border border-sky-400/15 bg-sunk p-3 font-mono text-xs text-sky-100">
                 {plainToken}
               </div>
             </div>
@@ -218,7 +218,7 @@ export function McpAccessSection({ showHeader = true }: { showHeader?: boolean }
                   {t('settings.mcp.copyCommand')}
                 </button>
               </div>
-              <pre className="overflow-x-auto whitespace-pre-wrap rounded-lg border border-white/[0.06] bg-black/50 p-3.5 font-mono text-xs leading-relaxed text-neutral-300">
+              <pre className="overflow-x-auto whitespace-pre-wrap rounded-lg border border-white/[0.06] bg-sunk p-3.5 font-mono text-xs leading-relaxed text-neutral-300">
                 {mcpCommand}
               </pre>
             </div>

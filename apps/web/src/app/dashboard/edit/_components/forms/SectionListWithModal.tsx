@@ -336,7 +336,7 @@ export default function SectionListWithModal<T extends BaseItem>({
                     placeholder={field.placeholder}
                     value={(currentItem?.[field.name] as string) || ''}
                     onChange={handleInputChange}
-                    className="h-10 rounded-lg border border-white/[0.07] bg-black/20 px-3.5 text-neutral-100 placeholder:text-neutral-600 transition-colors focus-visible:border-sky-500/40 focus-visible:ring-1 focus-visible:ring-sky-500/25 focus-visible:ring-offset-0"
+                    className="h-10 rounded-lg border border-white/[0.07] bg-sunk px-3.5 text-neutral-100 placeholder:text-neutral-600 transition-colors focus-visible:border-sky-500/40 focus-visible:ring-1 focus-visible:ring-sky-500/25 focus-visible:ring-offset-0"
                   />
                 </div>
               ))}
@@ -346,7 +346,7 @@ export default function SectionListWithModal<T extends BaseItem>({
             <Label className="text-[13px] font-medium text-neutral-300">
               {t('modals.dynamicForm.descriptionLabel')}
             </Label>
-            <div className="overflow-hidden rounded-lg border border-white/[0.07] bg-black/20">
+            <div className="overflow-hidden rounded-lg border border-white/[0.07] bg-sunk">
               <TiptapEditor
                 content={(currentItem?.[richtextKey] as string) || ''}
                 onChange={handleQuillChange}
@@ -369,7 +369,7 @@ export default function SectionListWithModal<T extends BaseItem>({
           <button
             type="button"
             onClick={handleSave}
-            className="h-9 rounded-lg bg-sky-500 px-5 text-[13px] font-medium text-white transition-colors hover:bg-sky-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/50"
+            className="h-9 rounded-lg bg-sky-500 px-5 text-[13px] font-medium text-[#fff] transition-colors hover:bg-sky-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/50"
           >
             {t('modals.dynamicForm.saveButton')}
           </button>

@@ -71,9 +71,9 @@ export default function ConfirmDialog({
               className={
                 variant === 'danger'
                   ? // Restrained destructive: theme red #dc2626, softened a touch so it signals without shouting.
-                    'rounded-lg border-none bg-red-600/90 px-4 font-medium text-white hover:bg-red-600 focus-visible:ring-2 focus-visible:ring-red-500/40 focus-visible:ring-offset-0'
+                    'rounded-lg border-none bg-red-600/90 px-4 font-medium text-[#fff] hover:bg-red-600 focus-visible:ring-2 focus-visible:ring-red-500/40 focus-visible:ring-offset-0'
                   : // Positive confirm uses the brand sky accent, matching the composer send button.
-                    'rounded-lg border-none bg-sky-500 px-4 font-medium text-white hover:bg-sky-600 focus-visible:ring-2 focus-visible:ring-sky-400/40 focus-visible:ring-offset-0'
+                    'rounded-lg border-none bg-sky-500 px-4 font-medium text-[#fff] hover:bg-sky-600 focus-visible:ring-2 focus-visible:ring-sky-400/40 focus-visible:ring-offset-0'
               }
             >
               {confirmText || t('common.confirm')}

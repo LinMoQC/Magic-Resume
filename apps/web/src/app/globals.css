@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* 让 Tailwind 的 `dark:` 变体跟随 <html> 上的 .dark class(由 ThemeProvider / 内联脚本控制),
+   而非默认的 prefers-color-scheme。深色为产品默认。 */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @font-face {
   font-family: "Source Han Sans SC";
   src: url("/fonts/SourceHanSansSC-Regular.otf") format("opentype");
@@ -88,6 +92,118 @@
   --foreground: #171717;
 }
 
+/* ============================================================
+   语义 token 层 —— 浅色适配的单一事实源
+   规范:docs/specs/light-theme/design.md §2
+   概念:日光下的实验台 · 暖纸桌 + 冷 sky 墨。
+   深色为默认(:root 与 .dark 均取深色值,对齐迁移前观感 = 零回归);
+   .light 覆盖为暖纸原生值。颜色用 OKLCH,向明/暗极值降 chroma。
+   Phase 1 只落 token,不改组件消费(组件迁移见 §8);故本层不改深色观感。
+   ============================================================ */
+:root,
+.dark {
+  color-scheme: dark;
+
+  /* 表面 / 中性 */
+  --surface-desk: oklch(0.145 0 0);        /* ≈ #0a0a0a 桌面底 */
+  --surface-sunk: oklch(0.12 0 0);         /* 凹槽 */
+  --surface-raised: oklch(0.205 0 0);      /* ≈ #171717 面板/卡片 */
+  --surface-overlay: oklch(0.18 0 0 / 0.72);/* 浮层/磨砂 */
+  --surface-paper: oklch(0.995 0 0);       /* 简历画布,恒定近白(不随主题) */
+  --border-hairline: oklch(1 0 0 / 0.08);  /* 分隔/描边 */
+  --border-strong: oklch(1 0 0 / 0.16);    /* 输入框/强边界 */
+  --text-primary: oklch(0.93 0 0);         /* ≈ #ededed 正文 */
+  --text-secondary: oklch(0.72 0 0);       /* 次要 */
+  --text-muted: oklch(0.56 0 0);           /* 弱化/占位 */
+
+  /* 强调色 sky —— 拆两支:墨(承载对比) vs 光(仅装饰) */
+  --ink-sky: #38bdf8;                       /* 深色下亮 sky 即可承载 */
+  --ink-sky-hover: #7dd3fc;
+  --fill-sky: #0ea5e9;
+  --on-fill-sky: #0a0a0a;
+  --tint-sky: rgba(56, 189, 248, 0.12);
+  --glow-sky: #38bdf8;                      /* 装饰光效 */
+
+  /* 状态色 */
+  --rev-add: #22c55e;
+  --rev-del: #f87171;
+  --danger: #f87171;
+  --warning: #fbbf24;
+  --success: #22c55e;
+
+  /* 高度/阴影(深色靠发光,阴影极浅) */
+  --elev-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --elev-2: 0 6px 20px rgba(0, 0, 0, 0.5);
+  --elev-3: 0 18px 44px -22px rgba(0, 0, 0, 0.7);
+}
+
+.light {
+  color-scheme: light;
+
+  /* 表面 / 中性 —— 暖纸(OKLCH hue≈85,刻意向暖染) */
+  --surface-desk: oklch(0.975 0.004 85);   /* ≈ #FAF8F4 暖纸桌 */
+  --surface-sunk: oklch(0.955 0.005 85);   /* ≈ #F1EEE8 凹槽 */
+  --surface-raised: oklch(0.992 0.002 85); /* ≈ #FDFCFA 面板/卡片 */
+  --surface-overlay: oklch(1 0 0 / 0.86);  /* 暖白 frost */
+  --surface-paper: oklch(0.995 0 0);       /* 简历画布,恒定近白 */
+  --border-hairline: oklch(0.90 0.004 85); /* ≈ #E4E0D9 */
+  --border-strong: oklch(0.83 0.006 85);   /* ≈ #CFC9BF */
+  --text-primary: oklch(0.27 0.01 85);     /* ≈ #2B2723 暖炭 */
+  --text-secondary: oklch(0.44 0.01 85);   /* ≈ #524D46 */
+  --text-muted: oklch(0.55 0.01 85);       /* ≈ #6E695F */
+
+  /* sky —— 墨走深档(AA 达标),光留亮 sky */
+  --ink-sky: oklch(0.52 0.13 233);         /* ≈ #0369a1 sky-700,文字/边框 */
+  --ink-sky-hover: oklch(0.46 0.13 233);   /* ≈ #075985 */
+  --fill-sky: oklch(0.60 0.14 233);        /* ≈ #0284c7 主按钮 */
+  --on-fill-sky: oklch(0.99 0.01 233);     /* 近白 */
+  --tint-sky: oklch(0.95 0.03 233);        /* ≈ #E8F4FB 极淡染 */
+  --glow-sky: #38bdf8;                      /* 装饰,配低透明使用 */
+
+  /* 状态色(白底沿用,红删略深保 AA) */
+  --rev-add: #15803d;
+  --rev-del: #c81e1e;
+  --danger: #c81e1e;
+  --warning: #b45309;
+  --success: #15803d;
+
+  /* 高度/阴影 —— 边界 + 落地暖影替代发光 */
+  --elev-1: 0 1px 2px oklch(0.2 0.02 85 / 0.06);
+  --elev-2: 0 2px 8px oklch(0.2 0.02 85 / 0.08);
+  --elev-3: 0 12px 32px oklch(0.2 0.02 85 / 0.12);
+
+  /* --------------------------------------------------------------
+     Tailwind `neutral` 色阶浅色重映射(全量迁移的主干)。
+     Tailwind v4 的工具类编译为 var(--color-neutral-*),在 .light 作用域内
+     覆盖这些变量即可让全部 bg/text/border-neutral-* 自动翻面——深色底阶→暖纸、
+     浅色文字阶→暖墨,无需改组件。暖 hue≈85,向极值降 chroma。
+     -------------------------------------------------------------- */
+  --color-neutral-950: oklch(0.985 0.004 85); /* 原最深底 → 最亮纸 */
+  --color-neutral-900: oklch(0.970 0.004 85); /* 面板/卡片底 */
+  --color-neutral-800: oklch(0.902 0.005 85); /* 边界/hover 底 */
+  --color-neutral-700: oklch(0.828 0.006 85); /* 强边界 */
+  --color-neutral-600: oklch(0.640 0.010 85);
+  --color-neutral-500: oklch(0.520 0.010 85); /* muted 文字(×144) */
+  --color-neutral-400: oklch(0.455 0.012 85); /* secondary 文字 */
+  --color-neutral-300: oklch(0.400 0.012 85);
+  --color-neutral-200: oklch(0.340 0.012 85);
+  --color-neutral-100: oklch(0.280 0.010 85); /* 标题/主文字(×64) */
+  --color-neutral-50:  oklch(0.240 0.010 85); /* 最深墨 */
+
+  /* white → 暖墨:承载「深色上的白色主文字」在浅色翻为墨色。
+     彩色按钮上的白字改用字面量 text-[#fff] 保持近白(见迁移说明)。
+     border-white/xx、bg-white/xx 的半透明描边/悬停底则自动变为淡墨,正确。 */
+  --color-white: oklch(0.270 0.010 85);
+
+  /* sky 浅端(100–400)加深:这些阶主要当「文字/图标/激活态」用,
+     浅 sky 落在暖纸上对比不足(如侧栏激活项 text-sky-300/200)。加深到可读档,
+     白底 AA 达标。填充阶 sky-500/600/700 保持鲜亮(按钮/强调块)不动。 */
+  --color-sky-100: oklch(0.640 0.110 240);
+  --color-sky-200: oklch(0.585 0.130 240); /* 激活标签 text-sky-200 */
+  --color-sky-300: oklch(0.540 0.140 240); /* 激活图标 text-sky-300(×47) */
+  --color-sky-400: oklch(0.520 0.150 240); /* text-sky-400(×40)/tint/ring */
+}
+
 /* 字体class */
 .font-inter { font-family: var(--font-inter); }
 .font-nunito { font-family: var(--font-nunito); }
@@ -111,6 +227,26 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* 语义 token → 工具类(bg-desk / text-primary / border-hairline / text-ink-sky …) */
+  --color-desk: var(--surface-desk);
+  --color-sunk: var(--surface-sunk);
+  --color-raised: var(--surface-raised);
+  --color-overlay: var(--surface-overlay);
+  --color-paper: var(--surface-paper);
+  --color-hairline: var(--border-hairline);
+  --color-strong: var(--border-strong);
+  --color-primary: var(--text-primary);
+  --color-secondary: var(--text-secondary);
+  --color-muted: var(--text-muted);
+  --color-ink-sky: var(--ink-sky);
+  --color-ink-sky-hover: var(--ink-sky-hover);
+  --color-fill-sky: var(--fill-sky);
+  --color-on-fill-sky: var(--on-fill-sky);
+  --color-tint-sky: var(--tint-sky);
+  --color-glow-sky: var(--glow-sky);
+  --color-rev-add: var(--rev-add);
+  --color-rev-del: var(--rev-del);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -121,8 +257,8 @@
 }
 
 body {
-  background: var(--background);
-  color: #222;
+  background: var(--surface-desk);
+  color: var(--text-primary);
   font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -266,8 +402,36 @@ body.grabbing, body.grabbing * {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #737373; 
+  background: #737373;
   background-clip: padding-box;
+}
+
+/* 浅色:滚动条转暖灰,轨道贴纸、滑块可辨 */
+.light ::-webkit-scrollbar-track {
+  background: oklch(0.94 0.004 85);
+}
+.light ::-webkit-scrollbar-thumb {
+  background: oklch(0.80 0.006 85);
+  border-color: oklch(0.94 0.004 85);
+}
+.light ::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.68 0.008 85);
+}
+
+/* 浅色:深色为主设计的重阴影(黑 40–60%,深底上才可见)在白纸上会显脏发重,
+   统一收敛为柔和暖影(仅浅色作用域覆盖,深色的 Tailwind 阴影不动 = 零回归)。
+   用主题感知的 --elev-*(见 §3),连带覆盖 shadow-black/xx 的深色阴影色组合。 */
+.light .shadow-md {
+  box-shadow: var(--elev-1);
+}
+.light .shadow-lg {
+  box-shadow: var(--elev-2);
+}
+.light .shadow-xl {
+  box-shadow: var(--elev-2);
+}
+.light .shadow-2xl {
+  box-shadow: var(--elev-3);
 }
 
 button {
@@ -1905,4 +2069,108 @@ button {
   .cs-cta::after {
     display: none;
   }
+}
+
+/* ============================================================
+   浅色:AI「活画布」发光元素原生分支(design.md §5)
+   原则:glow → grounded light —— 纸上的光有方向、有边界、会落地。
+   深色态样式全部保留,这里只在 .light 覆盖颜色与「发光↔落地阴影」。
+   ============================================================ */
+
+/* Polaris 光球:球体本身(深玻璃+液态流光+碎星)保留=纸上一颗宝石;
+   收敛外层大光晕(白上=脏印),改由清晰缘环 + 落地暖影让它「放在纸上」。 */
+.light .polaris-fab__halo {
+  opacity: 0.14;
+  filter: blur(9px);
+  background: radial-gradient(
+    circle at 50% 46%,
+    rgba(56, 120, 255, 0.26),
+    rgba(56, 189, 248, 0.1) 50%,
+    transparent 74%
+  );
+}
+.light .polaris-fab:hover .polaris-fab__halo {
+  opacity: 0.26;
+}
+.light .polaris-orb {
+  box-shadow:
+    0 12px 24px -10px oklch(0.28 0.03 250 / 0.32),
+    0 2px 6px oklch(0.28 0.02 85 / 0.16),
+    0 0 0 1px oklch(0.6 0.02 250 / 0.16);
+}
+/* AiFab.tsx 内联的蓝光 hover 阴影在浅色改为收紧的落地暖影 */
+.light .polaris-fab:hover {
+  box-shadow: 0 16px 30px -14px oklch(0.28 0.04 250 / 0.4) !important;
+}
+
+/* 画布描边流光:白底上模糊 bloom 失效 → 收窄 blur,更像「墨沿纸边写过」的清晰描边 */
+.light .ai-canvas-edge-flow__spin {
+  filter: blur(11px);
+  opacity: 0.85;
+}
+
+/* 思考遮罩:深色 frost → 暖白纸磨砂 + 极淡 sky 染;中央彩色 orb 与白 mark 保留 */
+.light .ai-thinking-overlay {
+  background:
+    radial-gradient(circle at 50% 46%, rgba(var(--ai-color), 0.12), transparent 34%),
+    oklch(1 0 0 / 0.68);
+  backdrop-filter: blur(10px) saturate(130%);
+  -webkit-backdrop-filter: blur(10px) saturate(130%);
+}
+.light .ai-thinking-overlay::before {
+  border-color: rgba(var(--ai-color), 0.2);
+  background: linear-gradient(
+    145deg,
+    oklch(1 0 0 / 0.55),
+    rgba(var(--ai-color), 0.05) 40%,
+    oklch(0.97 0.004 85 / 0.5)
+  );
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.6);
+}
+.light .ai-thinking-overlay__meter {
+  background: oklch(0.9 0.004 85);
+}
+
+/* AI 文本加载效果:白底上收敛 glow,加淡描边定形 */
+.light .ai-loading-effect {
+  background: rgba(var(--ai-color), 0.12);
+  box-shadow:
+    0 0 0 1px rgba(var(--ai-color), 0.28),
+    0 1px 6px rgba(var(--ai-color), 0.14);
+}
+
+/* Coming Soon 舞台:暖纸化 —— 网格转极淡暖线、玻璃面板转暖纸卡、
+   sky 大光晕降透明、暗晕反相为提亮暖晕保证前景可读、骨架条转纸上浅墨。 */
+.light .cs-grid {
+  background-image:
+    linear-gradient(oklch(0.2 0.01 85 / 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(0.2 0.01 85 / 0.045) 1px, transparent 1px);
+}
+.light .cs-aura--a {
+  background: rgba(56, 189, 248, 0.1);
+}
+.light .cs-aura--b {
+  background: rgba(56, 189, 248, 0.06);
+}
+.light .cs-panel {
+  background: linear-gradient(
+    160deg,
+    oklch(1 0 0 / 0.72),
+    oklch(0.99 0.002 85 / 0.42)
+  );
+  border-color: oklch(0.9 0.004 85);
+  box-shadow:
+    0 30px 60px -34px oklch(0.28 0.02 85 / 0.22),
+    inset 0 1px 0 oklch(1 0 0 / 0.6);
+}
+.light .cs-bar {
+  background: oklch(0.88 0.008 85);
+}
+.light .cs-vignette {
+  background: radial-gradient(
+    ellipse 60% 52% at 50% 48%,
+    oklch(0.985 0.004 85 / 0.82),
+    oklch(0.985 0.004 85 / 0.4) 46%,
+    transparent 72%
+  );
 }

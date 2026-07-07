@@ -111,7 +111,7 @@ export default function FormCard({ instance, onAction }: WidgetProps) {
             <button
               type="button"
               onClick={() => onAction({ type: 'submit', values })}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-sky-500 hover:bg-sky-600 px-3.5 py-1.5 text-xs font-medium text-white transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-sky-500 hover:bg-sky-600 px-3.5 py-1.5 text-xs font-medium text-[#fff] transition-colors cursor-pointer"
             >
               <Check size={13} />
               {t('aiLab.widgets.form.submit')}

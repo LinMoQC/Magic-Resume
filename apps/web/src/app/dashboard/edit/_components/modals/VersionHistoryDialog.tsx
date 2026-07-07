@@ -21,7 +21,8 @@ import { formatCompactDateTime } from '@/lib/utils/dateTime';
 import { generateShortHash } from '@/lib/utils/hash';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import ResumePreview from '../preview/ResumePreview';
-import { workbenchJsonTheme } from './jsonTheme';
+import { workbenchJsonTheme, workbenchJsonThemeLight } from './jsonTheme';
+import { useTheme } from '@/components/providers/ThemeProvider';
 
 const ReactJsonView = EditorComponents.JsonViewer;
 
@@ -43,6 +44,8 @@ export default function VersionHistoryDialog({ isOpen, onClose, onRestore, onDel
     const [selectedVersionId, setSelectedVersionId] = useState<string>('');
     const [confirmId, setConfirmId] = useState<string | null>(null);
     const [viewMode, setViewMode] = useState<'render' | 'json'>('render');
+    const { resolvedTheme } = useTheme();
+    const jsonTheme = resolvedTheme === 'light' ? workbenchJsonThemeLight : workbenchJsonTheme;
 
     // Sync selectedVersionId with the latest version when opening or when versions change
     useEffect(() => {
@@ -118,7 +121,7 @@ export default function VersionHistoryDialog({ isOpen, onClose, onRestore, onDel
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.98, y: 12 }}
                         transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                        className="flex h-[80vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-[#0e0f11] shadow-[0_24px_70px_-20px_rgb(0_0_0/0.8)] ring-1 ring-white/[0.07] focus:outline-none pointer-events-auto"
+                        className="flex h-[80vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-desk shadow-[0_24px_70px_-20px_rgb(0_0_0/0.8)] ring-1 ring-white/[0.07] focus:outline-none pointer-events-auto"
                     >
                         <div className="flex items-center justify-between px-6 py-4">
                             <div className="flex items-center gap-3">
@@ -243,7 +246,7 @@ export default function VersionHistoryDialog({ isOpen, onClose, onRestore, onDel
                                                             onClick={() => setViewMode(id)}
                                                             className={cn(
                                                                 "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer",
-                                                                viewMode === id ? "bg-sky-400/12 text-sky-300 ring-1 ring-sky-400/25" : "text-neutral-400 hover:text-white"
+                                                                viewMode === id ? "bg-sky-400/12 text-sky-300 ring-1 ring-sky-400/25" : "text-neutral-400 hover:text-[#fff]"
                                                             )}
                                                         >
                                                             <Icon size={13} />
@@ -253,7 +256,7 @@ export default function VersionHistoryDialog({ isOpen, onClose, onRestore, onDel
                                                 </div>
                                                 <button
                                                     onClick={() => onRestore(selectedVersionId)}
-                                                    className="flex items-center gap-1.5 rounded-lg bg-sky-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-sky-400 cursor-pointer"
+                                                    className="flex items-center gap-1.5 rounded-lg bg-sky-500 px-3 py-1.5 text-xs font-semibold text-[#fff] shadow-sm transition-colors hover:bg-sky-400 cursor-pointer"
                                                 >
                                                     <RotateCcw size={13} />
                                                     {t('modals.versionHistory.restore')}
@@ -274,13 +277,13 @@ export default function VersionHistoryDialog({ isOpen, onClose, onRestore, onDel
                                                     initial={{ opacity: 0 }}
                                                     animate={{ opacity: 1 }}
                                                     transition={{ duration: 0.15 }}
-                                                    className="h-full overflow-hidden rounded-xl bg-[#0a0b0d] ring-1 ring-white/[0.06]"
+                                                    className="h-full overflow-hidden"
                                                 >
                                                     <div className="h-full overflow-y-auto p-5 font-mono text-[11px] leading-relaxed [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                                                         {resolvedResume && (
                                                             <ReactJsonView
                                                                 src={resolvedResume}
-                                                                theme={workbenchJsonTheme}
+                                                                theme={jsonTheme}
                                                                 displayDataTypes={false}
                                                                 enableClipboard={false}
                                                                 style={{ backgroundColor: 'transparent', fontSize: '11px', lineHeight: '1.7' }}
@@ -295,7 +298,7 @@ export default function VersionHistoryDialog({ isOpen, onClose, onRestore, onDel
                                                     initial={{ opacity: 0 }}
                                                     animate={{ opacity: 1 }}
                                                     transition={{ duration: 0.15 }}
-                                                    className="h-full overflow-y-auto overflow-x-hidden custom-scrollbar rounded-xl bg-neutral-500/10 p-4 ring-1 ring-white/[0.06]"
+                                                    className="h-full overflow-y-auto overflow-x-hidden custom-scrollbar p-4"
                                                 >
                                                     {resolvedResume && (
                                                         <div
@@ -304,7 +307,7 @@ export default function VersionHistoryDialog({ isOpen, onClose, onRestore, onDel
                                                         >
                                                             <div
                                                                 ref={paperRef}
-                                                                className="overflow-hidden rounded-md bg-white shadow-xl"
+                                                                className="overflow-hidden rounded-md bg-[#fff] shadow-xl"
                                                                 style={{ width: PAPER_WIDTH, transform: `scale(${scale})`, transformOrigin: 'top left' }}
                                                             >
                                                                 <ResumePreview

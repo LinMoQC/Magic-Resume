@@ -10,7 +10,7 @@ function Bar({ className = "" }: { className?: string }) {
 function RailSkeleton({ side }: { side: "left" | "right" }) {
   return (
     <div
-      className={`flex h-full shrink-0 flex-col items-center gap-2 bg-[#0A0A0A] py-3 ${
+      className={`flex h-full shrink-0 flex-col items-center gap-2 bg-desk py-3 ${
         side === "left" ? "border-r" : "border-l"
       } border-white/[0.06]`}
       style={{ width: side === "left" ? LEFT_RAIL_WIDTH : RAIL_WIDTH }}
@@ -34,12 +34,12 @@ export default function ResumeEditSkeleton() {
   return (
     // 三列 in-flow flex:左右面板 shrink-0、中间画布 flex-1,画布自然居中于两侧面板之间;
     // 移动端面板 hidden,画布占满全宽。无需 fixed / margin,天然对称。
-    <main className="flex h-screen min-w-0 flex-1 overflow-hidden bg-black text-white">
+    <main className="flex h-screen min-w-0 flex-1 overflow-hidden bg-desk text-white">
       {/* ── 左:图标轨 + 内容表单面板 ── */}
       <div className="hidden h-full shrink-0 lg:flex">
         <RailSkeleton side="left" />
         <div
-          className="h-full border-r border-white/[0.06] bg-[#0A0A0A]"
+          className="h-full border-r border-white/[0.06] bg-desk"
           style={{ width: LEFT_PANEL_WIDTH }}
         >
           <div className="flex items-center border-b border-white/[0.06] px-4 py-4">
@@ -80,7 +80,7 @@ export default function ResumeEditSkeleton() {
       </div>
 
       {/* ── 中:画布(顶栏 scrim + 预览纸 + 底部工具坞) ── */}
-      <div className="relative flex min-w-0 flex-1 flex-col items-center justify-center bg-black">
+      <div className="relative flex min-w-0 flex-1 flex-col items-center justify-center bg-desk">
         {/* 顶栏:返回 + 标题 */}
         <div className="pointer-events-none absolute inset-x-0 top-0 flex h-16 items-center gap-2 px-6">
           <Bar className="h-8 w-8 rounded-lg" />
@@ -105,7 +105,7 @@ export default function ResumeEditSkeleton() {
       {/* ── 右:自定义面板 + 图标轨 ── */}
       <div className="hidden h-full shrink-0 lg:flex">
         <div
-          className="h-full border-l border-white/[0.06] bg-[#0A0A0A]"
+          className="h-full border-l border-white/[0.06] bg-desk"
           style={{ width: PANEL_WIDTH }}
         >
           <div className="flex items-center border-b border-white/[0.06] px-4 py-4">

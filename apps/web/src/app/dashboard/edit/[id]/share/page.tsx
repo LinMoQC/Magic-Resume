@@ -26,7 +26,7 @@ export default function ShareModalPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-black">
+    <div className="flex items-center justify-center min-h-screen bg-desk">
         <ShareModal
           isOpen={true}
           onClose={() => handleOpenChange(false)}

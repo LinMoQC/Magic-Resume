@@ -22,7 +22,7 @@ export default function ReviewBar({ count, onPrev, onNext, onAcceptAll, onDiscar
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 16 }}
       transition={{ type: 'spring', stiffness: 360, damping: 30 }}
-      className="absolute bottom-4 left-1/2 z-30 flex max-w-[calc(100%-2rem)] -translate-x-1/2 flex-nowrap items-center gap-2 overflow-x-auto rounded-2xl border border-neutral-800 bg-neutral-900/95 px-2.5 py-2 shadow-[0_12px_40px_rgba(0,0,0,0.5)] backdrop-blur"
+      className="absolute bottom-4 left-1/2 z-30 flex max-w-[calc(100%-2rem)] -translate-x-1/2 flex-nowrap items-center gap-2 overflow-x-auto rounded-2xl border border-neutral-800 bg-neutral-900/95 px-2.5 py-2 shadow-[0_10px_30px_rgba(0,0,0,0.14)] backdrop-blur"
     >
       <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap pl-1.5 pr-1 text-xs text-neutral-300">
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />

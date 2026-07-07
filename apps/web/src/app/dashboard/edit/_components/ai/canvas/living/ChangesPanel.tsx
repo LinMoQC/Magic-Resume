@@ -36,7 +36,7 @@ export default function ChangesPanel({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -6 }}
       transition={{ duration: 0.16, ease: 'easeOut' }}
-      className="absolute right-4 top-12 z-40 w-[300px] max-h-[60%] flex flex-col rounded-2xl bg-neutral-900 border border-neutral-800 shadow-[0_16px_50px_rgba(0,0,0,0.55)] overflow-hidden"
+      className="absolute right-4 top-12 z-40 w-[300px] max-h-[60%] flex flex-col rounded-2xl bg-neutral-900 border border-neutral-800 shadow-[0_12px_36px_rgba(0,0,0,0.15)] overflow-hidden"
     >
       <div className="flex items-center gap-2 px-3.5 py-2.5 shrink-0">
         <span className="text-xs font-medium text-white">{t('aiLab.living.allChanges')}</span>
