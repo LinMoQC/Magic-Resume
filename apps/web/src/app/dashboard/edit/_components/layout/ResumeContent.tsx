@@ -12,7 +12,7 @@ type ResumeContentProps = {
 export default function ResumeContent({ renderSections, handleSave, onShowJson, isSaving = false }: ResumeContentProps) {
   const { t } = useTranslation();
   return (
-    <div className="flex h-full flex-col bg-[#0A0A0A] py-5">
+    <div className="flex h-full flex-col bg-desk py-5">
       <div className="flex-1 overflow-y-auto px-4 hide-scrollbar">
         {renderSections()}
       </div>

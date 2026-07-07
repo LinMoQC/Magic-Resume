@@ -80,7 +80,7 @@ export default function DashboardSidebar() {
 
   return (
     <aside
-      className="group relative z-30 h-full shrink-0 border-r border-white/[0.06] bg-[#0A0A0A]"
+      className="group relative z-30 h-full shrink-0 border-r border-white/[0.06] bg-desk"
       style={{
         width: collapsed ? RAIL_WIDTH : PANEL_WIDTH,
         transition: anim ? `width ${DUR}ms ${EASE}` : undefined,
@@ -232,7 +232,7 @@ function NavItem({
         )}
       >
         {icon}
-        {dot && <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-sky-400 ring-2 ring-[#0A0A0A]" />}
+        {dot && <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-sky-400 ring-2 ring-desk" />}
       </span>
       <span
         className={cn(

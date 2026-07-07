@@ -147,7 +147,7 @@ export default function AccountMenu({ placement = "up", label }: AccountMenuProp
         transformOrigin: "bottom left",
         pointerEvents: open ? "auto" : "none",
       }}
-      className="rounded-2xl border border-white/[0.06] bg-[#0d0e10]/95 p-1.5 shadow-2xl shadow-black/60 backdrop-blur-xl will-change-transform"
+      className="rounded-2xl border border-white/[0.06] bg-desk/95 p-1.5 shadow-2xl shadow-black/60 backdrop-blur-xl will-change-transform"
     >
       {/* sky top-seam signature */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px rounded-t-2xl bg-gradient-to-r from-transparent via-sky-500/40 to-transparent" />

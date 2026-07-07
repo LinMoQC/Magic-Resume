@@ -25,7 +25,7 @@ export const Switch: React.FC<SwitchProps> = ({
       disabled={disabled}
       onClick={() => !disabled && onCheckedChange(!checked)}
       className={cn(
-        "relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black disabled:cursor-not-allowed disabled:opacity-50",
+        "relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-desk disabled:cursor-not-allowed disabled:opacity-50",
         checked ? "bg-sky-500" : "bg-neutral-700",
         className
       )}
@@ -41,7 +41,7 @@ export const Switch: React.FC<SwitchProps> = ({
           damping: 30,
         }}
         className={cn(
-          "pointer-events-none block h-5 w-5 rounded-full bg-white shadow-lg ring-0"
+          "pointer-events-none block h-5 w-5 rounded-full bg-[#fff] shadow-lg ring-0"
         )}
       />
     </button>

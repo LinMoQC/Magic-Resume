@@ -33,7 +33,7 @@ export default function EditorFormPanel({
 
   if (embedded) {
     return (
-      <div className="flex h-full w-full flex-col bg-[#0A0A0A]">
+      <div className="flex h-full w-full flex-col bg-desk">
         <div className="flex items-center border-b border-white/[0.06] px-4 py-4">
           <h2 className="text-[15px] font-semibold tracking-tight text-white">{t("outline.title")}</h2>
         </div>
@@ -55,7 +55,7 @@ export default function EditorFormPanel({
       />
 
       <motion.div
-        className="h-full overflow-hidden border-r border-white/[0.06] bg-[#0A0A0A]"
+        className="h-full overflow-hidden border-r border-white/[0.06] bg-desk"
         animate={{ width: collapsed ? 0 : LEFT_PANEL_WIDTH }}
         initial={false}
         transition={{ type: "spring", stiffness: 320, damping: 32 }}

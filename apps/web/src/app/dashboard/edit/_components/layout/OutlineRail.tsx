@@ -61,7 +61,7 @@ export default function OutlineRail({
 
   return (
     <div
-      className="flex h-full shrink-0 flex-col items-center gap-1 border-r border-white/[0.06] bg-[#0A0A0A] py-3"
+      className="flex h-full shrink-0 flex-col items-center gap-1 border-r border-white/[0.06] bg-desk py-3"
       style={{ width: LEFT_RAIL_WIDTH }}
     >
       <RailButton

@@ -41,7 +41,7 @@ export default function AIModalPage() {
   if (!activeResume) return null;
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-black">
+    <div className="flex items-center justify-center min-h-screen bg-desk">
         {/* Fallback for hard navigation: Just the modal */}
         <AIModal
           isOpen={true}

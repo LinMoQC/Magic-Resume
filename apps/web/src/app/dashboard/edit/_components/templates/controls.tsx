@@ -181,7 +181,7 @@ export function ToggleField({
       >
         <span
           className={cn(
-            "absolute top-0.5 left-0.5 h-[18px] w-[18px] rounded-full bg-white shadow-sm transition-transform duration-200",
+            "absolute top-0.5 left-0.5 h-[18px] w-[18px] rounded-full bg-[#fff] shadow-sm transition-transform duration-200",
             checked ? "translate-x-[18px]" : "translate-x-0",
           )}
         />
@@ -457,7 +457,7 @@ export function ColorField({
           <div className="absolute inset-0 rounded-lg" style={{ background: "linear-gradient(to right, #fff, rgba(255,255,255,0))" }} />
           <div className="absolute inset-0 rounded-lg" style={{ background: "linear-gradient(to top, #000, rgba(0,0,0,0))" }} />
           <span
-            className="pointer-events-none absolute h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-[0_0_0_1px_rgba(0,0,0,0.4)]"
+            className="pointer-events-none absolute h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-[0_0_0_1px_rgba(0,0,0,0.12)]"
             style={{ left: `${hsv.s * 100}%`, top: `${(1 - hsv.v) * 100}%` }}
           />
         </div>
@@ -473,7 +473,7 @@ export function ColorField({
           }}
         >
           <span
-            className="pointer-events-none absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-[0_0_0_1px_rgba(0,0,0,0.4)]"
+            className="pointer-events-none absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-[0_0_0_1px_rgba(0,0,0,0.12)]"
             style={{ left: `${(hsv.h / 360) * 100}%` }}
           />
         </div>

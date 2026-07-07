@@ -73,7 +73,7 @@ export const CommentPopover = ({
             {isOpen && (
                 <motion.div
                     className={cn(
-                        "absolute z-30 w-[280px] bg-white dark:bg-neutral-900 rounded-xl shadow-xl border border-neutral-200 dark:border-neutral-800 flex flex-col overflow-hidden",
+                        "absolute z-30 w-[280px] bg-[#fff] dark:bg-neutral-900 rounded-xl shadow-xl border border-neutral-200 dark:border-neutral-800 flex flex-col overflow-hidden",
                     )}
                     initial={{ opacity: 0, scale: 0.9, x: '-50%', y: isTopHalf ? 10 : -10 }} 
                     animate={{ 
@@ -101,7 +101,7 @@ export const CommentPopover = ({
                                     <img src={avatarUrl} alt={authorName} className="w-5 h-5 rounded-full object-cover border border-neutral-200 dark:border-neutral-700" />
                                 </>
                             ) : (
-                               <div className="w-5 h-5 rounded-full bg-linear-to-br from-blue-500 to-purple-500 flex items-center justify-center text-[10px] text-white font-bold">
+                               <div className="w-5 h-5 rounded-full bg-linear-to-br from-blue-500 to-purple-500 flex items-center justify-center text-[10px] text-[#fff] font-bold">
                                    {authorName && authorName !== 'Anonymous' ? authorName.charAt(0) : (t('sharedPage.comments.anonymous') || 'A').charAt(0)}
                                </div>
                            )}
@@ -190,7 +190,7 @@ export const CommentPopover = ({
                                  <button
                                     onClick={() => content.trim() && onSave(content, selectedColor)}
                                     disabled={!content.trim() || isLoading}
-                                    className="flex items-center gap-1.5 bg-blue-600 text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    className="flex items-center gap-1.5 bg-blue-600 text-[#fff] text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                  >
                                      {isLoading ? (
                                          <Loader2 size={12} className="animate-spin" />

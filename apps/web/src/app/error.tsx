@@ -21,7 +21,7 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-desk flex flex-col items-center justify-center p-4 relative overflow-hidden">
       {/* Background Gradients */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-[20%] right-[20%] w-[400px] h-[400px] bg-red-500/5 rounded-full blur-[120px]" />
@@ -49,7 +49,7 @@ export default function Error({
           <Button 
             onClick={() => reset()}
             size="lg" 
-            className="w-full sm:w-auto gap-2 bg-white text-black hover:bg-neutral-200"
+            className="w-full sm:w-auto gap-2 bg-[#fff] text-black hover:bg-neutral-200"
           >
             <RotateCcw className="w-4 h-4" />
             {t('errorPage.buttons.tryAgain')}
@@ -68,7 +68,7 @@ export default function Error({
         </div>
 
         {process.env.NODE_ENV === 'development' && (
-          <div className="mt-8 p-4 bg-black/50 rounded-lg text-left overflow-auto max-h-48 border border-neutral-800">
+          <div className="mt-8 p-4 bg-sunk rounded-lg text-left overflow-auto max-h-48 border border-neutral-800">
             <p className="font-mono text-xs text-red-400">
               {error.message || "Unknown error occurred"}
             </p>

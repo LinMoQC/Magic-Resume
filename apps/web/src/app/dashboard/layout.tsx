@@ -20,7 +20,7 @@ export default async function DashboardLayout({
 }) {
   if (isCloudMode && !(await hasBetaAccess())) redirect("/coming-soon");
   return (
-    <div className="flex h-screen bg-black text-white overflow-hidden">
+    <div className="flex h-screen bg-desk text-white overflow-hidden">
       <DashboardSidebar />
       <div className="flex-1 flex flex-col min-w-0">
         {children}

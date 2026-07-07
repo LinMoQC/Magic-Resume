@@ -27,7 +27,7 @@ export const SharedResumeHeader = React.memo(() => {
                 </Link>
                 <Link 
                     href="/dashboard"
-                    className="group flex items-center gap-2 px-4 py-2 bg-white text-black rounded-lg text-sm font-medium hover:bg-neutral-200 transition-colors shadow-lg shadow-white/5"
+                    className="group flex items-center gap-2 px-4 py-2 bg-[#fff] text-black rounded-lg text-sm font-medium hover:bg-neutral-200 transition-colors shadow-lg shadow-white/5"
                 >
                     <span className="hidden sm:inline">{t('sharedPage.header.createResume')}</span>
                     <span className="inline sm:hidden">{t('sharedPage.header.create')}</span>

@@ -31,7 +31,7 @@ export default function NewResumeDialog({ open, onOpenChange, newName, setNewNam
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="w-full max-w-md bg-[#1C1C1E] border border-neutral-800 rounded-3xl shadow-2xl p-8 pointer-events-auto"
+              className="w-full max-w-md bg-raised border border-neutral-800 rounded-3xl shadow-2xl p-8 pointer-events-auto"
             >
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-white">{t('newResumeDialog.title')}</h2>
@@ -68,7 +68,7 @@ export default function NewResumeDialog({ open, onOpenChange, newName, setNewNam
                   <Button 
                       onClick={handleCreate} 
                       disabled={!newName.trim() || isLoading} 
-                      className="min-w-[100px] bg-sky-600 hover:bg-sky-500 text-white rounded-lg"
+                      className="min-w-[100px] bg-sky-600 hover:bg-sky-500 text-[#fff] rounded-lg"
                   >
                       {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : t('newResumeDialog.create')}
                   </Button>

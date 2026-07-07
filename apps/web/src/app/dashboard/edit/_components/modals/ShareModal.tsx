@@ -85,7 +85,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.98, y: 12 }}
               transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-              className="w-full max-w-md rounded-2xl bg-[#0e0f11] p-6 shadow-[0_24px_70px_-20px_rgb(0_0_0/0.8)] ring-1 ring-white/[0.07] pointer-events-auto"
+              className="w-full max-w-md rounded-2xl bg-desk p-6 shadow-[0_24px_70px_-20px_rgb(0_0_0/0.8)] ring-1 ring-white/[0.07] pointer-events-auto"
             >
             <div className="flex items-start justify-between mb-6">
               <div className="flex items-center gap-3">
@@ -134,7 +134,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
                             isPublic ? "bg-sky-500" : "bg-white/10"
                         )}>
                             <div className={cn(
-                                "absolute left-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-white shadow-sm transition-transform duration-200 ease-out",
+                                "absolute left-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#fff] shadow-sm transition-transform duration-200 ease-out",
                                 isPublic ? "translate-x-5" : "translate-x-0"
                             )}>
                                 {(loading || isSyncing) && <div className="h-2 w-2 animate-spin rounded-full border-2 border-sky-500 border-t-transparent" />}
@@ -184,7 +184,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
 
                     {/* Link Copy */}
                     <div className="relative">
-                        <div className="flex items-center rounded-lg bg-black/40 p-3 pr-12 ring-1 ring-white/[0.06] focus-within:ring-sky-400/40 transition-shadow">
+                        <div className="flex items-center rounded-lg bg-sunk p-3 pr-12 ring-1 ring-white/[0.06] focus-within:ring-sky-400/40 transition-shadow">
                             <Link size={15} className="min-w-[15px] text-neutral-500" />
                             <input
                                 readOnly

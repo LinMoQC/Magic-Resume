@@ -75,7 +75,7 @@ function ResumePreview({ info, sections, sectionOrder, templateId, customTemplat
 
   if (loading || !template) {
     return (
-      <div className="w-full max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+      <div className="w-full max-w-4xl mx-auto bg-[#fff] shadow-lg rounded-lg overflow-hidden">
         {/* 简化的头部骨架 */}
         <div className="p-8 border-b border-gray-200">
           <div className="h-6 bg-gray-200 rounded w-48 animate-pulse mb-4" />

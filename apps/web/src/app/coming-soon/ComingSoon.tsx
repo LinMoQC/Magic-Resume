@@ -155,7 +155,7 @@ export default function ComingSoon({
   };
 
   return (
-    <main className="cs-root relative min-h-screen overflow-hidden bg-[#0A0A0A] text-white">
+    <main className="cs-root relative min-h-screen overflow-hidden bg-desk text-white">
       {/* ambient stage */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <span className="cs-aura cs-aura--a" />

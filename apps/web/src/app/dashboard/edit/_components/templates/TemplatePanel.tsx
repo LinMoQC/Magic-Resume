@@ -529,7 +529,7 @@ export default function TemplatePanel({
   // 移动端:抽屉内嵌,无固定定位 / 无图标轨
   if (embedded) {
     return (
-      <div className="flex h-full w-full flex-col bg-[#0A0A0A]">
+      <div className="flex h-full w-full flex-col bg-desk">
         <div className="flex items-center gap-3 border-b border-white/[0.06] px-4 py-4">
           <Shapes size={16} className="text-sky-300" />
           <h2 className="text-[15px] font-semibold tracking-tight text-white">
@@ -546,7 +546,7 @@ export default function TemplatePanel({
     <>
       <aside className="fixed top-0 right-0 z-40 flex h-screen">
         <motion.div
-          className="h-full overflow-hidden border-l border-white/[0.06] bg-[#0A0A0A]"
+          className="h-full overflow-hidden border-l border-white/[0.06] bg-desk"
           animate={{ width: rightCollapsed ? 0 : PANEL_WIDTH }}
           initial={false}
           transition={{ type: "spring", stiffness: 320, damping: 32 }}
@@ -563,7 +563,7 @@ export default function TemplatePanel({
 
         {/* 图标轨:折叠开关 + 分区跳转 */}
         <div
-          className="flex h-full flex-col items-center gap-1 border-l border-white/[0.06] bg-[#0A0A0A] py-3"
+          className="flex h-full flex-col items-center gap-1 border-l border-white/[0.06] bg-desk py-3"
           style={{ width: RAIL_WIDTH }}
         >
           <RailButton

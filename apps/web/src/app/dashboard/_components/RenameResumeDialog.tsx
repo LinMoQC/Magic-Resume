@@ -39,7 +39,7 @@ const RenameResumeDialog = React.memo(({
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="w-full max-w-md bg-[#1C1C1E] border border-neutral-800 rounded-2xl shadow-2xl p-6 focus:outline-none pointer-events-auto"
+              className="w-full max-w-md bg-raised border border-neutral-800 rounded-2xl shadow-2xl p-6 focus:outline-none pointer-events-auto"
             >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-white">{t('renameDialog.title')}</h2>
@@ -72,7 +72,7 @@ const RenameResumeDialog = React.memo(({
                 </Button>
                 <Button 
                     onClick={handleRename}
-                    className="min-w-[100px] bg-sky-600 hover:bg-sky-500 text-white rounded-lg"
+                    className="min-w-[100px] bg-sky-600 hover:bg-sky-500 text-[#fff] rounded-lg"
                 >
                     {t('renameDialog.rename')}
                 </Button>

@@ -51,7 +51,7 @@ export default function SelectionActionBar({ rect, onRun, onClose }: SelectionAc
       exit={{ opacity: 0, y: 6 }}
       transition={{ duration: 0.14, ease: 'easeOut' }}
       style={{ position: 'fixed', top: pos.top, left: pos.left, maxWidth: BAR_MAX_WIDTH, zIndex: 120 }}
-      className="flex items-center gap-1 rounded-xl bg-neutral-900 border border-neutral-800 shadow-[0_10px_30px_rgba(0,0,0,0.5)] p-1"
+      className="flex items-center gap-1 rounded-xl bg-neutral-900 border border-neutral-800 shadow-[0_8px_24px_rgba(0,0,0,0.14)] p-1"
     >
       {SELECTION_ACTIONS.map((a) => (
         <button

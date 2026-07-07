@@ -74,7 +74,7 @@ export default function SharedResumeClient() {
             <div className="relative w-full h-full flex items-center justify-center">
                 <MessageSquare className="h-full w-full text-neutral-500 dark:text-neutral-300" />
                 {comments.length > 0 && (
-                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-indigo-500 rounded-full text-[10px] flex items-center justify-center text-white border-2 border-[#0D0D0D]">
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-indigo-500 rounded-full text-[10px] flex items-center justify-center text-[#fff] border-2 border-hairline">
                         {comments.length}
                     </span>
                 )}
@@ -173,7 +173,7 @@ export default function SharedResumeClient() {
                 </p>
                 <button 
                     onClick={() => router.push('/')}
-                    className="mt-4 px-6 py-2 bg-white text-black rounded-full text-sm font-medium hover:bg-neutral-200 transition-colors"
+                    className="mt-4 px-6 py-2 bg-[#fff] text-black rounded-full text-sm font-medium hover:bg-neutral-200 transition-colors"
                 >
                     {t('sharedPage.error.returnNow')}
                 </button>
@@ -184,7 +184,7 @@ export default function SharedResumeClient() {
   }
 
   return (
-    <div className="h-screen w-screen bg-[#0A0A0A] flex flex-col overflow-hidden fixed inset-0">
+    <div className="h-screen w-screen bg-desk flex flex-col overflow-hidden fixed inset-0">
         {/* Background Effects */}
         <div className="absolute inset-0 z-0 pointer-events-none">
             <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-blue-500/10 rounded-full blur-[120px]" />

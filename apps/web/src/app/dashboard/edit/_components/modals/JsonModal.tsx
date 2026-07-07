@@ -4,7 +4,8 @@ import { Resume } from '@/types/frontend/resume';
 import { getSanitizedResume } from "@/store/useResumeStore";
 import { Download, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { workbenchJsonTheme } from "./jsonTheme";
+import { workbenchJsonTheme, workbenchJsonThemeLight } from "./jsonTheme";
+import { useTheme } from "@/components/providers/ThemeProvider";
 
 const ReactJsonView = EditorComponents.JsonViewer;
 
@@ -17,6 +18,8 @@ interface JsonModalProps {
 }
 
 export default function JsonModal({ isJsonModalOpen, closeJsonModal, handleDownloadJson, activeResume, t }: JsonModalProps) {
+    const { resolvedTheme } = useTheme();
+    const jsonTheme = resolvedTheme === 'light' ? workbenchJsonThemeLight : workbenchJsonTheme;
     return (
         <AnimatePresence>
             {isJsonModalOpen && (
@@ -34,7 +37,7 @@ export default function JsonModal({ isJsonModalOpen, closeJsonModal, handleDownl
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.98, y: 12 }}
                             transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                            className="flex h-[80vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-[#0e0f11] shadow-[0_24px_70px_-20px_rgb(0_0_0/0.8)] ring-1 ring-white/[0.07] focus:outline-none pointer-events-auto"
+                            className="flex h-[80vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-desk shadow-[0_24px_70px_-20px_rgb(0_0_0/0.8)] ring-1 ring-white/[0.07] focus:outline-none pointer-events-auto"
                         >
                         <div className="flex items-center justify-between px-6 py-4">
                             <div className="flex items-center gap-3">
@@ -64,12 +67,12 @@ export default function JsonModal({ isJsonModalOpen, closeJsonModal, handleDownl
                         </div>
 
                         {/* terminal surface */}
-                        <div className="relative mx-4 flex-1 overflow-hidden rounded-xl bg-[#0a0b0d] ring-1 ring-white/[0.06]">
+                        <div className="relative mx-4 flex-1 overflow-hidden rounded-xl bg-desk ring-1 ring-white/[0.06]">
                             <div className="h-full overflow-y-auto custom-scrollbar p-5">
                                 {activeResume && (
                                     <ReactJsonView
                                         src={getSanitizedResume(activeResume)}
-                                        theme={workbenchJsonTheme}
+                                        theme={jsonTheme}
                                         displayDataTypes={false}
                                         enableClipboard={false}
                                         style={{ backgroundColor: 'transparent', fontSize: '13px', lineHeight: '1.7', fontFamily: 'var(--font-mono, ui-monospace, monospace)' }}

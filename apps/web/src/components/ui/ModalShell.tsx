@@ -53,7 +53,7 @@ export function ModalShell({ open, onOpenChange, title, className, headerRight, 
                   exit={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.98, y: 8 }}
                   transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
                   className={cn(
-                    "relative flex min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl border border-white/[0.06] bg-[#0A0A0A] shadow-2xl shadow-black/60",
+                    "relative flex min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl border border-white/[0.06] bg-desk shadow-2xl shadow-black/60",
                     className,
                   )}
                 >
