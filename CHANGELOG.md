@@ -2,6 +2,8 @@
 
 All notable changes to Magic Resume are documented in this file.
 
+# [v2.1.1](https://github.com/LinMoQC/Magic-Resume/compare/v2.1.0...v2.1.1) (2026-07-07)
+
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
