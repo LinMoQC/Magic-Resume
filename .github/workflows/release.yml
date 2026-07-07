@@ -3,15 +3,14 @@ name: Release
 # Auto-release on push to master via semantic-release + gitmoji.
 # Version bump is derived from the gitmoji of each commit since the last tag:
 #   💥 :boom: → major   ✨ :sparkles: → minor   🐛/♻️/💄/… → patch   (docs/chore/ci → no release)
-# Produces: git tag vX.Y.Z + a GitHub Release with generated notes (the living
-# changelog). It does NOT commit CHANGELOG.md back — master is protected and
-# rejects direct pushes; the tag/Release are created via the API instead.
+# Produces: git tag vX.Y.Z + a GitHub Release with generated notes. master is
+# protected (direct pushes rejected), so the tag/Release are created via the API,
+# and the CHANGELOG.md update is landed through an auto-opened PR (not a push).
 
 on:
   push:
     branches: [master]
 
-# Least-privilege token: create releases/tags and comment on released issues/PRs.
 permissions:
   contents: write
   issues: write
@@ -24,7 +23,6 @@ concurrency:
 jobs:
   release:
     runs-on: ubuntu-latest
-    # Skip the repo's Husky hooks — this job commits the changelog itself.
     env:
       HUSKY: "0"
     steps:
@@ -46,9 +44,40 @@ jobs:
           npm install --no-audit --no-fund \
             semantic-release@24 \
             semantic-release-gitmoji@1 \
+            @semantic-release/changelog@6 \
             @semantic-release/github@11
 
+      # Runs semantic-release: creates the tag + GitHub Release (via API) and writes
+      # the CHANGELOG.md update into the working tree (the @semantic-release/git plugin
+      # is intentionally absent — we don't push to protected master). Capture the new
+      # version so the next step can title the changelog PR.
       - name: Release
+        id: sr
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: "$RUNNER_TEMP/sr/node_modules/.bin/semantic-release"
+        run: |
+          set -eo pipefail
+          "$RUNNER_TEMP/sr/node_modules/.bin/semantic-release" 2>&1 | tee "$RUNNER_TEMP/sr.log"
+          v="$(grep -oE 'next release version is [0-9]+\.[0-9]+\.[0-9]+' "$RUNNER_TEMP/sr.log" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | tail -1 || true)"
+          if [ -n "$v" ]; then
+            echo "version=$v" >> "$GITHUB_OUTPUT"
+            echo "published=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Land the CHANGELOG.md change through a PR (respects branch protection).
+      # Skipped when no release was cut.
+      - name: Open CHANGELOG pull request
+        if: steps.sr.outputs.published == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          add-paths: CHANGELOG.md
+          base: master
+          branch: chore/changelog-v${{ steps.sr.outputs.version }}
+          delete-branch: true
+          commit-message: ":memo: docs(changelog): update for v${{ steps.sr.outputs.version }}"
+          title: ":memo: docs(changelog): v${{ steps.sr.outputs.version }}"
+          body: |
+            Automated `CHANGELOG.md` update for **v${{ steps.sr.outputs.version }}**.
+            Full notes are on the [GitHub Release](../../releases/tag/v${{ steps.sr.outputs.version }}).
+            Merge to keep the in-repo changelog in sync — this PR is `:memo: docs`, so it does not trigger another release.
