@@ -3,13 +3,15 @@ name: Release
 # Auto-release on push to master via semantic-release + gitmoji.
 # Version bump is derived from the gitmoji of each commit since the last tag:
 #   💥 :boom: → major   ✨ :sparkles: → minor   🐛/♻️/💄/… → patch   (docs/chore/ci → no release)
-# Produces: git tag vX.Y.Z, GitHub Release with notes, and an updated CHANGELOG.md.
+# Produces: git tag vX.Y.Z + a GitHub Release with generated notes (the living
+# changelog). It does NOT commit CHANGELOG.md back — master is protected and
+# rejects direct pushes; the tag/Release are created via the API instead.
 
 on:
   push:
     branches: [master]
 
-# Least-privilege token: create releases/tags, comment on issues/PRs, push the changelog commit.
+# Least-privilege token: create releases/tags and comment on released issues/PRs.
 permissions:
   contents: write
   issues: write
@@ -44,8 +46,6 @@ jobs:
           npm install --no-audit --no-fund \
             semantic-release@24 \
             semantic-release-gitmoji@1 \
-            @semantic-release/changelog@6 \
-            @semantic-release/git@10 \
             @semantic-release/github@11
 
       - name: Release
