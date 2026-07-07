@@ -30,6 +30,13 @@
         }
       }
     ],
+    [
+      "@semantic-release/changelog",
+      {
+        "changelogFile": "CHANGELOG.md",
+        "changelogTitle": "# Changelog\n\nAll notable changes to Magic Resume are documented in this file."
+      }
+    ],
     "@semantic-release/github"
   ]
 }

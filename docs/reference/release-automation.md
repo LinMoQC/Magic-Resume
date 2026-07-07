@@ -12,16 +12,20 @@ plugin. It reads all commits since the last `vX.Y.Z` tag, derives the next
 version from their gitmoji, and — if a release is warranted — produces:
 
 - a git tag `vX.Y.Z`,
-- a **GitHub Release** with generated notes grouped by gitmoji.
+- a **GitHub Release** with generated notes grouped by gitmoji,
+- an **auto-opened PR** (`:memo: docs(changelog): vX.Y.Z`) that updates `CHANGELOG.md`.
 
-The **GitHub Releases page is the living changelog.** The workflow does not commit
-`CHANGELOG.md` back to `master`, because `master` is protected ("Changes must be
-made through a pull request") and rejects direct pushes. The tag and Release are
-created through the API, which branch protection does not block. `CHANGELOG.md`
-remains the curated historical record (≤ v2.0.0); newer entries live in Releases.
+Because `master` is protected ("Changes must be made through a pull request"), the
+workflow never pushes to it directly: the tag + Release are created through the
+API, and the `CHANGELOG.md` update is landed as a normal PR you merge. That
+changelog PR is `:memo: docs`, so merging it does **not** trigger another release.
 
 Because it keys off **gitmoji**, our existing emoji-first commit convention
 (`✨ feat(web): …`) works as-is — no change to how commits are written.
+
+> **One-time setting:** the changelog PR is opened via `peter-evans/create-pull-request`
+> with `GITHUB_TOKEN`, which requires **Settings → Actions → General → "Allow GitHub
+> Actions to create and approve pull requests"** to be enabled.
 
 ## Version rules
 
@@ -46,17 +50,10 @@ release-worthy commit. Adjust the lists in `.releaserc.json` to taste.
   the source of truth for the version is the git tag + GitHub Release. Add
   `@semantic-release/npm` (`npmPublish: false`) if you want `package.json` synced too.
 - The workflow sets `HUSKY: 0` so the repo's local git hooks don't run in CI.
-
-### Want `CHANGELOG.md` auto-updated in the repo too?
-
-That needs a way to land a commit on protected `master`. Pick one, then re-add
-`@semantic-release/changelog` + `@semantic-release/git` to `.releaserc.json`:
-
-- allow `github-actions[bot]` to **bypass** the branch ruleset (repo → Rules), **or**
-- give the workflow a **PAT / GitHub App token** with bypass rights as `GITHUB_TOKEN`, **or**
-- keep `@semantic-release/changelog` (no git plugin) and add a
-  `peter-evans/create-pull-request` step to open a changelog PR — this also needs
-  "Allow GitHub Actions to create and approve pull requests" enabled in settings.
+- **`CHANGELOG.md` lands via a PR, not a direct push** — see the note above. If you
+  ever want it committed straight to `master` instead (no changelog PR), grant
+  `github-actions[bot]` bypass on the branch ruleset and swap the
+  `create-pull-request` step for the `@semantic-release/git` plugin.
 
 ## Verifying / dry-run
 
