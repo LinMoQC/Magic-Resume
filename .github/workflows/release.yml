@@ -1,0 +1,54 @@
+name: Release
+
+# Auto-release on push to master via semantic-release + gitmoji.
+# Version bump is derived from the gitmoji of each commit since the last tag:
+#   💥 :boom: → major   ✨ :sparkles: → minor   🐛/♻️/💄/… → patch   (docs/chore/ci → no release)
+# Produces: git tag vX.Y.Z, GitHub Release with notes, and an updated CHANGELOG.md.
+
+on:
+  push:
+    branches: [master]
+
+# Least-privilege token: create releases/tags, comment on issues/PRs, push the changelog commit.
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    # Skip the repo's Husky hooks — this job commits the changelog itself.
+    env:
+      HUSKY: "0"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # semantic-release needs full history + tags
+          persist-credentials: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Install the release toolchain in an isolated dir so it never touches the
+      # pnpm workspace (avoids workspace-protocol install friction + frozen lockfile).
+      - name: Install semantic-release toolchain
+        run: |
+          mkdir -p "$RUNNER_TEMP/sr" && cd "$RUNNER_TEMP/sr"
+          npm init -y >/dev/null 2>&1
+          npm install --no-audit --no-fund \
+            semantic-release@24 \
+            semantic-release-gitmoji@1 \
+            @semantic-release/changelog@6 \
+            @semantic-release/git@10 \
+            @semantic-release/github@11
+
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: "$RUNNER_TEMP/sr/node_modules/.bin/semantic-release"

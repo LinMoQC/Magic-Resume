@@ -1,0 +1,49 @@
+{
+  "branches": ["master"],
+  "tagFormat": "v${version}",
+  "plugins": [
+    [
+      "semantic-release-gitmoji",
+      {
+        "releaseRules": {
+          "major": [":boom:"],
+          "minor": [":sparkles:"],
+          "patch": [
+            ":bug:",
+            ":ambulance:",
+            ":lock:",
+            ":zap:",
+            ":art:",
+            ":recycle:",
+            ":wrench:",
+            ":lipstick:",
+            ":globe_with_meridians:",
+            ":pencil2:",
+            ":goal_net:",
+            ":wheelchair:",
+            ":children_crossing:",
+            ":speech_balloon:",
+            ":alien:",
+            ":fire:",
+            ":rewind:"
+          ]
+        }
+      }
+    ],
+    [
+      "@semantic-release/changelog",
+      {
+        "changelogFile": "CHANGELOG.md",
+        "changelogTitle": "# Changelog\n\nAll notable changes to Magic Resume are documented in this file."
+      }
+    ],
+    "@semantic-release/github",
+    [
+      "@semantic-release/git",
+      {
+        "assets": ["CHANGELOG.md"],
+        "message": ":bookmark: chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+      }
+    ]
+  ]
+}
