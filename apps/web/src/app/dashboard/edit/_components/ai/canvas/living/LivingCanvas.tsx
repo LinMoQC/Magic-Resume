@@ -716,7 +716,7 @@ export default function LivingCanvas({
         <div className="flex justify-center pt-6 pb-24 px-12">
           <div style={{ width: PAGE_WIDTH * SCALE }}>
             <div
-              className="bg-white rounded-lg shadow-2xl"
+              className="bg-[#fff] rounded-lg shadow-2xl"
               style={{
                 width: PAGE_WIDTH,
                 transform: `scale(${SCALE})`,

@@ -160,7 +160,7 @@ const CommentItem = React.memo(({
             {active && (
                 <div className="mt-4 flex items-center gap-2">
                     <form 
-                        className="flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 flex items-center gap-2"
+                        className="flex-1 bg-sunk border border-white/10 rounded-lg px-3 py-1.5 flex items-center gap-2"
                         onSubmit={async (e) => {
                             e.preventDefault();
                             if (!replyText.trim() || isSubmitting) return;
@@ -237,7 +237,7 @@ export const CommentSidebar = React.memo(({
                         exit={isMobile ? { y: '100%', x: 0 } : { x: '100%', y: 0 }}
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                         className={cn(
-                            "fixed bottom-0 right-0 z-50 bg-[#0F0F0F] border-white/10 flex flex-col shadow-2xl overflow-hidden",
+                            "fixed bottom-0 right-0 z-50 bg-desk border-white/10 flex flex-col shadow-2xl overflow-hidden",
                             // Desktop: Sidebar on the right
                             "lg:top-16 lg:bottom-0 lg:w-96 lg:border-l",
                             // Mobile: Drawer from bottom

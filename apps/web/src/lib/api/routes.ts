@@ -55,4 +55,5 @@ export const WEB_AGENT_ROUTES = {
   chatApprove:      '/api/chat-agent/approve',
   chatSession:      '/api/chat-agent/session',
   chatEdit:         '/api/chat-agent/edit',
+  pdfParse:         '/api/pdf/parse',
 } as const;

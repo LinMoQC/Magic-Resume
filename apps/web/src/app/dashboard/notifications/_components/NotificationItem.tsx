@@ -49,7 +49,7 @@ export const NotificationItem = ({ notification, markAsRead }: NotificationItemP
             <User size={18} />
           </div>
         )}
-        <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-sky-500 text-white ring-2 ring-[#0A0A0A]">
+        <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-sky-500 text-[#fff] ring-2 ring-desk">
           {isComment ? <MessageSquare size={11} /> : <Reply size={11} />}
         </span>
       </div>

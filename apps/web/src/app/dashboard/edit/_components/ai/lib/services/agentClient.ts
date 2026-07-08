@@ -20,20 +20,12 @@ async function readError(res: Response): Promise<string> {
 }
 
 /**
- * Stream a normalized agent run. Yields typed {@link AgentSseEvent}s parsed from the
- * `data: {json}\n\n` frames. Foundation for the streaming skills (not used by P0).
+ * Parse an SSE response body into typed {@link AgentSseEvent}s. Shared by every
+ * streaming caller (JSON-bodied chat and FormData-bodied PDF parse), so the frame
+ * handling lives in one place. Throws (via {@link readError}) on a non-stream error
+ * response — e.g. a pre-stream 401/422/429 the backend emits before it starts SSE.
  */
-export async function* streamAgent(
-  url: string,
-  body: unknown,
-  signal?: AbortSignal
-): AsyncGenerator<AgentSseEvent> {
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-    signal,
-  });
+export async function* consumeSseFrames(res: Response): AsyncGenerator<AgentSseEvent> {
   if (!res.ok || !res.body) throw new Error(await readError(res));
 
   const reader = res.body.getReader();
@@ -42,7 +34,7 @@ export async function* streamAgent(
 
   // Line-based: each AgentSseEvent is a single `data: {json}` line. This tolerates
   // both real `\n\n`-framed SSE (graph/translate — blank lines just skip) and the
-  // chat-agent proxy that collapses `\n\n` → `\n`.
+  // route-handler proxy that collapses `\n\n` → `\n`.
   const parse = (raw: string): AgentSseEvent | null => {
     const line = raw.trim();
     if (!line.startsWith('data:')) return null;
@@ -68,6 +60,41 @@ export async function* streamAgent(
   }
   const tail = parse(buffer);
   if (tail) yield tail;
+}
+
+/**
+ * Stream a normalized agent run. Yields typed {@link AgentSseEvent}s parsed from the
+ * `data: {json}\n\n` frames. Foundation for the streaming skills (not used by P0).
+ */
+export async function* streamAgent(
+  url: string,
+  body: unknown,
+  signal?: AbortSignal
+): AsyncGenerator<AgentSseEvent> {
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+    signal,
+  });
+  yield* consumeSseFrames(res);
+}
+
+/**
+ * Stream the PDF-import parse. FormData body (file + `config`), so we deliberately
+ * omit `Content-Type` — the browser sets the multipart boundary itself. The route
+ * handler streams `pdf_progress` (`tool_result`) ticks and a final `resume_update`.
+ */
+export async function* streamPdfParse(
+  formData: FormData,
+  signal?: AbortSignal
+): AsyncGenerator<AgentSseEvent> {
+  const res = await fetch(WEB_AGENT_ROUTES.pdfParse, {
+    method: 'POST',
+    body: formData,
+    signal,
+  });
+  yield* consumeSseFrames(res);
 }
 
 export interface ChatStreamParams {

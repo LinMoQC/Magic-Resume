@@ -90,7 +90,7 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
                 damping: 25,
                 stiffness: 300
               }}
-              className="w-full max-w-lg bg-[#1C1C1E] border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden pointer-events-auto"
+              className="w-full max-w-lg bg-raised border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden pointer-events-auto"
             >
               {/* Header */}
               <div className="flex items-start justify-between p-6 pb-4 border-b border-neutral-800/50">
@@ -201,7 +201,7 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
                                     type="submit" 
                                     disabled={!feedback.trim() || isSubmitting}
                                     className={cn(
-                                        "flex-1 bg-linear-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-lg shadow-blue-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none",
+                                        "flex-1 bg-linear-to-r from-blue-500 to-blue-600 text-[#fff] hover:from-blue-600 hover:to-blue-700 shadow-lg shadow-blue-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none",
                                         !feedback.trim() && "from-neutral-700 to-neutral-700 hover:from-neutral-700 hover:to-neutral-700"
                                     )}
                                 >

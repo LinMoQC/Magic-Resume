@@ -54,7 +54,7 @@ export default function SectionActionPopover({
       exit={{ opacity: 0, y: -6 }}
       transition={{ duration: 0.14, ease: 'easeOut' }}
       style={{ position: 'fixed', top: pos.top, left: pos.left, width: WIDTH, zIndex: 120 }}
-      className="rounded-2xl bg-neutral-900 border border-neutral-800 shadow-[0_12px_40px_rgba(0,0,0,0.5)] p-1.5"
+      className="rounded-2xl bg-neutral-900 border border-neutral-800 shadow-[0_10px_30px_rgba(0,0,0,0.14)] p-1.5"
     >
       <div className="px-2 pt-1 pb-1.5 text-[11px] text-neutral-500 truncate">{title}</div>
       <button

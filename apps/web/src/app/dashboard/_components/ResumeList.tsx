@@ -235,7 +235,7 @@ const ResumeCard = React.memo(
         >
           <Link href={`/dashboard/edit/${resume.id}`} className="block">
             {/* specimen mat — the paper sits on a dark bench */}
-            <div className="flex h-44 items-center justify-center overflow-hidden bg-black/40 p-3">
+            <div className="flex h-44 items-center justify-center overflow-hidden bg-sunk p-3">
               {template ? (
                 <div className="aspect-[1/1.33] h-full transition-transform duration-300 ease-out group-hover:scale-[1.02]">
                   <ResumeMiniPreview
@@ -316,7 +316,7 @@ ResumeCard.displayName = 'ResumeCard';
 function ResumeCardSkeleton() {
   return (
     <div className="overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.02]">
-      <div className="flex h-44 items-center justify-center bg-black/40 p-3">
+      <div className="flex h-44 items-center justify-center bg-sunk p-3">
         <div className="aspect-[1/1.33] h-full animate-pulse rounded bg-white/[0.04]" />
       </div>
       <div className="border-t border-white/[0.06] px-3.5 py-3">
@@ -331,7 +331,7 @@ function ResumeCardSkeleton() {
       (标题 + 创建/导入入口 + 简历栅格),不用 i18n 以避免水合闪烁 ── */
 function DashboardSkeleton() {
   return (
-    <div className="flex-1 overflow-y-auto bg-[#0A0A0A] [contain:layout_paint]">
+    <div className="flex-1 overflow-y-auto bg-desk [contain:layout_paint]">
       <div className="mx-auto w-full max-w-[1400px] px-6 py-10 md:px-12">
         {/* 标题 */}
         <header className="mb-8 flex items-end justify-between gap-4">
@@ -401,7 +401,7 @@ const ResumeList = React.memo(
       // contain: layout paint — isolate this large subtree so the sidebar's width
       // animation (which reflows/re-centers this block every frame) can't invalidate
       // layout/paint outside it, keeping the collapse transition smooth.
-      <div className="flex-1 overflow-y-auto bg-[#0A0A0A] [contain:layout_paint]">
+      <div className="flex-1 overflow-y-auto bg-desk [contain:layout_paint]">
         <div className="mx-auto w-full max-w-[1400px] px-6 py-10 md:px-12">
           {/* header */}
           <header className="mb-8 flex items-end justify-between gap-4">

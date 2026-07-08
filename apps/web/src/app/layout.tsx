@@ -11,8 +11,8 @@ const brandFont = Sora({
   display: "swap",
 });
 import { Fragment } from "react";
-import { Theme } from "@radix-ui/themes";
 import { Toaster } from "sonner";
+import { ThemeProvider, themeInitScript } from "@/components/providers/ThemeProvider";
 import metaConfig from "@/lib/constants/metaConfig";
 import { isCloudMode } from "@/lib/config/app";
 
@@ -47,15 +47,21 @@ export default function RootLayout({
     <AuthWrapper>
       <AuthBridge>
         <HttpClientProvider>
-          <html lang="zh-CN" className="hide-scrollbar">
+          <html lang="zh-CN" className="hide-scrollbar dark" style={{ colorScheme: "dark" }} suppressHydrationWarning>
+            <head>
+              <script
+                // 水合前落定主题 class,避免浅/深闪烁(FOUC)。
+                dangerouslySetInnerHTML={{ __html: themeInitScript }}
+              />
+            </head>
             <body className={`font-sans ${brandFont.variable}`}>
               <CommercialRuntimeProvider>
                 <I18nProvider>
-                  <Theme appearance="dark">
+                  <ThemeProvider>
                     {children}
                     <Toaster />
                     <PreloadOptimizer />
-                  </Theme>
+                  </ThemeProvider>
                 </I18nProvider>
               </CommercialRuntimeProvider>
               <StructuredData type="website" />

@@ -290,16 +290,31 @@ function testImportResumeValidation() {
   assert.equal(normalized.sections.experience[0].extraBackendField, 'kept');
   assert.deepEqual(normalized.sections.education, []);
   assert.deepEqual(normalized.sections.customSection, [{ id: 'custom-1', title: 'Notes' }]);
+  assert.deepEqual(normalized.sectionOrder.map(({ key }) => key), [
+    'basics',
+    'experience',
+    'projects',
+    'education',
+    'skills',
+    'languages',
+    'certificates',
+    'customSection',
+  ]);
 
-  assert.throws(
-    () =>
-      validateAndNormalizeImportedResume({
-        info: {},
-        sections: {},
-        sectionOrder: [],
-      }),
-    ZodError,
-  );
+  const repairedEmptyOrder = validateAndNormalizeImportedResume({
+    info: {},
+    sections: {},
+    sectionOrder: [],
+  });
+  assert.deepEqual(repairedEmptyOrder.sectionOrder.map(({ key }) => key), [
+    'basics',
+    'projects',
+    'education',
+    'skills',
+    'languages',
+    'certificates',
+    'experience',
+  ]);
 
   const message = formatResumeImportValidationError(
     new ZodError([

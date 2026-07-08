@@ -10,7 +10,7 @@ export default function NotFound() {
   const { t } = useTranslation();
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-desk flex flex-col items-center justify-center p-4 relative overflow-hidden">
       {/* Background Gradients */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-[20%] left-[20%] w-[400px] h-[400px] bg-purple-500/10 rounded-full blur-[120px]" />
@@ -41,7 +41,7 @@ export default function NotFound() {
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link href="/">
-            <Button size="lg" className="gap-2 bg-white text-black hover:bg-neutral-200">
+            <Button size="lg" className="gap-2 bg-[#fff] text-black hover:bg-neutral-200">
               <Home className="w-4 h-4" />
               {t('notFoundPage.buttons.backHome')}
             </Button>

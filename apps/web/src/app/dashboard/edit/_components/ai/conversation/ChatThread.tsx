@@ -411,7 +411,7 @@ function Bubble({ message, showAvatar }: { message: ChatMessage; showAvatar: boo
             </span>
           )}
           {message.quote && (
-            <div className="mb-2 flex items-start gap-2 rounded-lg bg-black/25 px-2.5 py-2 text-left ring-1 ring-white/[0.05]">
+            <div className="mb-2 flex items-start gap-2 rounded-lg bg-sunk px-2.5 py-2 text-left ring-1 ring-white/[0.05]">
               <CornerUpLeft size={12} className="mt-0.5 shrink-0 text-sky-400/80" />
               <div className="min-w-0 flex-1">
                 <div className="text-[10px] font-medium text-neutral-500">{message.quote.label}</div>

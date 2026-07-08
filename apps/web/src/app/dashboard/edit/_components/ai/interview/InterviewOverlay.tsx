@@ -21,7 +21,7 @@ export default function InterviewOverlay({ open, onBack, onEnd }: InterviewOverl
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 z-30 bg-[#0A0A0A] flex flex-col"
+          className="absolute inset-0 z-30 bg-desk flex flex-col"
         >
           <div className="flex items-center gap-3 px-5 py-3.5 border-b border-neutral-800">
             <button

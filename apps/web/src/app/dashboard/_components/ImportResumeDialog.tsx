@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Loader2, X, FileText, FileJson, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,13 @@ import {
   formatResumeImportError,
   validateAndNormalizeImportedResume,
 } from '@/lib/validation/importResume';
+import { streamPdfParse } from '@/app/dashboard/edit/_components/ai/lib/services/agentClient';
+import {
+  getCompletePdfSectionSet,
+  PdfScanProgress,
+  PDF_SCAN_TIMING,
+  type PdfPhase,
+} from './PdfScanProgress';
 
 type FileType = 'json' | 'pdf' | null;
 
@@ -40,19 +47,39 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
   const [isImporting, setIsImporting] = useState(false);
   const [importStatus, setImportStatus] = useState<string>('');
   const [fileType, setFileType] = useState<FileType>(null);
+  // PDF streaming progress: current phase, running char count, and the set of
+  // sections lit up so far. Decorative — the imported result still comes from the
+  // final `resume_update` + validation.
+  const [pdfPhase, setPdfPhase] = useState<PdfPhase>(null);
+  const [pdfCharCount, setPdfCharCount] = useState(0);
+  const [pdfLitFields, setPdfLitFields] = useState<Set<string>>(new Set());
+  const [pdfComplete, setPdfComplete] = useState(false);
+  const pdfAbortRef = useRef<AbortController | null>(null);
   const { t } = useTranslation();
   // Shared readiness check (provider + key + baseUrl + model + maxTokens) — see useSettingStore.
   const hasLlmConfig = hasLlmConfigFn();
 
+  const resetPdfProgress = useCallback(() => {
+    setPdfPhase(null);
+    setPdfCharCount(0);
+    setPdfLitFields(new Set());
+    setPdfComplete(false);
+  }, []);
+
   const handleClose = useCallback((open: boolean) => {
     if (!open) {
+      // Cancel any in-flight parse so the backend stops generating (no orphaned
+      // token burn) when the user closes mid-import.
+      pdfAbortRef.current?.abort();
+      pdfAbortRef.current = null;
       setFileType(null);
       setUploadError(null);
       setLlmConfigMissing(false);
       setImportStatus('');
+      resetPdfProgress();
     }
     onOpenChange(open);
-  }, [onOpenChange]);
+  }, [onOpenChange, resetPdfProgress]);
 
   const handleSelectType = useCallback((value: string) => {
     const type = value as FileType;
@@ -77,33 +104,56 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
     return validateAndNormalizeImportedResume(result);
   }, [t]);
 
-  // ─── PDF 文件处理（前端传递 LLM 配置）───
+  // ─── PDF 文件处理（流式解析 + 逐板块点亮）───
   const handlePdfFile = useCallback(async (file: File) => {
-    setImportStatus(t('importDialog.pdf.extracting', { defaultValue: 'Extracting text from PDF...' }));
-
     const formData = new FormData();
     formData.append('file', file);
-
     // 传递用户的 LLM 配置
-    const llmConfig = { apiKey, baseUrl, modelName: model, maxTokens };
-    formData.append('config', JSON.stringify(llmConfig));
+    formData.append('config', JSON.stringify({ apiKey, baseUrl, modelName: model, maxTokens }));
 
-    setImportStatus(t('importDialog.pdf.analyzing', { defaultValue: 'AI is analyzing your resume...' }));
+    const controller = new AbortController();
+    pdfAbortRef.current = controller;
 
-    const response = await fetch('/api/pdf/parse', {
-      method: 'POST',
-      body: formData,
-    });
+    resetPdfProgress();
+    setPdfPhase('extracting');
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-      const detail = errorData.detail || errorData.error || `Server error: ${response.status}`;
-      throw new Error(detail);
+    let resume: unknown = null;
+
+    for await (const ev of streamPdfParse(formData, controller.signal)) {
+      if (ev.type === 'tool_result') {
+        const payload = ev.payload as
+          | { kind?: string; phase?: PdfPhase; charCount?: number; fields?: string[] }
+          | undefined;
+        if (payload?.kind !== 'pdf_progress') continue;
+        if (payload.phase) setPdfPhase(payload.phase);
+        if (typeof payload.charCount === 'number') setPdfCharCount(payload.charCount);
+        if (payload.fields?.length) {
+          setPdfLitFields((prev) => {
+            const next = new Set(prev);
+            for (const f of payload.fields!) next.add(f);
+            return next;
+          });
+        }
+      } else if (ev.type === 'resume_update') {
+        // Final product: prefer `data`, fall back to the chat-shaped `payload.resume`.
+        resume = ev.data ?? (ev.payload as { resume?: unknown } | undefined)?.resume ?? null;
+      } else if (ev.type === 'error' || ev.type === 'run_failed') {
+        throw new Error(ev.error || t('importDialog.errors.parseFailed'));
+      }
     }
 
-    const result = await response.json();
-    return validateAndNormalizeImportedResume(result);
-  }, [apiKey, baseUrl, model, maxTokens, t]);
+    if (!resume) {
+      throw new Error(t('importDialog.errors.parseFailed'));
+    }
+
+    // Completion beat: light every section, run the finishing sweep, and hold on
+    // "解析完成" briefly so the user sees the parse land before the dialog closes.
+    setPdfLitFields(getCompletePdfSectionSet());
+    setPdfComplete(true);
+    await new Promise((r) => setTimeout(r, PDF_SCAN_TIMING.completionHoldMs));
+
+    return validateAndNormalizeImportedResume(resume);
+  }, [apiKey, baseUrl, model, maxTokens, t, resetPdfProgress]);
 
   // ─── 统一文件处理 ───
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
@@ -160,6 +210,7 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
     } finally {
       setIsImporting(false);
       setImportStatus('');
+      pdfAbortRef.current = null;
     }
   }, [fileType, hasLlmConfig, importResume, handleClose, t, handleJsonFile, handlePdfFile, cloudSync]);
 
@@ -192,7 +243,7 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="w-full max-w-lg bg-[#1C1C1E] border border-neutral-800 rounded-3xl shadow-2xl p-8 pointer-events-auto"
+              className="w-full max-w-lg bg-raised border border-neutral-800 rounded-3xl shadow-2xl p-8 pointer-events-auto"
             >
               {/* Header */}
               <div className="flex items-center justify-between mb-2">
@@ -296,7 +347,14 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
                       `}
                     >
                       <input {...getInputProps()} />
-                      {isImporting ? (
+                      {isImporting && fileType === 'pdf' ? (
+                        <PdfScanProgress
+                          phase={pdfPhase}
+                          charCount={pdfCharCount}
+                          litFields={pdfLitFields}
+                          complete={pdfComplete}
+                        />
+                      ) : isImporting ? (
                         <div className="flex flex-col items-center justify-center text-sky-500">
                           <Loader2 className="w-10 h-10 mb-3 animate-spin" />
                           <p className="font-medium text-sm">{importStatus || t('importDialog.importing')}</p>

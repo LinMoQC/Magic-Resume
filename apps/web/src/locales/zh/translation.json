@@ -77,9 +77,10 @@
       "general": {
         "description": "偏好设置保持克制，只保留会影响日常创作的选项。",
         "appearance": "外观",
-        "appearanceDescription": "Magic Resume 目前固定为深色工作台，减少长时间编辑时的视觉干扰。",
+        "appearanceDescription": "深色是长时段编辑的默认工作台。可切换为浅色，或跟随系统。",
         "appearanceDark": "深色",
         "appearanceLight": "浅色",
+        "appearanceSystem": "跟随系统",
         "comingSoon": "即将推出",
         "language": "语言",
         "languageDescription": "切换界面语言，不影响简历内容本身。"
@@ -978,10 +979,21 @@
     "importing": "正在导入并同步...",
     "defaultName": "导入的简历",
     "pdf": {
-      "extracting": "正在从 PDF 中提取文本...",
-      "analyzing": "AI 正在分析您的简历...",
+      "extracting": "读取 PDF",
+      "analyzing": "解析中",
+      "done": "解析完成",
+      "charUnit": "字",
       "success": "PDF 简历导入成功！",
-      "hint": "PDF 文件将通过 AI 智能解析"
+      "hint": "PDF 文件将通过 AI 智能解析",
+      "sections": {
+        "info": "个人信息",
+        "experience": "工作经历",
+        "education": "教育经历",
+        "projects": "项目经历",
+        "skills": "技能",
+        "languages": "语言能力",
+        "certificates": "证书"
+      }
     }
   },
   "dynamicForm": {

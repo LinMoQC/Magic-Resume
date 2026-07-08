@@ -34,7 +34,7 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
 
   if (!activeResume) {
     return (
-      <section className="min-w-0 flex-1 flex items-center justify-center bg-black relative overflow-hidden max-h-screen">
+      <section className="min-w-0 flex-1 flex items-center justify-center bg-desk relative overflow-hidden max-h-screen">
         <div className="text-white">{t('common.loading')}</div>
       </section>
     );
@@ -42,7 +42,7 @@ const ResumePreviewPanel: React.FC<ResumePreviewPanelProps> = ({
 
   return (
     <section
-      className="min-w-0 flex-1 flex items-center justify-center bg-black relative overflow-hidden max-h-screen"
+      className="min-w-0 flex-1 flex items-center justify-center bg-desk relative overflow-hidden max-h-screen"
       data-ai-running={isAiJobRunning ? "true" : "false"}
     >
       {isAiJobRunning && (

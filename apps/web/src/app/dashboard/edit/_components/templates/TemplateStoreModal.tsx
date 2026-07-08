@@ -45,7 +45,7 @@ export default function TemplateStoreModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[85vh] w-full max-w-4xl flex-col gap-0 overflow-hidden border-white/10 bg-[#0A0A0A] p-0">
+      <DialogContent className="flex max-h-[85vh] w-full max-w-4xl flex-col gap-0 overflow-hidden border-white/10 bg-desk p-0">
         <DialogHeader className="space-y-3 border-b border-white/[0.06] px-6 py-5 text-left">
           <div className="flex items-end justify-between gap-4">
             <div>

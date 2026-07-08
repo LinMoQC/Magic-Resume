@@ -77,9 +77,10 @@
       "general": {
         "description": "Preferences stay quiet and focused on choices that affect everyday editing.",
         "appearance": "Appearance",
-        "appearanceDescription": "Magic Resume currently stays in the dark workbench to reduce visual noise during long editing sessions.",
+        "appearanceDescription": "Dark is the default workbench for long editing sessions. Switch to light, or follow your system.",
         "appearanceDark": "Dark",
         "appearanceLight": "Light",
+        "appearanceSystem": "System",
         "comingSoon": "Coming soon",
         "language": "Language",
         "languageDescription": "Change the interface language without changing resume content."
@@ -978,10 +979,21 @@
     "importing": "Importing and syncing...",
     "defaultName": "Imported Resume",
     "pdf": {
-      "extracting": "Extracting text from PDF...",
-      "analyzing": "AI is analyzing your resume...",
+      "extracting": "Reading PDF",
+      "analyzing": "Parsing",
+      "done": "Parsed",
+      "charUnit": "chars",
       "success": "PDF resume imported successfully!",
-      "hint": "PDF files will be parsed with AI"
+      "hint": "PDF files will be parsed with AI",
+      "sections": {
+        "info": "Basics",
+        "experience": "Experience",
+        "education": "Education",
+        "projects": "Projects",
+        "skills": "Skills",
+        "languages": "Languages",
+        "certificates": "Certificates"
+      }
     }
   },
   "dynamicForm": {

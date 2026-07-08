@@ -46,7 +46,7 @@ export default function HeaderTab({ updatedAt, syncStatus = 'saved', onVersionCl
             initial={{ y: -16, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-            className="pointer-events-none absolute inset-x-0 top-0 z-50 flex h-16 min-w-0 items-center gap-4 overflow-visible bg-gradient-to-b from-black via-black/70 to-transparent px-6"
+            className="pointer-events-none absolute inset-x-0 top-0 z-50 flex h-16 min-w-0 items-center gap-4 overflow-visible bg-gradient-to-b from-desk via-desk/70 to-transparent px-6"
         >
             {/* 左:返回工作台 + 标题(主角) */}
             <div className="pointer-events-auto flex min-w-0 items-center gap-2">

@@ -146,9 +146,9 @@ export default function Composer({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 8, scale: 0.98 }}
               transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute left-0 right-0 bottom-[calc(100%+10px)] rounded-2xl bg-neutral-900/95 backdrop-blur-xl border border-neutral-800 p-2 z-20 shadow-2xl shadow-black/60 origin-bottom"
+              className="absolute left-0 right-0 bottom-[calc(100%+10px)] rounded-2xl bg-neutral-900/95 backdrop-blur-xl border border-white/[0.06] p-2 z-20 shadow-2xl shadow-black/60 origin-bottom"
             >
-              <div className="px-2 pb-1.5 pt-0.5 text-[10px] font-medium uppercase tracking-wider text-neutral-600">
+              <div className="px-2.5 pb-2 pt-1 text-[10px] font-medium uppercase tracking-[0.14em] text-neutral-600">
                 {t('aiLab.composer.skills')}
               </div>
               {matches.map((s, i) => {
@@ -161,45 +161,34 @@ export default function Composer({
                     onMouseEnter={() => setHighlight(i)}
                     onClick={() => chooseSkill(s.id)}
                     className={cn(
-                      'w-full flex items-center gap-3 px-2 py-2 rounded-xl transition-colors cursor-pointer text-left',
-                      active ? 'bg-neutral-800' : 'hover:bg-neutral-800/50'
+                      // Codex-style: compact single-line rows, quiet neutral highlight (no color block).
+                      'group w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer text-left',
+                      active ? 'bg-white/[0.07]' : 'hover:bg-white/[0.035]'
                     )}
                   >
-                    <span
-                      className="flex items-center justify-center w-8 h-8 rounded-lg shrink-0"
-                      style={{ backgroundColor: `${s.accentHex}1f` }}
-                    >
-                      <Icon size={16} className={s.accent} />
+                    <span className="flex items-center justify-center w-5 h-5 shrink-0">
+                      <Icon
+                        size={16}
+                        className={cn(
+                          'transition-colors',
+                          active ? 'text-neutral-200' : 'text-neutral-500 group-hover:text-neutral-400'
+                        )}
+                      />
                     </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-[13px] font-medium text-neutral-100 truncate">{s.name}</span>
-                      <span className="block text-[11px] text-neutral-500 truncate">{s.tagline}</span>
+                    <span className="min-w-0 flex-1 flex items-baseline gap-2">
+                      <span
+                        className={cn(
+                          'shrink-0 text-[13px] font-medium transition-colors',
+                          active ? 'text-neutral-50' : 'text-neutral-200'
+                        )}
+                      >
+                        {s.name}
+                      </span>
+                      <span className="min-w-0 truncate text-[12px] text-neutral-500">{s.tagline}</span>
                     </span>
-                    <kbd
-                      className={cn(
-                        'shrink-0 rounded bg-neutral-700/70 px-1.5 py-0.5 font-mono text-[10px] leading-none text-sky-300 transition-opacity',
-                        active ? 'opacity-100' : 'opacity-0'
-                      )}
-                    >
-                      ↵
-                    </kbd>
                   </button>
                 );
               })}
-              <div className="mt-1.5 flex items-center gap-3 px-2 pt-2 text-[10px] text-neutral-600 border-t border-neutral-800/80">
-                <span className="inline-flex items-center gap-1">
-                  <kbd className="rounded bg-neutral-800 px-1 py-0.5 font-mono text-neutral-400">{'↑↓'}</kbd>
-                  {t('aiLab.composer.switch')}
-                </span>
-                <span className="inline-flex items-center gap-1">
-                  <kbd className="rounded bg-neutral-800 px-1 py-0.5 font-mono text-neutral-400">{'↵'}</kbd>
-                  {t('aiLab.composer.select')}
-                </span>
-                <span className="inline-flex items-center gap-1">
-                  <kbd className="rounded bg-neutral-800 px-1 py-0.5 font-mono text-neutral-400">{'esc'}</kbd>
-                  {t('aiLab.composer.exit')}
-                </span>
-              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -273,7 +262,7 @@ export default function Composer({
             aria-label="发送"
             onClick={submit}
             disabled={disabled || !canSend}
-            className="w-8 h-8 rounded-full bg-sky-500 hover:bg-sky-600 disabled:opacity-40 disabled:hover:bg-sky-500 text-white flex items-center justify-center transition-colors cursor-pointer shrink-0"
+            className="w-8 h-8 rounded-full bg-sky-500 hover:bg-sky-600 disabled:opacity-40 disabled:hover:bg-sky-500 text-[#fff] flex items-center justify-center transition-colors cursor-pointer shrink-0"
           >
             <ArrowUp size={16} />
           </button>
