@@ -32,7 +32,7 @@ const downloadBlob = (blob: Blob, filename: string) => {
 let pdfBrowserModulePromise: Promise<PdfBrowserModule> | null = null;
 const templatePromiseCache = new Map<string, Promise<MagicTemplateDSL>>();
 const pdfBlobPromiseCache = new WeakMap<Resume, Map<string, Promise<Blob>>>();
-const PDF_RENDERER_VERSION = 'pdf-canvas-date-font-v10';
+const PDF_RENDERER_VERSION = 'pdf-canvas-woff-fonts-v13';
 
 const loadPdfBrowserModule = () => {
   pdfBrowserModulePromise ??= import('@magic-resume/resume-templates/pdf/browser') as Promise<PdfBrowserModule>;
