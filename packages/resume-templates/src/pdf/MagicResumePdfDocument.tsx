@@ -244,7 +244,8 @@ const SectionTitle = ({ title, icon, sidebar, color, dividerColor, fontSize, con
   const titleColor = color ?? (sidebar ? context.colors.background : context.colors.primary);
   const borderColor = dividerColor ?? titleColor;
   const resolvedFontSize = fontSize ?? cssSizeToPoints(context.typography.fontSize.lg, 12);
-  const lineHeight = context.typography.lineHeight ?? 1.5;
+  const titleSpacing = cssSizeToPoints(context.spacing.sm, 6);
+  const lineHeight = Math.min(context.typography.lineHeight ?? 1.15, 1.15);
   return (
     <View
       style={{
@@ -253,8 +254,8 @@ const SectionTitle = ({ title, icon, sidebar, color, dividerColor, fontSize, con
         borderBottomWidth: context.showTitleDivider ? 0.75 : 0,
         flexDirection: 'row',
         gap: 4,
-        marginBottom: cssSizeToPoints(context.spacing.sm, 6),
-        paddingBottom: cssSizeToPoints(context.spacing.sm, 6),
+        marginBottom: titleSpacing,
+        paddingBottom: titleSpacing * 0.25,
       }}
     >
       {context.showTitleIcon && icon ? (
