@@ -1,5 +1,5 @@
 ### STAGE 1: DEPENDENCIES ###
-FROM node:20-alpine AS deps
+FROM node:22-alpine AS deps
 WORKDIR /app
 
 RUN corepack enable
@@ -18,7 +18,7 @@ COPY packages/utils/package.json packages/utils/package.json
 RUN pnpm install --frozen-lockfile
 
 ### STAGE 2: BUILDER ###
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 WORKDIR /app
 
 RUN corepack enable
@@ -38,7 +38,7 @@ ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 RUN pnpm --filter @magic-resume/web... build
 
 ### STAGE 3: RUNNER ###
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
