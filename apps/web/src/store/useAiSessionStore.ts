@@ -180,13 +180,26 @@ export function createAiSessionStore(
           if (saved && isExpired(session)) await db.removeItem(key);
         }
 
-        set((state) => {
-          const sessions = { ...state.sessions };
-          for (const [resumeId, session] of Object.entries(sessions)) {
-            if (isExpired(session)) delete sessions[resumeId];
+        const expiredIds = Object.entries(get().sessions)
+          .filter(([, session]) => isExpired(session))
+          .map(([resumeId]) => resumeId);
+
+        if (expiredIds.length > 0) {
+          set((state) => {
+            const sessions = { ...state.sessions };
+            for (const resumeId of expiredIds) delete sessions[resumeId];
+            return { sessions };
+          });
+          // Clear any pending debounced write for a pruned session so a stale timer
+          // can't fire (and leak) after the session is gone.
+          for (const resumeId of expiredIds) {
+            const timer = timers.get(resumeId);
+            if (timer) {
+              clearTimeout(timer);
+              timers.delete(resumeId);
+            }
           }
-          return { sessions };
-        });
+        }
       },
 
       flushSession: async (resumeId) => {

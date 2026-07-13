@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { useAppAuth } from '@/lib/auth';
-import { resumeApi } from '@/lib/api/resume';
+import { resumeApi, isLocalResumeId } from '@/lib/api/resume';
 import { getMagicTemplateById } from '@magic-resume/resume-templates/config/magic-templates';
 import { mergeTemplateConfig } from '@/lib/utils/templateUtils';
 import { Resume } from '@/types/frontend/resume';
@@ -111,12 +111,14 @@ export function useSharedResume() {
     // Data Fetching
     useEffect(() => {
         if (!shareId) return;
+        let ignore = false;
 
         const fetchResume = async () => {
             try {
                 setLoading(true);
                 const data = await resumeApi.fetchSharedResume(shareId);
-                
+                if (ignore) return;
+
                 let parsedResume = { ...data };
                 // Content is usually a string in DB, but sometimes it might be parsed by interceptor
                 if (typeof data.content === 'string') {
@@ -138,6 +140,17 @@ export function useSharedResume() {
                 const baseTemplate = await getMagicTemplateById(parsedResume.template || 'classic');
                 const fullTemplate = mergeTemplateConfig(baseTemplate, parsedResume.customTemplate);
 
+                if (ignore) return;
+
+                // Guard the render-critical shape so a malformed/legacy payload renders
+                // empty instead of white-screening the public page.
+                if (!parsedResume.sections || typeof parsedResume.sections !== 'object') {
+                    parsedResume.sections = {};
+                }
+                if (!Array.isArray(parsedResume.sectionOrder)) {
+                    parsedResume.sectionOrder = [];
+                }
+
                 setResume(parsedResume);
                 setTemplate(fullTemplate);
 
@@ -156,18 +169,23 @@ export function useSharedResume() {
                     }
                 }
             } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+                if (ignore) return;
                 console.error('Error fetching resume:', err);
                 setError(err.response?.status === 404 ? t('sharedPage.error.resumeNotFound') : t('sharedPage.error.failedToLoad'));
                 if (err.response?.status === 404) {
                     toast.error(t('sharedPage.notifications.resumeNotFound'));
                 }
             } finally {
-                setLoading(false);
+                if (!ignore) setLoading(false);
             }
         };
 
         fetchResume();
-    }, [shareId, t]);
+        // `t` is intentionally omitted: it changes identity on language switch, which
+        // would refetch and (without cancellation) let a stale response overwrite newer
+        // data. The ignore flag cancels in-flight work on shareId change / unmount.
+        return () => { ignore = true; };
+    }, [shareId]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Handlers
     const handleResumeMouseUp = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -239,7 +257,7 @@ export function useSharedResume() {
         if (!draftComment || !resume?.id) return;
         
         try {
-            const isLocalId = !isNaN(Number(resume.id)) && String(resume.id).length > 10;
+            const isLocalId = isLocalResumeId(String(resume.id));
             if (isLocalId) {
                 toast.error(t('sharedPage.notifications.syncing'));
                 return;
