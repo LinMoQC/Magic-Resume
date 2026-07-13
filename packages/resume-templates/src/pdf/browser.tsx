@@ -54,7 +54,7 @@ const ensureHyphenationRegistered = () => {
 };
 
 const getTemplateFontCategory = (template?: MagicTemplateDSL): PdfFontCategory => {
-  const fontFamily = template?.designTokens.typography.fontFamily.primary ?? '';
+  const fontFamily = template?.designTokens?.typography?.fontFamily?.primary ?? '';
   return getResumeFontCategory(fontFamily);
 };
 
@@ -136,14 +136,32 @@ const blobToDataUrl = (blob: Blob): Promise<string> => new Promise((resolve, rej
   reader.readAsDataURL(blob);
 });
 
+// Cache the remote-avatar → data-URL conversion by URL. The live preview
+// re-runs this pipeline on every (debounced) edit, so without memoization each
+// keystroke burst would re-fetch and re-encode the same remote image.
+const avatarDataUrlCache = new Map<string, Promise<string>>();
+
+const fetchAvatarDataUrl = (avatar: string): Promise<string> => {
+  let promise = avatarDataUrlCache.get(avatar);
+  if (!promise) {
+    promise = (async () => {
+      const response = await fetch(avatar, { cache: 'force-cache' });
+      if (!response.ok) throw new Error(`Avatar request failed with ${response.status}.`);
+      return blobToDataUrl(await response.blob());
+    })();
+    // Never cache a rejection — allow the next render to retry a failed fetch.
+    void promise.catch(() => avatarDataUrlCache.delete(avatar));
+    avatarDataUrlCache.set(avatar, promise);
+  }
+  return promise;
+};
+
 const prepareResumeImages = async (data: Resume): Promise<Resume> => {
   const avatar = data.info.avatar;
   if (!avatar || avatar.startsWith('data:')) return data;
 
   try {
-    const response = await fetch(avatar);
-    if (!response.ok) throw new Error(`Avatar request failed with ${response.status}.`);
-    const dataUrl = await blobToDataUrl(await response.blob());
+    const dataUrl = await fetchAvatarDataUrl(avatar);
     return { ...data, info: { ...data.info, avatar: dataUrl } };
   } catch {
     // A remote avatar should not prevent the rest of the resume from exporting.

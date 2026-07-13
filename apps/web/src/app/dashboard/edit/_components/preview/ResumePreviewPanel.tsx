@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import dynamic from 'next/dynamic';
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import { Resume } from '@/types/frontend/resume';
 import useMobile from '@/hooks/useMobile';
@@ -10,7 +11,14 @@ import { AiFab } from '../layout/AiFab';
 import AiThinkingOverlay from '../modals/AiThinkingOverlay';
 import { useTranslation } from 'react-i18next';
 import { isCloudMode } from '@/lib/config/app';
-import { PdfCanvasPreview } from './PdfCanvasPreview';
+
+// The canvas preview is client-only: pdf.js needs window/devicePixelRatio and a
+// <canvas>, and registers a worker at module load — none of which work during SSR.
+// Load it with ssr:false so it renders only in the browser.
+const PdfCanvasPreview = dynamic(
+  () => import('./PdfCanvasPreview').then((m) => m.PdfCanvasPreview),
+  { ssr: false },
+);
 
 interface ResumePreviewPanelProps {
   activeResume: Resume | null;

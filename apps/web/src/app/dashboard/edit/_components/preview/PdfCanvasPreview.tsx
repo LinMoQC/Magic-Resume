@@ -206,6 +206,10 @@ function PdfCanvasPage({
     void renderPage().catch((error: unknown) => {
       if (isRenderingCancelledError(error)) return;
       console.error(`Failed to render PDF preview page ${pageNumber}`, error);
+      // Settle the page even on failure. Otherwise a single failed page keeps a
+      // staged layer from ever promoting, leaving the previous preview stuck
+      // behind a permanent "updating" state instead of showing the new render.
+      if (!cancelled) onRenderSuccessRef.current(pageNumber);
     });
 
     return () => {
