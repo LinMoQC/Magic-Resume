@@ -1,5 +1,4 @@
 import { MagicDebugger } from "./debuggger";
-import html2canvas from "html2canvas";
 export { cn } from '@magic-resume/utils';
 export { formatTime, formatRelativeTime } from '@magic-resume/utils';
 
@@ -85,6 +84,9 @@ export function generateSnapshot(options?: {
       });
       await Promise.all(imageLoadPromises);
 
+      // Lazily import html2canvas so this heavy, browser-only library stays out
+      // of the @/lib/utils barrel's eager init graph (it is only needed here).
+      const { default: html2canvas } = await import("html2canvas");
       const canvas = await html2canvas(clonedResume, {
         scale: scale,
         useCORS: true,

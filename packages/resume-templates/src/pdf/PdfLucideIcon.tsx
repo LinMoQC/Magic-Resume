@@ -9,12 +9,14 @@ import {
   Rect,
   Svg,
 } from '@react-pdf/renderer';
+import type { Style } from '@react-pdf/types';
 import type { IconNode } from 'lucide';
 
 interface PdfLucideIconProps {
   color?: string;
   icon: IconNode;
   size?: number;
+  style?: Style;
   strokeWidth?: number;
 }
 
@@ -63,12 +65,14 @@ export const PdfLucideIcon = ({
   color = 'currentColor',
   icon,
   size = 10,
+  style,
   strokeWidth = 2,
 }: PdfLucideIconProps) => (
   <Svg
     viewBox="0 0 24 24"
     width={size}
     height={size}
+    style={style}
   >
     {icon.map((node, index) => renderNode(node, index, { color, strokeWidth }))}
   </Svg>

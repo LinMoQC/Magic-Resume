@@ -33,7 +33,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       # Install the release toolchain in an isolated dir so it never touches the
       # pnpm workspace (avoids workspace-protocol install friction + frozen lockfile).

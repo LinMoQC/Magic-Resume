@@ -17,9 +17,9 @@ const webFontsDir = resolve(packageDir, '../../apps/web/public/fonts');
 Font.register({
   family: 'Source Han Sans SC',
   fonts: [
-    { src: join(webFontsDir, 'SourceHanSansSC-Regular.otf'), fontWeight: 400 },
+    { src: join(webFontsDir, 'SourceHanSansSC-Regular.woff'), fontWeight: 400 },
     { src: join(webFontsDir, 'SourceHanSansSC-RegularOblique.woff'), fontWeight: 400, fontStyle: 'italic' },
-    { src: join(webFontsDir, 'SourceHanSansSC-Bold.otf'), fontWeight: 700 },
+    { src: join(webFontsDir, 'SourceHanSansSC-Bold.woff'), fontWeight: 700 },
     { src: join(webFontsDir, 'SourceHanSansSC-BoldOblique.woff'), fontWeight: 700, fontStyle: 'italic' },
   ],
 });

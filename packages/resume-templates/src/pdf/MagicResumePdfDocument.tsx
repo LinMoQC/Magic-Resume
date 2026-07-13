@@ -213,28 +213,23 @@ interface RenderContext {
   locale?: string;
 }
 
-const InlineIcon = ({
-  icon,
-  color,
-  size,
-  lineHeight,
-  strokeWidth = 2,
-}: {
+const InlineIcon = ({ icon, color, size, offsetY, strokeWidth = 2 }: {
   icon: IconNode;
   color: string;
   size: number;
-  lineHeight: number;
+  offsetY?: number;
   strokeWidth?: number;
 }) => (
-  <View
+  <PdfLucideIcon
+    icon={icon}
+    color={color}
+    size={size}
+    strokeWidth={strokeWidth}
     style={{
       flexShrink: 0,
-      height: size * lineHeight,
-      justifyContent: 'center',
+      marginTop: offsetY,
     }}
-  >
-    <PdfLucideIcon icon={icon} color={color} size={size} strokeWidth={strokeWidth} />
-  </View>
+  />
 );
 
 const SectionTitle = ({ title, icon, sidebar, color, dividerColor, fontSize, context }: {
@@ -249,21 +244,22 @@ const SectionTitle = ({ title, icon, sidebar, color, dividerColor, fontSize, con
   const titleColor = color ?? (sidebar ? context.colors.background : context.colors.primary);
   const borderColor = dividerColor ?? titleColor;
   const resolvedFontSize = fontSize ?? cssSizeToPoints(context.typography.fontSize.lg, 12);
-  const lineHeight = context.typography.lineHeight ?? 1.5;
+  const titleSpacing = cssSizeToPoints(context.spacing.sm, 6);
+  const lineHeight = Math.min(context.typography.lineHeight ?? 1.15, 1.15);
   return (
     <View
       style={{
-        alignItems: 'center',
+        alignItems: 'flex-start',
         borderBottomColor: borderColor,
         borderBottomWidth: context.showTitleDivider ? 0.75 : 0,
         flexDirection: 'row',
         gap: 4,
-        marginBottom: cssSizeToPoints(context.spacing.sm, 6),
-        paddingBottom: cssSizeToPoints(context.spacing.sm, 6),
+        marginBottom: titleSpacing,
+        paddingBottom: titleSpacing * 0.25,
       }}
     >
       {context.showTitleIcon && icon ? (
-        <InlineIcon icon={icon} color={titleColor} size={resolvedFontSize} lineHeight={lineHeight} />
+        <InlineIcon icon={icon} color={titleColor} size={resolvedFontSize} />
       ) : null}
       <Text
         style={{
@@ -290,6 +286,42 @@ const ContactText = ({ value, href, style }: { value: string; href?: string; sty
   return href ? <Link src={href} style={style}>{value}</Link> : <Text style={style}>{value}</Text>;
 };
 
+const DateText = ({
+  value,
+  color,
+  fontFamily,
+  fontSize,
+  fontWeight,
+  opacity,
+  textAlign,
+}: {
+  value: string;
+  color: string;
+  fontFamily: string[];
+  fontSize: number;
+  fontWeight?: number;
+  opacity?: number;
+  textAlign?: 'left' | 'right';
+}) => {
+  if (!value) return null;
+
+  return (
+    <Text
+      style={{
+        color,
+        fontFamily: fontFamily as unknown as string,
+        fontSize,
+        fontWeight,
+        lineHeight: 1.2,
+        opacity,
+        textAlign,
+      }}
+    >
+      {value}
+    </Text>
+  );
+};
+
 const HeaderBlock = ({ info, component, context }: {
   info: InfoType;
   component: ComponentDefinition;
@@ -301,7 +333,8 @@ const HeaderBlock = ({ info, component, context }: {
   const avatarWidth = cssSizeToPoints(Number(props.avatarWidth ?? 40));
   const avatarHeight = cssSizeToPoints(Number(props.avatarHeight ?? 40));
   const contactFontSize = 7.5;
-  const lineHeight = context.typography.lineHeight ?? 1.5;
+  const contactIconOffsetY = -0.75;
+  const contactLineHeight = 1;
   const contacts: Array<{ label: string; value: string; href: string; icon?: IconNode }> = [
     { label: context.locale?.startsWith('zh') ? '电话' : 'Phone', value: info.phoneNumber, href: info.phoneNumber ? `tel:${info.phoneNumber}` : '', icon: Phone },
     { label: context.locale?.startsWith('zh') ? '邮箱' : 'Email', value: info.email, href: info.email ? `mailto:${info.email}` : '', icon: Mail },
@@ -346,17 +379,17 @@ const HeaderBlock = ({ info, component, context }: {
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: labelContacts ? 5 : 7, marginTop: 2 }}>
           {contacts.map((item) => (
             <View key={`${item.label}:${item.value}`} style={{ flexDirection: 'row', alignItems: 'center', gap: 2, width: labelContacts ? '47%' : undefined }}>
-              {labelContacts ? <Text style={{ color: context.colors.textSecondary, fontSize: contactFontSize, lineHeight }}>{item.label}:</Text> : null}
+              {labelContacts ? <Text style={{ color: context.colors.textSecondary, fontSize: contactFontSize, lineHeight: contactLineHeight }}>{item.label}:</Text> : null}
               {!labelContacts && item.icon ? (
                 <InlineIcon
                   icon={item.icon}
                   color={context.colors.primary}
                   size={contactFontSize}
-                  lineHeight={lineHeight}
+                  offsetY={contactIconOffsetY}
                   strokeWidth={2.5}
                 />
               ) : null}
-              <ContactText value={item.value} href={item.href} style={{ color: context.colors.text, fontSize: contactFontSize, lineHeight, textDecoration: 'none' }} />
+              <ContactText value={item.value} href={item.href} style={{ color: context.colors.text, fontSize: contactFontSize, lineHeight: contactLineHeight, textDecoration: 'none' }} />
             </View>
           ))}
         </View>
@@ -411,8 +444,8 @@ const ProfileBlock = ({ info, component, sidebar, context }: {
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 7 }}>
           {contacts.map((item) => (
             <View key={item.value} style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
-              <PdfLucideIcon icon={item.icon} color={context.colors.textSecondary} size={8} />
-              <Text style={{ color: context.colors.textSecondary, fontSize: 8 }}>{item.value}</Text>
+              <InlineIcon icon={item.icon} color={context.colors.textSecondary} size={8} offsetY={-0.75} />
+              <Text style={{ color: context.colors.textSecondary, fontSize: 8, lineHeight: 1 }}>{item.value}</Text>
             </View>
           ))}
         </View>
@@ -462,7 +495,7 @@ const ContactBlock = ({ info, component, sidebar, context }: {
       <View style={{ gap: itemGap }}>
         {items.map((item) => (
           <View key={item.value} style={{ flexDirection: 'row', alignItems: 'center', gap: itemGap }}>
-            <InlineIcon icon={item.icon} color={iconColor} size={iconSize} lineHeight={lineHeight} />
+            <InlineIcon icon={item.icon} color={iconColor} size={iconSize} />
             <ContactText
               value={item.value}
               href={item.href}
@@ -508,6 +541,7 @@ const DefaultSectionBlock = ({ component, items, context }: {
   const fields = component.fieldMap ?? {};
   const bodyFontSize = cssSizeToPoints(context.typography.fontSize.sm, 9);
   const fieldWeight = context.typography.fontWeight.medium ?? 500;
+  const dateFontFamily = getPdfFontStack(context.typography.fontFamily.primary);
   return (
     <View style={[{ marginBottom: cssSizeToPoints(context.spacing.lg, 12) }, toPdfComponentStyle(component.style)]}>
       <SectionTitle title={resolveTitle(component, context.locale)} icon={getSectionIcon(component)} context={context} />
@@ -523,7 +557,14 @@ const DefaultSectionBlock = ({ component, items, context }: {
                   <Text style={{ color: context.colors.textSecondary, fontSize: bodyFontSize }}>{getFieldValue(record, fields.secondarySubtitle)}</Text>
                 </View>
                 <View style={{ alignItems: 'flex-end', flexShrink: 0 }}>
-                  <Text style={{ color: context.colors.text, fontSize: bodyFontSize, fontWeight: fieldWeight }}>{getFieldValue(record, fields.sideTitle)}</Text>
+                  <DateText
+                    value={getFieldValue(record, fields.sideTitle)}
+                    color={context.colors.text}
+                    fontFamily={dateFontFamily}
+                    fontSize={bodyFontSize}
+                    fontWeight={fieldWeight}
+                    textAlign="right"
+                  />
                   <Text style={{ color: context.colors.text, fontSize: bodyFontSize }}>{getFieldValue(record, fields.sideSubtitle)}</Text>
                   <Text style={{ color: context.colors.textSecondary, fontSize: bodyFontSize }}>{getFieldValue(record, fields.secondarySideSubtitle)}</Text>
                 </View>
@@ -550,6 +591,7 @@ const ListSectionBlock = ({ component, items, context }: {
   const fields = component.fieldMap ?? {};
   const bodyFontSize = cssSizeToPoints(context.typography.fontSize.sm, 9);
   const fieldWeight = context.typography.fontWeight.medium ?? 500;
+  const dateFontFamily = getPdfFontStack(context.typography.fontFamily.primary);
   return (
     <View style={[{ marginBottom: cssSizeToPoints(context.spacing.lg, 12) }, toPdfComponentStyle(component.style)]}>
       <SectionTitle title={resolveTitle(component, context.locale)} icon={getSectionIcon(component)} context={context} />
@@ -560,7 +602,12 @@ const ListSectionBlock = ({ component, items, context }: {
             <View key={item.id || index} wrap={false}>
               <Text style={{ color: context.colors.text, fontSize: bodyFontSize, fontWeight: fieldWeight }}>{getFieldValue(record, fields.itemName)}</Text>
               <Text style={{ color: context.colors.text, fontSize: bodyFontSize }}>{getFieldValue(record, fields.itemDetail)}</Text>
-              <Text style={{ color: context.colors.textSecondary, fontSize: bodyFontSize }}>{getFieldValue(record, fields.date)}</Text>
+              <DateText
+                value={getFieldValue(record, fields.date)}
+                color={context.colors.textSecondary}
+                fontFamily={dateFontFamily}
+                fontSize={bodyFontSize}
+              />
               <Description
                 value={getFieldValue(record, fields.summary)}
                 color={context.colors.text}
@@ -617,6 +664,7 @@ const TimelineBlock = ({ component, items, context }: {
 }) => {
   const fields = component.fieldMap ?? {};
   const color = component.style?.color ?? context.colors.text;
+  const dateFontFamily = getPdfFontStack(context.typography.fontFamily.primary);
   return (
     <View style={[{ marginBottom: cssSizeToPoints(context.spacing.lg, 12) }, toPdfComponentStyle(component.style)]}>
       <SectionTitle
@@ -647,7 +695,14 @@ const TimelineBlock = ({ component, items, context }: {
                     {subtitle ? <Text style={{ color: context.colors.primary, fontSize: 8, fontWeight: 700 }}>{subtitle}</Text> : null}
                     {location ? <Text style={{ color, fontSize: 7.5, opacity: 0.75 }}>{location}</Text> : null}
                   </View>
-                  {date ? <Text style={{ color, fontSize: 7.5, opacity: 0.75 }}>{date}</Text> : null}
+                  <DateText
+                    value={date}
+                    color={color}
+                    fontFamily={dateFontFamily}
+                    fontSize={7.5}
+                    opacity={0.75}
+                    textAlign="right"
+                  />
                 </View>
                 <Description
                   value={description}

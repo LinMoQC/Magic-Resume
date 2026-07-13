@@ -8,7 +8,7 @@ import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
 import { useSettingStore } from "@/store/useSettingStore";
 import { isCloudMode } from "@/lib/config/app";
-import { exportResumeToPdf } from "@/lib/utils/pdf-export";
+import { exportResumeToPdf, preloadResumePdfExport } from "@/lib/utils/pdf-export";
 
 export type ToolsProps = {
   isMobile: boolean;
@@ -27,17 +27,21 @@ type ToolButtonProps = {
   title: string;
   children: ReactNode;
   onClick?: () => void;
+  onFocus?: () => void;
+  onPointerEnter?: () => void;
   disabled?: boolean;
 };
 
 const toolButtonClassName =
   "w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white hover:bg-neutral-700 transition disabled:opacity-60 disabled:cursor-not-allowed";
 
-function ToolButton({ title, children, onClick, disabled = false }: ToolButtonProps) {
+function ToolButton({ title, children, onClick, onFocus, onPointerEnter, disabled = false }: ToolButtonProps) {
   return (
     <button
       className={toolButtonClassName}
       onClick={onClick}
+      onFocus={onFocus}
+      onPointerEnter={onPointerEnter}
       disabled={disabled}
       title={title}
       type="button"
@@ -62,6 +66,16 @@ export function Tools({ isMobile, zoomIn, zoomOut, resetTransform, resume, onSho
   const desktopRightPosition = rightCollapsed ? '76px' : '300px'; // 56px模板栏 + 20px间距 或 280px模板栏 + 20px间距
   
   const toggleCollapsed = () => setIsCollapsed((prev) => !prev);
+  // Match the locale the preview renders with so the export reuses its cached blob.
+  const pdfLocale = i18n.resolvedLanguage || i18n.language;
+
+  const warmupPdfExport = () => {
+    // Lightweight: only warms the template + fonts. The full blob is produced
+    // (and cached) by the live preview, so the click-to-export stays instant.
+    void preloadResumePdfExport(resume).catch(() => {
+      // Best-effort warmup only; export handles real failures.
+    });
+  };
 
   const handleExportPdf = async () => {
     // 客户端用 @react-pdf/renderer 生成矢量、文字可选中(ATS 友好)的多页 A4 PDF,
@@ -70,7 +84,7 @@ export function Tools({ isMobile, zoomIn, zoomOut, resetTransform, resume, onSho
     setIsExporting(true);
     const toastId = toast.loading(t('tools.exportingPDF'));
     try {
-      await exportResumeToPdf(resume, i18n.language);
+      await exportResumeToPdf(resume, pdfLocale);
       toast.success(t('tools.exportPDFSuccess'), { id: toastId });
     } catch (error) {
       console.error('PDF export failed:', error);
@@ -145,6 +159,8 @@ export function Tools({ isMobile, zoomIn, zoomOut, resetTransform, resume, onSho
             onClick={handleExportPdf}
             disabled={isExporting}
             title={isExporting ? t('tools.exportingPDF') : t('tools.exportPDF')}
+            onFocus={warmupPdfExport}
+            onPointerEnter={warmupPdfExport}
           >
             {isExporting ? <Loader2 size={16} className="animate-spin" /> : <DownloadIcon />}
           </ToolButton>

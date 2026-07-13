@@ -4,7 +4,7 @@ import { ZoomIn, ZoomOut, RotateCcw, Download, FileJson, Share2, Loader2 } from 
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { useSettingStore } from "@/store/useSettingStore";
-import { exportResumeToPdf } from "@/lib/utils/pdf-export";
+import { exportResumeToPdf, preloadResumePdfExport } from "@/lib/utils/pdf-export";
 import { Resume } from "@/types/frontend/resume";
 
 type EditorDockProps = {
@@ -30,6 +30,16 @@ export function EditorDock({ zoomIn, zoomOut, resetTransform, resume, onShareCli
   const { t, i18n } = useTranslation();
   const [isExporting, setIsExporting] = useState(false);
   const cloudSync = useSettingStore((state) => state.cloudSync);
+  // Match the locale the preview renders with so the export reuses its cached blob.
+  const pdfLocale = i18n.resolvedLanguage || i18n.language;
+
+  const warmupPdfExport = () => {
+    // Lightweight: only warms the template + fonts. The full blob is produced
+    // (and cached) by the live preview, so the click-to-export stays instant.
+    void preloadResumePdfExport(resume).catch(() => {
+      // Best-effort warmup only; export handles real failures.
+    });
+  };
 
   const handleExportPdf = async () => {
     // 客户端用 @react-pdf/renderer 生成矢量、文字可选中(ATS 友好)的多页 A4 PDF。
@@ -37,7 +47,7 @@ export function EditorDock({ zoomIn, zoomOut, resetTransform, resume, onShareCli
     setIsExporting(true);
     const toastId = toast.loading(t("tools.exportingPDF"));
     try {
-      await exportResumeToPdf(resume, i18n.language);
+      await exportResumeToPdf(resume, pdfLocale);
       toast.success(t("tools.exportPDFSuccess"), { id: toastId });
     } catch (error) {
       console.error("PDF export failed:", error);
@@ -86,6 +96,8 @@ export function EditorDock({ zoomIn, zoomOut, resetTransform, resume, onShareCli
               key={item.id}
               type="button"
               onClick={item.onClick}
+              onFocus={item.id === "export-pdf" ? warmupPdfExport : undefined}
+              onPointerEnter={item.id === "export-pdf" ? warmupPdfExport : undefined}
               disabled={item.disabled}
               title={item.title}
               aria-label={item.title}
