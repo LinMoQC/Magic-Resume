@@ -28,8 +28,10 @@ export async function POST(req: NextRequest) {
     });
 
     if (!backendResponse.ok) {
+      // Log the upstream body server-side only; never surface it to the client.
       const errorText = await backendResponse.text();
-      throw new Error(`Backend responded with status: ${backendResponse.status}, body: ${errorText}`);
+      console.error(`[AGENT_EDIT] Backend error ${backendResponse.status}: ${errorText}`);
+      throw new Error(`Backend request failed with status ${backendResponse.status}`);
     }
 
     // Non-streaming: a single JSON `{ after, rationale, rationaleDetail? }`.
