@@ -11,7 +11,7 @@ permissions:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: linmoqc/magic-resume
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build_and_push:
