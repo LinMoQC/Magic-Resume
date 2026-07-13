@@ -6,7 +6,7 @@ import { dbClient, RESUMES_KEY } from '@/lib/api/IndexDBClient';
 import { MagicDebugger } from '@/lib/utils/debuggger';
 import { toast } from "sonner";
 import { useSettingStore } from './useSettingStore';
-import { resumeApi } from '@/lib/api/resume';
+import { resumeApi, isLocalResumeId } from '@/lib/api/resume';
 import { getAuthToken } from '@/lib/api/httpClient';
 import debounce from 'lodash/debounce';
 import isEqual from 'lodash/isEqual';
@@ -241,12 +241,17 @@ const useResumeStore = create<ResumeState>()(
                   }
                 });
 
-                // Filter out resumes that are NOT in the cloud list
-                // This ensures we don't show local-only resumes or deleted cloud resumes
-                // Source of truth for existence is Cloud, but content can be Local (if newer)
-                for (const id of mergedMap.keys()) {
-                    if (!cloudIds.has(id)) {
-                        mergedMap.delete(id);
+                // Prune resumes that live in the cloud (cloud-style id) but are no
+                // longer in the cloud list — i.e. deleted on another device. Guard
+                // against data loss: only treat the cloud list as authoritative when it
+                // is non-empty (an empty/partial 200 response must not wipe everything),
+                // and NEVER delete local-only resumes (numeric id) created offline or
+                // not yet synced.
+                if (cloudResumes.length > 0) {
+                    for (const id of mergedMap.keys()) {
+                        if (!cloudIds.has(id) && !isLocalResumeId(id)) {
+                            mergedMap.delete(id);
+                        }
                     }
                 }
             }
@@ -648,9 +653,12 @@ const useResumeStore = create<ResumeState>()(
     // 2. If manual, trigger cloud sync and versioning immediately
     if (isCloudSyncOn) {
       if (type === 'manual') {
-        // Create manual version using the EXPLICIT targetResume to ensure consistency
-        await get().createVersion('manual', undefined, targetResume);
+        // Sync the main record FIRST so the freshest activeResume is persisted to the
+        // cloud, THEN snapshot a version. createVersion refreshes state from the cloud
+        // and grabs the isSyncing lock; running it before the sync makes syncToCloud
+        // silently skip the main-record PATCH and reverts activeResume to stale content.
         await get().syncToCloud({ skipVersioning: true });
+        await get().createVersion('manual', undefined, targetResume);
         toast.success(i18next.t('store.notifications.resumeSavedCloud'));
       } else {
         get().syncToCloud();
@@ -666,8 +674,8 @@ const useResumeStore = create<ResumeState>()(
     const targetResume = resumeData || get().activeResume;
     
     if (!targetResume) return;
-    
-    const isLocalId = !isNaN(Number(targetResume.id));
+
+    const isLocalId = isLocalResumeId(targetResume.id);
     if (isCloudSyncOn && !isLocalId) {
       try {
         const changelog = name || (type === 'manual' ? 'Manual Save' : 'Auto Save');
@@ -1015,8 +1023,16 @@ const useResumeStore = create<ResumeState>()(
       } else {
           console.log('[Sync] Skipping auto-version as requested (skipVersioning=true).');
       }
-      
-      set({ syncStatus: 'saved' });
+
+      // Only claim 'saved' if no newer edit (or id rebind) landed while the request
+      // was in flight; otherwise keep 'modified' so the debounced sync flushes the
+      // latest state instead of the UI lying that everything is persisted.
+      const latest = get().activeResume;
+      if (latest && latest.updatedAt !== activeResume.updatedAt) {
+        set({ syncStatus: 'modified' });
+      } else {
+        set({ syncStatus: 'saved' });
+      }
     } catch (error) {
       console.error('[Sync] Cloud sync failed:', error);
       set({ syncStatus: 'error' });
@@ -1069,6 +1085,16 @@ useResumeStore.subscribe((state, prevState) => {
     debouncedLocalPersist(state.resumes);
   }
 });
+
+// Flush the debounced persist on tab hide / unload so an edit made within the 2s
+// debounce window isn't lost on refresh or close.
+if (typeof window !== 'undefined') {
+  const flushLocalPersist = () => debouncedLocalPersist.flush();
+  window.addEventListener('pagehide', flushLocalPersist);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') flushLocalPersist();
+  });
+}
 
 // 移除立即加载，改为按需加载
 // useResumeStore.getState().loadResumes();

@@ -11,13 +11,21 @@ import {
 } from '@/types/backend/resume';
 import { API_ROUTES } from './routes';
 
+/**
+ * A resume that only exists locally (never synced) has a numeric timestamp id
+ * (Date.now().toString()); cloud resumes use CUIDs. Centralised so every call site
+ * classifies ids the same way instead of re-deriving the rule inline.
+ */
+export const isLocalResumeId = (id: string): boolean =>
+  !isNaN(Number(id)) && id.length > 10;
+
 export const resumeApi = {
   /**
    * 将简历同步到云端。
    * 本地临时 ID（纯数字且长度 > 10）→ POST 创建；云端 ID → PATCH 更新。
    */
   syncResume: async (resume: Resume): Promise<CloudResumeResponse> => {
-    const isLocalId = !isNaN(Number(resume.id)) && resume.id.length > 10;
+    const isLocalId = isLocalResumeId(resume.id);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const resumeData = { ...resume } as any;
