@@ -8,7 +8,7 @@ import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
 import { useSettingStore } from "@/store/useSettingStore";
 import { isCloudMode } from "@/lib/config/app";
-import { exportResumeToPdf, prepareResumePdfExport } from "@/lib/utils/pdf-export";
+import { exportResumeToPdf, preloadResumePdfExport } from "@/lib/utils/pdf-export";
 
 export type ToolsProps = {
   isMobile: boolean;
@@ -66,9 +66,13 @@ export function Tools({ isMobile, zoomIn, zoomOut, resetTransform, resume, onSho
   const desktopRightPosition = rightCollapsed ? '76px' : '300px'; // 56px模板栏 + 20px间距 或 280px模板栏 + 20px间距
   
   const toggleCollapsed = () => setIsCollapsed((prev) => !prev);
+  // Match the locale the preview renders with so the export reuses its cached blob.
+  const pdfLocale = i18n.resolvedLanguage || i18n.language;
 
   const warmupPdfExport = () => {
-    void prepareResumePdfExport(resume, i18n.language).catch(() => {
+    // Lightweight: only warms the template + fonts. The full blob is produced
+    // (and cached) by the live preview, so the click-to-export stays instant.
+    void preloadResumePdfExport(resume).catch(() => {
       // Best-effort warmup only; export handles real failures.
     });
   };
@@ -80,7 +84,7 @@ export function Tools({ isMobile, zoomIn, zoomOut, resetTransform, resume, onSho
     setIsExporting(true);
     const toastId = toast.loading(t('tools.exportingPDF'));
     try {
-      await exportResumeToPdf(resume, i18n.language);
+      await exportResumeToPdf(resume, pdfLocale);
       toast.success(t('tools.exportPDFSuccess'), { id: toastId });
     } catch (error) {
       console.error('PDF export failed:', error);
