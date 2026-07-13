@@ -391,10 +391,18 @@ export default function LivingCanvas({
     (path: string) => {
       const change = pendingRef.current[path];
       if (!change) return;
+      // Update the ref synchronously as well as calling the store setter: two accepts
+      // in the same tick (e.g. Enter pressed twice fast) would otherwise both read the
+      // pre-accept snapshot and the second would drop the first. The ref is re-synced
+      // from props on the next render.
       if (change.target.sectionKey === 'info') {
-        onApplyInfo(applyInfoChange(infoRef.current, change));
+        const nextInfo = applyInfoChange(infoRef.current, change);
+        infoRef.current = nextInfo;
+        onApplyInfo(nextInfo);
       } else {
-        onApplySections(applyChangeToSections(sectionsRef.current, change));
+        const nextSections = applyChangeToSections(sectionsRef.current, change);
+        sectionsRef.current = nextSections;
+        onApplySections(nextSections);
       }
       onLog(
         change.isInsert

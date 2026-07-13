@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { nanoid } from 'nanoid';
 import { Button } from '@/components/ui/button';
 import {
   DndContext,
@@ -174,7 +175,7 @@ export default function SectionListWithModal<T extends BaseItem>({
   );
 
   const handleOpenModal = useCallback((item: T | null, index: number | null) => {
-    setCurrentItem(item ? { ...item } : { id: Date.now().toString(), visible: true, ...fields.reduce((acc, f) => ({ ...acc, [f.name]: '' }), {} as Record<string, string>), [richtextKey]: '' } as T);
+    setCurrentItem(item ? { ...item } : { id: nanoid(), visible: true, ...fields.reduce((acc, f) => ({ ...acc, [f.name]: '' }), {} as Record<string, string>), [richtextKey]: '' } as T);
     setCurrentIndex(index);
     setIsOpen(true);
     onModalStateChange?.(true);
@@ -208,8 +209,15 @@ export default function SectionListWithModal<T extends BaseItem>({
     }
 
     const newItems = [...items];
-    if (currentIndex !== null && items[currentIndex]) {
-      newItems[currentIndex] = currentItem;
+    if (currentIndex !== null) {
+      // Locate the row by id, not the captured index: an external reorder (AI accept
+      // / cloud sync) while the modal was open could otherwise overwrite the wrong item.
+      const targetIndex = items.findIndex((it) => it.id === currentItem.id);
+      if (targetIndex !== -1) {
+        newItems[targetIndex] = currentItem;
+      } else {
+        newItems.push(currentItem);
+      }
     } else {
       newItems.push(currentItem);
     }
@@ -229,7 +237,7 @@ export default function SectionListWithModal<T extends BaseItem>({
 
   const handleCopy = useCallback((index: number) => {
     const itemToCopy = items[index];
-    const newItem = { ...itemToCopy, id: Date.now().toString() } as T;
+    const newItem = { ...itemToCopy, id: nanoid() } as T;
     const newItems = [...items.slice(0, index + 1), newItem, ...items.slice(index + 1)];
     setItems(newItems);
     toast.success(t('sections.notifications.itemCopied'));
