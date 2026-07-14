@@ -232,7 +232,12 @@ export default function StructuredData({ type, data = {} }: StructuredDataProps)
       id={`structured-data-${type}`}
       type="application/ld+json"
       dangerouslySetInnerHTML={{
-        __html: JSON.stringify(schemaData)
+        // Escape characters that could break out of the <script> block if user
+        // data ever reaches the JSON-LD (e.g. a title containing "</script>").
+        __html: JSON.stringify(schemaData).replace(
+          /[<>\u2028\u2029]/g,
+          (ch) => '\\u' + ch.charCodeAt(0).toString(16).padStart(4, '0'),
+        ),
       }}
     />
   )
