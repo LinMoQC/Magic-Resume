@@ -12,7 +12,7 @@ export default function HistoryModalPage() {
   const params = useParams();
   const id = params.id as string;
   const cloudSync = useSettingStore(state => state.cloudSync);
-  const { activeResume, loadResumeForEdit, fetchCloudResume, restoreVersion, deleteVersion } = useResumeStore();
+  const { activeResume, loadResumeForEdit, refreshCloudVersions, restoreVersion, deleteVersion } = useResumeStore();
 
   const [isLoading, setIsLoading] = useState(false);
   const hasLoadedHistory = useRef(false);
@@ -29,7 +29,7 @@ export default function HistoryModalPage() {
         setIsLoading(true);
         hasLoadedHistory.current = true;
         try {
-          await fetchCloudResume(activeResume.id);
+          await refreshCloudVersions(activeResume.id);
         } finally {
           setIsLoading(false);
         }
@@ -39,7 +39,7 @@ export default function HistoryModalPage() {
       loadHistory();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeResume?.id, id, cloudSync, fetchCloudResume]);
+  }, [activeResume?.id, id, cloudSync, refreshCloudVersions]);
 
   const handleOpenChange = (open: boolean) => {
     if (!open) router.push(`/dashboard/edit/${id}`);

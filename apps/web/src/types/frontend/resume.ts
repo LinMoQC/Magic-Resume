@@ -48,6 +48,7 @@ export type CustomTemplateConfig = {
   };
   layout?: {
     type?: 'single-column' | 'two-column' | 'sidebar' | 'grid';
+    pageSize?: 'A4' | 'Letter';
     containerWidth?: string;
     containerHeight?: string;
     padding?: string;
@@ -64,6 +65,14 @@ export type CustomTemplateConfig = {
     };
     showTitleDivider?: boolean;
     showTitleIcon?: boolean;
+  };
+  /** 头像 / 页眉样式覆盖,合并进 Header / ProfileCard 组件的 props。 */
+  header?: {
+    avatarPosition?: 'left' | 'right';
+    avatarWidth?: number;
+    avatarHeight?: number;
+    avatarRounded?: boolean;
+    contactStyle?: 'icon' | 'label';
   };
 };
 
@@ -143,5 +152,7 @@ export interface CloudResume {
   isPublic: boolean;
   shareId?: string;
   shareRole: 'VIEWER' | 'COMMENTER' | 'EDITOR';
+  /** 服务端乐观锁版本号,作为下次 PATCH 的 baseRevision(见 docs/specs/cloud-sync-v2) */
+  revision?: number;
   versions?: CloudVersion[];
 }

@@ -1,4 +1,54 @@
 {
+  "auth": {
+    "signIn": {
+      "title": "Log in to Magic Resume",
+      "switchPrompt": "Don't have an account?",
+      "switchLink": "Sign up",
+      "submit": "Log in"
+    },
+    "signUp": {
+      "title": "Create your account",
+      "switchPrompt": "Already have an account?",
+      "switchLink": "Log in",
+      "submit": "Create account",
+      "verify": "Verify & continue"
+    },
+    "continueWith": {
+      "google": "Continue with Google",
+      "github": "Continue with GitHub",
+      "email": "Continue with email"
+    },
+    "lastUsed": "You used this last time",
+    "continue": "Continue",
+    "back": "Back",
+    "emailPlaceholder": "you@example.com",
+    "fields": {
+      "email": "Email",
+      "password": "Password",
+      "newPassword": "New password"
+    },
+    "forgotPassword": "Forgot password?",
+    "useCodeInstead": "Use a code instead",
+    "codeSentTo": "We sent a code to {{email}}",
+    "resend": "Resend code",
+    "passwordHint": "At least 8 characters",
+    "forgot": {
+      "hint": "Enter your email and we'll send a reset code.",
+      "send": "Send reset code",
+      "reset": "Reset & log in"
+    },
+    "errors": {
+      "passwordIncorrect": "Email or password is wrong. Try again.",
+      "identifierNotFound": "No account for this email. Sign up?",
+      "identifierExists": "This email is already registered. Log in?",
+      "codeIncorrect": "That code isn't right. Try again.",
+      "codeExpired": "That code expired. Send a new one.",
+      "passwordWeak": "Password is too weak. Pick a stronger one.",
+      "emailInvalid": "That email doesn't look right.",
+      "rateLimited": "Too many attempts. Try again shortly.",
+      "generic": "Something went wrong. Try again."
+    }
+  },
   "comingSoon": {
     "title": "Something great is on the way",
     "subtitle": "Magic Resume is in private beta. We're putting the finishing touches on your AI resume workspace — the public launch is close.",
@@ -853,7 +903,22 @@
       "text": "Text Color",
       "textSecondary": "Secondary Text Color",
       "background": "Background Color",
-      "sidebar": "Sidebar Color"
+      "sidebar": "Sidebar Color",
+      "border": "Border Color",
+      "advanced": "More Colors"
+    },
+    "header": {
+      "title": "Avatar & Header",
+      "avatarShape": "Avatar Shape",
+      "shapeRound": "Round",
+      "shapeSquare": "Square",
+      "avatarPosition": "Avatar Position",
+      "positionLeft": "Left",
+      "positionRight": "Right",
+      "avatarSize": "Avatar Size",
+      "contactStyle": "Contact Style",
+      "contactIcon": "Icon",
+      "contactLabel": "Label"
     },
     "typography": {
       "fontSettings": "Font Settings",
@@ -866,10 +931,13 @@
     "layout": {
       "layoutSettings": "Layout Settings",
       "containerSettings": "Container Settings",
+      "pageSize": "Page Size",
       "containerWidth": "Container Width",
       "padding": "Padding",
       "gap": "Gap",
       "borderRadius": "Corner Radius",
+      "sidebarWidth": "Sidebar Width",
+      "columnGap": "Column Gap",
       "density": "Density",
       "densityCompact": "Compact",
       "densityNormal": "Default",
@@ -1091,10 +1159,18 @@
       "resumeUnpublished": "Resume unpublished",
       "sharingUpdateFailed": "Failed to update sharing settings",
       "cloudSyncFailed": "Cloud sync failed. Please check your connection.",
+      "resumeUpToDate": "Already up to date in the cloud",
+      "syncConflictResolved": "Changes from another device detected: backed up as a version; your current content now wins",
       "duplicatingInCloud": "Duplicating in cloud...",
       "duplicateCloudSuccess": "Resume duplicated in cloud",
       "duplicateCloudError": "Failed to duplicate in cloud"
+    },
+    "sync": {
+      "conflictBackupChangelog": "Conflict backup (edits from another device)"
     }
+  },
+  "pdfPreview": {
+    "generateFailed": "Failed to generate the PDF preview. Please retry; the export button shows the specific error."
   },
   "common": {
     "loading": "Loading...",

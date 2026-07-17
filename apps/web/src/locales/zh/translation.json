@@ -1,4 +1,54 @@
 {
+  "auth": {
+    "signIn": {
+      "title": "登录 Magic Resume",
+      "switchPrompt": "还没有账号?",
+      "switchLink": "注册",
+      "submit": "登录"
+    },
+    "signUp": {
+      "title": "注册 Magic Resume",
+      "switchPrompt": "已有账号?",
+      "switchLink": "登录",
+      "submit": "创建账号",
+      "verify": "验证并进入"
+    },
+    "continueWith": {
+      "google": "用 Google 继续",
+      "github": "用 GitHub 继续",
+      "email": "用邮箱继续"
+    },
+    "lastUsed": "上次用的就是这个",
+    "continue": "继续",
+    "back": "返回",
+    "emailPlaceholder": "you@example.com",
+    "fields": {
+      "email": "邮箱",
+      "password": "密码",
+      "newPassword": "新密码"
+    },
+    "forgotPassword": "忘记密码?",
+    "useCodeInstead": "改用验证码登录",
+    "codeSentTo": "验证码已发到 {{email}}",
+    "resend": "重新发送",
+    "passwordHint": "至少 8 位",
+    "forgot": {
+      "hint": "输入邮箱,我们给你发一个重置码。",
+      "send": "发送重置码",
+      "reset": "重置并登录"
+    },
+    "errors": {
+      "passwordIncorrect": "邮箱或密码不对,再试一次",
+      "identifierNotFound": "没找到这个邮箱,去注册?",
+      "identifierExists": "这个邮箱已注册,去登录?",
+      "codeIncorrect": "验证码不对,重新输入",
+      "codeExpired": "验证码已过期,重发一个",
+      "passwordWeak": "密码太弱,换一个更强的",
+      "emailInvalid": "邮箱格式不对",
+      "rateLimited": "尝试太频繁,稍后再试",
+      "generic": "出了点问题,稍后再试"
+    }
+  },
   "comingSoon": {
     "title": "好东西,马上就来",
     "subtitle": "Magic Resume 正在内测。我们正为你的 AI 简历工作台做最后打磨,公开上线近在眼前。",
@@ -853,7 +903,22 @@
       "text": "文本颜色",
       "textSecondary": "次要文本颜色",
       "background": "背景颜色",
-      "sidebar": "侧边栏颜色"
+      "sidebar": "侧边栏颜色",
+      "border": "边框颜色",
+      "advanced": "更多颜色"
+    },
+    "header": {
+      "title": "头像与页眉",
+      "avatarShape": "头像形状",
+      "shapeRound": "圆形",
+      "shapeSquare": "方形",
+      "avatarPosition": "头像位置",
+      "positionLeft": "左侧",
+      "positionRight": "右侧",
+      "avatarSize": "头像大小",
+      "contactStyle": "联系方式",
+      "contactIcon": "图标",
+      "contactLabel": "标签"
     },
     "typography": {
       "fontSettings": "字体设置",
@@ -866,10 +931,13 @@
     "layout": {
       "layoutSettings": "布局设置",
       "containerSettings": "容器设置",
+      "pageSize": "纸张规格",
       "containerWidth": "容器宽度",
       "padding": "内边距",
       "gap": "模块间距",
       "borderRadius": "圆角",
+      "sidebarWidth": "侧栏宽度",
+      "columnGap": "栏间距",
       "density": "疏密",
       "densityCompact": "紧凑",
       "densityNormal": "标准",
@@ -1160,10 +1228,18 @@
       "resumeUnpublished": "简历已取消发布",
       "sharingUpdateFailed": "更新分享设置失败",
       "cloudSyncFailed": "云端同步失败。请检查您的网络连接。",
+      "resumeUpToDate": "云端已是最新，无需保存",
+      "syncConflictResolved": "检测到其它设备的修改：已备份为历史版本，当前内容已覆盖云端",
       "duplicatingInCloud": "正在云端复制...",
       "duplicateCloudSuccess": "简历已在云端复制",
       "duplicateCloudError": "在云端复制失败"
+    },
+    "sync": {
+      "conflictBackupChangelog": "冲突备份（其它设备的修改）"
     }
+  },
+  "pdfPreview": {
+    "generateFailed": "PDF 预览生成失败，请稍后重试；导出按钮会显示更具体的错误。"
   },
   "common": {
     "loading": "加载中...",
