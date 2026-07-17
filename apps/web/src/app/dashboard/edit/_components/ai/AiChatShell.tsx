@@ -21,6 +21,7 @@ import InterviewOverlay from './interview/InterviewOverlay';
 import LivingCanvas, { type BatchRequest, type FocusRequest } from './canvas/living/LivingCanvas';
 import { type BatchKind, type TargetedSelectionDiff } from './lib/diffResume';
 import type { MultiPersonaResumeAnalysis } from '@/types/agent/multi-persona';
+import type { FitReport } from '@/types/agent/fit-report';
 import { streamChat, approveTool, endSessionThread } from './lib/services/agentClient';
 import type { AgentSseEvent } from './lib/services/types';
 import { resolveResumePatchBatch } from './lib/resumePatch';
@@ -92,6 +93,7 @@ export default function AiChatShell({
   const livingOpen = aiSession?.livingOpen ?? false;
   const livingSkillId = aiSession?.livingSkillId ?? null;
   const analysis = aiSession?.analysis ?? null;
+  const fitReport = aiSession?.fitReport ?? null;
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [running, setRunning] = useState(false);
   const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
@@ -161,6 +163,13 @@ export default function AiChatShell({
     (next: React.SetStateAction<MultiPersonaResumeAnalysis | null>) => {
       const prev = getCurrentAiSession().analysis;
       patchAiSession(resumeId, { analysis: resolveState(next, prev) });
+    },
+    [getCurrentAiSession, patchAiSession, resumeId]
+  );
+  const setFitReport = useCallback(
+    (next: React.SetStateAction<FitReport | null>) => {
+      const prev = getCurrentAiSession().fitReport;
+      patchAiSession(resumeId, { fitReport: resolveState(next, prev) });
     },
     [getCurrentAiSession, patchAiSession, resumeId]
   );
@@ -582,6 +591,34 @@ export default function AiChatShell({
                 );
               }
             }
+          } else if (ev.type === 'fit_report') {
+            // The evaluate_fit tool finished — surface the resume × JD FitReport on
+            // the MatchView canvas (runs entirely through /api/chat, like analyze).
+            const report = (ev.data ?? (ev.payload as { data?: unknown } | undefined)?.data) as
+              | FitReport
+              | undefined;
+            if (report && typeof report === 'object') {
+              setFitReport(report);
+              setLivingOpen(false);
+              setCanvas({ open: true, skillId: 'analyze', view: 'match', status: 'ready' });
+              // The report landed → mark every checklist step done (defensive: the
+              // assemble step's plan_update may race the artifact event).
+              if (planCardRef.current) {
+                const planId = planCardRef.current;
+                planCardRef.current = null;
+                setMessages((prev) =>
+                  prev.map((m) =>
+                    m.id === planId
+                      ? {
+                          ...m,
+                          status: 'done',
+                          todos: m.todos?.map((t) => ({ ...t, status: 'completed' })),
+                        }
+                      : m
+                  )
+                );
+              }
+            }
           } else if (ev.type === 'error') {
             throw new Error(ev.error || '对话出错');
           }
@@ -643,6 +680,7 @@ export default function AiChatShell({
       markReadActivityDone,
       resumeData,
       setAnalysis,
+      setFitReport,
       setApprovalReadState,
       setCanvas,
       setLivingOpen,
@@ -1332,6 +1370,7 @@ export default function AiChatShell({
             resumeData={resumeData}
             templateId={templateId}
             analysis={analysis}
+            fitReport={fitReport}
             onApply={applyChanges}
             onDiscard={() => setCanvas(CLOSED_CANVAS)}
             onExport={() => addAssistant('体检报告已导出为 PDF。')}

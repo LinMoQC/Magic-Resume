@@ -7,6 +7,7 @@ import type {
   SkillId,
 } from '../app/dashboard/edit/_components/ai/types';
 import type { MultiPersonaResumeAnalysis } from '../types/agent/multi-persona';
+import type { FitReport } from '../types/agent/fit-report';
 
 export const AI_SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 export const AI_SESSION_STORAGE_PREFIX = 'ai-session:';
@@ -25,6 +26,7 @@ export interface AiSessionSnapshot {
   livingOpen: boolean;
   livingSkillId: SkillId | null;
   analysis: MultiPersonaResumeAnalysis | null;
+  fitReport: FitReport | null;
   updatedAt: number;
 }
 
@@ -89,6 +91,7 @@ export function createAiSessionStore(
     livingOpen: false,
     livingSkillId: null,
     analysis: null,
+    fitReport: null,
     updatedAt: now(),
   });
 

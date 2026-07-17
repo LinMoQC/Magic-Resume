@@ -20,6 +20,7 @@ export type AgentEventType =
   | 'resume_patch'
   | 'resume_update'
   | 'resume_analysis'
+  | 'fit_report'
   | 'translation_result'
   | 'pdf_result'
   | 'interview_question'

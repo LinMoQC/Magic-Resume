@@ -1264,6 +1264,27 @@
         "good": "Overall competitiveness is good",
         "medium": "Overall competitiveness is moderate",
         "needsWork": "Competitiveness needs improvement"
+      },
+      "match": {
+        "empty": "No fit result yet. Paste a target JD and Polaris will score this resume against the role.",
+        "dims": {
+          "technical": "Technical",
+          "experience": "Experience",
+          "behavioral": "Culture fit",
+          "career": "Career fit"
+        },
+        "band": {
+          "strong": "Strong fit for the role",
+          "good": "Good fit for the role",
+          "moderate": "Moderate fit for the role",
+          "weak": "Weak fit for the role",
+          "poor": "Poor fit for the role"
+        },
+        "locationPass": "Location OK",
+        "locationFail": "Location mismatch",
+        "matched": "Covered keywords",
+        "missing": "Missing keywords",
+        "gaps": "Suggested fixes"
       }
     },
     "chat": {

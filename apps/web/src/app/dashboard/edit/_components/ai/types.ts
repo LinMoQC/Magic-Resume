@@ -3,7 +3,7 @@ import type { WidgetInstance } from './widgets/types';
 
 export type SkillId = 'create' | 'optimize' | 'analyze' | 'translate' | 'interview';
 
-export type CanvasView = 'preview' | 'diff' | 'json' | 'score';
+export type CanvasView = 'preview' | 'diff' | 'json' | 'score' | 'match';
 
 /**
  * Where a skill can act (design §8.1). `whole-resume` is the classic "optimize

@@ -1333,6 +1333,27 @@
         "good": "综合竞争力良好",
         "medium": "综合竞争力中等",
         "needsWork": "竞争力有待提升"
+      },
+      "match": {
+        "empty": "暂无匹配结果。粘贴目标 JD，让 Polaris 评估这份简历与岗位的匹配度。",
+        "dims": {
+          "technical": "技术匹配",
+          "experience": "经验匹配",
+          "behavioral": "行为契合",
+          "career": "职业契合"
+        },
+        "band": {
+          "strong": "与目标岗位强匹配",
+          "good": "与目标岗位较匹配",
+          "moderate": "与目标岗位中等匹配",
+          "weak": "与目标岗位匹配偏弱",
+          "poor": "与目标岗位不匹配"
+        },
+        "locationPass": "地点符合",
+        "locationFail": "地点不符",
+        "matched": "已覆盖关键词",
+        "missing": "缺失关键词",
+        "gaps": "补强建议"
       }
     },
     "chat": {
