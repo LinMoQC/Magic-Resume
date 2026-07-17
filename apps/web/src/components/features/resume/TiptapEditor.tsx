@@ -9,7 +9,7 @@ import { FaBold, FaItalic, FaStrikethrough, FaListUl, FaListOl, FaCode, FaUndo, 
 import Underline from '@tiptap/extension-underline'
 import Link from '@tiptap/extension-link'
 import TextAlign from '@tiptap/extension-text-align'
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // 关键:工具栏按钮按下时阻止默认行为,否则点击按钮会让编辑器失焦、选区丢失,
@@ -81,6 +81,18 @@ interface TiptapEditorProps {
 }
 
 const TiptapEditor = ({ content, onChange, placeholder }: TiptapEditorProps) => {
+  const { t } = useTranslation();
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  // 关键:编辑器常挂在 Radix modal Dialog 里,而 modal 会给 body 打上 pointer-events:none。
+  // tippy 默认(或旧代码显式)把气泡菜单挂到 document.body,就落在这层"死区"里 —— 菜单能
+  // 显示却点不动(表现为"选中文字工具栏触发不了")。改挂到最近的 [role=dialog](即弹窗内容
+  // 层,pointer-events:auto 且不裁剪),按钮恢复可点;非弹窗场景回退到 body。
+  const appendToDialog = useCallback(
+    () => wrapperRef.current?.closest<HTMLElement>('[role="dialog"]') ?? document.body,
+    [],
+  );
+
   const editor = useEditor({
     extensions: [
       Color.configure({ types: [TextStyle.name, ListItem.name] }),
@@ -105,17 +117,36 @@ const TiptapEditor = ({ content, onChange, placeholder }: TiptapEditorProps) => 
 
   const buttonClass = (active: boolean) => `flex h-8 w-8 items-center justify-center rounded-md text-[13px] transition-colors ${active ? 'bg-sky-500/15 text-sky-300' : 'text-neutral-400 hover:bg-white/[0.06] hover:text-neutral-100'}`;
 
+  const setLink = useCallback(() => {
+    if (!editor) return;
+    const previousUrl = editor.getAttributes('link').href;
+    const url = window.prompt(t('tiptap.prompt.url'), previousUrl);
+    if (url === null) return;
+    if (url === '') {
+      editor.chain().focus().extendMarkRange('link').unsetLink().run();
+      return;
+    }
+    editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+  }, [editor, t]);
+
+  // 浮动菜单容器:略高于弹窗底色的深色玻璃面 + 极细边 + 柔和投影,呼应工作台美学(少 border、
+  // sky 点缀由内部按钮的 active 态承担)。取代旧的扁平 bg-neutral-900 方块。
+  const floatMenuClass =
+    'flex items-center gap-0.5 rounded-xl border border-white/[0.08] bg-[#1b1b1e]/95 p-1 text-neutral-200 shadow-[0_10px_34px_-8px_rgba(0,0,0,0.7)] backdrop-blur-xl';
+
   return (
-    <div>
+    <div ref={wrapperRef}>
       <TiptapToolbar editor={editor} />
 
       {editor && <BubbleMenu
-        className="flex items-center gap-0.5 rounded-lg border border-white/10 bg-neutral-900 p-1 text-white shadow-xl shadow-black/50"
+        className={floatMenuClass}
         tippyOptions={{
-          appendTo: () => document.body,
+          appendTo: appendToDialog,
+          duration: 120,
+          maxWidth: 'none',
           popperOptions: {
             strategy: 'fixed',
-            modifiers: [{ name: 'flip' }, { name: 'preventOverflow' }],
+            modifiers: [{ name: 'flip' }, { name: 'preventOverflow', options: { padding: 8 } }],
           },
         }}
         editor={editor}
@@ -123,18 +154,23 @@ const TiptapEditor = ({ content, onChange, placeholder }: TiptapEditorProps) => 
         <div className="flex items-center gap-0.5" onMouseDown={keepSelection}>
           <button onClick={() => editor.chain().focus().toggleBold().run()} className={buttonClass(editor.isActive('bold'))} aria-label="Bold"><FaBold /></button>
           <button onClick={() => editor.chain().focus().toggleItalic().run()} className={buttonClass(editor.isActive('italic'))} aria-label="Italic"><FaItalic /></button>
+          <button onClick={() => editor.chain().focus().toggleUnderline().run()} className={buttonClass(editor.isActive('underline'))} aria-label="Underline"><FaUnderline /></button>
           <button onClick={() => editor.chain().focus().toggleStrike().run()} className={buttonClass(editor.isActive('strike'))} aria-label="Strike"><FaStrikethrough /></button>
+          <div className="mx-0.5 h-5 w-px bg-white/10" aria-hidden />
+          <button onClick={setLink} className={buttonClass(editor.isActive('link'))} aria-label="Link"><FaLink /></button>
         </div>
       </BubbleMenu>}
 
       {editor && <FloatingMenu
-        className="flex items-center gap-0.5 rounded-lg border border-white/10 bg-neutral-900 p-1 text-white shadow-xl shadow-black/50"
+        className={floatMenuClass}
         tippyOptions={{
           placement: 'left',
-          appendTo: () => document.body,
+          appendTo: appendToDialog,
+          duration: 120,
+          maxWidth: 'none',
           popperOptions: {
             strategy: 'fixed',
-            modifiers: [{ name: 'flip' }, { name: 'preventOverflow' }],
+            modifiers: [{ name: 'flip' }, { name: 'preventOverflow', options: { padding: 8 } }],
           },
         }}
         editor={editor}

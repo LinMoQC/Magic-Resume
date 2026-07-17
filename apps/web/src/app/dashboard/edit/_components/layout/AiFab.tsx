@@ -34,61 +34,71 @@ export function AiFab({ onClick, isRunning = false }: AiFabProps) {
   const label = t("tools.polaris");
 
   return (
-    <motion.button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      title={label}
-      aria-busy={isRunning || undefined}
-      data-running={isRunning ? "true" : "false"}
-      whileHover={{ y: -6 }}
-      whileTap={{ y: -2, scale: 0.96 }}
-      transition={{ type: "spring", stiffness: 320, damping: 28, mass: 0.7 }}
-      className={cn(
-        "polaris-fab group absolute bottom-6 right-6 z-20 rounded-full",
-        "transition-shadow duration-200 ease-out",
-        "hover:shadow-[0_18px_44px_-22px_rgba(120,150,255,0.7)]",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/50",
-      )}
+    // 入场包在外层(比 dock 再晚半拍,轻微缩放淡入,像光球"呼吸"登场);按钮本体只保留
+    // hover/tap 弹簧,二者互不串扰(同元素上 initial/animate 的 transition 会拖慢 hover 回落)。
+    // 定位类挪到 wrapper;按钮改 relative,光晕(inset 定位)与 tooltip 锚点不变。
+    <motion.div
+      className="absolute bottom-6 right-6 z-20"
+      initial={{ opacity: 0, scale: 0.92, y: 6 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1], delay: 0.42 }}
     >
-      <span aria-hidden className="polaris-fab__halo" />
-      <span
-        aria-hidden
-        className="polaris-orb block transition-[filter] duration-200 group-hover:brightness-110"
+      <motion.button
+        type="button"
+        onClick={onClick}
+        aria-label={label}
+        title={label}
+        aria-busy={isRunning || undefined}
+        data-running={isRunning ? "true" : "false"}
+        whileHover={{ y: -6 }}
+        whileTap={{ y: -2, scale: 0.96 }}
+        transition={{ type: "spring", stiffness: 320, damping: 28, mass: 0.7 }}
+        className={cn(
+          "polaris-fab group relative block rounded-full",
+          "transition-shadow duration-200 ease-out",
+          "hover:shadow-[0_18px_44px_-22px_rgba(120,150,255,0.7)]",
+          "focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/50",
+        )}
       >
-        <span className="polaris-orb__light">
-          <span className="polaris-orb__flow" />
-          <span className="polaris-orb__blob polaris-orb__blob--magenta" />
-          <span className="polaris-orb__blob polaris-orb__blob--blue" />
-          <span className="polaris-orb__blob polaris-orb__blob--cyan" />
-          <span className="polaris-orb__blob polaris-orb__blob--violet" />
-          <span className="polaris-orb__blob polaris-orb__blob--teal" />
-          <span className="polaris-orb__core" />
+        <span aria-hidden className="polaris-fab__halo" />
+        <span
+          aria-hidden
+          className="polaris-orb block transition-[filter] duration-200 group-hover:brightness-110"
+        >
+          <span className="polaris-orb__light">
+            <span className="polaris-orb__flow" />
+            <span className="polaris-orb__blob polaris-orb__blob--magenta" />
+            <span className="polaris-orb__blob polaris-orb__blob--blue" />
+            <span className="polaris-orb__blob polaris-orb__blob--cyan" />
+            <span className="polaris-orb__blob polaris-orb__blob--violet" />
+            <span className="polaris-orb__blob polaris-orb__blob--teal" />
+            <span className="polaris-orb__core" />
+          </span>
+          <span className="polaris-orb__rim" />
+          <span className="polaris-orb__glass" />
+          <span className="polaris-orb__stars">
+            {SPARKS.map((s, i) => (
+              <span
+                key={i}
+                className="polaris-orb__spark"
+                style={{
+                  left: s.left,
+                  top: s.top,
+                  width: s.size,
+                  height: s.size,
+                  animationDelay: s.delay,
+                  animationDuration: s.dur,
+                }}
+              >
+                <PolarisGlyph />
+              </span>
+            ))}
+          </span>
         </span>
-        <span className="polaris-orb__rim" />
-        <span className="polaris-orb__glass" />
-        <span className="polaris-orb__stars">
-          {SPARKS.map((s, i) => (
-            <span
-              key={i}
-              className="polaris-orb__spark"
-              style={{
-                left: s.left,
-                top: s.top,
-                width: s.size,
-                height: s.size,
-                animationDelay: s.delay,
-                animationDuration: s.dur,
-              }}
-            >
-              <PolarisGlyph />
-            </span>
-          ))}
+        <span className="pointer-events-none absolute right-full top-1/2 mr-3 -translate-y-1/2 whitespace-nowrap rounded-md border border-neutral-800 bg-neutral-900/90 px-2 py-1 text-xs text-sky-200 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+          {label}
         </span>
-      </span>
-      <span className="pointer-events-none absolute right-full top-1/2 mr-3 -translate-y-1/2 whitespace-nowrap rounded-md border border-neutral-800 bg-neutral-900/90 px-2 py-1 text-xs text-sky-200 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
-        {label}
-      </span>
-    </motion.button>
+      </motion.button>
+    </motion.div>
   );
 }
