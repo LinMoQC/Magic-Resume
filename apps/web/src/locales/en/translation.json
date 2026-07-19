@@ -1018,9 +1018,62 @@
   "sidebar": {
     "resumes": "My Resumes",
     "notifications": "Notifications",
+    "knowledge": "Content Hub",
     "settings": "Settings",
     "open": "Open sidebar",
     "close": "Close sidebar"
+  },
+  "knowledge": {
+    "title": "Content Hub",
+    "back": "Back to dashboard",
+    "tabs": {
+      "timelines": "Recruiting Timelines",
+      "qa": "Interview Q&A"
+    },
+    "common": {
+      "error": "Couldn't load the content — please try again in a moment",
+      "retry": "Retry",
+      "prev": "Previous",
+      "next": "Next",
+      "total": "{{count}} items"
+    },
+    "timelines": {
+      "filters": {
+        "season": "All seasons",
+        "industry": "All industries",
+        "region": "Region",
+        "role": "Role"
+      },
+      "deadline": {
+        "none": "Open-ended",
+        "past": "Closed",
+        "today": "Closes today",
+        "days": "Closes in {{count}} days"
+      },
+      "ongoing": "Ongoing",
+      "empty": {
+        "title": "Nothing here yet",
+        "hint": "Try different filters, or check back in a few days"
+      }
+    },
+    "qa": {
+      "searchPlaceholder": "Search questions, companies or roles…",
+      "filters": {
+        "role": "All roles",
+        "difficulty": "All levels",
+        "company": "Company"
+      },
+      "difficulty": {
+        "easy": "Easy",
+        "medium": "Medium",
+        "hard": "Hard"
+      },
+      "noAnswer": "No reference answer for this one yet",
+      "empty": {
+        "title": "No matching questions",
+        "hint": "Try another keyword or filter"
+      }
+    }
   },
   "importDialog": {
     "title": "Import Resume",

@@ -1018,9 +1018,62 @@
   "sidebar": {
     "resumes": "简历",
     "notifications": "通知中心",
+    "knowledge": "内容中心",
     "settings": "设置",
     "open": "打开侧边栏",
     "close": "关闭侧边栏"
+  },
+  "knowledge": {
+    "title": "内容中心",
+    "back": "返回工作台",
+    "tabs": {
+      "timelines": "秋招时间线",
+      "qa": "面经题库"
+    },
+    "common": {
+      "error": "内容没加载出来，稍等一下再试试",
+      "retry": "重试",
+      "prev": "上一页",
+      "next": "下一页",
+      "total": "共 {{count}} 条"
+    },
+    "timelines": {
+      "filters": {
+        "season": "全部季节",
+        "industry": "全部行业",
+        "region": "地区",
+        "role": "岗位"
+      },
+      "deadline": {
+        "none": "长期有效",
+        "past": "已截止",
+        "today": "今日截止",
+        "days": "{{count}} 天后截止"
+      },
+      "ongoing": "进行中",
+      "empty": {
+        "title": "这里还空着",
+        "hint": "换个筛选条件，或者过几天再来看看"
+      }
+    },
+    "qa": {
+      "searchPlaceholder": "搜题目、公司或岗位…",
+      "filters": {
+        "role": "全部岗位",
+        "difficulty": "全部难度",
+        "company": "公司"
+      },
+      "difficulty": {
+        "easy": "简单",
+        "medium": "中等",
+        "hard": "困难"
+      },
+      "noAnswer": "这题还没有参考答案",
+      "empty": {
+        "title": "没找到相关题目",
+        "hint": "换个关键词或筛选条件试试"
+      }
+    }
   },
   "importDialog": {
     "title": "导入简历",
