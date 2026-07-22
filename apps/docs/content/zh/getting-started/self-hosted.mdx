@@ -3,11 +3,7 @@ title: 自托管
 description: 不需要任何后端、数据库或账号，在自己机器上跑起 Magic Resume。
 ---
 
-import { Callout, Steps } from 'nextra/components'
-
-# 自托管
-
-自托管模式下，Web 应用完全跑在浏览器里。简历数据持久化在名为 `MagicResumeDB` 的 IndexedDB 里。**没有鉴权、没有 Core API、没有 Python agent，也不会发送产品埋点事件** —— 需要后端的 AI 功能在你配置之前是禁用的。
+自托管模式下，Web 应用完全跑在浏览器里。简历数据持久化在名为 `MagicResumeDB` 的 IndexedDB 里。**没有鉴权、没有后端（gateway / platform-api / agent-service），也不会发送产品埋点事件。AI 完全不可用** —— AI Lab 和 AI PDF 导入都会代理到后端、需要已登录用户，这里用不了。
 
 这是改造代码本身时推荐的模式。
 
@@ -17,24 +13,22 @@ import { Callout, Steps } from 'nextra/components'
 - pnpm `10.28.1`（`packageManager` 里钉死的版本）。其他版本能跑，但 lockfile 漂移要你自己负责。
 
 <Steps>
-
-### 克隆仓库
-
+<Step title="克隆仓库">
 ```bash
 git clone https://github.com/LinMoQC/Magic-Resume.git
 cd Magic-Resume
 ```
+</Step>
 
-### 安装依赖
-
+<Step title="安装依赖">
 ```bash
 pnpm install
 ```
 
 必须从 **仓库根目录** 运行 —— pnpm 需要看到 `pnpm-workspace.yaml` 才能解析 `workspace:*` 依赖。
+</Step>
 
-### 配置环境变量
-
+<Step title="配置环境变量">
 ```bash
 cp apps/web/.env.example apps/web/.env.local
 ```
@@ -46,21 +40,21 @@ NEXT_PUBLIC_APP_MODE=self-hosted
 ```
 
 如果 `NEXT_PUBLIC_APP_MODE` 没设置，并且 `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` 也没设置，应用会自动判断为 `self-hosted`。显式设置一下只是更清楚。
+</Step>
 
-### 启动开发服务器
-
+<Step title="启动开发服务器">
 ```bash
 pnpm run dev
 ```
 
-Turbo 会把每个有 `dev` 脚本的 workspace 都拉起来。Web 应用监听 [http://localhost:3000](http://localhost:3000)；文档站点（即本站）在 [http://localhost:3001](http://localhost:3001)。
+Turbo 会把每个有 `dev` 脚本的 workspace 都拉起来，Web 应用监听 [http://localhost:3000](http://localhost:3000)。（本文档是独立的 Mintlify 站点，用 `npx mint dev` 本地预览。）
 
 只跑 Web 应用：
 
 ```bash
 pnpm --filter @magic-resume/web dev
 ```
-
+</Step>
 </Steps>
 
 ## 没有后端时能用什么
@@ -70,19 +64,19 @@ pnpm --filter @magic-resume/web dev
 | 简历编辑器、12 套模板、导出 PDF | ✅ |
 | 本地 IndexedDB 存储 | ✅ |
 | 版本历史（仅本地） | ✅ |
-| 在 Settings 里自带 Key 的 AI | ✅ |
+| AI Lab / AI PDF 导入 | ❌（需要云端模式 + 后端） |
 | Clerk 鉴权、云端同步、分享 | ❌ |
-| 面试 / JD 分析 / 翻译（Python agent） | ❌ 除非你跑 `apps/agent` 或把 `BACKEND_URL` 指向某个地方 |
+| 面试 / JD 分析 / 翻译（agent 后端） | ❌ 除非你把后端跑起来并设 `NEXT_PUBLIC_API_URL` |
 
-<Callout type="info">
-要用"自带 Key"模式，打开 Web 应用的 **设置 → AI**，粘贴一个 OpenAI / Anthropic / Gemini 的 Key。Key 永远不会离开浏览器。
-</Callout>
+<Info>
+纯自托管模式下**没有 AI** —— 每个 AI 功能都会代理到后端、且要求已登录用户。把完整后端跑起来、切到云端模式才能用；那时你可以自带 API Key（只存浏览器本地）代替平台额度。
+</Info>
 
 ## 环境变量速查
 
 | 变量 | 是否必需 | 作用 |
 |---|---|---|
 | `NEXT_PUBLIC_APP_MODE` | 否 | `self-hosted` 或 `cloud`。会根据是否有 Clerk Key 自动判断。 |
-| `BACKEND_URL` | 否 | Python agent 的基础 URL。只在用 AI Lab 时才需要。 |
+| `NEXT_PUBLIC_API_URL` | 否 | 网关源。只在要把 AI Lab 指向一个在跑的后端时才需要。 |
 
 完整的云端模式变量列表见 [云端模式](/zh/getting-started/cloud)。

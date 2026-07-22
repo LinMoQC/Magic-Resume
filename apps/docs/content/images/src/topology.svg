@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="620" viewBox="0 0 1080 620">
+<style>
+text{font-family:'PingFang SC','Helvetica Neue',Arial,sans-serif;fill:#202124}
+.title{font-size:22px;font-weight:700}
+.sub{font-size:12.5px;fill:#5f6368}
+.h{font-size:15px;font-weight:700;fill:#202124}
+.p{font-size:11.5px;fill:#5f6368}
+.lbl{font-size:11px;font-weight:700;fill:#c5221f}
+.note{font-size:12px;fill:#5f6368}
+.edge{fill:none;stroke:#546e7a;stroke-width:2.4}
+.client{fill:#e8f0fe;stroke:#1a73e8;stroke-width:2}
+.neutral{fill:#f1f3f4;stroke:#9aa0a6;stroke-width:2}
+.gw{fill:#fef7e0;stroke:#f9ab00;stroke-width:2}
+.plat{fill:#e6f4ea;stroke:#34a853;stroke-width:2}
+.agent{fill:#f3e8fd;stroke:#a142f4;stroke-width:2}
+.data{fill:#fce8e6;stroke:#ea4335;stroke-width:2}
+</style>
+<defs><marker id="a" markerWidth="11" markerHeight="11" refX="8" refY="4" orient="auto"><path d="M0 0L9 4L0 8Z" fill="#546e7a"/></marker></defs>
+<rect width="1080" height="620" fill="#fff"/>
+<text x="540" y="36" text-anchor="middle" class="title">Magic Resume · system topology</text>
+<text x="540" y="59" text-anchor="middle" class="sub">Two entry points (browser, AI tool) reach one gateway origin, which routes /api/* by path prefix</text>
+
+<!-- clients -->
+<rect x="140" y="86" width="240" height="62" rx="11" class="client"/>
+<text x="260" y="115" text-anchor="middle" class="h">Browser</text>
+<text x="260" y="135" text-anchor="middle" class="p">resume editor · AI Lab · PDF export</text>
+<rect x="700" y="86" width="240" height="62" rx="11" class="client"/>
+<text x="820" y="115" text-anchor="middle" class="h">AI coding tool</text>
+<text x="820" y="135" text-anchor="middle" class="p">Claude Code · Cursor</text>
+
+<!-- this repo -->
+<rect x="140" y="196" width="240" height="62" rx="11" class="neutral"/>
+<text x="260" y="225" text-anchor="middle" class="h">apps/web</text>
+<text x="260" y="245" text-anchor="middle" class="p">Next.js 15 · local-first (IndexedDB)</text>
+<rect x="700" y="196" width="240" height="62" rx="11" class="neutral"/>
+<text x="820" y="225" text-anchor="middle" class="h">@magic-resume/mcp</text>
+<text x="820" y="245" text-anchor="middle" class="p">stdio · Node · on npm</text>
+
+<!-- gateway -->
+<rect x="330" y="306" width="420" height="62" rx="11" class="gw"/>
+<text x="540" y="335" text-anchor="middle" class="h">Gateway — single origin</text>
+<text x="540" y="355" text-anchor="middle" class="p">NEXT_PUBLIC_API_URL · routes /api/* by prefix</text>
+
+<!-- backend -->
+<rect x="250" y="416" width="250" height="62" rx="11" class="plat"/>
+<text x="375" y="445" text-anchor="middle" class="h">platform-api</text>
+<text x="375" y="465" text-anchor="middle" class="p">CRUD · resumes / users / share</text>
+<rect x="580" y="416" width="250" height="62" rx="11" class="agent"/>
+<text x="705" y="445" text-anchor="middle" class="h">agent-service</text>
+<text x="705" y="465" text-anchor="middle" class="p">AI · chat / interview · SSE</text>
+
+<!-- data -->
+<rect x="330" y="528" width="420" height="54" rx="11" class="data"/>
+<text x="540" y="561" text-anchor="middle" class="h">PostgreSQL</text>
+
+<!-- edges -->
+<path class="edge" marker-end="url(#a)" d="M260 148 L260 194"/>
+<text x="272" y="177" class="p">in-page</text>
+<path class="edge" marker-end="url(#a)" d="M820 148 L820 194"/>
+<text x="832" y="177" class="p">stdio (MCP)</text>
+
+<path class="edge" marker-end="url(#a)" d="M260 258 L260 288 Q260 306 300 320 L432 336"/>
+<text x="196" y="292" class="lbl">Clerk JWT</text>
+<path class="edge" marker-end="url(#a)" d="M820 258 L820 288 Q820 306 780 320 L648 336"/>
+<text x="742" y="292" text-anchor="end" class="lbl">PAT · mr_pat_…</text>
+
+<path class="edge" marker-end="url(#a)" d="M470 368 L400 414"/>
+<path class="edge" marker-end="url(#a)" d="M610 368 L680 414"/>
+<path class="edge" marker-end="url(#a)" d="M375 478 L440 526"/>
+
+<!-- agent reads resumes via platform-api -->
+<path class="edge" style="stroke-dasharray:6 4" marker-end="url(#a)" d="M580 452 L505 452"/>
+<text x="542" y="443" text-anchor="middle" class="p">reads</text>
+
+<!-- schema note -->
+<rect x="140" y="196" width="0" height="0"/>
+<text x="540" y="602" text-anchor="middle" class="note">Every resume is one Zod value — <tspan style="font-weight:700;fill:#202124">@magic-resume/resume-schema</tspan>, validated in web, mcp, and backend. AI edits are JSON Patch, never full rewrites.</text>
+</svg>

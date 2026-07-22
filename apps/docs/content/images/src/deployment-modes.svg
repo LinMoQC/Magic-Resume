@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="500" viewBox="0 0 1120 500">
+<style>
+text{font-family:'PingFang SC','Helvetica Neue',Arial,sans-serif;fill:#202124}
+.title{font-size:22px;font-weight:700}
+.sub{font-size:12.5px;fill:#5f6368}
+.ch{font-size:16px;font-weight:700;fill:#fff}
+.h{font-size:14px;font-weight:700;fill:#202124}
+.p{font-size:11px;fill:#5f6368}
+.li{font-size:12.5px;fill:#202124}
+.edge{fill:none;stroke:#546e7a;stroke-width:2.2}
+.client{fill:#e8f0fe;stroke:#1a73e8;stroke-width:2}
+.neutral{fill:#f1f3f4;stroke:#9aa0a6;stroke-width:2}
+.gw{fill:#fef7e0;stroke:#f9ab00;stroke-width:2}
+.data{fill:#fce8e6;stroke:#ea4335;stroke-width:2}
+.plat{fill:#e6f4ea;stroke:#34a853;stroke-width:2}
+</style>
+<defs><marker id="a" markerWidth="11" markerHeight="11" refX="8" refY="4" orient="auto"><path d="M0 0L9 4L0 8Z" fill="#546e7a"/></marker></defs>
+<rect width="1120" height="500" fill="#fff"/>
+<text x="560" y="34" text-anchor="middle" class="title">Two deployment modes</text>
+<text x="560" y="57" text-anchor="middle" class="sub">Self-hosted = editing only. AI, accounts, sync and sharing need cloud mode (backend + sign-in).</text>
+
+<!-- LEFT: self-hosted -->
+<rect x="32" y="80" width="512" height="392" rx="14" fill="#f7f9fc" stroke="#dfe3e8"/>
+<rect x="32" y="80" width="512" height="44" rx="14" fill="#607d8b"/>
+<text x="288" y="108" text-anchor="middle" class="ch">Self-hosted · local mode</text>
+
+<rect x="178" y="146" width="220" height="52" rx="10" class="client"/>
+<text x="288" y="177" text-anchor="middle" class="h">Browser</text>
+<rect x="178" y="222" width="220" height="52" rx="10" class="neutral"/>
+<text x="288" y="253" text-anchor="middle" class="h">apps/web (Next.js)</text>
+<rect x="178" y="298" width="220" height="52" rx="10" class="client"/>
+<text x="288" y="322" text-anchor="middle" class="h">IndexedDB</text>
+<text x="288" y="340" text-anchor="middle" class="p">local, in the browser</text>
+<path class="edge" marker-end="url(#a)" d="M288 198 L288 220"/>
+<path class="edge" marker-end="url(#a)" d="M288 274 L288 296"/>
+
+<text x="72" y="384" class="li">✅  Editor · templates · live preview · PDF export</text>
+<text x="72" y="410" class="li" fill="#c5221f">✕  No AI (AI Lab, AI PDF import)</text>
+<text x="72" y="436" class="li" fill="#c5221f">✕  No account · no cloud sync · no sharing</text>
+
+<!-- RIGHT: cloud -->
+<rect x="576" y="80" width="512" height="392" rx="14" fill="#f4fbf6" stroke="#dfe3e8"/>
+<rect x="576" y="80" width="512" height="44" rx="14" fill="#34a853"/>
+<text x="832" y="108" text-anchor="middle" class="ch">Cloud mode</text>
+
+<rect x="722" y="146" width="220" height="52" rx="10" class="client"/>
+<text x="832" y="170" text-anchor="middle" class="h">Browser</text>
+<text x="832" y="188" text-anchor="middle" class="p">signed in (Clerk)</text>
+<rect x="722" y="222" width="220" height="52" rx="10" class="gw"/>
+<text x="832" y="253" text-anchor="middle" class="h">Gateway (single origin)</text>
+<rect x="722" y="298" width="220" height="52" rx="10" class="plat"/>
+<text x="832" y="322" text-anchor="middle" class="h">platform-api · agent-service</text>
+<text x="832" y="340" text-anchor="middle" class="p">→ PostgreSQL</text>
+<path class="edge" marker-end="url(#a)" d="M832 198 L832 220"/>
+<path class="edge" marker-end="url(#a)" d="M832 274 L832 296"/>
+
+<text x="616" y="384" class="li" fill="#1e7e34">✓  Everything in local mode, plus…</text>
+<text x="616" y="410" class="li" fill="#1e7e34">✓  AI Lab · AI PDF import (credits or your own key)</text>
+<text x="616" y="436" class="li" fill="#1e7e34">✓  Accounts · cloud sync · share links &amp; comments</text>
+</svg>

@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="200" viewBox="0 0 1180 200">
+<style>
+text{font-family:'PingFang SC','Helvetica Neue',Arial,sans-serif;fill:#202124}
+.title{font-size:21px;font-weight:700}
+.sub{font-size:12.5px;fill:#5f6368}
+.h{font-size:15px;font-weight:700;fill:#0b3d91}
+.p{font-size:11px;fill:#5f6368}
+.n{font-size:13px;font-weight:700;fill:#fff}
+.step{fill:#e8f0fe;stroke:#1a73e8;stroke-width:2}
+</style>
+<rect width="1180" height="200" fill="#fff"/>
+<text x="590" y="36" text-anchor="middle" class="title">你的第一份简历：从打开到投递</text>
+<text x="590" y="60" text-anchor="middle" class="sub">整条主线都不需要技术背景 · 免注册就能走完前几步</text>
+
+<!-- steps -->
+<g>
+<rect x="24"  y="86" width="175" height="92" rx="12" class="step"/>
+<circle cx="46" cy="108" r="15" fill="#1a73e8"/><text x="46" y="113" text-anchor="middle" class="n">1</text>
+<text x="111" y="132" text-anchor="middle" class="h">打开应用</text>
+<text x="111" y="156" text-anchor="middle" class="p">免注册直接用</text>
+
+<rect x="215" y="86" width="175" height="92" rx="12" class="step"/>
+<circle cx="237" cy="108" r="15" fill="#1a73e8"/><text x="237" y="113" text-anchor="middle" class="n">2</text>
+<text x="302" y="132" text-anchor="middle" class="h">新建 / 导入</text>
+<text x="302" y="156" text-anchor="middle" class="p">从零 或 导 PDF/JSON</text>
+
+<rect x="406" y="86" width="175" height="92" rx="12" class="step"/>
+<circle cx="428" cy="108" r="15" fill="#1a73e8"/><text x="428" y="113" text-anchor="middle" class="n">3</text>
+<text x="493" y="132" text-anchor="middle" class="h">编辑 + 模板</text>
+<text x="493" y="156" text-anchor="middle" class="p">填内容 · 换外观</text>
+
+<rect x="597" y="86" width="175" height="92" rx="12" class="step"/>
+<circle cx="619" cy="108" r="15" fill="#1a73e8"/><text x="619" y="113" text-anchor="middle" class="n">4</text>
+<text x="684" y="132" text-anchor="middle" class="h">AI Lab</text>
+<text x="684" y="156" text-anchor="middle" class="p">Polaris 陪你改</text>
+
+<rect x="788" y="86" width="175" height="92" rx="12" class="step"/>
+<circle cx="810" cy="108" r="15" fill="#1a73e8"/><text x="810" y="113" text-anchor="middle" class="n">5</text>
+<text x="875" y="132" text-anchor="middle" class="h">分享 + 批注</text>
+<text x="875" y="156" text-anchor="middle" class="p">发链接 · 收评论</text>
+
+<rect x="979" y="86" width="175" height="92" rx="12" class="step"/>
+<circle cx="1001" cy="108" r="15" fill="#1a73e8"/><text x="1001" y="113" text-anchor="middle" class="n">6</text>
+<text x="1066" y="132" text-anchor="middle" class="h">导出 PDF</text>
+<text x="1066" y="156" text-anchor="middle" class="p">本地生成 · 投递</text>
+</g>
+
+<!-- chevrons -->
+<g fill="#1a73e8">
+<path d="M203 126 L211 132 L203 138 Z"/>
+<path d="M394 126 L402 132 L394 138 Z"/>
+<path d="M585 126 L593 132 L585 138 Z"/>
+<path d="M776 126 L784 132 L776 138 Z"/>
+<path d="M967 126 L975 132 L967 138 Z"/>
+</g>
+</svg>

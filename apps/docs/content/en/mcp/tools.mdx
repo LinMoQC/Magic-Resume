@@ -3,10 +3,6 @@ title: Tool reference
 description: Every MCP tool exposed by @magic-resume/mcp, what it does, and when to use it.
 ---
 
-import { Callout } from 'nextra/components'
-
-# Tool reference
-
 All resume mutations are JSON Patch (RFC 6902) — surgical edits, never full rewrites. AI tools should typically `get_resume_schema` once per session, then `preview_resume_patch` before each `update_resume_content` to catch validation errors before they cost a retry.
 
 ## Read
@@ -63,9 +59,9 @@ update_resume_content({ resumeId, patch }) → Resume
 
 Applies the patch, validates it against the schema, and persists to the Core API. The new resume is returned. Failures throw with a structured error.
 
-<Callout type="warning">
+<Warning>
 This is the only mutating tool. If a model asks to "rewrite" or "replace" a resume, that's still a patch — typically a `replace` op on the section root. There is no `set_resume_content` endpoint.
-</Callout>
+</Warning>
 
 ## Patch shape
 

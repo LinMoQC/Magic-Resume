@@ -1,0 +1,57 @@
+---
+title: Create / import a resume
+description: Start one from scratch, or import an existing PDF or JSON resume (PDFs are parsed automatically with AI).
+---
+
+On the **dashboard** (**Resumes** in the left sidebar) there are two cards: **Create a new resume** and **Import an existing resume**.
+
+## Option 1: Start from scratch
+
+<Steps>
+<Step title="Click “Create a new resume”">
+Click the card to open the **Create New Resume** dialog.
+</Step>
+<Step title="Give it a name">
+Type a name in **Resume Name** and click **Create**. You'll go straight into the editor and can start filling it in.
+</Step>
+</Steps>
+
+## Option 2: Import an existing resume
+
+Already have a resume? Import it instead of retyping.
+
+<Steps>
+<Step title="Click “Import an existing resume”">
+The **Import Resume** dialog opens. Two file types are supported: **JSON** and **PDF**.
+</Step>
+<Step title="Pick the file type, drop the file">
+First choose JSON or PDF under **File type**, then **drag the file into the dashed box** (or click to select).
+</Step>
+<Step title="Wait for the import">
+- **JSON**: instant — it creates a new resume directly.
+- **PDF**: parsed section by section with AI (Basics, Experience, Education, Projects, Skills…), which takes a few to a dozen seconds.
+</Step>
+</Steps>
+
+<Warning>
+**Before importing a PDF, sign in and configure an AI model.** PDF parsing runs on the backend (an LLM), so it needs a **signed-in account (cloud mode)** plus an AI model in **Settings → Model Configuration** (API Key, Base URL, Model, Max Tokens). Otherwise you'll be prompted.
+
+JSON import needs **neither** sign-in nor AI configuration.
+</Warning>
+
+<Note>
+**Where does JSON come from?** Every resume in Magic Resume can be exported as JSON (the **JSON** panel in the editor → Download). For backup, migration, or moving content between two resumes, JSON is the safest route.
+</Note>
+
+## After importing
+
+You land in the editor and can edit right away. Next you might:
+
+<CardGroup cols={2}>
+  <Card title="Sign in for AI" icon="key" href="/en/guide/account">
+    AI (writing, PDF parsing) runs on the backend and needs sign-in. Once signed in, use platform credits or your own API key (stored only in your browser).
+  </Card>
+  <Card title="Back to quickstart" icon="rocket" href="/en/guide/quickstart">
+    The full flow for choosing a template and exporting a PDF.
+  </Card>
+</CardGroup>

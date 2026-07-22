@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1160" height="270" viewBox="0 0 1160 270">
+<style>
+text{font-family:'PingFang SC','Helvetica Neue',Arial,sans-serif;fill:#202124}
+.title{font-size:21px;font-weight:700}
+.sub{font-size:12.5px;fill:#5f6368}
+.h{font-size:14.5px;font-weight:700;fill:#202124}
+.p{font-size:11px;fill:#5f6368}
+.edge{fill:none;stroke:#546e7a;stroke-width:2.2}
+.loop{fill:none;stroke:#a142f4;stroke-width:2;stroke-dasharray:6 4}
+.client{fill:#e8f0fe;stroke:#1a73e8;stroke-width:2}
+.agent{fill:#f3e8fd;stroke:#a142f4;stroke-width:2}
+.plat{fill:#e6f4ea;stroke:#34a853;stroke-width:2}
+</style>
+<defs>
+<marker id="a" markerWidth="11" markerHeight="11" refX="8" refY="4" orient="auto"><path d="M0 0L9 4L0 8Z" fill="#546e7a"/></marker>
+<marker id="pv" markerWidth="11" markerHeight="11" refX="8" refY="4" orient="auto"><path d="M0 0L9 4L0 8Z" fill="#a142f4"/></marker>
+</defs>
+<rect width="1160" height="270" fill="#fff"/>
+<text x="580" y="34" text-anchor="middle" class="title">AI Lab: editing by conversation</text>
+<text x="580" y="57" text-anchor="middle" class="sub">Polaris proposes, you decide — each change is apply-or-reject, on the same resume (JSON Patch, never a full rewrite)</text>
+
+<rect x="24"  y="86" width="200" height="92" rx="12" class="client"/>
+<text x="124" y="126" text-anchor="middle" class="h">You: say your goal</text>
+<text x="124" y="150" text-anchor="middle" class="p">"tailor to this job"</text>
+
+<rect x="252" y="86" width="200" height="92" rx="12" class="agent"/>
+<text x="352" y="126" text-anchor="middle" class="h">Polaris picks a skill</text>
+<text x="352" y="150" text-anchor="middle" class="p">reads your resume</text>
+
+<rect x="480" y="86" width="200" height="92" rx="12" class="agent"/>
+<text x="580" y="126" text-anchor="middle" class="h">Proposes changes</text>
+<text x="580" y="150" text-anchor="middle" class="p">JSON Patch · with reasons</text>
+
+<rect x="708" y="86" width="200" height="92" rx="12" class="client"/>
+<text x="808" y="126" text-anchor="middle" class="h">You decide</text>
+<text x="808" y="150" text-anchor="middle" class="p">Apply ✓ or reject ✗</text>
+
+<rect x="936" y="86" width="200" height="92" rx="12" class="plat"/>
+<text x="1036" y="126" text-anchor="middle" class="h">Resume updates</text>
+<text x="1036" y="150" text-anchor="middle" class="p">only applied changes</text>
+
+<path class="edge" marker-end="url(#a)" d="M224 132 L250 132"/>
+<path class="edge" marker-end="url(#a)" d="M452 132 L478 132"/>
+<path class="edge" marker-end="url(#a)" d="M680 132 L706 132"/>
+<path class="edge" marker-end="url(#a)" d="M908 132 L934 132"/>
+
+<path class="loop" marker-end="url(#pv)" d="M808 178 L808 228 Q808 240 796 240 L136 240 Q124 240 124 228 L124 180"/>
+<text x="466" y="234" text-anchor="middle" class="p" fill="#a142f4">not happy? keep chatting and it revises</text>
+</svg>

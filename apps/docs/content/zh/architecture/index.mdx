@@ -3,10 +3,6 @@ title: 架构总览
 description: Magic Resume 代码库的高层地图 —— workspace、数据流，以及"当我要改 X 时该去哪儿"。
 ---
 
-import { Cards } from 'nextra/components'
-
-# 架构总览
-
 Magic Resume 围绕四个反复出现的核心思想构建：
 
 1. **简历是一个带类型的值。** 一份 Zod Schema（在 `@magic-resume/resume-schema` 里）定义了简历的形状。Web 应用、MCP 服务器、AI agent 全都读写这个统一形状。
@@ -36,11 +32,11 @@ Magic Resume 围绕四个反复出现的核心思想构建：
 
 ## 该去哪里看
 
-<Cards>
-  <Cards.Card title="单仓结构" href="/zh/architecture/monorepo" arrow />
-  <Cards.Card title="部署模式" href="/zh/architecture/deployment-modes" arrow />
-  <Cards.Card title="状态管理" href="/zh/architecture/state-management" arrow />
-  <Cards.Card title="HTTP 客户端" href="/zh/architecture/http-clients" arrow />
-  <Cards.Card title="简历 Schema" href="/zh/architecture/resume-schema" arrow />
-  <Cards.Card title="模板系统" href="/zh/architecture/templates" arrow />
-</Cards>
+<CardGroup>
+  <Card title="单仓结构" href="/zh/architecture/monorepo" />
+  <Card title="部署模式" href="/zh/architecture/deployment-modes" />
+  <Card title="状态管理" href="/zh/architecture/state-management" />
+  <Card title="HTTP 客户端" href="/zh/architecture/http-clients" />
+  <Card title="简历 Schema" href="/zh/architecture/resume-schema" />
+  <Card title="模板系统" href="/zh/architecture/templates" />
+</CardGroup>

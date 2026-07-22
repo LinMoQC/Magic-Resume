@@ -1,0 +1,57 @@
+---
+title: 新建 / 导入简历
+description: 从零新建一份，或把你已有的 PDF、JSON 简历导进来（PDF 会用 AI 自动解析）。
+---
+
+在 **工作台**（左侧栏 **简历**）里，有两张卡片：**创建新简历** 和 **导入现有简历**。
+
+## 方式一：从零新建
+
+<Steps>
+<Step title="点「创建新简历」">
+点这张卡片，弹出 **新建简历** 对话框。
+</Step>
+<Step title="起个名字">
+在 **简历名称** 里输入名字，点 **创建**。随后自动进入编辑器，你就能开始填内容了。
+</Step>
+</Steps>
+
+## 方式二：导入已有简历
+
+已经有简历了？直接导进来，省得重打。
+
+<Steps>
+<Step title="点「导入现有简历」">
+弹出 **导入简历** 对话框。支持两种文件：**JSON** 和 **PDF**。
+</Step>
+<Step title="选文件类型，拖入文件">
+先在 **类型** 里选 JSON 或 PDF，然后把文件**拖到虚线框里**，或点框选择文件。
+</Step>
+<Step title="等它导入">
+- **JSON**：秒进，直接生成一份新简历。
+- **PDF**：会用 AI 逐段解析（个人信息、工作经历、教育、项目、技能……），需要几秒到十几秒。
+</Step>
+</Steps>
+
+<Warning>
+**导入 PDF 前，要先登录并配好 AI 模型。** PDF 解析在后端跑（靠大模型），所以需要**登录（云端模式）** + 在 **设置 → 模型配置** 里填好 **API Key、Base URL、模型、最大令牌数**。没弄会提示你。
+
+JSON 导入**既不用登录也不用配 AI**。
+</Warning>
+
+<Note>
+**JSON 从哪来？** Magic Resume 里的每份简历都能导出成 JSON（编辑器里的 **JSON** 面板 → 下载）。想备份、迁移、或在两份之间搬内容，用 JSON 最稳。
+</Note>
+
+## 导进来之后
+
+进入编辑器就能改了。接着可以：
+
+<CardGroup cols={2}>
+  <Card title="登录后用 AI" icon="key" href="/zh/guide/account">
+    AI（写作、PDF 解析）在后端跑、需要登录。登录后用平台额度或自带 API Key（只存你本地浏览器）。
+  </Card>
+  <Card title="回到快速上手" icon="rocket" href="/zh/guide/quickstart">
+    选模板、导出 PDF 的完整流程。
+  </Card>
+</CardGroup>

@@ -3,11 +3,7 @@ title: Self-Hosted
 description: Run Magic Resume on your own machine with no backend, no database, and no account.
 ---
 
-import { Callout, Steps, FileTree } from 'nextra/components'
-
-# Self-Hosted
-
-In self-hosted mode the web app runs entirely in the browser. Resume data is persisted in IndexedDB under the database name `MagicResumeDB`. There is **no auth, no Core API, no Python agent, and no product analytics delivery** — AI features that need a backend are simply disabled until you configure one.
+In self-hosted mode the web app runs entirely in the browser. Resume data is persisted in IndexedDB under the database name `MagicResumeDB`. There is **no auth, no backend (gateway / platform-api / agent-service), and no product analytics delivery**. **AI is off entirely** — AI Lab and AI PDF import are proxied to the backend and need a signed-in user, so they don't work here.
 
 This is the recommended mode for hacking on the codebase.
 
@@ -17,24 +13,22 @@ This is the recommended mode for hacking on the codebase.
 - pnpm `10.28.1` (the version in `packageManager`). Other versions work but lockfile drift is on you.
 
 <Steps>
-
-### Clone the repository
-
+<Step title="Clone the repository">
 ```bash
 git clone https://github.com/LinMoQC/Magic-Resume.git
 cd Magic-Resume
 ```
+</Step>
 
-### Install dependencies
-
+<Step title="Install dependencies">
 ```bash
 pnpm install
 ```
 
 Run this from the **repo root** — pnpm needs to see `pnpm-workspace.yaml` to resolve `workspace:*` deps.
+</Step>
 
-### Configure environment variables
-
+<Step title="Configure environment variables">
 ```bash
 cp apps/web/.env.example apps/web/.env.local
 ```
@@ -46,21 +40,21 @@ NEXT_PUBLIC_APP_MODE=self-hosted
 ```
 
 If `NEXT_PUBLIC_APP_MODE` is unset and `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` is also unset, the app auto-detects `self-hosted`. Setting it explicitly is just clearer.
+</Step>
 
-### Start the dev server
-
+<Step title="Start the dev server">
 ```bash
 pnpm run dev
 ```
 
-Turbo will spin up every workspace that has a `dev` script. The web app listens on [http://localhost:3000](http://localhost:3000); the docs site (this one) is on [http://localhost:3001](http://localhost:3001).
+Turbo spins up every workspace that has a `dev` script; the web app listens on [http://localhost:3000](http://localhost:3000). (These docs are a separate Mintlify site — preview them with `npx mint dev`.)
 
 To run only the web app:
 
 ```bash
 pnpm --filter @magic-resume/web dev
 ```
-
+</Step>
 </Steps>
 
 ## What works without a backend
@@ -70,19 +64,19 @@ pnpm --filter @magic-resume/web dev
 | Resume editor, all 12 templates, export PDF | ✅ |
 | Local IndexedDB storage | ✅ |
 | Version history (local only) | ✅ |
-| Bring-your-own-key AI in Settings | ✅ |
+| AI Lab / AI PDF import | ❌ (needs cloud mode + backend) |
 | Clerk auth, cloud sync, sharing | ❌ |
-| Interview / JD analyze / translate (Python agent) | ❌ unless you run `apps/agent` or point `BACKEND_URL` somewhere |
+| Interview / JD analyze / translate (agent backend) | ❌ unless you run the backend and set `NEXT_PUBLIC_API_URL` |
 
-<Callout type="info">
-For the bring-your-own-key flow, open **Settings → AI** in the web app and paste an OpenAI / Anthropic / Gemini key. The key never leaves the browser.
-</Callout>
+<Info>
+There is **no AI** in pure self-hosted mode — every AI feature is proxied to the backend and requires a signed-in user. Run the full backend and switch to cloud mode to enable it; there you can bring your own API key (stored only in the browser) instead of platform credits.
+</Info>
 
 ## Environment reference
 
 | Variable | Required | Purpose |
 |---|---|---|
 | `NEXT_PUBLIC_APP_MODE` | No | `self-hosted` or `cloud`. Auto-detected from the presence of a Clerk key. |
-| `BACKEND_URL` | No | Python agent base URL. Only needed for AI Lab features. |
+| `NEXT_PUBLIC_API_URL` | No | The gateway origin. Only needed to point AI Lab at a running backend. |
 
-See [Cloud Mode](/getting-started/cloud) for the full cloud-mode env list.
+See [Cloud Mode](/en/getting-started/cloud) for the full cloud-mode env list.

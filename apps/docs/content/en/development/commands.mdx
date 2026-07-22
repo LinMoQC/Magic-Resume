@@ -3,8 +3,6 @@ title: Commands
 description: Every pnpm and turbo command worth remembering.
 ---
 
-# Commands
-
 A reference of every command worth remembering. All paths are relative to the repo root.
 
 ## Whole-repo (Turbo)
@@ -26,8 +24,7 @@ pnpm --filter @magic-resume/web build
 pnpm --filter @magic-resume/web lint
 pnpm --filter @magic-resume/web i18n:check
 
-pnpm --filter @magic-resume/docs dev            # this site, port 3001
-pnpm --filter @magic-resume/docs build
+cd apps/docs/content && npx mint dev            # this docs site (Mintlify local preview)
 
 pnpm --filter @magic-resume/resume-schema build
 pnpm --filter @magic-resume/resume-schema test  # node --test

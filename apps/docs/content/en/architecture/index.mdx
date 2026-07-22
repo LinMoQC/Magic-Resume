@@ -3,10 +3,6 @@ title: Architecture overview
 description: A high-level map of the Magic Resume codebase — workspaces, data flow, and where to look when you touch X.
 ---
 
-import { Cards } from 'nextra/components'
-
-# Architecture overview
-
 Magic Resume is built around four ideas that show up everywhere in the code:
 
 1. **The resume is a typed value.** A single Zod schema in `@magic-resume/resume-schema` describes what a resume is. The web app, the MCP server, and the AI agents all read and write that same shape.
@@ -36,11 +32,11 @@ Magic Resume is built around four ideas that show up everywhere in the code:
 
 ## Where to look
 
-<Cards>
-  <Cards.Card title="Monorepo layout" href="/architecture/monorepo" arrow />
-  <Cards.Card title="Deployment modes" href="/architecture/deployment-modes" arrow />
-  <Cards.Card title="State management" href="/architecture/state-management" arrow />
-  <Cards.Card title="HTTP clients" href="/architecture/http-clients" arrow />
-  <Cards.Card title="Resume schema" href="/architecture/resume-schema" arrow />
-  <Cards.Card title="Template system" href="/architecture/templates" arrow />
-</Cards>
+<CardGroup>
+  <Card title="Monorepo layout" href="/en/architecture/monorepo" />
+  <Card title="Deployment modes" href="/en/architecture/deployment-modes" />
+  <Card title="State management" href="/en/architecture/state-management" />
+  <Card title="HTTP clients" href="/en/architecture/http-clients" />
+  <Card title="Resume schema" href="/en/architecture/resume-schema" />
+  <Card title="Template system" href="/en/architecture/templates" />
+</CardGroup>

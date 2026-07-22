@@ -3,10 +3,6 @@ title: 本地开发
 description: Magic Resume monorepo 的日常开发流程。
 ---
 
-import { Callout } from 'nextra/components'
-
-# 本地开发
-
 仓库已经拉好、`pnpm install` 跑完之后的日常工作流。还没装好的话，从 [自托管](/zh/getting-started/self-hosted) 开始。
 
 ## 仓库一瞥
@@ -15,7 +11,7 @@ import { Callout } from 'nextra/components'
 Magic-Resume/
 ├── apps/
 │   ├── web/         # @magic-resume/web   —— Next.js 15 前端
-│   └── docs/        # @magic-resume/docs  —— Nextra 文档站点（本站）
+│   └── docs/        # Mintlify 文档站点 —— 仅 content/，无需构建
 ├── packages/
 │   ├── mcp/             # @magic-resume/mcp
 │   ├── resume-schema/   # @magic-resume/resume-schema
@@ -45,16 +41,16 @@ Magic-Resume/
 | Workspace | `dev` 做什么 |
 |---|---|
 | `apps/web` | 在 `:3000` 跑 `next dev` |
-| `apps/docs` | 在 `:3001` 跑 `next dev` |
+| `apps/docs/content` | Mintlify —— 用 `npx mint dev` 预览（不在 `turbo dev` 内） |
 | `packages/resume-schema` | `tsc --watch` |
 | `packages/resume-templates` | `tsc --watch` |
 | `packages/mcp` | `tsc --watch` |
 
 所以改 `packages/resume-schema/src/index.ts` 会触发一次重建，Web 应用通过 workspace link 自动拿到。
 
-<Callout type="info">
+<Info>
 Web 应用支持 Turbopack：`pnpm --filter @magic-resume/web dev:turbo`。更快，但偶尔比 Next.js minor 版本落后一拍 —— 撞上 Turbopack 特有的 bug 时回退到 `dev`。
-</Callout>
+</Info>
 
 ## 提交前过 lint 和测试
 
