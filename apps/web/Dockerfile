@@ -6,7 +6,6 @@ RUN corepack enable
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json .npmrc ./
 COPY patches ./patches
-COPY apps/docs/package.json apps/docs/package.json
 COPY apps/web/package.json apps/web/package.json
 COPY packages/env/package.json packages/env/package.json
 COPY packages/mcp/package.json packages/mcp/package.json
