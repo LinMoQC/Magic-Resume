@@ -1,11 +1,35 @@
 /**
  * The single API origin — the whole frontend talks to ONE configured address.
- * ONE variable only (`NEXT_PUBLIC_API_URL`, resolved identically in browser +
- * server); no legacy per-service fallback.
+ * Resolved at RUNTIME so one build can target any backend:
+ *   - browser → `window.__ENV.apiOrigin`, injected by CommercialRuntimeProvider
+ *   - server  → `process.env.APP_API_ORIGIN` (container env, read per request)
+ *   - fallback → build-time `NEXT_PUBLIC_API_URL` / dev default
+ * The runtime var is deliberately WITHOUT the `NEXT_PUBLIC_` prefix: Next inlines
+ * `NEXT_PUBLIC_*` at build time into BOTH client and server bundles, which would
+ * freeze the address into the image. A prefix-less var is read from the container
+ * env at runtime (server), then shipped to the browser via `window.__ENV`.
  * Lives in this dep-free module so both client and server can import it without
  * pulling axios in via httpClient.
  */
-export const API_ORIGIN = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3110';
+type CommercialRuntime = { apiOrigin?: string };
+declare global {
+  interface Window {
+    __ENV?: CommercialRuntime;
+  }
+}
+
+function resolveApiOrigin(): string {
+  if (typeof window !== 'undefined') {
+    return window.__ENV?.apiOrigin || 'http://localhost:3110';
+  }
+  return (
+    process.env.APP_API_ORIGIN ||
+    process.env.NEXT_PUBLIC_API_URL ||
+    'http://localhost:3110'
+  );
+}
+
+export const API_ORIGIN = resolveApiOrigin();
 
 /**
  * Product API routes.
