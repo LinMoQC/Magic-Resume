@@ -1,0 +1,88 @@
+---
+title: 简介
+description: Magic Resume 是开源、AI 原生的简历平台——Turborepo 前端 + NestJS 后端（前面挡着单一网关）。这里是贡献者 / 集成者手册。
+---
+
+**Magic Resume** 是一个开源、AI 原生的简历平台，围绕三个理念：
+
+- **默认本地优先** —— 所有简历数据存在 IndexedDB。跑起来不需要账户或后端，云同步是可选项。
+- **Schema 优先的模板** —— 每份简历都是一个带类型的 Zod 值。模板从共享 schema 渲染，AI 工具通过 JSON Patch 对着 schema 改（不靠猜）。
+- **AI 工具是一等公民** —— 原生 MCP 服务器（`@magic-resume/mcp`）让 Claude Code、Cursor、Windsurf 通过和网页版同一套数据层读改你的简历。
+
+本站是贡献者与集成者手册。想用托管版，去 [magic-resume.cn](https://magic-resume.cn)；想**跑它、改它、把 AI 工具接进去**，你来对地方了。
+
+## 系统架构
+
+产品横跨**两个仓库**：本仓（前端、MCP、共享 schema）和 **Magic-Resume-Core**（后端）。前端只跟**一个网关源**通信，网关按路径前缀把 `/api/*` 转发到后端各服务。
+
+![Magic Resume 系统拓扑](/images/topology.png)
+
+### 1. `Magic-Resume`（本仓）
+
+[github.com/LinMoQC/Magic-Resume](https://github.com/LinMoQC/Magic-Resume) —— pnpm + Turborepo 单仓：
+
+| 工作区 | 职责 |
+|---|---|
+| `apps/web` | Next.js 15 前端 —— 编辑器、模板预览、AI Lab UI、导出 PDF |
+| `apps/docs/content` | 你正在看的文档（Mintlify） |
+| `packages/mcp` | 发到 npm 的 `@magic-resume/mcp` —— stdio MCP 服务器 + CLI |
+| `packages/resume-schema` | Zod schema、类型、样例数据 —— 跨仓共享的简历真源 |
+| `packages/resume-templates` | 模板 DSL、渲染器、注册表 |
+| `packages/env` / `packages/utils` / `packages/tsconfig` | 共享工具与配置 |
+
+**职责：** 所有面向用户的 UI、本地编辑、IndexedDB 持久化、MCP 工具。前端自己也带一批 `app/api/*` 的 Next.js 路由处理器（如 `chat-agent`、`pdf/parse`），它们校验用户身份、把 AI 请求代理到后端。
+
+### 2. `Magic-Resume-Core`（后端，独立仓库）
+
+一个 NestJS pnpm 工作区单仓，按运行画像拆分，前面挡着一个网关：
+
+- **`gateway`** —— 唯一公网入口。边缘鉴权 + 可信身份注入、按 IP/用户限流、把 `/api/*` 按前缀流式反代路由。无数据库。
+- **`platform-api`** —— CRUD：简历、用户、分享/协作、通知、JSON Patch 应用、Zod 校验。持有 **PostgreSQL**。
+- **`agent-service`** —— AI 后端：DeepAgents 驱动的对话 / 工作流 / 面试（LangGraph），走 **SSE** 流式；PDF 解析；翻译。
+
+**为什么分开：** 浏览器端的 React 树和服务端的数据库是两码事。把后端拆出来，MCP 服务器（以及未来的第三方客户端——移动端、CLI）就能共享一个后端，不用拖着前端走。
+
+### 契约
+
+| 从 → 到 | 协议 | 鉴权 |
+|---|---|---|
+| 浏览器 → 网关 | HTTP (Axios) + SSE | Clerk JWT（拦截器附加） |
+| `@magic-resume/mcp` → platform-api | HTTP | PAT（`~/.magic-resume/mcp.json`） |
+| 网关 → platform-api / agent-service | HTTP（按路径前缀路由） | 来自边缘的可信身份 |
+| agent-service → LLM 提供商 | HTTP | 用户自带或平台托管的 Key |
+
+Schema 一致性靠 `@magic-resume/resume-schema` —— 发到 npm、被后端作为依赖消费。**定义一次，处处校验。**
+
+## 部署模式
+
+- **自托管：** 只需跑 `apps/web`。数据留在 IndexedDB —— 只能编辑和导出简历。**没有账户、没有后端、没有 AI**（AI 需要后端 / 云端模式）。见 [自托管](/zh/getting-started/self-hosted)。
+- **云端（magic-resume.cn）：** 两个仓库分开部署 —— Web 在 Vercel，Core 后端在容器平台。前端把 `NEXT_PUBLIC_API_URL` 指向网关。见 [云端模式](/zh/getting-started/cloud)。
+
+## 技术栈
+
+| 层 | 选型 | 备注 |
+|---|---|---|
+| 单仓 | **pnpm** + **Turborepo** | `pnpm@10.28.1` |
+| Web 应用 | **Next.js 15**（App Router）+ React 19 | `apps/web` |
+| 状态 | **Zustand** + Immer | 通过 `idb-keyval` 持久化到 IndexedDB |
+| 鉴权（云端） | **Clerk** | 仅在 `NEXT_PUBLIC_APP_MODE=cloud` 时加载 |
+| Schema | **Zod 4** | 真源在 `@magic-resume/resume-schema` |
+| 编辑器 | **Tiptap** | 简历字段的富文本 |
+| 模板 | 自定义 DSL → React 渲染器 | `@magic-resume/resume-templates` |
+| 后端 | **NestJS** + **PostgreSQL** | gateway / platform-api / agent-service（Magic-Resume-Core） |
+| Agent | **DeepAgents** + **LangGraph** | `agent-service`（在 Core 里），SSE 流式 |
+| MCP 服务器 | **`@modelcontextprotocol/sdk`** + `fast-json-patch` | `@magic-resume/mcp`（stdio，Node ESM） |
+| 文档 | **Mintlify** | `apps/docs/content`（即本站） |
+
+## 接下来读什么
+
+<CardGroup>
+  <Card title="快速开始" href="/zh/getting-started" />
+  <Card title="架构总览" href="/zh/architecture" />
+  <Card title="MCP 服务器" href="/zh/mcp" />
+  <Card title="本地开发" href="/zh/development" />
+</CardGroup>
+
+<Info>
+本文档跟随 `master` 分支。如果你在功能分支上、这里有出入，仓库根的 `CLAUDE.md` 是权威的简版参考。
+</Info>

@@ -3,10 +3,6 @@ title: Template system
 description: The Magic Template DSL, the registry, and how to add a new template.
 ---
 
-import { Callout, Steps } from 'nextra/components'
-
-# Template system
-
 Templates live in `packages/resume-templates`. A template is a `MagicTemplateDSL` value — a declarative description of design tokens, layout, and per-section rendering. The renderer in this package turns one DSL value plus one `Resume` into JSX.
 
 This means templates are **data**, not components. The web app and the PDF exporter share one renderer.
@@ -55,17 +51,15 @@ Template IDs **must match** `templateIds` in `packages/resume-schema` exactly. T
 ## Adding a new template
 
 <Steps>
-
-### Add the ID to the schema
-
+<Step title="Add the ID to the schema">
 In `packages/resume-schema/src/`, append your new ID to the `templateIds` tuple.
+</Step>
 
-### Create the DSL config
-
+<Step title="Create the DSL config">
 In `packages/resume-templates/src/config/`, add a new file exporting your `MagicTemplateDSL`. Start from the closest existing template — pick one with the same layout shape.
+</Step>
 
-### Register it
-
+<Step title="Register it">
 ```ts
 // packages/resume-templates/src/registry.ts
 import { myTemplate } from './config/myTemplate'
@@ -75,9 +69,9 @@ export const templateRegistry = {
   'my-template': myTemplate,
 }
 ```
+</Step>
 
-### Add a thumbnail
-
+<Step title="Add a thumbnail">
 Drop a JPEG at:
 
 ```
@@ -85,19 +79,19 @@ apps/web/public/templates/jpg/my-template.jpg
 ```
 
 The gallery picks it up by ID; the filename must match the template ID exactly.
+</Step>
 
-### Rebuild
-
+<Step title="Rebuild">
 ```bash
 pnpm --filter @magic-resume/resume-schema build
 pnpm --filter @magic-resume/resume-templates build
 ```
-
+</Step>
 </Steps>
 
-<Callout type="warning">
+<Warning>
 Three places must stay aligned: `templateIds` in the schema, `templateRegistry` in resume-templates, and the thumbnail filename in `apps/web/public/templates/jpg/`. Missing any one of these will surface as a 404 or a Zod validation error.
-</Callout>
+</Warning>
 
 ## TemplateCustomizer
 

@@ -3,11 +3,9 @@ title: 简历 Schema
 description: 那份 Zod 定义的、"简历是什么"的唯一真源。
 ---
 
-import { Callout } from 'nextra/components'
-
-# 简历 Schema
-
 `@magic-resume/resume-schema` 是"简历的形状"的唯一真源。Web 应用、MCP 服务器、每一套模板、每一个 AI 工具都遵循它。Schema 里没有的字段，就是不存在的字段。
+
+![一套 schema，处处校验](/images/resume-schema.png)
 
 ## 导出
 
@@ -48,9 +46,9 @@ Mutation 都是 JSON Patch（RFC 6902）。一次往返：
 
 这条路径对 **Web 编辑器和 MCP 工具都适用** —— 编辑器产生的也是 patch，不是另一条代码路径。
 
-<Callout type="info">
+<Info>
 MCP 服务器里有 `preview_resume_patch` 工具，就是给你做这种"校验但不动数据"的环节用的。在执行任何破坏性操作前，AI 工具应该先调它。
-</Callout>
+</Info>
 
 ## 加一个新字段
 

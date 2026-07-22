@@ -3,11 +3,9 @@ title: Resume schema
 description: The Zod-typed source of truth for what a resume is.
 ---
 
-import { Callout } from 'nextra/components'
-
-# Resume schema
-
 `@magic-resume/resume-schema` is the single source of truth for the resume data shape. The web app, the MCP server, every template, and every AI tool all conform to it. If a field isn't in the schema, it doesn't exist.
+
+![One schema, validated everywhere](/images/resume-schema.png)
 
 ## Exports
 
@@ -48,9 +46,9 @@ Mutations are JSON Patch (RFC 6902) operations. The roundtrip:
 
 This applies to **both** the web editor and MCP tools — the editor produces patches too, it's not a separate code path.
 
-<Callout type="info">
+<Info>
 The MCP server has `preview_resume_patch` for exactly this validation loop without mutating state. Use it from AI tools before applying anything destructive.
-</Callout>
+</Info>
 
 ## Adding a new field
 

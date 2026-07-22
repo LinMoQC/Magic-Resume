@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="300" viewBox="0 0 1080 300">
+<style>
+text{font-family:'PingFang SC','Helvetica Neue',Arial,sans-serif;fill:#202124}
+.title{font-size:21px;font-weight:700}
+.sub{font-size:12.5px;fill:#5f6368}
+.h{font-size:14.5px;font-weight:700;fill:#202124}
+.p{font-size:11px;fill:#5f6368}
+.lbl{font-size:11px;font-weight:700;fill:#546e7a}
+.note{font-size:12px;fill:#5f6368}
+.edge{fill:none;stroke:#546e7a;stroke-width:2.4}
+.client{fill:#e8f0fe;stroke:#1a73e8;stroke-width:2}
+.neutral{fill:#f1f3f4;stroke:#9aa0a6;stroke-width:2}
+.plat{fill:#e6f4ea;stroke:#34a853;stroke-width:2}
+.data{fill:#fce8e6;stroke:#ea4335;stroke-width:2}
+</style>
+<defs>
+<marker id="a" markerWidth="11" markerHeight="11" refX="8" refY="4" orient="auto"><path d="M0 0L9 4L0 8Z" fill="#546e7a"/></marker>
+<marker id="s" markerWidth="11" markerHeight="11" refX="1" refY="4" orient="auto"><path d="M9 0L0 4L9 8Z" fill="#546e7a"/></marker>
+</defs>
+<rect width="1080" height="300" fill="#fff"/>
+<text x="540" y="34" text-anchor="middle" class="title">MCP data flow</text>
+<text x="540" y="57" text-anchor="middle" class="sub">Your AI tool spawns the MCP server; it talks to platform-api with your PAT — schema-aware and patch-based.</text>
+
+<rect x="32"  y="100" width="220" height="66" rx="11" class="client"/>
+<text x="142" y="130" text-anchor="middle" class="h">AI coding tool</text>
+<text x="142" y="150" text-anchor="middle" class="p">Claude Code · Cursor</text>
+
+<rect x="322" y="100" width="230" height="66" rx="11" class="neutral"/>
+<text x="437" y="130" text-anchor="middle" class="h">@magic-resume/mcp</text>
+<text x="437" y="150" text-anchor="middle" class="p">stdio server (Node)</text>
+
+<rect x="622" y="100" width="210" height="66" rx="11" class="plat"/>
+<text x="727" y="130" text-anchor="middle" class="h">platform-api</text>
+<text x="727" y="150" text-anchor="middle" class="p">resume API</text>
+
+<rect x="902" y="100" width="146" height="66" rx="11" class="data"/>
+<text x="975" y="138" text-anchor="middle" class="h">PostgreSQL</text>
+
+<!-- edges -->
+<path class="edge" marker-start="url(#s)" marker-end="url(#a)" d="M252 126 L322 126"/>
+<text x="287" y="116" text-anchor="middle" class="lbl">stdio</text>
+<path class="edge" marker-end="url(#a)" d="M552 133 L622 133"/>
+<text x="587" y="123" text-anchor="middle" class="lbl">HTTP</text>
+<text x="587" y="151" text-anchor="middle" class="lbl" fill="#c5221f">Bearer mr_pat_…</text>
+<path class="edge" marker-end="url(#a)" d="M832 133 L902 133"/>
+
+<!-- ops under mcp -->
+<text x="437" y="196" text-anchor="middle" class="note">list · read  <tspan style="fill:#9aa0a6">(GET /api/resumes)</tspan>   ·   edit  <tspan style="fill:#9aa0a6">(PATCH · JSON Patch)</tspan></text>
+
+<text x="540" y="250" text-anchor="middle" class="note">Schema-aware &amp; patch-based — <tspan style="font-weight:700;fill:#202124">never</tspan> full rewrites, <tspan style="font-weight:700;fill:#202124">never</tspan> invented fields. A PAT can read/write all your resumes.</text>
+</svg>

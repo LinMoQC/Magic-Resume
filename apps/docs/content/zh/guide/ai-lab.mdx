@@ -1,0 +1,73 @@
+---
+title: AI Lab 是什么
+description: 认识 AI 助手北极星（Polaris）——用对话在简历上"就地"改，改动先给你看、可拒绝。这是所有 AI 能力的入口。
+---
+
+<Frame>
+  <img src="/images/polaris-pet.svg" alt="北极星 Polaris" width="150" noZoom />
+</Frame>
+
+**AI Lab（AI 实验室）** 是 Magic Resume 的 AI 助手，它的形象叫 **北极星（Polaris）**——一只像素小北极星。点编辑器里的 **AI 助手** 按钮就能打开。它不是冷冰冰的填表工具，而是**陪你一起改简历**的搭档。
+
+![AI Lab：对话式改简历](/images/ai-lab-flow.zh.png)
+
+打开后它会先问你：
+
+> 嗨，今天想把简历打磨成什么样？说说你的目标，我来挑合适的技能，陪你一起改。
+
+你用大白话说需求就行，它来干活。
+
+<Warning>
+AI Lab 需要**云端模式** —— 先[登录](/zh/guide/account)、且后端在线（官方 magic-resume.cn 就现成）。**没登录的本地模式下完全没有 AI**，只能编辑和导出简历。
+</Warning>
+
+## 登录后配一次 AI（二选一）
+
+登录后 AI 在后端跑——两种方式任选：
+
+<CardGroup cols={2}>
+  <Card title="用内部额度" icon="wallet">
+    登录后有一定免费额度；用完可**充值 / 订阅 Pro** 解锁更多。账户菜单里能看 **剩余额度**。
+  </Card>
+  <Card title="用你自己的 Key" icon="key">
+    到 **设置 → 模型配置**，填自己的 API Key（OpenAI / Anthropic / Gemini 等）。**密钥只存你本地浏览器，不上传。**
+  </Card>
+</CardGroup>
+
+<Note>
+没配的话 AI 会暂停，并提示「账户额度不足」——照上面二选一就能继续。
+</Note>
+
+## 五件它能帮你做的事
+
+在 AI Lab 里直接说，或点对应的建议：
+
+<CardGroup cols={2}>
+  <Card title="从零创建" icon="wand-magic-sparkles" href="/zh/guide/ai-create">
+    "带我从零做一份简历"——一问一答帮你搭出初稿。
+  </Card>
+  <Card title="针对岗位优化" icon="bullseye" href="/zh/guide/ai-optimize">
+    贴上目标 JD / 公司 / 岗位，帮你把简历改得更对口。
+  </Card>
+  <Card title="深度分析（体检打分）" icon="chart-line" href="/zh/guide/ai-analyze">
+    三位虚拟面试官给你的简历打分、指出亮点和待改进。
+  </Card>
+  <Card title="翻译" icon="language" href="/zh/guide/ai-translate">
+    把简历整份翻成英/日/韩/法等目标语言。
+  </Card>
+  <Card title="模拟面试" icon="comments" href="/zh/guide/ai-interview">
+    针对你的简历做一轮问答演练。
+  </Card>
+</CardGroup>
+
+## 关键：改动是"提案"，你说了算
+
+这是 Magic Resume 的原则——**AI 是合作者，不是自动驾驶**：
+
+- **就地改，不另开**：用 **实时画布**，AI 直接在你右侧的简历上标出要改哪。
+- **先提案、可拒绝**：每处改动都先给你看，标注理由；你可以 **应用到简历**，也可以不接受。顶部会显示「**N 处改动待应用**」。
+- **随时新对话**：点 **新对话** 清空当前会话重新来（会清掉这份简历的 AI 记录和分析结果，不可撤销）。
+
+<Tip>
+AI 生成的是**草稿**。它写完会说"已根据对话生成简历草稿"，你点 **应用到简历** 才会落到简历上——不满意就继续让它改。
+</Tip>

@@ -3,10 +3,6 @@ title: Monorepo layout
 description: Workspaces, package boundaries, and what is allowed to import what.
 ---
 
-import { Callout } from 'nextra/components'
-
-# Monorepo layout
-
 Magic Resume is a **pnpm + Turborepo** monorepo. Package manager is pinned to `pnpm@10.28.1` in the root `package.json` so CI and local installs stay aligned.
 
 ## Workspaces
@@ -14,7 +10,7 @@ Magic Resume is a **pnpm + Turborepo** monorepo. Package manager is pinned to `p
 | Path | Package name | Role |
 |---|---|---|
 | `apps/web` | `@magic-resume/web` | Next.js 15 App Router frontend. The actual product. |
-| `apps/docs` | `@magic-resume/docs` | This site. Nextra 4 on Next.js 15. |
+| `apps/docs/content` | — | This site. Mintlify (Markdown/MDX, no build step). |
 | `packages/mcp` | `@magic-resume/mcp` | stdio MCP server + CLI. Node ESM, published to npm. |
 | `packages/resume-schema` | `@magic-resume/resume-schema` | Zod schema, types, sample data, JSON Schema export. |
 | `packages/resume-templates` | `@magic-resume/resume-templates` | Template DSL, renderer, registry. |
@@ -26,14 +22,14 @@ Magic Resume is a **pnpm + Turborepo** monorepo. Package manager is pinned to `p
 
 These are enforced by code review rather than tooling. Keep them honest:
 
-<Callout type="error">
+<Warning>
 **`@magic-resume/mcp` must not import from:**
 - Next.js or React component packages
 - Browser APIs (`window`, `localStorage`, `IndexedDB`)
 - Anything in `apps/web`
 
 It's a plain Node ESM library + CLI. Adding a browser import will break `node --test` and `npm publish`.
-</Callout>
+</Warning>
 
 - `apps/web` may depend on any `packages/*` workspace.
 - `packages/resume-templates` depends on `packages/resume-schema`. The reverse must not happen — schema is the leaf.

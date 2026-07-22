@@ -1,0 +1,39 @@
+---
+title: Cloud sync
+description: Sign in and enable cloud sync — your resumes are stored in the cloud, synced across devices, with every version backed up.
+---
+
+By default a resume lives only in your current browser (**local mode**). Turn on **cloud sync** and it's stored in the cloud — pick up on another device, with version history backed up automatically.
+
+## How to enable it
+
+<Steps>
+<Step title="Sign in first">
+Cloud sync needs an account — [sign up / sign in](/en/guide/account) first.
+</Step>
+<Step title="Turn it on in Settings">
+**Settings → Cloud Sync**, switch on **Enable cloud sync**. The first time, you'll see a short data-upload notice; confirm to activate.
+</Step>
+</Steps>
+
+Once on, edits on this device **sync automatically** to the cloud, and any other signed-in device sees the latest version.
+
+## Reading the sync status
+
+The top of the editor shows the current state:
+
+| Shown | Meaning |
+|---|---|
+| **Synced** | Cloud and local match — you're good |
+| **Syncing…** | Uploading your changes |
+| **Pending** | Changes not uploaded yet (e.g. you just went offline) |
+| **Sync Error** | Something failed; it retries after you check your connection |
+| **Local Only** | Cloud sync is off — stored on this device only |
+
+<Note>
+**What if I edit the same resume on two devices?** The system handles conflicts and tries hard not to lose your work. ⚠️ To verify visually: to be safe, avoid heavily editing the same resume on two devices at once.
+</Note>
+
+<Warning>
+Turn off cloud sync or sign out and new changes stay local only. For important resumes, keep a [JSON export](/en/guide/export) as a backup.
+</Warning>

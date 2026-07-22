@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="200" viewBox="0 0 1180 200">
+<style>
+text{font-family:'PingFang SC','Helvetica Neue',Arial,sans-serif;fill:#202124}
+.title{font-size:21px;font-weight:700}
+.sub{font-size:12.5px;fill:#5f6368}
+.h{font-size:15px;font-weight:700;fill:#0b3d91}
+.p{font-size:11px;fill:#5f6368}
+.n{font-size:13px;font-weight:700;fill:#fff}
+.step{fill:#e8f0fe;stroke:#1a73e8;stroke-width:2}
+</style>
+<rect width="1180" height="200" fill="#fff"/>
+<text x="590" y="36" text-anchor="middle" class="title">Your first resume: from open to sent</text>
+<text x="590" y="60" text-anchor="middle" class="sub">The whole main path needs no technical background · the first steps need no sign-up</text>
+
+<g>
+<rect x="24"  y="86" width="175" height="92" rx="12" class="step"/>
+<circle cx="46" cy="108" r="15" fill="#1a73e8"/><text x="46" y="113" text-anchor="middle" class="n">1</text>
+<text x="111" y="132" text-anchor="middle" class="h">Open the app</text>
+<text x="111" y="156" text-anchor="middle" class="p">no sign-up</text>
+
+<rect x="215" y="86" width="175" height="92" rx="12" class="step"/>
+<circle cx="237" cy="108" r="15" fill="#1a73e8"/><text x="237" y="113" text-anchor="middle" class="n">2</text>
+<text x="302" y="132" text-anchor="middle" class="h">Create / import</text>
+<text x="302" y="156" text-anchor="middle" class="p">from zero or PDF/JSON</text>
+
+<rect x="406" y="86" width="175" height="92" rx="12" class="step"/>
+<circle cx="428" cy="108" r="15" fill="#1a73e8"/><text x="428" y="113" text-anchor="middle" class="n">3</text>
+<text x="493" y="132" text-anchor="middle" class="h">Edit + template</text>
+<text x="493" y="156" text-anchor="middle" class="p">fill in · restyle</text>
+
+<rect x="597" y="86" width="175" height="92" rx="12" class="step"/>
+<circle cx="619" cy="108" r="15" fill="#1a73e8"/><text x="619" y="113" text-anchor="middle" class="n">4</text>
+<text x="684" y="132" text-anchor="middle" class="h">AI Lab</text>
+<text x="684" y="156" text-anchor="middle" class="p">Polaris helps</text>
+
+<rect x="788" y="86" width="175" height="92" rx="12" class="step"/>
+<circle cx="810" cy="108" r="15" fill="#1a73e8"/><text x="810" y="113" text-anchor="middle" class="n">5</text>
+<text x="875" y="132" text-anchor="middle" class="h">Share + comments</text>
+<text x="875" y="156" text-anchor="middle" class="p">link · notes</text>
+
+<rect x="979" y="86" width="175" height="92" rx="12" class="step"/>
+<circle cx="1001" cy="108" r="15" fill="#1a73e8"/><text x="1001" y="113" text-anchor="middle" class="n">6</text>
+<text x="1066" y="132" text-anchor="middle" class="h">Export PDF</text>
+<text x="1066" y="156" text-anchor="middle" class="p">local · send</text>
+</g>
+
+<g fill="#1a73e8">
+<path d="M203 126 L211 132 L203 138 Z"/>
+<path d="M394 126 L402 132 L394 138 Z"/>
+<path d="M585 126 L593 132 L585 138 Z"/>
+<path d="M776 126 L784 132 L776 138 Z"/>
+<path d="M967 126 L975 132 L967 138 Z"/>
+</g>
+</svg>

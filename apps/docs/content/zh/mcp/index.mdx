@@ -3,10 +3,6 @@ title: MCP 服务器总览
 description: "@magic-resume/mcp 是原生的 Model Context Protocol 服务器，把你的简历作为带类型、可 Patch 编辑的资源暴露给 AI 编程工具。"
 ---
 
-import { Callout, Cards } from 'nextra/components'
-
-# MCP 服务器
-
 `@magic-resume/mcp` 是一个 [Model Context Protocol](https://modelcontextprotocol.io) 服务器，把你的简历作为带类型、可 Patch 编辑的资源暴露给 AI 编程工具 —— Claude Code、Cursor、Windsurf，任何会说 MCP 的客户端都能用。
 
 为什么要有它：把整份简历 JSON 粘到 AI prompt 里不靠谱。模型得猜 Schema、不知道哪些字段必填、也没办法验证自己的修改。MCP 给模型提供 **结构化访问** —— Schema、样例数据、JSON Patch 校验、原子应用。
@@ -18,11 +14,11 @@ import { Callout, Cards } from 'nextra/components'
 - **不依赖浏览器。** 它是一个纯 Node ESM 进程，通过 HTTP 和 Core API 通信。没有 React、没有 IndexedDB、没有 Next.js 引用。
 - **PAT 鉴权，不是 Clerk。** 用户在 Web 应用的 Settings 里签发个人访问令牌（PAT）；MCP 服务器拿这个 PAT 去 Core API 鉴权。Clerk 的 JWT 流程只在浏览器侧。
 
-<Cards>
-  <Cards.Card title="配置" href="/zh/mcp/setup" arrow />
-  <Cards.Card title="工具参考" href="/zh/mcp/tools" arrow />
-  <Cards.Card title="内部细节" href="/zh/mcp/internals" arrow />
-</Cards>
+<CardGroup>
+  <Card title="配置" href="/zh/mcp/setup" />
+  <Card title="工具参考" href="/zh/mcp/tools" />
+  <Card title="内部细节" href="/zh/mcp/internals" />
+</CardGroup>
 
 ## 什么时候适合用
 
@@ -33,6 +29,6 @@ import { Callout, Cards } from 'nextra/components'
 | 基于简历数据搭一个自己的 dashboard | ❌ —— 直接用 PAT 调 Core API 就行，不需要 MCP |
 | 从零生成一份全新简历 | ⚠️ —— 可以，但建议用 `defaultResume` + 一连串小 patch，而不是一个大 patch |
 
-<Callout type="info">
+<Info>
 MCP 服务器需要一个 Magic Resume 的 **云端** 账号，因为它走 Core API。自托管用户可以自己跑 Core API 来启用这一能力。
-</Callout>
+</Info>

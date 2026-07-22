@@ -3,10 +3,6 @@ title: Contributing
 description: How to contribute code, docs, or templates to Magic Resume.
 ---
 
-import { Callout } from 'nextra/components'
-
-# Contributing
-
 Magic Resume is MIT-licensed and accepts contributions. PRs that come with reproductions, tests, and a clear `why` tend to land fast.
 
 ## Before you start
@@ -26,17 +22,17 @@ Magic Resume is MIT-licensed and accepts contributions. PRs that come with repro
 
 ## Hard rules
 
-<Callout type="error">
+<Warning>
 **Do not modify Clerk auth without a maintainer asking for it.** That includes `clerkMiddleware`, `<ClerkProvider>`, `useAuth`, and the cloud sync layer in `useResumeStore`. The cloud/self-hosted split depends on these being predictable.
-</Callout>
+</Warning>
 
-<Callout type="error">
+<Warning>
 **Do not add new local/cloud toggles or deployment modes.** The current `NEXT_PUBLIC_APP_MODE` split is intentional. If you think you need a third mode, open an issue first.
-</Callout>
+</Warning>
 
-<Callout type="error">
+<Warning>
 **`@magic-resume/mcp` must stay browser-free.** No React, no Next.js, no `window`, no IndexedDB. If you import one of those by accident, `node --test` will catch you, but please catch yourself first.
-</Callout>
+</Warning>
 
 ## Where things go
 
@@ -49,7 +45,7 @@ Magic Resume is MIT-licensed and accepts contributions. PRs that come with repro
 | Shared util | `packages/utils` if 2+ workspaces use it, otherwise local to the caller |
 | Docs | `apps/docs/content/` — write for OSS developers, code-first, no marketing speak |
 
-See [Architecture](/architecture) for the why behind each of these.
+See [Architecture](/en/architecture) for the why behind each of these.
 
 ## Commit style
 

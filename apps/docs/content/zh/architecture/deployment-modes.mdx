@@ -3,18 +3,16 @@ title: 部署模式
 description: NEXT_PUBLIC_APP_MODE 如何在自托管和云端之间切换应用。
 ---
 
-import { Callout } from 'nextra/components'
-
-# 部署模式
-
 Web 应用通过 `NEXT_PUBLIC_APP_MODE` 选择两种模式之一。选择是 **构建时烤进去的** —— 没有运行时开关。
+
+![自托管 vs 云端模式](/images/deployment-modes.png)
 
 | | `self-hosted` | `cloud` |
 |---|---|---|
 | 默认？ | 是 | 仅当存在 Clerk Key 时 |
 | 鉴权 | 无 | Clerk（middleware + `<ClerkProvider>`） |
 | 存储 | 仅 IndexedDB | IndexedDB + Core API |
-| AI Lab（面试/翻译/分析） | 除非接 `BACKEND_URL`，否则禁用 | 启用 |
+| AI Lab（面试/翻译/分析） | 除非把 `NEXT_PUBLIC_API_URL` 指向后端，否则禁用 | 启用 |
 | 分享和版本历史 | 仅本地 | 服务端支撑 |
 | 同步状态指示 | `local` | `saved` / `syncing` / `modified` / `error` |
 
@@ -47,9 +45,9 @@ export default APP_MODE === 'cloud'
 
 …而只在 **边缘** 做切换：鉴权 middleware、同步副作用、AI Lab 可见性。
 
-<Callout type="warning">
+<Warning>
 没有充足理由，不要新增其他运行时模式开关或本地/云端分支。现在的边界是有意收窄的。详见 [贡献指南](/zh/development/contributing)。
-</Callout>
+</Warning>
 
 ## 加一个云端专属功能
 

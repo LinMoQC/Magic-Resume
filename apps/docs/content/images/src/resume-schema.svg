@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="430" viewBox="0 0 1000 430">
+<style>
+text{font-family:'PingFang SC','Helvetica Neue',Arial,sans-serif;fill:#202124}
+.title{font-size:21px;font-weight:700}
+.sub{font-size:12.5px;fill:#5f6368}
+.h{font-size:15px;font-weight:700;fill:#202124}
+.hub{font-size:15px;font-weight:700;fill:#fff}
+.p{font-size:11px;fill:#5f6368}
+.pw{font-size:11px;fill:#e8eaed}
+.lbl{font-size:11px;font-weight:700;fill:#546e7a}
+.edge{fill:none;stroke:#546e7a;stroke-width:2.2}
+.client{fill:#e8f0fe;stroke:#1a73e8;stroke-width:2}
+.neutral{fill:#f1f3f4;stroke:#9aa0a6;stroke-width:2}
+.plat{fill:#e6f4ea;stroke:#34a853;stroke-width:2}
+.hubbox{fill:#5b53e0;stroke:#3d39e5;stroke-width:2}
+</style>
+<defs><marker id="a" markerWidth="11" markerHeight="11" refX="8" refY="4" orient="auto"><path d="M0 0L9 4L0 8Z" fill="#546e7a"/></marker></defs>
+<rect width="1000" height="430" fill="#fff"/>
+<text x="500" y="34" text-anchor="middle" class="title">One schema, validated everywhere</text>
+<text x="500" y="57" text-anchor="middle" class="sub">Every resume is one Zod value. Defined once in @magic-resume/resume-schema, consumed across repos.</text>
+
+<!-- hub -->
+<rect x="360" y="182" width="280" height="76" rx="12" class="hubbox"/>
+<text x="500" y="214" text-anchor="middle" class="hub">@magic-resume/resume-schema</text>
+<text x="500" y="236" text-anchor="middle" class="pw">Zod 4 · types · JSON Schema · source of truth</text>
+
+<!-- consumers -->
+<rect x="70" y="92" width="250" height="64" rx="11" class="client"/>
+<text x="195" y="120" text-anchor="middle" class="h">apps/web</text>
+<text x="195" y="140" text-anchor="middle" class="p">editor + template rendering</text>
+
+<rect x="680" y="92" width="250" height="64" rx="11" class="neutral"/>
+<text x="805" y="120" text-anchor="middle" class="h">@magic-resume/mcp</text>
+<text x="805" y="140" text-anchor="middle" class="p">AI edits as JSON Patch</text>
+
+<rect x="375" y="330" width="250" height="64" rx="11" class="plat"/>
+<text x="500" y="358" text-anchor="middle" class="h">platform-api (backend)</text>
+<text x="500" y="378" text-anchor="middle" class="p">validates on every write</text>
+
+<!-- edges from hub to consumers -->
+<path class="edge" marker-end="url(#a)" d="M380 200 L250 158"/>
+<path class="edge" marker-end="url(#a)" d="M620 200 L750 158"/>
+<path class="edge" marker-end="url(#a)" d="M500 258 L500 328"/>
+
+<text x="300" y="182" text-anchor="middle" class="lbl">types + render</text>
+<text x="700" y="182" text-anchor="middle" class="lbl">patch shape</text>
+<text x="512" y="298" class="lbl">Zod validate</text>
+</svg>

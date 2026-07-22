@@ -3,18 +3,16 @@ title: Deployment modes
 description: How NEXT_PUBLIC_APP_MODE flips the app between self-hosted and cloud.
 ---
 
-import { Callout } from 'nextra/components'
-
-# Deployment modes
-
 The web app has two modes selected by `NEXT_PUBLIC_APP_MODE`. The choice is **baked at build time** — there is no runtime toggle.
+
+![Self-hosted vs cloud mode](/images/deployment-modes.png)
 
 | | `self-hosted` | `cloud` |
 |---|---|---|
 | Default? | Yes | Only with a Clerk key present |
 | Auth | None | Clerk (middleware + `<ClerkProvider>`) |
 | Storage | IndexedDB only | IndexedDB + Core API |
-| AI Lab (interview/translate/analyze) | Disabled unless you wire `BACKEND_URL` | Enabled |
+| AI Lab (interview/translate/analyze) | Disabled unless you point `NEXT_PUBLIC_API_URL` at a backend | Enabled |
 | Sharing & version history | Local only | Server-backed |
 | Sync indicator | `local` | `saved` / `syncing` / `modified` / `error` |
 
@@ -47,13 +45,13 @@ The same React tree, store, and routes run in both modes. Adding a second app wo
 
 …and only switches the **edges** — auth middleware, sync side-effects, AI Lab visibility.
 
-<Callout type="warning">
-Do not add new runtime mode toggles or local/cloud branches without strong justification. The current split is intentionally narrow. See the [contributing guide](/development/contributing).
-</Callout>
+<Warning>
+Do not add new runtime mode toggles or local/cloud branches without strong justification. The current split is intentionally narrow. See the [contributing guide](/en/development/contributing).
+</Warning>
 
 ## Adding a new cloud-only feature
 
 1. Gate the UI on `APP_MODE === 'cloud'` (or a more specific capability flag if it applies to BYO-Clerk users only).
 2. Put network calls behind `httpClient.api` so the auth interceptor handles tokens.
 3. Make sure the feature degrades gracefully in self-hosted — empty state, not crash.
-4. Add a row to the env-var table in [Cloud Mode](/getting-started/cloud) if it needs new config.
+4. Add a row to the env-var table in [Cloud Mode](/en/getting-started/cloud) if it needs new config.

@@ -1,0 +1,44 @@
+---
+title: "Settings: AI & access tokens"
+description: Configure your own AI model (bring-your-own-key), toggle cloud sync, and create personal access tokens (PATs) for AI tools.
+---
+
+**Settings** (**Settings** in the left sidebar) has three main areas: model configuration, cloud sync, and personal access tokens.
+
+## Model Configuration (bring your own key)
+
+AI (AI Lab, AI PDF import) runs on the backend and needs you to be **signed in** (cloud mode). Instead of platform credits you can bring your own API key — in **Settings → Model Configuration**, fill in:
+
+- **API Provider** (OpenAI / Anthropic / Gemini, etc.)
+- **API Key**
+- **Model**
+- **Base URL**, **Max Tokens** (under "Advanced")
+
+Click **Test connection**; **Connected** means it works and the status becomes **AI ready**.
+
+<Note>
+**The key is stored only in your local browser, never uploaded.** This is also how you use AI in self-hosted / local mode — see [Deploy to Vercel](/en/getting-started/vercel).
+</Note>
+
+## Cloud Sync
+
+Toggle sync under **Settings → Cloud Sync** — details in [Cloud sync](/en/guide/cloud-sync).
+
+## Personal Access Tokens (PAT)
+
+Want AI tools like **Claude Code / Cursor** to read and edit your resumes directly? First create a **personal access token**:
+
+<Steps>
+<Step title="Create a token">
+**Settings → Personal Access Tokens → Create**. It generates a value starting with `mr_pat_…`.
+</Step>
+<Step title="Copy it right away">
+The value is **shown only once**. Treat it like a password — it grants read/write to all your resumes.
+</Step>
+</Steps>
+
+<Warning>
+A PAT is a key to your resumes. **Don't paste it into chats or commit it to a repo.** If it leaks, come back here to **revoke** it and create a new one.
+</Warning>
+
+Then you can [connect AI coding tools](/en/guide/mcp).

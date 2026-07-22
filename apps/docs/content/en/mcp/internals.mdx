@@ -3,10 +3,6 @@ title: Internals
 description: How @magic-resume/mcp is wired internally — entry points, config, and the Core API contract.
 ---
 
-import { Callout } from 'nextra/components'
-
-# Internals
-
 For contributors hacking on the MCP package itself, or building a fork.
 
 ## Layout
@@ -43,9 +39,9 @@ The CLI and the server share `config.ts` and `http.ts`. The CLI is for one-shot 
 
 `config.ts` reads this lazily on first use. On Windows the path is `%USERPROFILE%\.magic-resume\mcp.json`.
 
-<Callout type="warning">
+<Warning>
 This file holds a PAT in plaintext. The CLI sets file permissions to `0600` on POSIX. If you're contributing on Windows, don't relax this.
-</Callout>
+</Warning>
 
 ## Tool registration
 
@@ -63,10 +59,9 @@ The MCP server is a client of the same NestJS Core API the web app talks to. Rel
 
 | Endpoint | Method | Auth |
 |---|---|---|
-| `/v1/resumes` | GET | PAT |
-| `/v1/resumes/:id` | GET | PAT |
-| `/v1/resumes/:id/patch` | PATCH | PAT |
-| `/v1/schema` | GET | none |
+| `/api/resumes/mine` | GET | PAT |
+| `/api/resumes/:id` | GET | PAT |
+| `/api/resumes/:id` | PATCH | PAT |
 
 `http.ts` attaches `Authorization: Bearer <pat>` automatically. Unlike the web app, **there is no Clerk involvement** — PATs are a separate auth method the Core API understands.
 
@@ -85,4 +80,4 @@ Publishing is gated by `publishConfig.access = "public"` and uses pnpm's `worksp
 1. Add the handler to `resume-tools.ts`. Keep it pure and patch-based.
 2. Register it in `server.ts` with a Zod input schema and a short description.
 3. Add a `node --test` case in `test/`.
-4. If the tool reads or mutates a new field, update [`get_resume_editing_guide`](/mcp/tools#get_resume_editing_guide) so models know how to use it.
+4. If the tool reads or mutates a new field, update [`get_resume_editing_guide`](/en/mcp/tools#get_resume_editing_guide) so models know how to use it.

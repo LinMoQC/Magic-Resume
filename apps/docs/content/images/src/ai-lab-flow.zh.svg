@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1160" height="270" viewBox="0 0 1160 270">
+<style>
+text{font-family:'PingFang SC','Helvetica Neue',Arial,sans-serif;fill:#202124}
+.title{font-size:21px;font-weight:700}
+.sub{font-size:12.5px;fill:#5f6368}
+.h{font-size:14.5px;font-weight:700;fill:#202124}
+.p{font-size:11px;fill:#5f6368}
+.edge{fill:none;stroke:#546e7a;stroke-width:2.2}
+.loop{fill:none;stroke:#a142f4;stroke-width:2;stroke-dasharray:6 4}
+.client{fill:#e8f0fe;stroke:#1a73e8;stroke-width:2}
+.agent{fill:#f3e8fd;stroke:#a142f4;stroke-width:2}
+.plat{fill:#e6f4ea;stroke:#34a853;stroke-width:2}
+</style>
+<defs>
+<marker id="a" markerWidth="11" markerHeight="11" refX="8" refY="4" orient="auto"><path d="M0 0L9 4L0 8Z" fill="#546e7a"/></marker>
+<marker id="pv" markerWidth="11" markerHeight="11" refX="8" refY="4" orient="auto"><path d="M0 0L9 4L0 8Z" fill="#a142f4"/></marker>
+</defs>
+<rect width="1160" height="270" fill="#fff"/>
+<text x="580" y="34" text-anchor="middle" class="title">AI Lab：对话式改简历</text>
+<text x="580" y="57" text-anchor="middle" class="sub">Polaris 先提案、你说了算——每处改动可应用、可拒绝，改的是同一份简历（JSON Patch，不整份重写）</text>
+
+<rect x="24"  y="86" width="200" height="92" rx="12" class="client"/>
+<text x="124" y="126" text-anchor="middle" class="h">你说需求</text>
+<text x="124" y="150" text-anchor="middle" class="p">"帮我针对岗位优化"</text>
+
+<rect x="252" y="86" width="200" height="92" rx="12" class="agent"/>
+<text x="352" y="126" text-anchor="middle" class="h">Polaris 挑技能</text>
+<text x="352" y="150" text-anchor="middle" class="p">读你的简历</text>
+
+<rect x="480" y="86" width="200" height="92" rx="12" class="agent"/>
+<text x="580" y="126" text-anchor="middle" class="h">提案改动</text>
+<text x="580" y="150" text-anchor="middle" class="p">JSON Patch · 带理由</text>
+
+<rect x="708" y="86" width="200" height="92" rx="12" class="client"/>
+<text x="808" y="126" text-anchor="middle" class="h">你说了算</text>
+<text x="808" y="150" text-anchor="middle" class="p">应用 ✓ 或 拒绝 ✗</text>
+
+<rect x="936" y="86" width="200" height="92" rx="12" class="plat"/>
+<text x="1036" y="126" text-anchor="middle" class="h">简历更新</text>
+<text x="1036" y="150" text-anchor="middle" class="p">只落已应用的</text>
+
+<path class="edge" marker-end="url(#a)" d="M224 132 L250 132"/>
+<path class="edge" marker-end="url(#a)" d="M452 132 L478 132"/>
+<path class="edge" marker-end="url(#a)" d="M680 132 L706 132"/>
+<path class="edge" marker-end="url(#a)" d="M908 132 L934 132"/>
+
+<!-- loopback: reject -> keep chatting -->
+<path class="loop" marker-end="url(#pv)" d="M808 178 L808 228 Q808 240 796 240 L136 240 Q124 240 124 228 L124 180"/>
+<text x="466" y="234" text-anchor="middle" class="p" fill="#a142f4">不满意就继续聊，让它再改</text>
+</svg>

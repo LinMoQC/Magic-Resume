@@ -1,0 +1,73 @@
+---
+title: What is AI Lab
+description: Meet Polaris (北极星), the AI Lab assistant — edit your resume in place through conversation, with every change proposed first and rejectable. It's the entry point to every AI capability.
+---
+
+<Frame>
+  <img src="/images/polaris-pet.svg" alt="Polaris (北极星)" width="150" noZoom />
+</Frame>
+
+**AI Lab** is Magic Resume's AI assistant, and its character is **Polaris (北极星)** — a little pixel north-star pet. Open it with the **AI Assistant** button in the editor. It's not a cold form-filler — it's a partner that **edits the resume with you**.
+
+![AI Lab: editing by conversation](/images/ai-lab-flow.en.png)
+
+When it opens, it asks:
+
+> Hi — what would you like your resume to become today? Tell me your goal and I'll pick the right skills and work on it with you.
+
+Say what you need in plain words; it does the work.
+
+<Warning>
+AI Lab needs **cloud mode** — [sign in](/en/guide/account) with the backend online (ready on the official magic-resume.cn). **Signed out (local mode) there is no AI at all** — you can only edit and export resumes.
+</Warning>
+
+## Set up AI (once signed in)
+
+Once signed in, AI runs on the backend — power it one of two ways:
+
+<CardGroup cols={2}>
+  <Card title="Use internal credits" icon="wallet">
+    Signed-in accounts get some free quota; when it runs out, **add credits / subscribe to Pro** for more. Your **remaining quota** is in the account menu.
+  </Card>
+  <Card title="Use your own key" icon="key">
+    Go to **Settings → Model Configuration** and paste your own API key (OpenAI / Anthropic / Gemini, etc.). **The key is stored only in your local browser, never uploaded.**
+  </Card>
+</CardGroup>
+
+<Note>
+If neither is set, AI pauses and shows "Account credits are unavailable" — do one of the two above to continue.
+</Note>
+
+## Five things it can do
+
+Just say it in AI Lab, or click the matching suggestion:
+
+<CardGroup cols={2}>
+  <Card title="Create from scratch" icon="wand-magic-sparkles" href="/en/guide/ai-create">
+    "Walk me through building a resume from zero" — a Q&A builds your first draft.
+  </Card>
+  <Card title="Tailor to a job" icon="bullseye" href="/en/guide/ai-optimize">
+    Paste a target JD / company / role and it reshapes your resume to fit.
+  </Card>
+  <Card title="Deep analysis (a score)" icon="chart-line" href="/en/guide/ai-analyze">
+    Three virtual interviewers score your resume and flag strengths and gaps.
+  </Card>
+  <Card title="Translate" icon="language" href="/en/guide/ai-translate">
+    Translate the whole resume into English / Japanese / Korean / French, etc.
+  </Card>
+  <Card title="Mock interview" icon="comments" href="/en/guide/ai-interview">
+    Run a round of Q&A based on your resume.
+  </Card>
+</CardGroup>
+
+## Key: changes are proposals — you decide
+
+This is a Magic Resume principle — **AI is a collaborator, not autopilot**:
+
+- **In place, not in a separate window**: with the **Live canvas**, AI marks what to change right on your resume on the right.
+- **Proposed first, rejectable**: every change is shown with a reason; you can **Apply to resume** or skip it. The top shows "**N changes pending**".
+- **New chat anytime**: click **New chat** to clear the current session and start over (this clears this resume's AI history and analysis, and can't be undone).
+
+<Tip>
+AI produces a **draft**. When it finishes it says "A resume draft has been generated"; only when you click **Apply to resume** does it land on the resume — not happy? Keep asking it to revise.
+</Tip>

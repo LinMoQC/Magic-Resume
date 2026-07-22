@@ -1,0 +1,76 @@
+---
+title: Connect AI coding tools (MCP)
+description: Advanced — read and edit your Magic Resume resumes right inside Claude Code, Cursor, and similar tools.
+---
+
+If you use AI coding tools like **Claude Code** or **Cursor**, you can plug Magic Resume in so the AI can **read your resumes and safely edit them on your instructions** — using the same data layer as the web app.
+
+![MCP data flow](/images/mcp-dataflow.png)
+
+<Note>
+This is an **advanced feature** for people comfortable with the command line / AI coding tools. If you only make resumes in the browser, you don't need this page.
+</Note>
+
+It runs a small program over **MCP** (a standard protocol), spawned locally by your AI tool. Two steps: configure credentials once, then register it with each tool.
+
+<Steps>
+<Step title="Create a Personal Access Token (PAT)">
+In the web app, **Settings → Personal Access Tokens → Create**, and copy the `mr_pat_…` value (shown once). See [Settings](/en/guide/settings).
+</Step>
+
+<Step title="Configure the MCP server">
+```bash
+npx -y @magic-resume/mcp config set \
+  --api-url "https://api.magic-resume.cn" \
+  --pat "mr_pat_xxx"
+```
+
+This writes `~/.magic-resume/mcp.json`. If you run the backend locally, point `--api-url` at it.
+</Step>
+
+<Step title="Register with your AI tool">
+<Tabs>
+<Tab title="Claude Code">
+```bash
+claude mcp add magic-resume -- npx -y @magic-resume/mcp mcp
+```
+This adds Magic Resume to the user-scoped MCP list. Restart Claude Code so it picks up the new server.
+</Tab>
+<Tab title="Cursor">
+Open `~/.cursor/mcp.json` (create if missing) and add:
+
+```json
+{
+  "mcpServers": {
+    "magic-resume": {
+      "command": "npx",
+      "args": ["-y", "@magic-resume/mcp", "mcp"]
+    }
+  }
+}
+```
+</Tab>
+<Tab title="Manual / Windsurf">
+Any MCP client that supports stdio servers can spawn it:
+
+```bash
+npx -y @magic-resume/mcp mcp
+```
+
+The server speaks the standard MCP protocol over stdin/stdout — no flags needed.
+</Tab>
+</Tabs>
+</Step>
+
+<Step title="Try it">
+In your AI tool, ask: "List my Magic Resume resumes." The model should call the tool and return your list. If it errors, run `npx -y @magic-resume/mcp config print` and check the API URL and PAT.
+</Step>
+</Steps>
+
+<Warning>
+AI tools edit resumes the same safe way — **schema-aware, via JSON Patch** — never full rewrites, never invented fields. But the PAT lets it read/write all your resumes, so keep it safe.
+</Warning>
+
+<Note>
+Curious how MCP works internally and which tools exist? That's developer material — see the [MCP section of the Developer Handbook](/en/mcp).
+</Note>

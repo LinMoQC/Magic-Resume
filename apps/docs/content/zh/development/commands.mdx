@@ -3,8 +3,6 @@ title: 命令速查
 description: 值得记住的每一条 pnpm 与 turbo 命令。
 ---
 
-# 命令速查
-
 值得记住的所有命令。路径都相对仓库根目录。
 
 ## 全仓（Turbo）
@@ -26,8 +24,7 @@ pnpm --filter @magic-resume/web build
 pnpm --filter @magic-resume/web lint
 pnpm --filter @magic-resume/web i18n:check
 
-pnpm --filter @magic-resume/docs dev            # 文档站点，端口 3001
-pnpm --filter @magic-resume/docs build
+cd apps/docs/content && npx mint dev            # 文档站点（Mintlify 本地预览）
 
 pnpm --filter @magic-resume/resume-schema build
 pnpm --filter @magic-resume/resume-schema test  # node --test

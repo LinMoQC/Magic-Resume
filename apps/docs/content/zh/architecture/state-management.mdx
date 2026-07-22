@@ -3,10 +3,6 @@ title: 状态管理
 description: Zustand store、Immer draft、IndexedDB 持久化，以及云端同步是如何接进来的。
 ---
 
-import { Callout } from 'nextra/components'
-
-# 状态管理
-
 状态住在 `apps/web/src/store/` 里的 **Zustand** store 里。每个 store 都用 Immer middleware，写 reducer 时像直接 mutate 一样。IndexedDB 是持久化层（通过 `src/lib/api/IndexDBClient.ts` 访问 `MagicResumeDB`）。
 
 ## Store 列表
@@ -40,9 +36,9 @@ import { Callout } from 'nextra/components'
 
 Store 不维护单独的"脏字段"map —— 同步的 diff 在 push 时计算。这让 store 保持无聊，撤销重做也好推导。
 
-<Callout type="info">
+<Info>
 云端同步这条副作用只有同时满足 `APP_MODE === 'cloud'` 和用户在 Settings 里手动打开同步时才会触发。自托管用户永远不会因 store 操作发起网络请求。
-</Callout>
+</Info>
 
 ## IndexedDB 层
 
