@@ -21,6 +21,42 @@ interface ProbeResult {
 const TIMEOUT_MS = 12_000;
 const stripTrailingSlash = (url: string) => url.replace(/\/+$/, '');
 
+// SSRF guard: this probe runs server-side against a user-supplied baseUrl, so the
+// host must be an allow-listed provider — otherwise the route could be driven to
+// reach internal services / cloud metadata endpoints (169.254.169.254, localhost).
+// Operators self-hosting a custom OpenAI-compatible gateway can opt extra hosts in
+// via the TEST_LLM_ALLOWED_HOSTS env var (comma-separated), which stays an
+// operator-controlled allow-list rather than an attacker-controlled target.
+const DEFAULT_ALLOWED_HOSTS = [
+  'api.openai.com',
+  'api.anthropic.com',
+  'generativelanguage.googleapis.com',
+  'api.deepseek.com',
+];
+const ALLOWED_HOSTS = new Set([
+  ...DEFAULT_ALLOWED_HOSTS,
+  ...(process.env.TEST_LLM_ALLOWED_HOSTS ?? '')
+    .split(',')
+    .map((h) => h.trim().toLowerCase())
+    .filter(Boolean),
+]);
+
+function validateProbeBaseUrl(raw: string): { ok: true } | { ok: false; message: string } {
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    return { ok: false, message: 'Invalid baseUrl' };
+  }
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+    return { ok: false, message: 'baseUrl must use http(s)' };
+  }
+  if (!ALLOWED_HOSTS.has(url.hostname.toLowerCase())) {
+    return { ok: false, message: `baseUrl host is not allowed: ${url.hostname}` };
+  }
+  return { ok: true };
+}
+
 const json = (data: unknown, status: number) =>
   new Response(JSON.stringify(data), {
     status,
@@ -115,6 +151,11 @@ export async function POST(request: Request) {
   const baseUrl = body.baseUrl ? stripTrailingSlash(body.baseUrl.trim()) : '';
   if (!apiKey || !baseUrl || !model) {
     return json({ ok: false, message: 'Missing apiKey / baseUrl / model' }, 400);
+  }
+
+  const urlCheck = validateProbeBaseUrl(baseUrl);
+  if (!urlCheck.ok) {
+    return json({ ok: false, message: urlCheck.message }, 400);
   }
 
   const startedAt = Date.now();

@@ -68,6 +68,24 @@
   font-display: swap;
 }
 
+/* 楷体:霞鹜文楷(subset-fonts.mjs 产出的子集 woff2)。让不带系统楷体的机器上
+   HTML 预览也用它,与 react-pdf 导出一致。Medium 当 700 加粗用。 */
+@font-face {
+  font-family: "LXGW WenKai";
+  src: url("/fonts/LXGWWenKai-Regular.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "LXGW WenKai";
+  src: url("/fonts/LXGWWenKai-Medium.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 700 900;
+  font-display: swap;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -636,176 +654,38 @@ button {
   }
 }
 
-/* Siri 风格玻璃光球:玻璃壳下彩色液滴各自沿不同路径漂移 + 呼吸缩放,
-   交叠不断变化 = 液态流动;底层 conic 色环慢转提供角向环流,缘光沿球缘环行 */
-.polaris-orb {
-  position: relative;
+/* AI 入口就是品牌桌宠本体:光身站立(无底板),身后靠 .polaris-fab__halo 那层柔和呼吸光晕。
+   桌宠自己的动作(静息多重微动 / hover 雀跃 / 生成中思考)烘在各自 svg 里,随 <img src> 切换。 */
+.polaris-pet-fab {
   width: 3.5rem;
   height: 3.5rem;
-  border-radius: 9999px;
-  overflow: hidden;
-  background: radial-gradient(circle at 50% 52%, #1b2668 0%, #141a48 55%, #090c28 100%);
-  box-shadow:
-    0 14px 30px -12px rgba(0, 0, 0, 0.9),
-    0 0 22px -6px rgba(80, 120, 255, 0.45),
-    0 0 0 1px rgba(120, 150, 255, 0.12);
 }
 
-/* 流光容器:统一柔化 / 提饱和,子层只动 transform */
-.polaris-orb__light {
-  position: absolute;
-  inset: -10%;
-  filter: blur(4.5px) saturate(1.35);
+/* 像素桌宠精灵:24→48 的 2x 整数放大,像素边严丝合缝不糊;
+   一层落地暗影 + 一层 sky 辉光,让它「立」在深色画布上而非漂浮的贴纸。 */
+.polaris-pet-fab__sprite {
+  width: 48px;
+  height: 48px;
+  image-rendering: pixelated;
+  filter:
+    drop-shadow(0 6px 9px rgba(0, 0, 0, 0.5))
+    drop-shadow(0 0 8px rgba(var(--polaris-sky), 0.32));
+  transition: filter 0.2s ease-out;
 }
 
-/* 底层环流:conic 色环慢转 = 永不停的角向流动 */
-.polaris-orb__flow {
-  position: absolute;
-  inset: -22%;
-  border-radius: 9999px;
-  opacity: 0.38;
-  background: conic-gradient(
-    from 220deg,
-    rgba(56, 120, 255, 0),
-    rgba(168, 110, 255, 0.55) 12%,
-    rgba(255, 64, 156, 0.6) 30%,
-    rgba(120, 90, 255, 0.4) 46%,
-    rgba(40, 222, 240, 0.6) 64%,
-    rgba(40, 224, 170, 0.42) 78%,
-    rgba(56, 120, 255, 0)
-  );
-  animation: polaris-orb-spin calc(18s * var(--orb-speed, 1)) linear infinite;
-  will-change: transform;
+.polaris-fab:hover .polaris-pet-fab__sprite {
+  filter:
+    drop-shadow(0 8px 11px rgba(0, 0, 0, 0.5))
+    drop-shadow(0 0 11px rgba(var(--polaris-sky), 0.5));
 }
 
-/* 彩色液滴:screen 叠色,漂移路径 / 时长 / 方向各不相同 → 交叠持续变化 */
-.polaris-orb__blob {
-  position: absolute;
-  border-radius: 9999px;
-  mix-blend-mode: screen;
-  will-change: transform;
-}
-.polaris-orb__blob--magenta { left: 4%; top: 8%; width: 56%; height: 56%; background: radial-gradient(circle at 40% 38%, rgba(255, 64, 156, 0.9), rgba(255, 64, 156, 0.3) 52%, transparent 68%); animation: polaris-orb-drift-a calc(9s * var(--orb-speed, 1)) ease-in-out infinite; }
-.polaris-orb__blob--blue { left: 40%; top: 42%; width: 60%; height: 60%; background: radial-gradient(circle at 42% 40%, rgba(56, 120, 255, 0.9), rgba(56, 120, 255, 0.3) 52%, transparent 68%); animation: polaris-orb-drift-b calc(12s * var(--orb-speed, 1)) ease-in-out infinite; }
-.polaris-orb__blob--cyan { left: 54%; top: 10%; width: 44%; height: 44%; background: radial-gradient(circle at 40% 42%, rgba(40, 222, 240, 0.85), rgba(40, 222, 240, 0.26) 52%, transparent 68%); animation: polaris-orb-drift-c calc(8s * var(--orb-speed, 1)) ease-in-out infinite; }
-.polaris-orb__blob--violet { left: 6%; top: 46%; width: 54%; height: 54%; background: radial-gradient(circle at 44% 40%, rgba(168, 110, 255, 0.85), rgba(168, 110, 255, 0.28) 52%, transparent 68%); animation: polaris-orb-drift-b calc(13.5s * var(--orb-speed, 1)) ease-in-out infinite reverse; }
-.polaris-orb__blob--teal { left: 40%; top: 58%; width: 46%; height: 46%; background: radial-gradient(circle at 42% 40%, rgba(40, 224, 170, 0.8), rgba(40, 224, 170, 0.24) 52%, transparent 68%); animation: polaris-orb-drift-c calc(11s * var(--orb-speed, 1)) ease-in-out infinite reverse; }
-
-/* 漂移路径:translate 按自身尺寸百分比,幅度小、速度慢 = 轻微但持续 */
-@keyframes polaris-orb-drift-a {
-  0%, 100% { transform: translate3d(-12%, -8%, 0) scale(1); }
-  33% { transform: translate3d(14%, -16%, 0) scale(1.18); }
-  66% { transform: translate3d(8%, 16%, 0) scale(0.86); }
-}
-@keyframes polaris-orb-drift-b {
-  0%, 100% { transform: translate3d(10%, 10%, 0) scale(1); }
-  25% { transform: translate3d(-12%, 4%, 0) scale(1.14); }
-  55% { transform: translate3d(-6%, -14%, 0) scale(0.9); }
-  80% { transform: translate3d(12%, -4%, 0) scale(1.06); }
-}
-@keyframes polaris-orb-drift-c {
-  0%, 100% { transform: translate3d(6%, -10%, 0) scale(0.94); }
-  40% { transform: translate3d(-16%, 6%, 0) scale(1.16); }
-  70% { transform: translate3d(10%, 16%, 0) scale(0.88); }
-}
-
-/* 游动的亮核:在球心附近缓慢游走、呼吸 */
-.polaris-orb__core {
-  position: absolute;
-  left: 30%;
-  top: 30%;
-  width: 40%;
-  height: 40%;
-  border-radius: 9999px;
-  mix-blend-mode: screen;
-  background: radial-gradient(circle, rgba(190, 225, 255, 0.9), rgba(140, 190, 255, 0.32) 45%, transparent 70%);
-  filter: blur(3px);
-  animation: polaris-orb-core calc(7s * var(--orb-speed, 1)) ease-in-out infinite;
-}
-
-/* 缘光:两道彗尾光弧沿球缘环行(Apple Intelligence 式) */
-.polaris-orb__rim {
-  position: absolute;
-  inset: 1px;
-  z-index: 1;
-  border-radius: 9999px;
-  mix-blend-mode: screen;
-  opacity: 0.8;
-  transition: opacity 0.2s ease-out;
-  background: conic-gradient(
-    from 0deg,
-    transparent 0deg,
-    rgba(190, 240, 255, 0.9) 40deg,
-    rgba(var(--polaris-sky), 0.35) 70deg,
-    transparent 110deg,
-    transparent 180deg,
-    rgba(255, 120, 200, 0.55) 220deg,
-    rgba(168, 110, 255, 0.3) 250deg,
-    transparent 290deg
-  );
-  -webkit-mask: radial-gradient(closest-side, transparent 60%, #000 82%);
-  mask: radial-gradient(closest-side, transparent 60%, #000 82%);
-  filter: blur(1.5px);
-  animation: polaris-orb-spin calc(10s * var(--orb-speed, 1)) linear infinite;
-  will-change: transform;
-}
-
-.polaris-fab:hover .polaris-orb__rim {
-  opacity: 1;
-}
-
-/* 散布的小碎星(星空),错相闪烁 */
-.polaris-orb__stars {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  pointer-events: none;
-}
-.polaris-orb__spark {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  color: #a8e9fb;
-  filter: drop-shadow(0 0 1.5px rgba(148, 225, 246, 0.85));
-  animation: polaris-spark 3.6s ease-in-out infinite;
-}
-.polaris-orb__spark svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-@keyframes polaris-spark {
-  0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) scale(0.78); }
-  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.12); }
-}
-
-/* 玻璃壳:固定高光、边缘暗角与内阴影给出球体纵深,光在其下流动 */
-.polaris-orb__glass {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  border-radius: 9999px;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse 42% 24% at 34% 18%, rgba(255, 255, 255, 0.4), transparent 62%),
-    radial-gradient(circle at 50% 50%, transparent 56%, rgba(5, 8, 38, 0.52) 97%);
-  box-shadow:
-    inset 0 2px 3px rgba(255, 255, 255, 0.3),
-    inset 0 -12px 20px rgba(0, 2, 20, 0.55),
-    inset 0 0 0 1px rgba(180, 200, 255, 0.14);
-}
-
-/* 生成中:整体提速 + 光更亮 */
-.polaris-fab[data-running="true"] { --orb-speed: 0.45; }
-.polaris-fab[data-running="true"] .polaris-fab__halo { opacity: 0.8; }
-.polaris-fab[data-running="true"] .polaris-orb__rim { opacity: 1; }
-
-@keyframes polaris-orb-spin {
-  to { transform: rotate(360deg); }
-}
-@keyframes polaris-orb-core {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(0.9); opacity: 0.75; }
-  30% { transform: translate3d(14%, -8%, 0) scale(1.1); opacity: 1; }
-  65% { transform: translate3d(-10%, 12%, 0) scale(0.95); opacity: 0.85; }
+/* 生成中:辉光更盛 + 光晕提速加亮(桌宠本体切到思考帧,由 <img> 负责) */
+.polaris-fab[data-running="true"] { --orb-speed: 0.55; }
+.polaris-fab[data-running="true"] .polaris-fab__halo { opacity: 0.72; }
+.polaris-fab[data-running="true"] .polaris-pet-fab__sprite {
+  filter:
+    drop-shadow(0 6px 9px rgba(0, 0, 0, 0.5))
+    drop-shadow(0 0 12px rgba(var(--polaris-sky), 0.6));
 }
 
 /* Apple Intelligence(iOS 18)式:四边亮起一圈流动的彩色光晕描边。
@@ -932,143 +812,54 @@ button {
   animation: ai-edge-sweep-y-reverse 6.4s cubic-bezier(0.16, 1, 0.3, 1) 0.2s infinite;
 }
 
+/* 「纸面入定」——docs/specs/ai-working-motion。
+   轻压暗、无 blur：纸面内容仍隐约可读，感觉是纸自己在思考。 */
 .ai-thinking-overlay {
   --ai-color: 56, 189, 248;
   overflow: hidden;
-  background:
-    radial-gradient(circle at 50% 46%, rgba(var(--ai-color), 0.2), transparent 32%),
-    rgba(2, 8, 14, 0.34);
-  backdrop-filter: blur(12px) saturate(145%);
-  -webkit-backdrop-filter: blur(12px) saturate(145%);
+  background: rgba(2, 8, 14, 0.32);
 }
 
-.ai-thinking-overlay::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border: 1px solid rgba(var(--ai-color), 0.2);
-  background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.12),
-    rgba(var(--ai-color), 0.04) 38%,
-    rgba(2, 8, 14, 0.16)
-  );
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  pointer-events: none;
-}
-
+/* 边缘细流光：复用 edge-flow 的 beam，但巡行更慢、更淡 */
 .ai-thinking-overlay__edge {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  opacity: 0.92;
+  opacity: 0.5;
 }
 
-.ai-thinking-overlay__core {
-  position: relative;
-  display: flex;
-  width: 5.75rem;
-  height: 5.75rem;
-  align-items: center;
-  justify-content: center;
-  isolation: isolate;
+.ai-thinking-overlay__edge > .ai-thinking-overlay__beam--top {
+  animation-duration: 9.5s;
 }
 
-.ai-thinking-overlay__halo {
-  position: absolute;
-  inset: -1.2rem;
-  border-radius: 9999px;
-  background: radial-gradient(
-    circle,
-    rgba(var(--ai-color), 0.38),
-    rgba(var(--ai-color), 0.1) 46%,
-    transparent 72%
-  );
-  filter: blur(14px);
-  animation: ai-thinking-halo 3s ease-in-out infinite;
-  will-change: transform, opacity;
+.ai-thinking-overlay__edge > .ai-thinking-overlay__beam--bottom {
+  animation-duration: 10.5s;
 }
 
-.ai-thinking-overlay__ripple {
-  position: absolute;
-  inset: 0.35rem;
-  border-radius: 9999px;
-  border: 1px solid rgba(var(--ai-color), 0.42);
-  opacity: 0;
-  animation: ai-thinking-ripple 3.2s ease-out infinite;
-  will-change: transform, opacity;
+.ai-thinking-overlay__edge > .ai-thinking-overlay__beam--right {
+  animation-duration: 10s;
 }
 
-.ai-thinking-overlay__ripple--two {
-  animation-delay: 1.45s;
+.ai-thinking-overlay__edge > .ai-thinking-overlay__beam--left {
+  animation-duration: 11s;
 }
 
+/* 小 Polaris 球：品牌锚点，随全局心跳呼吸（JSX 上挂 .ai-breath） */
 .ai-thinking-overlay__orb {
   position: relative;
   display: flex;
-  width: 4rem;
-  height: 4rem;
+  width: 2.75rem;
+  height: 2.75rem;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 9999px;
-  background:
-    radial-gradient(circle at 36% 28%, rgba(255, 255, 255, 0.34), transparent 30%),
-    linear-gradient(145deg, rgba(var(--ai-color), 0.9), rgba(var(--ai-color), 0.58));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    inset 0 -12px 24px rgba(2, 8, 14, 0.12),
-    0 20px 38px -24px rgba(var(--ai-color), 0.75);
-  animation: ai-thinking-orb 4.2s ease-in-out infinite;
-  will-change: transform, opacity;
-}
-
-.ai-thinking-overlay__sheen {
-  position: absolute;
-  inset: -35%;
-  background: linear-gradient(
-    115deg,
-    transparent 40%,
-    rgba(255, 255, 255, 0.32) 49%,
-    transparent 58%
-  );
-  transform: translate3d(-56%, 0, 0) rotate(18deg);
-  animation: ai-thinking-sheen 3.8s ease-in-out infinite;
-  will-change: transform;
+  background: linear-gradient(150deg, rgba(var(--ai-color), 0.85), rgba(var(--ai-color), 0.58));
+  box-shadow: 0 10px 24px -16px rgba(var(--ai-color), 0.55);
 }
 
 .ai-thinking-overlay__mark {
-  position: relative;
-  z-index: 1;
-  color: rgba(255, 255, 255, 0.94);
-  filter: drop-shadow(0 4px 12px rgba(2, 8, 14, 0.22));
-}
-
-.ai-thinking-overlay__meter {
-  position: relative;
-  width: 8rem;
-  height: 2px;
-  margin: 0.85rem auto 0;
-  overflow: hidden;
-  border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.16);
-}
-
-.ai-thinking-overlay__meter span {
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 44%;
-  border-radius: inherit;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(var(--ai-color), 0.92),
-    rgba(255, 255, 255, 0.76),
-    transparent
-  );
-  animation: ai-thinking-meter 1.8s cubic-bezier(0.16, 1, 0.3, 1) infinite;
-  will-change: transform, opacity;
+  color: rgba(255, 255, 255, 0.95);
 }
 
 @keyframes ai-edge-sweep-x {
@@ -1131,78 +922,10 @@ button {
   }
 }
 
-@keyframes ai-thinking-halo {
-  0%,
-  100% {
-    opacity: 0.48;
-    transform: scale(0.94);
-  }
-  50% {
-    opacity: 0.88;
-    transform: scale(1.08);
-  }
-}
-
-@keyframes ai-thinking-ripple {
-  0% {
-    opacity: 0.56;
-    transform: scale(0.88);
-  }
-  80%,
-  100% {
-    opacity: 0;
-    transform: scale(1.8);
-  }
-}
-
-@keyframes ai-thinking-orb {
-  0%,
-  100% {
-    transform: scale(1) rotate(-1.5deg);
-  }
-  50% {
-    transform: scale(1.06) rotate(1.5deg);
-  }
-}
-
-@keyframes ai-thinking-sheen {
-  0% {
-    transform: translate3d(-58%, 0, 0) rotate(18deg);
-  }
-  56%,
-  100% {
-    transform: translate3d(58%, 0, 0) rotate(18deg);
-  }
-}
-
-@keyframes ai-thinking-meter {
-  0% {
-    opacity: 0;
-    transform: translate3d(-110%, 0, 0);
-  }
-  18%,
-  74% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: translate3d(250%, 0, 0);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .polaris-fab__halo,
   .ai-canvas-edge-flow__spin,
-  .polaris-orb__flow,
-  .polaris-orb__blob,
-  .polaris-orb__rim,
-  .polaris-orb__core,
-  .polaris-orb__spark,
-  .ai-thinking-overlay__halo,
-  .ai-thinking-overlay__ripple,
-  .ai-thinking-overlay__orb,
-  .ai-thinking-overlay__sheen,
-  .ai-thinking-overlay__meter span {
+  .ai-thinking-overlay__beam {
     animation: none;
   }
 
@@ -1210,6 +933,185 @@ button {
   .ai-canvas-edge-flow,
   .ai-thinking-overlay__edge {
     opacity: 0.5;
+  }
+}
+
+/* ============================================================
+   「呼吸叙述」AI 工作中动效系统
+   docs/specs/ai-working-motion/brief.md
+   一个心跳：所有「AI 工作中」的元素共享同一条呼吸曲线。
+   ============================================================ */
+:root {
+  --breath-duration: 2.4s;
+  --breath-ease: ease-in-out;
+  --narrate-duration: 180ms;
+  --narrate-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* 全局心跳：scale 0.985 → 1.015，opacity 0.75 → 1 */
+@keyframes ai-breath {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: scale(0.985);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.015);
+  }
+}
+
+.ai-breath {
+  animation: ai-breath var(--breath-duration) var(--breath-ease) infinite;
+  will-change: transform, opacity;
+}
+
+/* 大面积表面（骨架块、纸面）只呼吸明暗，不缩放——避免边缘可见的抖动 */
+@keyframes ai-breath-soft {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.ai-breath--soft {
+  animation: ai-breath-soft var(--breath-duration) var(--breath-ease) infinite;
+  will-change: opacity;
+}
+
+/* 状态叙述文字：实色底 + 一道亮带同频掠过（Claude 式 shimmer text）。
+   基底与亮带只差一档亮度，读感仍是"实色文字上有光走过"。 */
+.ai-narrate {
+  display: inline-block;
+  color: transparent;
+  background-image: linear-gradient(
+    90deg,
+    var(--narrate-base, rgba(212, 212, 212, 0.85)) 0%,
+    var(--narrate-base, rgba(212, 212, 212, 0.85)) 38%,
+    var(--narrate-sheen, rgba(255, 255, 255, 0.98)) 50%,
+    var(--narrate-base, rgba(212, 212, 212, 0.85)) 62%,
+    var(--narrate-base, rgba(212, 212, 212, 0.85)) 100%
+  );
+  background-size: 220% 100%;
+  background-position: 120% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: ai-narrate-sheen var(--breath-duration) var(--breath-ease) infinite;
+}
+
+.light .ai-narrate {
+  --narrate-base: rgba(82, 82, 82, 0.9);
+  --narrate-sheen: var(--ink-sky, #0369a1);
+}
+
+@keyframes ai-narrate-sheen {
+  0% {
+    background-position: 120% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+/* 叙述文字换词：旧词上浮淡出、新词下方淡入（配 framer-motion 或原生皆可） */
+@keyframes ai-narrate-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 4px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.ai-narrate-enter {
+  animation: ai-narrate-in var(--narrate-duration) var(--narrate-ease) both;
+}
+
+/* ---- LivingCanvas 就地编辑（挂载点见 EditableCanvas.tsx）----
+   简历纸面恒定近白，深浅主题共用一套。 */
+
+/* 处理中：白纱把底下内容压到 ~45%，一道贴块 sky 扫光同频掠过 */
+.lc-shimmer {
+  display: block;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.lc-shimmer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 32%,
+    rgba(2, 132, 199, 0.08) 44%,
+    rgba(2, 132, 199, 0.16) 50%,
+    rgba(2, 132, 199, 0.08) 56%,
+    transparent 68%
+  );
+  transform: translate3d(-70%, 0, 0);
+  animation: lc-shimmer-sweep var(--breath-duration) var(--breath-ease) infinite;
+  will-change: transform;
+}
+
+@keyframes lc-shimmer-sweep {
+  to {
+    transform: translate3d(70%, 0, 0);
+  }
+}
+
+/* 接受后：绿色微闪一次落定（绿 = 简历修订语言的"增"） */
+.lc-flash {
+  animation: lc-flash 700ms var(--narrate-ease) both;
+}
+
+@keyframes lc-flash {
+  0% {
+    background-color: rgba(21, 128, 61, 0.16);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+/* 定位跳转：轻高亮一次（LivingCanvas 1.2s 后移除类名） */
+.lc-highlight {
+  animation: lc-highlight 1.2s var(--narrate-ease) both;
+}
+
+@keyframes lc-highlight {
+  0% {
+    background-color: rgba(2, 132, 199, 0.1);
+    box-shadow: inset 0 0 0 1px rgba(2, 132, 199, 0.35);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: inset 0 0 0 1px transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-breath,
+  .ai-breath--soft,
+  .ai-narrate,
+  .ai-narrate-enter,
+  .lc-shimmer::before {
+    animation: none;
+  }
+
+  /* 退化：叙述文字回到实色 */
+  .ai-narrate {
+    color: rgba(212, 212, 212, 0.9);
+    background: none;
+  }
+
+  .light .ai-narrate {
+    color: rgba(82, 82, 82, 0.9);
   }
 }
 
@@ -1328,6 +1230,28 @@ button {
     opacity: 1;
     transform: scale(1);
   }
+}
+
+/* ── 编辑器入场编排(阶段 4 · C1)──────────────────────────────
+   骨架 → 内容:左栏 / 画布 / 右栏依次淡入。固定定位的侧栏只用 opacity
+   (transform 会给 position:fixed 子元素造 containing block),画布在流内
+   可 rise。轻、快、不弹跳;prefers-reduced-motion 下直接呈现。 */
+@keyframes editor-enter-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes editor-enter-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.editor-enter-left  { animation: editor-enter-fade 0.34s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.editor-enter-stage { animation: editor-enter-rise 0.42s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both; }
+.editor-enter-right { animation: editor-enter-fade 0.34s cubic-bezier(0.22, 1, 0.36, 1) 0.16s both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .editor-enter-left,
+  .editor-enter-stage,
+  .editor-enter-right { animation: none; }
 }
 
 .editor-container {
@@ -2077,8 +2001,8 @@ button {
    深色态样式全部保留,这里只在 .light 覆盖颜色与「发光↔落地阴影」。
    ============================================================ */
 
-/* Polaris 光球:球体本身(深玻璃+液态流光+碎星)保留=纸上一颗宝石;
-   收敛外层大光晕(白上=脏印),改由清晰缘环 + 落地暖影让它「放在纸上」。 */
+/* Polaris 桌宠(浅色):halo 那层环境光在白纸上收得很淡(白上=脏印),
+   桌宠本体改用清晰落地暖影让它「站在纸上」。 */
 .light .polaris-fab__halo {
   opacity: 0.14;
   filter: blur(9px);
@@ -2092,15 +2016,16 @@ button {
 .light .polaris-fab:hover .polaris-fab__halo {
   opacity: 0.26;
 }
-.light .polaris-orb {
-  box-shadow:
-    0 12px 24px -10px oklch(0.28 0.03 250 / 0.32),
-    0 2px 6px oklch(0.28 0.02 85 / 0.16),
-    0 0 0 1px oklch(0.6 0.02 250 / 0.16);
+/* 桌宠精灵:浅色下把 sky 辉光收成干净的落地暖影,避免白纸上糊一团蓝 */
+.light .polaris-pet-fab__sprite {
+  filter:
+    drop-shadow(0 6px 8px oklch(0.28 0.03 250 / 0.28))
+    drop-shadow(0 1px 2px oklch(0.28 0.02 85 / 0.18));
 }
-/* AiFab.tsx 内联的蓝光 hover 阴影在浅色改为收紧的落地暖影 */
-.light .polaris-fab:hover {
-  box-shadow: 0 16px 30px -14px oklch(0.28 0.04 250 / 0.4) !important;
+.light .polaris-fab:hover .polaris-pet-fab__sprite {
+  filter:
+    drop-shadow(0 9px 12px oklch(0.28 0.04 250 / 0.34))
+    drop-shadow(0 1px 2px oklch(0.28 0.02 85 / 0.18));
 }
 
 /* 画布描边流光:白底上模糊 bloom 失效 → 收窄 blur,更像「墨沿纸边写过」的清晰描边 */
@@ -2109,26 +2034,21 @@ button {
   opacity: 0.85;
 }
 
-/* 思考遮罩:深色 frost → 暖白纸磨砂 + 极淡 sky 染;中央彩色 orb 与白 mark 保留 */
+/* 思考遮罩（纸面入定 · 浅色）:深压暗 → 暖白纸磨砂;球落纸 —— 描边清晰、
+   glow 收成落地暖影(light-theme spec: glow → grounded light) */
 .light .ai-thinking-overlay {
-  background:
-    radial-gradient(circle at 50% 46%, rgba(var(--ai-color), 0.12), transparent 34%),
-    oklch(1 0 0 / 0.68);
-  backdrop-filter: blur(10px) saturate(130%);
-  -webkit-backdrop-filter: blur(10px) saturate(130%);
+  background: oklch(1 0 0 / 0.55);
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
 }
-.light .ai-thinking-overlay::before {
-  border-color: rgba(var(--ai-color), 0.2);
-  background: linear-gradient(
-    145deg,
-    oklch(1 0 0 / 0.55),
-    rgba(var(--ai-color), 0.05) 40%,
-    oklch(0.97 0.004 85 / 0.5)
-  );
-  box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.6);
+.light .ai-thinking-overlay__edge {
+  opacity: 0.35;
 }
-.light .ai-thinking-overlay__meter {
-  background: oklch(0.9 0.004 85);
+.light .ai-thinking-overlay__orb {
+  border-color: rgba(var(--ai-color), 0.4);
+  box-shadow:
+    0 10px 20px -14px oklch(0.28 0.02 85 / 0.35),
+    0 1px 3px oklch(0.28 0.02 85 / 0.14);
 }
 
 /* AI 文本加载效果:白底上收敛 glow,加淡描边定形 */
@@ -2173,4 +2093,86 @@ button {
     oklch(0.985 0.004 85 / 0.4) 46%,
     transparent 72%
   );
+}
+
+/* ---- 描述编辑器(TiptapEditor)排版 ----
+   表单场景下收敛的层级:标题只比正文大一到两号,列表节奏紧凑,
+   链接 sky 点缀。替代 prose 插件,避免文章级的巨大标题出现在弹窗里。 */
+.tiptap-desc p {
+  margin: 0.35em 0;
+}
+.tiptap-desc h1,
+.tiptap-desc h2,
+.tiptap-desc h3 {
+  font-weight: 600;
+  color: rgba(245, 245, 245, 0.96);
+  margin: 0.9em 0 0.35em;
+  line-height: 1.45;
+}
+.tiptap-desc h1 {
+  font-size: 16px;
+}
+.tiptap-desc h2 {
+  font-size: 15px;
+}
+.tiptap-desc h3 {
+  font-size: 14px;
+}
+.tiptap-desc > :first-child {
+  margin-top: 0;
+}
+.tiptap-desc > :last-child {
+  margin-bottom: 0;
+}
+.tiptap-desc ul,
+.tiptap-desc ol {
+  margin: 0.35em 0;
+  padding-left: 1.35em;
+}
+.tiptap-desc ul {
+  list-style: disc;
+}
+.tiptap-desc ol {
+  list-style: decimal;
+}
+.tiptap-desc li {
+  margin: 0.2em 0;
+}
+.tiptap-desc li::marker {
+  color: #737373;
+}
+.tiptap-desc a {
+  color: #7dd3fc;
+  text-decoration: underline;
+  text-decoration-color: rgba(14, 165, 233, 0.4);
+  text-underline-offset: 2px;
+  transition: text-decoration-color 0.15s ease;
+}
+.tiptap-desc a:hover {
+  text-decoration-color: #7dd3fc;
+}
+.tiptap-desc code {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+  font-size: 0.9em;
+}
+.tiptap-desc ::selection {
+  background: rgba(14, 165, 233, 0.3);
+}
+/* Placeholder 扩展的空态提示 */
+.tiptap-desc p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: #525252;
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+/* 链接面板进场:轻微上浮淡入,120ms,只动 transform/opacity */
+@keyframes tiptap-pop {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
 }

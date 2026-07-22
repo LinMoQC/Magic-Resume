@@ -24,6 +24,7 @@ import {
   validateAndNormalizeImportedResume,
 } from '@/lib/validation/importResume';
 import { streamPdfParse } from '@/app/dashboard/edit/_components/ai/lib/services/agentClient';
+import { resolveAiAccessConfig } from '@/app/dashboard/edit/_components/ai/lib/services/aiAccess';
 import {
   getCompletePdfSectionSet,
   PdfScanProgress,
@@ -40,7 +41,7 @@ type ImportResumeDialogProps = {
 
 export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeDialogProps) {
   const { importResume } = useResumeStore();
-  const { apiKey, baseUrl, model, maxTokens, cloudSync, hasLlmConfig: hasLlmConfigFn } = useSettingStore();
+  const { cloudSync } = useSettingStore();
   const openSettings = useAccountUiStore((s) => s.openSettings);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [llmConfigMissing, setLlmConfigMissing] = useState(false);
@@ -56,9 +57,6 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
   const [pdfComplete, setPdfComplete] = useState(false);
   const pdfAbortRef = useRef<AbortController | null>(null);
   const { t } = useTranslation();
-  // Shared readiness check (provider + key + baseUrl + model + maxTokens) — see useSettingStore.
-  const hasLlmConfig = hasLlmConfigFn();
-
   const resetPdfProgress = useCallback(() => {
     setPdfPhase(null);
     setPdfCharCount(0);
@@ -85,8 +83,8 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
     const type = value as FileType;
     setUploadError(null);
     setFileType(type);
-    setLlmConfigMissing(type === 'pdf' && !hasLlmConfig);
-  }, [hasLlmConfig]);
+    setLlmConfigMissing(false);
+  }, []);
 
   // ─── JSON 文件处理 ───
   const handleJsonFile = useCallback(async (file: File) => {
@@ -106,10 +104,17 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
 
   // ─── PDF 文件处理（流式解析 + 逐板块点亮）───
   const handlePdfFile = useCallback(async (file: File) => {
+    const access = await resolveAiAccessConfig();
+    if (!access.ok) {
+      if (access.reason === 'custom_config_required') {
+        setLlmConfigMissing(true);
+        throw new Error(t('importDialog.errors.noApiKey', { defaultValue: 'Please add credits/subscription or complete your custom AI model settings before importing PDF files.' }));
+      }
+      throw new Error(access.message || '账户额度检查失败，请稍后重试');
+    }
     const formData = new FormData();
     formData.append('file', file);
-    // 传递用户的 LLM 配置
-    formData.append('config', JSON.stringify({ apiKey, baseUrl, modelName: model, maxTokens }));
+    formData.append('config', JSON.stringify(access.config));
 
     const controller = new AbortController();
     pdfAbortRef.current = controller;
@@ -153,7 +158,7 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
     await new Promise((r) => setTimeout(r, PDF_SCAN_TIMING.completionHoldMs));
 
     return validateAndNormalizeImportedResume(resume);
-  }, [apiKey, baseUrl, model, maxTokens, t, resetPdfProgress]);
+  }, [t, resetPdfProgress]);
 
   // ─── 统一文件处理 ───
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
@@ -162,12 +167,6 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
     const file = acceptedFiles[acceptedFiles.length - 1];
     if (!file) return;
     if (!fileType) return;
-    if (fileType === 'pdf' && !hasLlmConfig) {
-      setLlmConfigMissing(true);
-      setUploadError(t('importDialog.errors.noApiKey', { defaultValue: 'Please complete your AI model settings before importing PDF files.' }));
-      return;
-    }
-
     setIsImporting(true);
 
     try {
@@ -212,7 +211,7 @@ export default function ImportResumeDialog({ open, onOpenChange }: ImportResumeD
       setImportStatus('');
       pdfAbortRef.current = null;
     }
-  }, [fileType, hasLlmConfig, importResume, handleClose, t, handleJsonFile, handlePdfFile, cloudSync]);
+  }, [fileType, importResume, handleClose, t, handleJsonFile, handlePdfFile, cloudSync]);
 
   const dropzoneAccept: Record<string, string[]> = fileType === 'pdf'
     ? { 'application/pdf': ['.pdf'] }

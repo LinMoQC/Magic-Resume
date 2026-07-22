@@ -4,6 +4,7 @@ import { MapPin, Phone, Mail, Globe } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
 import { Editable } from '../renderer/EditableCanvas';
+import { safeHref } from './utils';
 
 interface Props {
   data: InfoType;
@@ -96,13 +97,14 @@ export const Header = React.memo(function Header({
     });
   }
   if (info.website) {
+    const websiteHref = safeHref(info.website);
     contactItems.push({
       key: 'website',
       icon: LucideIcons.website,
       label: t('basicForm.fields.website'),
       content: info.website,
-      href: info.website,
-      external: true,
+      href: websiteHref ?? undefined,
+      external: Boolean(websiteHref),
     });
   }
 
@@ -110,9 +112,7 @@ export const Header = React.memo(function Header({
     .filter(field => field && field.name?.trim() && field.value?.trim())
     .map((field, index) => {
       const value = field.value.trim();
-      const hasUrlProtocol = /^https?:\/\//i.test(value);
-      const isDomainLike = /^(www\.)?[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+(\/.*)?$/.test(value);
-      const href = hasUrlProtocol ? value : (isDomainLike ? `https://${value}` : undefined);
+      const href = safeHref(value) ?? undefined;
       return {
         key: field.id || `custom-${index}`,
         label: field.name.trim(),

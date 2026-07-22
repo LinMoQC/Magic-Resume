@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Globe, Link, Copy, Check, Lock } from "lucide-react";
 
 import { useResumeStore } from "@/store/useResumeStore";
+import { isLocalResumeId } from "@/lib/api/resume";
 
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -22,7 +23,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
   // Auto-sync if it's a local resume (ID is a timestamp)
   useEffect(() => {
     if (isOpen && activeResume) {
-        const isLocalId = !isNaN(Number(activeResume.id)) && activeResume.id.length > 10;
+        const isLocalId = isLocalResumeId(activeResume.id);
         if (isLocalId && syncStatus !== 'syncing') {
             saveResume('manual');
         }

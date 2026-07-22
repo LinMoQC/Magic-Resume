@@ -2,6 +2,7 @@ import React from 'react';
 import { InfoType } from '../types/resume';
 import { Mail, Phone, Globe, MapPin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { safeHref } from './utils';
 
 interface Props {
   data: InfoType;
@@ -18,7 +19,7 @@ export const ContactInfo = React.memo(function ContactInfo({ data: info, style, 
     { icon: MapPin, value: info.address, href: null },
     { icon: Phone, value: info.phoneNumber, href: `tel:${info.phoneNumber}` },
     { icon: Mail, value: info.email, href: `mailto:${info.email}` },
-    { icon: Globe, value: info.website, href: info.website },
+    { icon: Globe, value: info.website, href: safeHref(info.website) },
   ].filter(item => item.value);
 
   if (contactItems.length === 0) return null;

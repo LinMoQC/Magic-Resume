@@ -25,9 +25,9 @@ const sidebarMenu: SidebarMenuItem[] = [
     icon: FolderKanban,
     label: 'sections.projects',
     itemRender: (item) => (
-      <div className="flex flex-col gap-2 max-w-[155px]">
-        <div className="font-bold text-sm">{item.name}</div>
-        <div className="text-xs text-neutral-400">{item.role}</div>
+      <div className="flex min-w-0 flex-col gap-2">
+        <div className="truncate font-bold text-sm">{item.name}</div>
+        <div className="truncate text-xs text-neutral-400">{item.role}</div>
       </div>
     )
   },
@@ -37,9 +37,9 @@ const sidebarMenu: SidebarMenuItem[] = [
     label: 'sections.education',
     formFields: dynamicFormFields.education,
     itemRender: (item) => (
-      <div className="flex flex-col gap-2 max-w-[155px]">
-        <div className="font-bold text-sm">{item.school}</div>
-        <div className="text-xs text-neutral-400">{item.major}</div>
+      <div className="flex min-w-0 flex-col gap-2">
+        <div className="truncate font-bold text-sm">{item.school}</div>
+        <div className="truncate text-xs text-neutral-400">{item.major}</div>
       </div>
     )
   },
@@ -47,19 +47,27 @@ const sidebarMenu: SidebarMenuItem[] = [
     key: 'skills',
     icon: Zap,
     label: 'sections.skills',
-    itemRender: (item) => <div className="font-bold text-sm max-w-[155px]">{item.name}</div>
+    // 技能条目的 name 往往是整句描述,限制两行防止卡片被撑高
+    itemRender: (item) => <div className="line-clamp-2 font-bold text-sm">{item.name}</div>
   },
   {
     key: 'languages',
     icon: Globe,
     label: 'sections.languages',
-    itemRender: (item) => <div className="font-bold text-sm max-w-[155px]">{item.language}</div>
+    itemRender: (item) => <div className="truncate font-bold text-sm">{item.language}</div>
   },
   {
     key: 'certificates',
     icon: Award,
     label: 'sections.certificates',
-    itemRender: (item) => <div className="font-bold text-sm max-w-[155px]">{item.certificate}</div>
+    // 证书条目的标题字段是 name(见 dynamicFormFields.certificatesFields),
+    // 不是 certificate——旧写法取不到值,列表行会整行空白。
+    itemRender: (item) => (
+      <div className="flex min-w-0 flex-col gap-2">
+        <div className="truncate font-bold text-sm">{item.name}</div>
+        <div className="truncate text-xs text-neutral-400">{item.issuer}</div>
+      </div>
+    )
   },
   {
     key: 'experience',
@@ -67,9 +75,9 @@ const sidebarMenu: SidebarMenuItem[] = [
     label: 'sections.experience',
     formFields: dynamicFormFields.experience,
     itemRender: (item) => (
-      <div className="flex flex-col gap-2 max-w-[155px]">
-        <div className="font-bold text-sm">{item.company}</div>
-        <div className="text-xs text-neutral-400">{item.location}</div>
+      <div className="flex min-w-0 flex-col gap-2">
+        <div className="truncate font-bold text-sm">{item.company}</div>
+        <div className="truncate text-xs text-neutral-400">{item.location}</div>
       </div>
     )
   },

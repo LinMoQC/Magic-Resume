@@ -80,36 +80,44 @@ export function EditorDock({ zoomIn, zoomOut, resetTransform, resume, onShareCli
   }, [t, isExporting, cloudSync, onShareClick, onJsonClick]);
 
   return (
+    // 居中 translate 留在静态外层(framer 会覆写 transform,不能同元素混用)。
+    // 入场与悬停分离:中层 tween 负责登台 —— 与舞台入场同曲线、略滞后半拍,读作"工作台
+    // 就位后工具坞浮上来";内层 spring 只管 hover 上浮。旧版把 y:24 弹簧弹入直接放在
+    // 胶囊上,面板异步挂载时它会在空黑画布上独自弹出,正是"工具栏出现不优雅"的来源。
     <div className="absolute bottom-6 left-1/2 z-20 -translate-x-1/2">
       <motion.div
-        initial={{ y: 24, opacity: 0 }}
+        initial={{ y: 14, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        whileHover={{ y: -4 }}
-        transition={{ type: "spring", stiffness: 380, damping: 18, mass: 0.9 }}
-        className="flex items-center gap-0.5 rounded-full border border-white/10 bg-neutral-900/70 px-1.5 py-1 shadow-xl shadow-black/40 backdrop-blur-md transition-[background-color,border-color,box-shadow] duration-200 hover:border-sky-400/30 hover:bg-neutral-900/85 hover:shadow-2xl hover:shadow-black/50"
+        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
       >
-        {items.map((item) =>
-          item.type === "divider" ? (
-            <div key={item.id} className="mx-1 h-4 w-px bg-white/10" />
-          ) : (
-            <button
-              key={item.id}
-              type="button"
-              onClick={item.onClick}
-              onFocus={item.id === "export-pdf" ? warmupPdfExport : undefined}
-              onPointerEnter={item.id === "export-pdf" ? warmupPdfExport : undefined}
-              disabled={item.disabled}
-              title={item.title}
-              aria-label={item.title}
-              className="group/dock relative flex h-8 w-8 items-center justify-center rounded-xl text-neutral-400 transition-colors duration-150 ease-out hover:bg-white/[0.06] hover:text-sky-300 focus:outline-none focus-visible:ring-1 focus-visible:ring-sky-400/50 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {item.icon}
-              <span className="pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-neutral-800 bg-neutral-900 px-2 py-0.5 text-xs text-neutral-100 opacity-0 transition-opacity duration-150 group-hover/dock:opacity-100">
-                {item.title}
-              </span>
-            </button>
-          ),
-        )}
+        <motion.div
+          whileHover={{ y: -4 }}
+          transition={{ type: "spring", stiffness: 380, damping: 18, mass: 0.9 }}
+          className="flex items-center gap-0.5 rounded-full border border-white/10 bg-neutral-900/70 px-1.5 py-1 shadow-xl shadow-black/40 backdrop-blur-md transition-[background-color,border-color,box-shadow] duration-200 hover:border-sky-400/30 hover:bg-neutral-900/85 hover:shadow-2xl hover:shadow-black/50"
+        >
+          {items.map((item) =>
+            item.type === "divider" ? (
+              <div key={item.id} className="mx-1 h-4 w-px bg-white/10" />
+            ) : (
+              <button
+                key={item.id}
+                type="button"
+                onClick={item.onClick}
+                onFocus={item.id === "export-pdf" ? warmupPdfExport : undefined}
+                onPointerEnter={item.id === "export-pdf" ? warmupPdfExport : undefined}
+                disabled={item.disabled}
+                title={item.title}
+                aria-label={item.title}
+                className="group/dock relative flex h-8 w-8 items-center justify-center rounded-xl text-neutral-400 transition-colors duration-150 ease-out hover:bg-white/[0.06] hover:text-sky-300 focus:outline-none focus-visible:ring-1 focus-visible:ring-sky-400/50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {item.icon}
+                <span className="pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-neutral-800 bg-neutral-900 px-2 py-0.5 text-xs text-neutral-100 opacity-0 transition-opacity duration-150 group-hover/dock:opacity-100">
+                  {item.title}
+                </span>
+              </button>
+            ),
+          )}
+        </motion.div>
       </motion.div>
     </div>
   );

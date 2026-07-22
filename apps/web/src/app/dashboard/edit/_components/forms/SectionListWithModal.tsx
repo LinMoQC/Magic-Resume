@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { nanoid } from 'nanoid';
 import { Button } from '@/components/ui/button';
 import {
   DndContext,
@@ -101,11 +102,11 @@ function SortableItem<T extends BaseItem>({ id, item, index, handleEdit, handleD
       <div {...attributes} {...listeners} className={cn("flex h-8 w-5 items-center justify-center text-neutral-600 transition-colors duration-150 hover:text-neutral-300", disabled ? "cursor-default" : "cursor-grab active:cursor-grabbing")}>
         <FaGripVertical size={12} />
       </div>
-      <div className="grow">
+      <div className="min-w-0 grow">
         {itemRender ? itemRender(item) : (
           <div>
-            <p className="font-semibold">{item.title || item.name || item.degree || t('sections.shared.untitled')}</p>
-            <p className="text-sm text-neutral-400">{item.subtitle || item.company || item.school || ''}</p>
+            <p className="truncate font-semibold">{item.title || item.name || item.degree || t('sections.shared.untitled')}</p>
+            <p className="truncate text-sm text-neutral-400">{item.subtitle || item.company || item.school || ''}</p>
           </div>
         )}
       </div>
@@ -174,7 +175,7 @@ export default function SectionListWithModal<T extends BaseItem>({
   );
 
   const handleOpenModal = useCallback((item: T | null, index: number | null) => {
-    setCurrentItem(item ? { ...item } : { id: Date.now().toString(), visible: true, ...fields.reduce((acc, f) => ({ ...acc, [f.name]: '' }), {} as Record<string, string>), [richtextKey]: '' } as T);
+    setCurrentItem(item ? { ...item } : { id: nanoid(), visible: true, ...fields.reduce((acc, f) => ({ ...acc, [f.name]: '' }), {} as Record<string, string>), [richtextKey]: '' } as T);
     setCurrentIndex(index);
     setIsOpen(true);
     onModalStateChange?.(true);
@@ -208,8 +209,15 @@ export default function SectionListWithModal<T extends BaseItem>({
     }
 
     const newItems = [...items];
-    if (currentIndex !== null && items[currentIndex]) {
-      newItems[currentIndex] = currentItem;
+    if (currentIndex !== null) {
+      // Locate the row by id, not the captured index: an external reorder (AI accept
+      // / cloud sync) while the modal was open could otherwise overwrite the wrong item.
+      const targetIndex = items.findIndex((it) => it.id === currentItem.id);
+      if (targetIndex !== -1) {
+        newItems[targetIndex] = currentItem;
+      } else {
+        newItems.push(currentItem);
+      }
     } else {
       newItems.push(currentItem);
     }
@@ -229,7 +237,7 @@ export default function SectionListWithModal<T extends BaseItem>({
 
   const handleCopy = useCallback((index: number) => {
     const itemToCopy = items[index];
-    const newItem = { ...itemToCopy, id: Date.now().toString() } as T;
+    const newItem = { ...itemToCopy, id: nanoid() } as T;
     const newItems = [...items.slice(0, index + 1), newItem, ...items.slice(index + 1)];
     setItems(newItems);
     toast.success(t('sections.notifications.itemCopied'));
@@ -346,7 +354,7 @@ export default function SectionListWithModal<T extends BaseItem>({
             <Label className="text-[13px] font-medium text-neutral-300">
               {t('modals.dynamicForm.descriptionLabel')}
             </Label>
-            <div className="overflow-hidden rounded-lg border border-white/[0.07] bg-sunk">
+            <div className="overflow-hidden rounded-lg border border-white/[0.07] bg-sunk transition-colors focus-within:border-sky-500/40 focus-within:ring-1 focus-within:ring-sky-500/25">
               <TiptapEditor
                 content={(currentItem?.[richtextKey] as string) || ''}
                 onChange={handleQuillChange}

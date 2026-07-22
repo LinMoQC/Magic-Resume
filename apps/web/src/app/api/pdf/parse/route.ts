@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerUserId } from '@/lib/auth/server';
 import { serverFetchBackend } from '@/lib/auth/serverFetchBackend';
 
+// Cap parse time and upload size so a huge/crafted PDF can't buffer unbounded into
+// memory here and get amplified onto the agent backend (DoS). 10 MB comfortably
+// covers real resumes.
+export const maxDuration = 60;
+const MAX_PDF_BYTES = 10 * 1024 * 1024;
+
 export async function POST(req: NextRequest) {
   try {
     // 验证用户身份 — 未登录直接拒绝
@@ -10,9 +16,32 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Reject oversized bodies before buffering the whole multipart payload
+    // (headroom over MAX_PDF_BYTES for the `config` field + multipart boundaries).
+    const contentLength = Number(req.headers.get('content-length') ?? 0);
+    if (contentLength > MAX_PDF_BYTES + 1024 * 1024) {
+      return NextResponse.json({ error: 'File too large' }, { status: 413 });
+    }
+
     // 透传前端的 FormData（file + config）给 agent-service。pass req.signal so a
     // closed dialog / navigation cancels upstream generation promptly.
     const formData = await req.formData();
+
+    // Validate the upload: must be a PDF within the size cap. Guards the memory/DoS
+    // path for chunked requests that omit Content-Length.
+    const file = formData.get('file');
+    if (!(file instanceof File)) {
+      return NextResponse.json({ error: 'Missing file' }, { status: 400 });
+    }
+    const isPdf =
+      file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+    if (!isPdf) {
+      return NextResponse.json({ error: 'Only PDF files are accepted' }, { status: 415 });
+    }
+    if (file.size > MAX_PDF_BYTES) {
+      return NextResponse.json({ error: 'File too large' }, { status: 413 });
+    }
+
     const backendResponse = await serverFetchBackend('/api/pdf/parse', {
       method: 'POST',
       body: formData,

@@ -32,7 +32,7 @@ const downloadBlob = (blob: Blob, filename: string) => {
 let pdfBrowserModulePromise: Promise<PdfBrowserModule> | null = null;
 const templatePromiseCache = new Map<string, Promise<MagicTemplateDSL>>();
 const pdfBlobPromiseCache = new WeakMap<Resume, Map<string, Promise<Blob>>>();
-const PDF_RENDERER_VERSION = 'pdf-canvas-woff-fonts-v15';
+const PDF_RENDERER_VERSION = 'pdf-canvas-woff2-subset-v16';
 
 const loadPdfBrowserModule = () => {
   pdfBrowserModulePromise ??= import('@magic-resume/resume-templates/pdf/browser') as Promise<PdfBrowserModule>;
@@ -75,6 +75,9 @@ const getPdfCacheKey = (resume: Resume, locale?: string) => {
     resume.template,
     resume.themeColor,
     resume.typography,
+    // customTemplate 承载右侧面板的全部自定义(布局/排版/配色),漏掉会命中旧缓存,
+    // 表现为"自定义不生效"。
+    JSON.stringify(resume.customTemplate ?? null),
   ].join(':');
 };
 

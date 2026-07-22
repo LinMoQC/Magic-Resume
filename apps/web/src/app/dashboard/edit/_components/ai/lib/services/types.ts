@@ -20,6 +20,7 @@ export type AgentEventType =
   | 'resume_patch'
   | 'resume_update'
   | 'resume_analysis'
+  | 'fit_report'
   | 'translation_result'
   | 'pdf_result'
   | 'interview_question'
@@ -44,10 +45,16 @@ export interface AgentSseEvent {
   error?: string;
 }
 
+/** Reasoning strength ("强度") → OpenAI-compatible `reasoning_effort`. */
+export type ReasoningEffort = 'low' | 'medium' | 'high';
+
 /** User-provided model config carried in request bodies. */
 export interface AgentLlmConfig {
+  source?: 'internal' | 'byok';
   apiKey?: string;
   baseUrl?: string;
   modelName?: string;
   maxTokens?: number;
+  /** Picked in the composer; only sent when set. */
+  effort?: ReasoningEffort;
 }

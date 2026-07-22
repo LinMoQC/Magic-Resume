@@ -1,12 +1,19 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowUp, CornerUpLeft, X } from 'lucide-react';
+import { ArrowUp, CornerUpLeft, Square, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { SKILLS, SKILL_LIST } from '../skills/registry';
 import type { SkillId } from '../types';
+import ModelStrengthPicker from './ModelStrengthPicker';
+
+/** Grow the input up to this height, then scroll (px). */
+const MAX_TEXTAREA_HEIGHT = 160;
+// useLayoutEffect writes the height before paint (no clipped frame) but warns
+// during SSR — fall back to useEffect on the server.
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 /** A snippet lifted from the canvas ("自定义 / 问 AI"), shown as a quoted chip above the input. */
 export type QuotedContext = { label: string; text: string };
@@ -20,6 +27,9 @@ type ComposerProps = {
   onSendWithContext?: (text: string) => void;
   onClearQuoted?: () => void;
   disabled?: boolean;
+  /** 生成中:发送按钮原位变成停止按钮(ChatGPT/Claude 式),不再另起浮动胶囊。 */
+  running?: boolean;
+  onStop?: () => void;
 };
 
 export default function Composer({
@@ -29,6 +39,8 @@ export default function Composer({
   onSendWithContext,
   onClearQuoted,
   disabled,
+  running,
+  onStop,
 }: ComposerProps) {
   const { t } = useTranslation();
   const [value, setValue] = useState('');
@@ -36,7 +48,29 @@ export default function Composer({
   // The skill picked from `/`: shown as a highlighted chip in the input. Selecting
   // does NOT launch — the user keeps typing context, then Enter runs it (Claude-style).
   const [activeSkill, setActiveSkill] = useState<SkillId | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-grow the textarea to fit its content up to MAX_TEXTAREA_HEIGHT, then
+  // scroll. Measured at height:auto; a FLIP restore + reflow makes the CSS
+  // height transition animate from the previous height (smooth grow/shrink).
+  const autosize = useCallback(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    const prev = el.style.height;
+    el.style.height = 'auto';
+    const next = Math.min(el.scrollHeight, MAX_TEXTAREA_HEIGHT);
+    el.style.overflowY = el.scrollHeight > MAX_TEXTAREA_HEIGHT ? 'auto' : 'hidden';
+    if (prev) {
+      el.style.height = prev; // baseline = last height so the transition runs prev → next
+      void el.offsetHeight; // commit it before the final set
+    }
+    el.style.height = `${next}px`;
+  }, []);
+
+  // Re-fit on every value change — typing, clearing on send, or dropping a chip/quote.
+  useIsomorphicLayoutEffect(() => {
+    autosize();
+  }, [value, autosize]);
 
   // `/` only opens the menu when no skill chip is active (one skill at a time).
   const slashActive = !activeSkill && value.startsWith('/');
@@ -221,51 +255,83 @@ export default function Composer({
           )}
         </AnimatePresence>
 
-        <div className="flex items-center gap-2 rounded-2xl bg-neutral-800/60 px-3.5 py-2.5 transition-colors focus-within:bg-neutral-800">
-          {activeMeta && (
-            <motion.span
-              layout
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-neutral-700/60 pl-2 pr-1 py-1 shrink-0"
-            >
-              {ActiveIcon && <ActiveIcon size={13} className={activeMeta.accent} />}
-              <span className={cn('text-[12px] font-medium', activeMeta.accent)}>{activeMeta.name}</span>
-              <button
-                type="button"
-                onClick={() => setActiveSkill(null)}
-                aria-label="移除技能"
-                className="ml-0.5 text-neutral-500 hover:text-neutral-200 transition-colors cursor-pointer"
+        <div className="rounded-2xl bg-neutral-800/60 px-3.5 py-2.5 transition-colors focus-within:bg-neutral-800">
+          <div className="flex items-center gap-2">
+            {activeMeta && (
+              <motion.span
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-neutral-700/60 pl-2 pr-1 py-1 shrink-0"
               >
-                <X size={12} />
-              </button>
-            </motion.span>
-          )}
-          <input
-            ref={inputRef}
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            onKeyDown={onKeyDown}
-            disabled={disabled}
-            placeholder={
-              quotedContext
-                ? t('aiLab.composer.placeholderQuoted')
-                : activeMeta
-                  ? t('aiLab.composer.placeholderSkill', { skill: activeMeta.name })
-                  : t('aiLab.composer.placeholderDefault')
-            }
-            className="flex-1 bg-transparent text-sm text-neutral-100 placeholder:text-neutral-600 focus:outline-none disabled:opacity-50"
-          />
-          <button
-            type="button"
-            aria-label="发送"
-            onClick={submit}
-            disabled={disabled || !canSend}
-            className="w-8 h-8 rounded-full bg-sky-500 hover:bg-sky-600 disabled:opacity-40 disabled:hover:bg-sky-500 text-[#fff] flex items-center justify-center transition-colors cursor-pointer shrink-0"
-          >
-            <ArrowUp size={16} />
-          </button>
+                {ActiveIcon && <ActiveIcon size={13} className={activeMeta.accent} />}
+                <span className={cn('text-[12px] font-medium', activeMeta.accent)}>{activeMeta.name}</span>
+                <button
+                  type="button"
+                  onClick={() => setActiveSkill(null)}
+                  aria-label="移除技能"
+                  className="ml-0.5 text-neutral-500 hover:text-neutral-200 transition-colors cursor-pointer"
+                >
+                  <X size={12} />
+                </button>
+              </motion.span>
+            )}
+            <textarea
+              ref={inputRef}
+              rows={1}
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              onKeyDown={onKeyDown}
+              disabled={disabled}
+              placeholder={
+                quotedContext
+                  ? t('aiLab.composer.placeholderQuoted')
+                  : activeMeta
+                    ? t('aiLab.composer.placeholderSkill', { skill: activeMeta.name })
+                    : t('aiLab.composer.placeholderDefault')
+              }
+              className="flex-1 resize-none overflow-y-hidden bg-transparent text-sm leading-6 text-neutral-100 placeholder:text-neutral-600 transition-[height] duration-150 ease-out focus:outline-none disabled:opacity-50"
+            />
+          </div>
+
+          {/* bottom toolbar: model + strength picker (left), send / stop (right) */}
+          <div className="mt-2 flex items-center justify-between gap-2">
+            <ModelStrengthPicker disabled={disabled} />
+            <AnimatePresence mode="popLayout" initial={false}>
+              {running ? (
+                <motion.button
+                  key="stop"
+                  type="button"
+                  aria-label={t('aiLab.run.stop')}
+                  title={t('aiLab.run.stop')}
+                  onClick={onStop}
+                  initial={{ opacity: 0, scale: 0.85 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.85 }}
+                  transition={{ duration: 0.14, ease: [0.22, 1, 0.36, 1] }}
+                  className="w-8 h-8 rounded-full bg-sky-500 hover:bg-sky-600 text-[#fff] flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                >
+                  <Square size={11} fill="currentColor" />
+                </motion.button>
+              ) : (
+                <motion.button
+                  key="send"
+                  type="button"
+                  aria-label="发送"
+                  onClick={submit}
+                  disabled={disabled || !canSend}
+                  initial={{ opacity: 0, scale: 0.85 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.85 }}
+                  transition={{ duration: 0.14, ease: [0.22, 1, 0.36, 1] }}
+                  className="w-8 h-8 rounded-full bg-sky-500 hover:bg-sky-600 disabled:opacity-40 disabled:hover:bg-sky-500 text-[#fff] flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                >
+                  <ArrowUp size={16} />
+                </motion.button>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </div>

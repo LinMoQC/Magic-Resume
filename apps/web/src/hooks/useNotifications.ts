@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import useSWR from 'swr';
 import { useAuth } from '@clerk/nextjs';
 import { notificationsApi, Notification } from '@/lib/api/notifications';
@@ -13,7 +14,7 @@ export function useNotifications() {
     { refreshInterval: 0, revalidateOnFocus: true }
   );
 
-  const markAsRead = async (id: string) => {
+  const markAsRead = useCallback(async (id: string) => {
     try {
       await mutate(
         (currentData) => currentData?.map((n) => n.id === id ? { ...n, isRead: true } : n),
@@ -26,7 +27,7 @@ export function useNotifications() {
       toast.error(i18next.t('notificationsPage.notificationUpdateFailed'));
       mutate();
     }
-  };
+  }, [mutate]);
 
   const unreadCount = Array.isArray(notifications) ? notifications.filter(n => !n.isRead).length : 0;
 

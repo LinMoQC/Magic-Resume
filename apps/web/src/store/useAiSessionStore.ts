@@ -7,6 +7,7 @@ import type {
   SkillId,
 } from '../app/dashboard/edit/_components/ai/types';
 import type { MultiPersonaResumeAnalysis } from '../types/agent/multi-persona';
+import type { FitReport } from '../types/agent/fit-report';
 
 export const AI_SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 export const AI_SESSION_STORAGE_PREFIX = 'ai-session:';
@@ -25,6 +26,7 @@ export interface AiSessionSnapshot {
   livingOpen: boolean;
   livingSkillId: SkillId | null;
   analysis: MultiPersonaResumeAnalysis | null;
+  fitReport: FitReport | null;
   updatedAt: number;
 }
 
@@ -89,6 +91,7 @@ export function createAiSessionStore(
     livingOpen: false,
     livingSkillId: null,
     analysis: null,
+    fitReport: null,
     updatedAt: now(),
   });
 
@@ -180,13 +183,26 @@ export function createAiSessionStore(
           if (saved && isExpired(session)) await db.removeItem(key);
         }
 
-        set((state) => {
-          const sessions = { ...state.sessions };
-          for (const [resumeId, session] of Object.entries(sessions)) {
-            if (isExpired(session)) delete sessions[resumeId];
+        const expiredIds = Object.entries(get().sessions)
+          .filter(([, session]) => isExpired(session))
+          .map(([resumeId]) => resumeId);
+
+        if (expiredIds.length > 0) {
+          set((state) => {
+            const sessions = { ...state.sessions };
+            for (const resumeId of expiredIds) delete sessions[resumeId];
+            return { sessions };
+          });
+          // Clear any pending debounced write for a pruned session so a stale timer
+          // can't fire (and leak) after the session is gone.
+          for (const resumeId of expiredIds) {
+            const timer = timers.get(resumeId);
+            if (timer) {
+              clearTimeout(timer);
+              timers.delete(resumeId);
+            }
           }
-          return { sessions };
-        });
+        }
       },
 
       flushSession: async (resumeId) => {

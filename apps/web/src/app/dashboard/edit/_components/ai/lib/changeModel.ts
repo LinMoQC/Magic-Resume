@@ -297,13 +297,22 @@ export function buildSelectionChange(
   };
 }
 
+/**
+ * Sections rendered by the item *name* (fieldMap.itemName) rather than a summary
+ * bullet. 'name' is a common fallback in every template's itemName candidate list,
+ * so inserting into 'name' is picked up across templates — whereas writing 'summary'
+ * here makes the inserted content invisible.
+ */
+const NAME_FIELD_SECTIONS = new Set(['skills', 'languages', 'certificates', 'awards', 'profiles']);
+
 /** A fresh target for an insert — made by the caller so its path is stable across the async call. */
 export function makeInsertTarget(sectionKey: string, title: string): EditableTarget {
+  const isNameField = NAME_FIELD_SECTIONS.has(sectionKey);
   return {
     sectionKey,
     itemId: `new-${nanoid(6)}`,
-    fieldKey: 'summary',
-    kind: 'html',
+    fieldKey: isNameField ? 'name' : 'summary',
+    kind: isNameField ? 'text' : 'html',
     label: `${title} · 新增一条`,
   };
 }

@@ -136,7 +136,13 @@ function replaceTextAtTarget(
   if (!needle) return null;
 
   const resume = cloneResume(current);
-  resume.sections[target.sectionKey][index][target.fieldKey] = value.replace(needle, newString);
+  // Replace the first occurrence by index rather than value.replace(needle, …): a
+  // plain-string needle only replaces the first match anyway, but String.replace also
+  // interprets '$' sequences in newString (e.g. a salary like "$1,000" or "$&") as
+  // replacement patterns and mangles the output. Slicing keeps newString literal.
+  const matchIndex = value.indexOf(needle);
+  resume.sections[target.sectionKey][index][target.fieldKey] =
+    value.slice(0, matchIndex) + newString + value.slice(matchIndex + needle.length);
   return { resume, selectionText: needle };
 }
 

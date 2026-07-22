@@ -6,8 +6,8 @@ import { useSettingStore } from '@/store/useSettingStore';
 import debounce from 'lodash/debounce';
 import BasicForm from './forms/BasicForm';
 import sidebarMenu from '@/lib/constants/sidebarMenu';
-import dynamic from 'next/dynamic';
 import SectionListWithModal from './forms/SectionListWithModal';
+import ResumePreviewPanel from './preview/ResumePreviewPanel';
 import FormSection from './forms/FormSection';
 import { dynamicFormFields } from '@/lib/constants/dynamicFormFields';
 import {
@@ -32,18 +32,14 @@ import useMobile from '@/hooks/useMobile';
 import MobileResumEdit from './mobile/MobileResumEdit';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
 import HeaderTab from './layout/HeaderTab';
 import { appLifecycle } from '@/lib/extensions/app-lifecycle';
 
-const ResumePreviewPanel = dynamic(() => import('./preview/ResumePreviewPanel'), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full h-full bg-desk flex items-center justify-center text-white">
-      <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-    </div>
-  )
-});
+// 预览面板静态引入:它本体很轻(重件 pdf.js / @react-pdf 都在更下层按需懒加载,见
+// PdfCanvasPreview 的 dynamic 与 pdf-export 的内部 import())。之前整个面板 dynamic 化,
+// 造成"转圈 spinner → dock 独自弹在黑画布上 → 纸才出现"的三段跳;静态引入后舞台、占位纸、
+// dock 同帧入场,加载故事从头到尾只有一张持续呼吸的纸。SSR 无虞:父组件在 store 加载完成前
+// 渲染的是 ResumeEditSkeleton,服务端不会走到本面板。
 
 type ResumeEditProps = {
   id: string;
@@ -270,11 +266,13 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     }
   };
 
-  // 自动同步逻辑 - 10000ms (10s) 防抖
+  // 自动同步:10s 防抖 + 45s maxWait。纯 trailing 防抖会被持续输入无限重置 —— 用户连续
+  // 写作几分钟,云端(分享链接 / AI read_resume / 其它设备)就几分钟拿不到新内容;maxWait
+  // 保证再怎么连续编辑,至多 45s 也会落一次云。
   const debouncedSync = useMemo(
     () => debounce(async () => {
       await syncToCloud();
-    }, 10000),
+    }, 10000, { maxWait: 45000 }),
     [syncToCloud]
   );
 
@@ -306,11 +304,55 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
     };
     
     triggerSync();
-    
-    return () => {
-      debouncedSync.cancel();
-    };
+
+    // 注意:cleanup 里不要 cancel。此 effect 每次编辑都重跑,cancel 会 ①卸载时把待同步
+    // 修改静默丢弃 ②每次击键清零 maxWait 的计时,让"最迟 45s 必落云"彻底失效(trailing
+    // 计时器 debounce 自己每次调用就会重置,无需 cancel 帮忙)。"待同步不再成立"的场景
+    // (关同步 / 无 activeResume)由 syncToCloud 入口的前置检查兜住。
   }, [activeResume, cloudSync, isStoreLoading, debouncedSync]);
+
+  // 离开编辑器(卸载)或切换简历时,把仍在防抖窗口里的待同步立即刷出去,而不是丢弃。
+  // flush 对无挂起调用是 no-op;syncToCloud 在 flush 触发时同步地快照 store 里的
+  // activeResume(此刻仍是旧简历),同步对象不会串。
+  useEffect(() => {
+    return () => {
+      debouncedSync.flush();
+    };
+  }, [id, debouncedSync]);
+
+  // 标签页隐藏 / 关闭时尽力刷出 —— 与 store 层 debouncedLocalPersist 的 flush-on-hide
+  // 同款模式(useResumeStore.ts 末尾)。分两档:
+  //   visibilitychange:hidden(切标签/切应用,页面还活着)→ axios flush,走完整同步算法;
+  //   pagehide(关标签/跳走,axios 不保送达)→ keepalive fetch(flushSyncOnExit),浏览器
+  //   托管送完;同时 cancel 防抖,避免 bfcache 恢复后重复推送。
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') void debouncedSync.flush();
+    };
+    const onPageHide = () => {
+      debouncedSync.cancel();
+      useResumeStore.getState().flushSyncOnExit();
+    };
+    window.addEventListener('pagehide', onPageHide);
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => {
+      window.removeEventListener('pagehide', onPageHide);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+    };
+  }, [debouncedSync]);
+
+  // 网络恢复时,若仍有未落云的修改(modified)或上次同步失败(error),立即补一次,
+  // 不必干等下一次编辑才触发。
+  useEffect(() => {
+    const onOnline = () => {
+      const { syncStatus: status } = useResumeStore.getState();
+      if (cloudSync && (status === 'modified' || status === 'error')) {
+        void syncToCloud();
+      }
+    };
+    window.addEventListener('online', onOnline);
+    return () => window.removeEventListener('online', onOnline);
+  }, [cloudSync, syncToCloud]);
 
   // 折叠分区 / 大纲轨跳转 / 滚动高亮
   const toggleSection = useCallback((key: string) => {
@@ -473,19 +515,21 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
   return (
     <>
       <main className="flex h-screen min-w-0 overflow-hidden bg-desk text-white flex-1">
-        {/* 左侧:大纲轨 + 可折叠表单面板 */}
-        <EditorFormPanel
-          renderSections={renderSections}
-          sectionOrder={(sectionOrder || []).map(s => ({ key: s.key, label: s.label }))}
-          activeSection={activeSection}
-          collapsed={leftCollapsed}
-          onToggleCollapse={toggleLeftPanel}
-          onJump={jumpToSection}
-          scrollRef={leftScrollRef}
-          onScroll={handleLeftScroll}
-        />
+        {/* 左侧:大纲轨 + 可折叠表单面板(入场:opacity-only,不动 fixed 定位) */}
+        <div className="editor-enter-left">
+          <EditorFormPanel
+            renderSections={renderSections}
+            sectionOrder={(sectionOrder || []).map(s => ({ key: s.key, label: s.label }))}
+            activeSection={activeSection}
+            collapsed={leftCollapsed}
+            onToggleCollapse={toggleLeftPanel}
+            onJump={jumpToSection}
+            scrollRef={leftScrollRef}
+            onScroll={handleLeftScroll}
+          />
+        </div>
         <div
-          className='min-w-0 flex-1 flex items-center justify-center bg-desk relative overflow-hidden transition-all duration-300'
+          className='min-w-0 flex-1 flex items-center justify-center bg-desk relative overflow-hidden transition-all duration-300 editor-enter-stage'
           style={{
             marginLeft: leftPanelWidth(leftCollapsed),
             marginRight: rightWorkspaceInset
@@ -508,13 +552,15 @@ export default function ResumeEdit({ id }: ResumeEditProps) {
         </div>
       </main>
 
-      {/* 模板面板 */}
-      <TemplatePanel
-        rightCollapsed={rightCollapsed}
-        setRightCollapsed={setRightPanelCollapsed}
-        onSelectTemplate={handleSelectTemplate}
-        currentTemplateId={currentTemplateId}
-      />
+      {/* 模板面板(入场:opacity-only,不动 fixed 定位) */}
+      <div className="editor-enter-right">
+        <TemplatePanel
+          rightCollapsed={rightCollapsed}
+          setRightCollapsed={setRightPanelCollapsed}
+          onSelectTemplate={handleSelectTemplate}
+          currentTemplateId={currentTemplateId}
+        />
+      </div>
     </>
   );
 }

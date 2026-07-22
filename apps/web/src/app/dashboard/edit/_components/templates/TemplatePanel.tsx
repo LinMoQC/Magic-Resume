@@ -77,6 +77,7 @@ export default function TemplatePanel({
     colors: true,
   });
   const [active, setActive] = useState<SectionId>("template");
+  const [showAdvancedColors, setShowAdvancedColors] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -105,6 +106,18 @@ export default function TemplatePanel({
     () => (baseTemplate ? mergeTemplateConfig(baseTemplate, activeResume?.customTemplate) : null),
     [baseTemplate, activeResume?.customTemplate],
   );
+
+  // 页眉控件仅当模板含 Header 组件时显示(Header 完整消费这些 props)。
+  const headerComponent = useMemo(
+    () => working?.components.find((c) => c.type === "Header"),
+    [working],
+  );
+  const headerProps = (headerComponent?.props ?? {}) as {
+    avatarPosition?: "left" | "right";
+    avatarWidth?: number;
+    avatarRounded?: boolean;
+    contactStyle?: "icon" | "label";
+  };
 
   const hasCustomizations = useMemo(() => {
     const c = activeResume?.customTemplate;
@@ -157,15 +170,17 @@ export default function TemplatePanel({
     [working, applyTemplate],
   );
 
-  const updateBorderRadius = useCallback(
-    (md: string) => {
+  // 头像 / 页眉:改动落到 Header / ProfileCard 组件的 props(经 extract/merge round-trip)。
+  const updateHeader = useCallback(
+    (patch: Record<string, unknown>) => {
       if (!working) return;
       applyTemplate({
         ...working,
-        designTokens: {
-          ...working.designTokens,
-          borderRadius: { ...working.designTokens.borderRadius, md, lg: md },
-        },
+        components: working.components.map((c) =>
+          c.type === "Header" || c.type === "ProfileCard"
+            ? { ...c, props: { ...c.props, ...patch } }
+            : c,
+        ),
       });
     },
     [working, applyTemplate],
@@ -248,7 +263,7 @@ export default function TemplatePanel({
         <button
           type="button"
           onClick={() => setStoreOpen(true)}
-          className="group flex w-full items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3 text-left transition-colors duration-150 hover:border-sky-400/40 hover:bg-white/[0.05]"
+          className="group flex w-full items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3 text-left transition duration-150 active:scale-[0.99] hover:border-sky-400/40 hover:bg-white/[0.05]"
         >
           <div className="h-20 w-[60px] shrink-0 overflow-hidden rounded-md border border-white/10 bg-neutral-900 p-1">
             <ResumeMiniPreview template={working} />
@@ -289,6 +304,18 @@ export default function TemplatePanel({
         registerRef={(el) => (sectionRefs.current.layout = el)}
       >
         <SegmentedField
+          label={t("templateCustomizer.layout.pageSize")}
+          options={[
+            { label: "A4", value: "A4" },
+            { label: "Letter", value: "Letter" },
+          ]}
+          value={working.layout.pageSize ?? "A4"}
+          onChange={(v) =>
+            // 切换纸张同时把 containerWidth 设为该规格标准页宽(A4 794 / Letter 816)。
+            updateLayout({ pageSize: v as "A4" | "Letter", containerWidth: v === "Letter" ? "816px" : "794px" })
+          }
+        />
+        <SegmentedField
           label={t("templateCustomizer.layout.density")}
           options={[
             { label: t("templateCustomizer.layout.densityCompact"), value: 0.5 },
@@ -326,15 +353,47 @@ export default function TemplatePanel({
           display={working.layout.gap}
           onChange={(v) => updateLayout({ gap: `${v}px` })}
         />
-        <SliderField
-          label={t("templateCustomizer.layout.borderRadius")}
-          value={parseCssPixelValue(working.designTokens.borderRadius.md)}
-          min={0}
-          max={16}
-          step={1}
-          display={working.designTokens.borderRadius.md}
-          onChange={(v) => updateBorderRadius(`${v}px`)}
-        />
+
+        {/* 两栏比例:仅两栏模板可见。leftWidth = 固定侧栏宽,gap = 栏间距;
+            rightWidth 恒为 1fr(填满剩余),不暴露。 */}
+        {working.layout.type === "two-column" && working.layout.twoColumn && (
+          <>
+            <SliderField
+              label={t("templateCustomizer.layout.sidebarWidth")}
+              value={parseCssPixelValue(working.layout.twoColumn.leftWidth)}
+              min={160}
+              max={360}
+              step={10}
+              display={working.layout.twoColumn.leftWidth}
+              onChange={(v) =>
+                updateLayout({
+                  twoColumn: {
+                    leftWidth: `${v}px`,
+                    rightWidth: working.layout.twoColumn?.rightWidth ?? "1fr",
+                    gap: working.layout.twoColumn?.gap ?? "0",
+                  },
+                })
+              }
+            />
+            <SliderField
+              label={t("templateCustomizer.layout.columnGap")}
+              value={parseCssPixelValue(working.layout.twoColumn.gap)}
+              min={0}
+              max={48}
+              step={2}
+              display={working.layout.twoColumn.gap}
+              onChange={(v) =>
+                updateLayout({
+                  twoColumn: {
+                    leftWidth: working.layout.twoColumn?.leftWidth ?? "280px",
+                    rightWidth: working.layout.twoColumn?.rightWidth ?? "1fr",
+                    gap: `${v}px`,
+                  },
+                })
+              }
+            />
+          </>
+        )}
 
         <div className="space-y-4 pt-1">
           <ToggleField
@@ -350,6 +409,49 @@ export default function TemplatePanel({
             onChange={(v) => updateLayout({ showTitleIcon: v })}
           />
         </div>
+
+        {/* 头像 / 页眉:仅含 Header 组件的模板显示 */}
+        {headerComponent && (
+          <div className="space-y-5 pt-1">
+            <GroupLabel>{t("templateCustomizer.header.title")}</GroupLabel>
+            <SegmentedField
+              label={t("templateCustomizer.header.avatarShape")}
+              options={[
+                { label: t("templateCustomizer.header.shapeRound"), value: "round" },
+                { label: t("templateCustomizer.header.shapeSquare"), value: "square" },
+              ]}
+              value={headerProps.avatarRounded === false ? "square" : "round"}
+              onChange={(v) => updateHeader({ avatarRounded: v === "round" })}
+            />
+            <SegmentedField
+              label={t("templateCustomizer.header.avatarPosition")}
+              options={[
+                { label: t("templateCustomizer.header.positionLeft"), value: "left" },
+                { label: t("templateCustomizer.header.positionRight"), value: "right" },
+              ]}
+              value={headerProps.avatarPosition ?? "left"}
+              onChange={(v) => updateHeader({ avatarPosition: v })}
+            />
+            <SliderField
+              label={t("templateCustomizer.header.avatarSize")}
+              value={headerProps.avatarWidth ?? 40}
+              min={32}
+              max={96}
+              step={4}
+              display={`${headerProps.avatarWidth ?? 40}px`}
+              onChange={(v) => updateHeader({ avatarWidth: v, avatarHeight: v })}
+            />
+            <SegmentedField
+              label={t("templateCustomizer.header.contactStyle")}
+              options={[
+                { label: t("templateCustomizer.header.contactIcon"), value: "icon" },
+                { label: t("templateCustomizer.header.contactLabel"), value: "label" },
+              ]}
+              value={headerProps.contactStyle ?? "icon"}
+              onChange={(v) => updateHeader({ contactStyle: v })}
+            />
+          </div>
+        )}
       </AccordionSection>
 
       {/* Typography */}
@@ -371,19 +473,6 @@ export default function TemplatePanel({
           }
           fonts={PANEL_FONTS}
         />
-        {working.designTokens.typography.fontFamily.secondary && (
-          <FontField
-            label={t("templateCustomizer.typography.secondaryFont")}
-            value={working.designTokens.typography.fontFamily.secondary}
-            onChange={(font) =>
-              updateTypography({
-                fontFamily: { ...working.designTokens.typography.fontFamily, secondary: font },
-              })
-            }
-            fonts={PANEL_FONTS}
-          />
-        )}
-
         <div className="space-y-5 pt-1">
           <GroupLabel>{t("templateCustomizer.typography.fontSize")}</GroupLabel>
           <SliderField
@@ -465,12 +554,6 @@ export default function TemplatePanel({
             presets={PANEL_PRESET_COLORS}
           />
           <ColorField
-            label={t("templateCustomizer.colors.secondary")}
-            value={working.designTokens.colors.secondary}
-            onChange={(c) => updateColors({ secondary: c })}
-            presets={PANEL_PRESET_COLORS}
-          />
-          <ColorField
             label={t("templateCustomizer.colors.text")}
             value={working.designTokens.colors.text}
             onChange={(c) => updateColors({ text: c })}
@@ -489,6 +572,37 @@ export default function TemplatePanel({
               onChange={(c) => updateColors({ sidebar: c })}
               presets={PANEL_PRESET_COLORS}
             />
+          )}
+        </div>
+
+        {/* 高级:边框 / 背景色。默认收起,保持核心配色区干净(仅 3 色)。 */}
+        <div className="pt-1">
+          <button
+            type="button"
+            onClick={() => setShowAdvancedColors((v) => !v)}
+            className="flex w-full items-center justify-between text-[12px] font-medium text-neutral-400 transition-colors duration-150 hover:text-neutral-200"
+          >
+            {t("templateCustomizer.colors.advanced")}
+            <ChevronRight
+              size={13}
+              className={cn("transition-transform duration-150", showAdvancedColors && "rotate-90")}
+            />
+          </button>
+          {showAdvancedColors && (
+            <div className="space-y-5 pt-4">
+              <ColorField
+                label={t("templateCustomizer.colors.border")}
+                value={working.designTokens.colors.border}
+                onChange={(c) => updateColors({ border: c })}
+                presets={PANEL_PRESET_COLORS}
+              />
+              <ColorField
+                label={t("templateCustomizer.colors.background")}
+                value={working.designTokens.colors.background}
+                onChange={(c) => updateColors({ background: c })}
+                presets={PANEL_PRESET_COLORS}
+              />
+            </div>
           )}
         </div>
       </AccordionSection>

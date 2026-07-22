@@ -1,22 +1,15 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-
 import { ShareModal } from '@/app/dashboard/edit/_components/modals/ShareModal';
+import { useInterceptModalRoute } from '@/hooks/useInterceptModalRoute';
 
 export default function ShareModalPage() {
-  const router = useRouter();
-  
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      router.back();
-    }
-  };
+  const { open, close } = useInterceptModalRoute();
 
   return (
     <ShareModal
-      isOpen={true}
-      onClose={() => handleOpenChange(false)}
+      isOpen={open}
+      onClose={close}
     />
   );
 }

@@ -47,6 +47,7 @@ export type CustomTemplateConfig = {
   };
   layout?: {
     type?: 'single-column' | 'two-column' | 'sidebar' | 'grid';
+    pageSize?: 'A4' | 'Letter';
     containerWidth?: string;
     containerHeight?: string;
     padding?: string;
@@ -63,6 +64,14 @@ export type CustomTemplateConfig = {
     };
     showTitleDivider?: boolean;
     showTitleIcon?: boolean;
+  };
+  /** 头像 / 页眉样式覆盖,合并进 Header / ProfileCard 组件的 props。 */
+  header?: {
+    avatarPosition?: 'left' | 'right';
+    avatarWidth?: number;
+    avatarHeight?: number;
+    avatarRounded?: boolean;
+    contactStyle?: 'icon' | 'label';
   };
 };
 

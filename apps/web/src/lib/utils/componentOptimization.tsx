@@ -39,12 +39,31 @@ export const AIComponents = {
  * 编辑器相关组件的懒加载
  */
 export const EditorComponents = {
-  // TipTap编辑器
+  // TipTap编辑器 — 骨架镜像最终布局(工具栏条 + 三行文本),同 token 同高度,
+  // 加载完成零跳动;外层描边由调用方容器提供,这里不再自带 border。
   TiptapEditor: createOptimizedComponent(
     () => import('@/components/features/resume/TiptapEditor'),
     {
       ssr: false,
-      loading: () => <div className="animate-pulse bg-neutral-800 h-[200px] rounded border border-neutral-700" />,
+      loading: () => (
+        <div aria-hidden className="animate-pulse">
+          <div className="flex h-10 items-center gap-1.5 border-b border-white/[0.06] px-2">
+            {[0, 1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="h-6 w-6 rounded-md bg-white/[0.05]" />
+            ))}
+            <div className="mx-1 h-4 w-px bg-white/[0.06]" />
+            {[6, 7, 8].map((i) => (
+              <div key={i} className="h-6 w-6 rounded-md bg-white/[0.05]" />
+            ))}
+          </div>
+          <div className="min-h-[160px] space-y-2.5 px-4 py-4">
+            <div className="h-3 w-2/5 rounded bg-white/[0.06]" />
+            <div className="h-3 w-11/12 rounded bg-white/[0.04]" />
+            <div className="h-3 w-4/5 rounded bg-white/[0.04]" />
+            <div className="h-3 w-3/5 rounded bg-white/[0.04]" />
+          </div>
+        </div>
+      ),
     }
   ),
 

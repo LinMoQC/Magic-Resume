@@ -11,13 +11,17 @@ import { AiFab } from '../layout/AiFab';
 import AiThinkingOverlay from '../modals/AiThinkingOverlay';
 import { useTranslation } from 'react-i18next';
 import { isCloudMode } from '@/lib/config/app';
+import { PaperSkeleton } from './PaperSkeleton';
 
 // The canvas preview is client-only: pdf.js needs window/devicePixelRatio and a
 // <canvas>, and registers a worker at module load — none of which work during SSR.
 // Load it with ssr:false so it renders only in the browser.
+// loading 必须给同款占位纸:这个 chunk 含 pdf.js,加载期不短;没有 fallback 时画布是
+// 纯黑的,dock 悬浮在黑洞上("工具栏浮在空画布"的丑态)。占位纸与组件内部首帧 loader
+// 同构同相位(见 PaperSkeleton),chunk 就绪的交接肉眼不可见。
 const PdfCanvasPreview = dynamic(
   () => import('./PdfCanvasPreview').then((m) => m.PdfCanvasPreview),
-  { ssr: false },
+  { ssr: false, loading: () => <PaperSkeleton /> },
 );
 
 interface ResumePreviewPanelProps {

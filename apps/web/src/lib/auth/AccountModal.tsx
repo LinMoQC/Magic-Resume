@@ -22,6 +22,8 @@ import { isCloudMode } from '@/lib/config/app';
 import { ModalShell } from '@/components/ui/ModalShell';
 import { useAccountUiStore } from '@/store/useAccountUiStore';
 import { useResumeStore } from '@/store/useResumeStore';
+import { useEntitlement } from '@/lib/billing/useEntitlement';
+import type { Entitlement } from '@/lib/billing/types';
 import { cn } from '@/lib/utils';
 
 type Tab = 'profile' | 'security' | 'activity';
@@ -51,11 +53,17 @@ export function AccountModal() {
 
 function CloudAccountModal() {
   const { t, i18n } = useTranslation();
-  const { accountOpen, closeAccount } = useAccountUiStore();
+  const { accountOpen, closeAccount, openPricing } = useAccountUiStore();
   const { isLoaded, user } = useUser();
   const resumes = useResumeStore((s) => s.resumes);
+  const { data: entitlement } = useEntitlement(accountOpen);
   const [tab, setTab] = useState<Tab>('profile');
   const [copied, setCopied] = useState<string | null>(null);
+
+  const goUpgrade = () => {
+    closeAccount();
+    openPricing();
+  };
 
   const locale = i18n.language.startsWith('en') ? 'en-US' : 'zh-CN';
   const fmtDate = (d?: Date | number | string | null) =>
@@ -158,8 +166,9 @@ function CloudAccountModal() {
           <p className="py-16 text-center text-sm text-neutral-500">{t('account.profile.loadFailed')}</p>
         ) : (
           <>
-            {/* header */}
-            <div className="flex items-start gap-4">
+            {/* header — items-center keeps the short avatar block vertically
+                balanced against the taller usage card on the right */}
+            <div className="flex items-center gap-4">
               <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral-800 text-[18px] font-medium text-neutral-300 ring-1 ring-white/10">
                 {user.imageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -175,6 +184,12 @@ function CloudAccountModal() {
                 </div>
                 <p className="mt-0.5 text-[13px] text-neutral-500">{lastActive}</p>
               </div>
+
+              {/* subscription-usage cluster — the single place subscription info lives;
+                  clicking it opens the pricing modal */}
+              {entitlement && (
+                <UsageCluster entitlement={entitlement} onClick={goUpgrade} fmtDateTime={fmtDateTime} t={t} />
+              )}
             </div>
 
             {/* tabs */}
@@ -290,6 +305,7 @@ function CloudAccountModal() {
                     </Section>
                   </>
                 )}
+
               </div>
 
               {/* side rail */}
@@ -419,6 +435,80 @@ function SideCopy({
         )}
       </button>
     </div>
+  );
+}
+
+/* ---- subscription usage ---- */
+
+type TFn = (k: string, o?: Record<string, unknown>) => string;
+
+function remainingLabel(used: number, limit: number, t: TFn) {
+  if (!limit || limit <= 0) return t('account.subscription.unlimited');
+  return t('account.subscription.remaining', { count: Math.max(0, limit - used) });
+}
+
+function MiniBar({ used, limit }: { used: number; limit: number }) {
+  const unlimited = !limit || limit <= 0;
+  const pct = unlimited ? 100 : Math.min(100, Math.round((used / limit) * 100));
+  return (
+    <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-white/[0.06]">
+      <div
+        className={cn(
+          'h-full rounded-full bg-gradient-to-r from-sky-500 to-sky-400',
+          unlimited && 'opacity-60',
+        )}
+        style={{ width: `${pct}%` }}
+      />
+    </div>
+  );
+}
+
+function UsageCluster({
+  entitlement,
+  onClick,
+  fmtDateTime,
+  t,
+}: {
+  entitlement: Entitlement;
+  onClick: () => void;
+  fmtDateTime: (d?: Date | number | string | null) => string;
+  t: TFn;
+}) {
+  const { usage, currentPlan } = entitlement;
+  const rows = [
+    { label: t('account.subscription.today'), used: usage.dailyUsed, limit: usage.dailyLimit, resetAt: usage.dailyResetAt },
+    { label: t('account.subscription.week'), used: usage.weeklyUsed, limit: usage.weeklyLimit, resetAt: usage.weeklyResetAt },
+  ];
+  // Horizontal, header-height layout — the card must stay roughly as tall as the
+  // avatar block or the whole header inflates and the left side looks stranded.
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={t('account.menu.upgrade')}
+      className="group hidden shrink-0 items-center gap-3.5 rounded-xl border border-white/[0.08] bg-gradient-to-br from-sky-500/[0.08] via-white/[0.02] to-white/[0.02] p-3 text-left transition-colors duration-150 hover:border-sky-400/40 sm:flex"
+    >
+      <div className="flex flex-col items-start gap-1">
+        <span className="whitespace-nowrap text-[11px] text-neutral-500">{t('account.subscription.currentPlan')}</span>
+        <span className="inline-flex h-5 items-center rounded-md border border-sky-400/25 bg-sky-400/10 px-1.5 text-[11px] font-semibold text-sky-300">
+          {currentPlan?.name ?? '—'}
+        </span>
+      </div>
+      <div className="w-px self-stretch bg-white/[0.08]" />
+      <div className="w-48 space-y-2">
+        {rows.map((row) => (
+          <div
+            key={row.label}
+            className="flex items-center gap-2 text-[11px]"
+            title={row.resetAt ? t('account.subscription.resetAt', { time: fmtDateTime(row.resetAt) }) : undefined}
+          >
+            <span className="shrink-0 text-neutral-400">{row.label}</span>
+            <MiniBar used={row.used} limit={row.limit} />
+            <span className="shrink-0 tabular-nums text-neutral-300">{remainingLabel(row.used, row.limit, t)}</span>
+          </div>
+        ))}
+      </div>
+    </button>
   );
 }
 

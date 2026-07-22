@@ -23,13 +23,23 @@ export const customInfoFieldSchema = z.object({
   value: z.string(),
 });
 
+// Reject the URL schemes that make a rendered <a href> executable (defense in
+// depth behind the render-layer safeHref guard). Scheme-less domains and empty
+// strings stay valid so existing resumes and the default resume still parse.
+const UNSAFE_URL_SCHEME = /^\s*(?:javascript|data|vbscript):/i;
+const safeUrlString = z
+  .string()
+  .refine((v) => !UNSAFE_URL_SCHEME.test(v), {
+    message: 'URL must not use a javascript:, data:, or vbscript: scheme',
+  });
+
 export const infoSchema = z.object({
   fullName: z.string(),
   headline: z.string(),
   email: z.string(),
   phoneNumber: z.string(),
   address: z.string(),
-  website: z.string(),
+  website: safeUrlString,
   avatar: z.string(),
   customFields: z.array(customInfoFieldSchema).optional(),
 });

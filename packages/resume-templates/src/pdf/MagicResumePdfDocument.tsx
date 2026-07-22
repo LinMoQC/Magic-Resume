@@ -32,7 +32,7 @@ import type { InfoType, Resume, SectionItem } from '../types/resume';
 import { getPdfFontStack, getPdfRichTextFontFamily } from '../font-family';
 import { PdfLucideIcon } from './PdfLucideIcon';
 import { PdfRichText } from './PdfRichText';
-import { FREE_FORM_PAGE_MIN_HEIGHT_STYLE, FREE_FORM_PAGE_SIZE } from './page-size';
+import { FREE_FORM_PAGE_SIZE, getFreeFormPageMinHeight } from './page-size';
 
 type PdfStyle = Style | Style[];
 
@@ -40,6 +40,12 @@ export interface MagicResumePdfDocumentProps {
   data: Resume;
   template: MagicTemplateDSL;
   locale?: string;
+  /**
+   * When the resume contains CJK ideographs outside the subset fonts, the caller
+   * registers the full fonts and sets this so the document references the full
+   * font families (see pdf/browser.tsx). Defaults to the subset families.
+   */
+  cjkFallback?: boolean;
 }
 
 const ZH_TITLE_BY_SECTION_KEY: Record<string, string> = {
@@ -210,6 +216,7 @@ interface RenderContext {
   showTitleDivider: boolean;
   showTitleIcon: boolean;
   richTextFontFamily: string;
+  cjkFallback: boolean;
   locale?: string;
 }
 
@@ -366,7 +373,7 @@ const HeaderBlock = ({ info, component, context }: {
     <View
       wrap={false}
       style={[
-        { flexDirection: 'row', alignItems: 'flex-start', gap: 12, marginBottom: cssSizeToPoints(context.spacing.lg, 12) },
+        { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
         toPdfComponentStyle(component.style),
       ]}
     >
@@ -425,7 +432,7 @@ const ProfileBlock = ({ info, component, sidebar, context }: {
     <View
       wrap={false}
       style={[
-        { alignItems: 'center', gap: contentGap, marginBottom: cssSizeToPoints(context.spacing.lg, 12) },
+        { alignItems: 'center', gap: contentGap },
         toPdfComponentStyle(component.style),
       ]}
     >
@@ -479,7 +486,6 @@ const ContactBlock = ({ info, component, sidebar, context }: {
       style={[
         {
           gap: cssSizeToPoints(context.spacing.md, 12),
-          marginBottom: cssSizeToPoints(context.spacing.lg, 12),
         },
         toPdfComponentStyle(component.style),
       ]}
@@ -541,9 +547,9 @@ const DefaultSectionBlock = ({ component, items, context }: {
   const fields = component.fieldMap ?? {};
   const bodyFontSize = cssSizeToPoints(context.typography.fontSize.sm, 9);
   const fieldWeight = context.typography.fontWeight.medium ?? 500;
-  const dateFontFamily = getPdfFontStack(context.typography.fontFamily.primary);
+  const dateFontFamily = getPdfFontStack(context.typography.fontFamily.primary, context.cjkFallback);
   return (
-    <View style={[{ marginBottom: cssSizeToPoints(context.spacing.lg, 12) }, toPdfComponentStyle(component.style)]}>
+    <View style={toPdfComponentStyle(component.style)}>
       <SectionTitle title={resolveTitle(component, context.locale)} icon={getSectionIcon(component)} context={context} />
       <View style={{ gap: cssSizeToPoints(context.spacing.md, 8) }}>
         {items.map((item, index) => {
@@ -591,9 +597,9 @@ const ListSectionBlock = ({ component, items, context }: {
   const fields = component.fieldMap ?? {};
   const bodyFontSize = cssSizeToPoints(context.typography.fontSize.sm, 9);
   const fieldWeight = context.typography.fontWeight.medium ?? 500;
-  const dateFontFamily = getPdfFontStack(context.typography.fontFamily.primary);
+  const dateFontFamily = getPdfFontStack(context.typography.fontFamily.primary, context.cjkFallback);
   return (
-    <View style={[{ marginBottom: cssSizeToPoints(context.spacing.lg, 12) }, toPdfComponentStyle(component.style)]}>
+    <View style={toPdfComponentStyle(component.style)}>
       <SectionTitle title={resolveTitle(component, context.locale)} icon={getSectionIcon(component)} context={context} />
       <View style={{ gap: 6 }}>
         {items.map((item, index) => {
@@ -631,7 +637,7 @@ const CompactListBlock = ({ component, items, sidebar, context }: {
   const fields: FieldMapping = component.fieldMap ?? {};
   const color = component.style?.color ?? (sidebar ? context.colors.background : context.colors.text);
   return (
-    <View style={[{ marginBottom: cssSizeToPoints(context.spacing.lg, 12) }, toPdfComponentStyle(component.style)]}>
+    <View style={toPdfComponentStyle(component.style)}>
       <SectionTitle
         title={resolveTitle(component, context.locale)}
         icon={getSectionIcon(component)}
@@ -664,9 +670,9 @@ const TimelineBlock = ({ component, items, context }: {
 }) => {
   const fields = component.fieldMap ?? {};
   const color = component.style?.color ?? context.colors.text;
-  const dateFontFamily = getPdfFontStack(context.typography.fontFamily.primary);
+  const dateFontFamily = getPdfFontStack(context.typography.fontFamily.primary, context.cjkFallback);
   return (
-    <View style={[{ marginBottom: cssSizeToPoints(context.spacing.lg, 12) }, toPdfComponentStyle(component.style)]}>
+    <View style={toPdfComponentStyle(component.style)}>
       <SectionTitle
         title={resolveTitle(component, context.locale)}
         icon={getSectionIcon(component)}
@@ -740,15 +746,22 @@ const ComponentBlock = ({ component, data, sidebar, context }: {
   return <DefaultSectionBlock component={component} items={items} context={context} />;
 };
 
-export const MagicResumePdfDocument = ({ data, template, locale }: MagicResumePdfDocumentProps) => {
+export const MagicResumePdfDocument = ({ data, template, locale, cjkFallback = false }: MagicResumePdfDocumentProps) => {
   const { colors, typography, spacing } = template.designTokens;
+  // 页宽 / 模块间距取自 layout(自定义面板的容器宽度 / 模块间距滑杆写入处),
+  // 缺省回落 A4 宽与 spacing.lg —— 硬编码会让这两项自定义静默失效。
+  // 模块间距用父容器 gap 而非各块 marginBottom:与 HTML 渲染器 flex gap 语义一致,
+  // 组件自身 style 的 margin(如 classic header 的 8px)是叠加而不是覆盖。
+  const pageWidth = cssSizeToPoints(template.layout.containerWidth, FREE_FORM_PAGE_SIZE.width);
+  const sectionGap = cssSizeToPoints(template.layout.gap, cssSizeToPoints(spacing.lg, 12));
   const context: RenderContext = {
     colors,
     typography,
     spacing,
     showTitleDivider: template.layout.showTitleDivider !== false,
     showTitleIcon: template.layout.showTitleIcon !== false,
-    richTextFontFamily: getPdfRichTextFontFamily(typography.fontFamily.primary),
+    richTextFontFamily: getPdfRichTextFontFamily(typography.fontFamily.primary, cjkFallback),
+    cjkFallback,
     locale,
   };
   const sorted = sortComponents(template, data);
@@ -758,12 +771,18 @@ export const MagicResumePdfDocument = ({ data, template, locale }: MagicResumePd
   const baseStyle: Style = {
     backgroundColor: colors.background,
     color: colors.text,
-    fontFamily: getPdfFontStack(typography.fontFamily.primary) as unknown as string,
+    fontFamily: getPdfFontStack(typography.fontFamily.primary, cjkFallback) as unknown as string,
     fontSize: cssSizeToPoints(typography.fontSize.sm, 9),
     lineHeight,
+    // 字距:HTML 渲染器一直消费,PDF 之前漏读 → 编辑器主画布(PDF)里字距滑杆无效。
+    letterSpacing: cssSizeToPoints(typography.letterSpacing, 0),
   };
   const padding = cssSizeToPoints(template.layout.padding, 24);
   const columnGap = cssSizeToPoints(template.layout.twoColumn?.gap, 0);
+  const pageSize = { width: pageWidth };
+  const pageMinHeightStyle: Style = {
+    minHeight: getFreeFormPageMinHeight(pageWidth, template.layout.pageSize),
+  };
 
   return (
     <Document
@@ -776,14 +795,15 @@ export const MagicResumePdfDocument = ({ data, template, locale }: MagicResumePd
     >
       {template.layout.type === 'two-column' && template.layout.twoColumn ? (
         <Page
-          size={FREE_FORM_PAGE_SIZE}
-          style={[baseStyle, FREE_FORM_PAGE_MIN_HEIGHT_STYLE, { flexDirection: 'row', gap: columnGap }]}
+          size={pageSize}
+          style={[baseStyle, pageMinHeightStyle, { flexDirection: 'row', gap: columnGap }]}
         >
           <View
             style={{
               width: cssSizeToPoints(template.layout.twoColumn.leftWidth),
               backgroundColor: colors.sidebar ?? colors.primary,
               padding,
+              gap: sectionGap,
             }}
           >
             {sidebar.map((component) => <ComponentBlock key={component.id} component={component} data={data} sidebar context={context} />)}
@@ -793,14 +813,15 @@ export const MagicResumePdfDocument = ({ data, template, locale }: MagicResumePd
               flexGrow: 1,
               flexShrink: 1,
               padding,
+              gap: sectionGap,
             }}
           >
             {main.map((component) => <ComponentBlock key={component.id} component={component} data={data} sidebar={false} context={context} />)}
           </View>
         </Page>
       ) : (
-        <Page size={FREE_FORM_PAGE_SIZE} style={[baseStyle, FREE_FORM_PAGE_MIN_HEIGHT_STYLE]}>
-          <View style={{ padding }}>
+        <Page size={pageSize} style={[baseStyle, pageMinHeightStyle]}>
+          <View style={{ padding, gap: sectionGap }}>
             {main.map((component) => <ComponentBlock key={component.id} component={component} data={data} sidebar={false} context={context} />)}
           </View>
         </Page>

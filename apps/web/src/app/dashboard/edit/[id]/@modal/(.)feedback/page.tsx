@@ -1,20 +1,14 @@
 'use client';
-import { useRouter } from 'next/navigation';
 import { FeedbackModal } from '@/app/dashboard/edit/_components/modals/FeedbackModal';
+import { useInterceptModalRoute } from '@/hooks/useInterceptModalRoute';
 
 export default function FeedbackModalPage() {
-  const router = useRouter();
-  
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      router.back();
-    }
-  };
+  const { open, close } = useInterceptModalRoute();
 
   return (
     <FeedbackModal
-      open={true}
-      onOpenChange={handleOpenChange}
+      open={open}
+      onOpenChange={(next) => { if (!next) close(); }}
     />
   );
 }

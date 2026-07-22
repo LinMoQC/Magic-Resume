@@ -1,6 +1,6 @@
 import { ChevronLeft, History, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useSettingStore } from '@/store/useSettingStore';
 import { isCloudMode } from '@/lib/config/app';
@@ -24,6 +24,7 @@ interface HeaderTabProps {
 export default function HeaderTab({ updatedAt, syncStatus = 'saved', onVersionClick, onFeedbackClick }: HeaderTabProps) {
     const { t } = useTranslation();
     const cloudSync = useSettingStore((state) => state.cloudSync);
+    const reduce = useReducedMotion();
 
     // 紧凑同步状态:一颗状态点 + 短词;syncing 时呼吸扩散;完整时间在外层 title 里。
     const status = (() => {
@@ -72,7 +73,7 @@ export default function HeaderTab({ updatedAt, syncStatus = 'saved', onVersionCl
                                 onClick={onVersionClick}
                                 aria-label={t('header.versionHistory')}
                                 type="button"
-                                className="group/htip relative flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-white/[0.06] hover:text-neutral-100"
+                                className="group/htip relative flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 transition active:scale-95 hover:bg-white/[0.06] hover:text-neutral-100"
                             >
                                 <History size={16} />
                                 <span className="pointer-events-none absolute left-1/2 top-full z-[60] mt-2 -translate-x-1/2 whitespace-nowrap rounded-md border border-neutral-800 bg-neutral-900 px-2 py-0.5 text-xs text-neutral-100 shadow-lg shadow-black/40 opacity-0 transition-opacity duration-150 group-hover/htip:opacity-100">
@@ -85,7 +86,7 @@ export default function HeaderTab({ updatedAt, syncStatus = 'saved', onVersionCl
                                 onClick={onFeedbackClick}
                                 aria-label={t('tools.feedback')}
                                 type="button"
-                                className="group/htip relative flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-white/[0.06] hover:text-neutral-100"
+                                className="group/htip relative flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 transition active:scale-95 hover:bg-white/[0.06] hover:text-neutral-100"
                             >
                                 <MessageCircle size={16} />
                                 <span className="pointer-events-none absolute left-1/2 top-full z-[60] mt-2 -translate-x-1/2 whitespace-nowrap rounded-md border border-neutral-800 bg-neutral-900 px-2 py-0.5 text-xs text-neutral-100 shadow-lg shadow-black/40 opacity-0 transition-opacity duration-150 group-hover/htip:opacity-100">
@@ -106,9 +107,21 @@ export default function HeaderTab({ updatedAt, syncStatus = 'saved', onVersionCl
                                     {status.pulse && (
                                         <span className={`absolute inline-flex h-full w-full animate-ping rounded-full ${status.dot} opacity-75`} />
                                     )}
-                                    <span className={`relative inline-flex h-1.5 w-1.5 rounded-full ${status.dot}`} />
+                                    <span className={`relative inline-flex h-1.5 w-1.5 rounded-full ${status.dot} transition-colors duration-300`} />
                                 </span>
-                                <span className={`whitespace-nowrap text-xs ${status.text}`}>{status.word}</span>
+                                {/* C3:同步状态几态切换用极轻的纵向 crossfade,替代硬切;reduced-motion 下直切 */}
+                                <AnimatePresence mode="wait" initial={false}>
+                                    <motion.span
+                                        key={syncStatus}
+                                        initial={{ opacity: 0, y: reduce ? 0 : 2 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: reduce ? 0 : -2 }}
+                                        transition={{ duration: reduce ? 0 : 0.18, ease: 'easeOut' }}
+                                        className={`whitespace-nowrap text-xs ${status.text}`}
+                                    >
+                                        {status.word}
+                                    </motion.span>
+                                </AnimatePresence>
                             </div>
                         </>
                     )}

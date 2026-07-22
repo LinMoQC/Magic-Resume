@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" shape-rendering="crispEdges">
+  <!-- 桌宠的静态帧(聊天头像用):同一姿态,无动画 -->
+  <rect x="7" y="19" width="3" height="3" fill="#2fa8ea"/>
+  <rect x="14" y="19" width="3" height="3" fill="#2fa8ea"/>
+  <g fill="#dbeffe" opacity="0.9">
+    <rect x="11.5" y="0.5" width="1" height="3"/>
+    <rect x="10.5" y="1.5" width="3" height="1"/>
+  </g>
+  <rect x="11.5" y="4" width="1" height="3" fill="#67cdf9"/>
+  <rect x="5" y="6" width="14" height="13" fill="#67cdf9"/>
+  <rect x="4" y="7" width="16" height="11" fill="#67cdf9"/>
+  <rect x="5" y="6" width="7" height="1" fill="#a8e2fd"/>
+  <rect x="4" y="7" width="1" height="6" fill="#a8e2fd"/>
+  <rect x="5" y="18" width="14" height="1" fill="#2fa8ea"/>
+  <rect x="19" y="12" width="1" height="6" fill="#2fa8ea"/>
+  <rect x="2" y="9" width="2" height="4" fill="#a8e2fd"/>
+  <rect x="20" y="9" width="2" height="4" fill="#2fa8ea"/>
+  <rect x="8" y="10" width="2.5" height="4" fill="#082f49"/>
+  <rect x="13.5" y="10" width="2.5" height="4" fill="#082f49"/>
+</svg>

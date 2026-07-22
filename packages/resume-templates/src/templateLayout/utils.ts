@@ -9,6 +9,24 @@ interface Item {
   [key: string]: unknown;
 }
 
+/**
+ * Return a safe href for a user-supplied link value, or null if it can't be
+ * trusted. Only http(s) URLs are allowed; a bare domain-like value is promoted to
+ * https://. Anything else (javascript:, data:, vbscript:, …) yields null so the
+ * caller renders the value as plain text instead of a clickable link. This is the
+ * XSS guard for user-authored links shown on the public share page.
+ */
+export const safeHref = (value: string | undefined | null): string | null => {
+  if (!value) return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  if (/^(www\.)?[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+(\/.*)?$/.test(trimmed)) {
+    return `https://${trimmed}`;
+  }
+  return null;
+};
+
 export const getFieldValue = (item: Item, field: string | string[] | undefined) => {
   if (!field) return null;
   const fields = Array.isArray(field) ? field : [field];
