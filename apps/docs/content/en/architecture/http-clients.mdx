@@ -1,81 +1,90 @@
 ---
 title: HTTP clients
-description: The two Axios instances, the shared auth interceptor, and where routes are centralized.
+description: One gateway origin, two Axios instances for call-site semantics, a shared auth interceptor, and centralized routes.
 ---
 
-import { Callout } from 'nextra/components'
+The whole frontend talks to **one configured address** — the gateway. `apps/web/src/lib/api/httpClient.ts` exposes two Axios instances that both point at that single origin and share one auth interceptor. All network calls go through them — never `fetch` directly, never a fresh Axios instance per feature.
 
-# HTTP clients
+## One origin
 
-`apps/web/src/lib/api/httpClient.ts` exposes two Axios instances that share a single auth interceptor. All network calls from the web app go through one of these — never `fetch` directly, never a fresh Axios instance per feature.
+```ts
+// apps/web/src/lib/api/routes.ts
+export const API_ORIGIN = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3110'
+```
 
-## The two clients
+`NEXT_PUBLIC_API_URL` is the **single** backend variable, resolved identically in the browser and on the server — no legacy per-service fallbacks. It points at the **gateway** (`apps/gateway`, `:3110` in dev), which routes by path prefix to the right upstream (`platform-api` vs `agent-service`). The frontend never addresses individual services.
+
+<Note>
+`API_ORIGIN` lives in the dependency-free `routes.ts` (not `httpClient.ts`) so both client and server can import it without pulling Axios in.
+</Note>
+
+## Two instances, same origin
 
 ```ts
 import { httpClient } from '@/lib/api/httpClient'
 
-httpClient.api      // → NestJS Core API   (default http://localhost:3111)
-httpClient.agent    // → Python agent      (default http://localhost:8000)
+httpClient.api      // CRUD-style calls (resumes, users, notifications…)
+httpClient.agent    // AI-style calls (interview, …)
 ```
 
-| Client | Base URL env | Used for |
-|---|---|---|
-| `httpClient.api` | `NEXT_PUBLIC_CLOUD_API_URL` | Resumes, version history, sharing, users |
-| `httpClient.agent` | `BACKEND_URL` | Interview, translate, JD-optimize, AI analyze |
+| Instance | Intent |
+|---|---|
+| `httpClient.api` | Product CRUD — resumes, version history, sharing, users, notifications |
+| `httpClient.agent` | AI / long-running — interview and other agent calls |
 
-Both are plain Axios instances. The split exists because the two backends have **different auth contracts** (the Core API expects a Clerk JWT; the agent forwards it but also accepts BYOK headers) and different rate-limit and CORS profiles.
+Both are `createClient(API_ORIGIN)` — **the same base URL**. The split is purely for **call-site semantics** (CRUD vs AI reads better than one client everywhere); it is *not* two different backends. The gateway decides where each `/api/...` path actually goes.
 
 ## Auth interceptor
 
-`configureHttpClient(getToken)` registers a single request interceptor on both clients:
+`configureHttpClient(getter)` registers one request interceptor on both clients:
 
 ```ts
-// pseudo-code
 configureHttpClient(async () => clerk.session?.getToken())
 ```
 
-The interceptor:
+The interceptor calls `getAuthToken()` and, if a token comes back, sets `Authorization: Bearer <jwt>` (unless the caller already set one). `getAuthToken()` also caches the last good token; `getCachedAuthToken()` exposes it synchronously for exit-time keepalive requests (see `resumeApi.syncResumeKeepalive`), where the page may die before an async token fetch resolves.
 
-1. Calls the provided `getToken` (Clerk's `useAuth().getToken` in the app).
-2. Sets `Authorization: Bearer <jwt>` if a token came back.
-3. Lets the request through unchanged otherwise.
-
-<Callout type="warning">
-Don't pass tokens manually in feature code. If you find yourself writing `httpClient.api.get(url, { headers: { Authorization: ... } })`, the interceptor isn't wired in that context — fix the wiring, don't bypass it.
-</Callout>
+<Warning>
+Don't pass tokens manually in feature code. If you're writing `httpClient.api.get(url, { headers: { Authorization: ... } })`, the interceptor isn't wired in that context — fix the wiring, don't bypass it.
+</Warning>
 
 ## Centralized routes
 
-API paths live in `src/lib/api/routes.ts`:
+All paths live in `src/lib/api/routes.ts` and are all under the `/api/*` prefix (the gateway's namespace):
 
 ```ts
 export const API_ROUTES = {
-  resume: {
-    list: '/v1/resumes',
-    detail: (id: string) => `/v1/resumes/${id}`,
-    patch: (id: string) => `/v1/resumes/${id}/patch`,
-    // ...
+  resumes: {
+    list:   '/api/resumes/mine',
+    create: '/api/resumes',
+    byId:   (id: string) => `/api/resumes/${id}`,
+    patch:  (id: string) => `/api/resumes/${id}`,        // see resume-schema for the patch contract
+    versions: (id: string) => `/api/resumes/${id}/versions`,
+    // …sharing, comments, replies
   },
-  // ...
+  users:         { pats: '/api/users/me/personal-access-tokens', /* … */ },
+  notifications: { list: '/api/notifications', /* … */ },
+  knowledge:     { timelines: '/api/knowledge/timelines' },
 }
 
 export const AGENT_ROUTES = {
-  interview: '/agent/interview',
-  translate: '/agent/translate',
-  // ...
+  interview: { start: '/api/interview/start', chat: '/api/interview/chat', /* … */ },
 }
+
+// Next.js route handlers the AI Lab service layer calls (app/api/chat-agent/*)
+export const WEB_AGENT_ROUTES = { chat: '/api/chat-agent', chatApprove: '/api/chat-agent/approve', /* … */ }
 ```
 
-Two rules:
+Rules:
 
-1. **Every Core API path must live in `API_ROUTES`.** No inline strings.
-2. **Agent paths live in `AGENT_ROUTES`.** They're versioned separately from the Core API.
+1. **No inline path strings** — every backend path lives in one of these maps.
+2. `API_ROUTES` / `AGENT_ROUTES` hit the gateway; `WEB_AGENT_ROUTES` are the web app's **own** Next.js route handlers (`app/api/chat-agent/*`) that proxy to the agent.
 
-This is what makes a backend route rename a one-file PR instead of a grep-and-pray.
+This is what makes a backend route rename a one-file change instead of a grep-and-pray.
 
 ## Adding a new endpoint
 
-1. Add the path to `API_ROUTES` or `AGENT_ROUTES`.
-2. Add a typed wrapper in `src/lib/api/<feature>.ts` that returns a typed response.
+1. Add the path to the right map in `routes.ts`.
+2. Add a typed wrapper in `src/lib/api/<feature>.ts` returning a typed response.
 3. Use `httpClient.api` or `httpClient.agent` — never `axios.create()` a third client.
 4. If the feature is cloud-only, gate the caller on `APP_MODE === 'cloud'`.

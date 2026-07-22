@@ -1,0 +1,231 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "almond",
+  "name": "Magic Resume",
+  "description": "Magic Resume — the open-source, AI-native resume platform. A friendly usage guide for everyone, and a developer handbook for contributors and integrators.",
+  "colors": {
+    "primary": "#0284c7",
+    "light": "#38bdf8"
+  },
+  "logo": {
+    "light": "/logo/mark.png",
+    "dark": "/logo/mark.png"
+  },
+  "favicon": "/logo/mark.png",
+  "navbar": {
+    "primary": {
+      "type": "github",
+      "href": "https://github.com/LinMoQC/Magic-Resume"
+    }
+  },
+  "navigation": {
+    "languages": [
+      {
+        "language": "en",
+        "tabs": [
+          {
+            "tab": "User Guide",
+            "groups": [
+              {
+                "group": "Get started",
+                "pages": [
+                  "en/guide/index",
+                  "en/guide/quickstart",
+                  "en/guide/account"
+                ]
+              },
+              {
+                "group": "Your resume",
+                "pages": [
+                  "en/guide/create-import",
+                  "en/guide/editor",
+                  "en/guide/templates",
+                  "en/guide/export"
+                ]
+              },
+              {
+                "group": "AI Lab",
+                "pages": [
+                  "en/guide/ai-lab",
+                  "en/guide/ai-create",
+                  "en/guide/ai-optimize",
+                  "en/guide/ai-analyze",
+                  "en/guide/ai-translate",
+                  "en/guide/ai-interview"
+                ]
+              },
+              {
+                "group": "Collaboration & sync",
+                "pages": [
+                  "en/guide/cloud-sync",
+                  "en/guide/share-feedback",
+                  "en/guide/history",
+                  "en/guide/notifications"
+                ]
+              },
+              {
+                "group": "Advanced",
+                "pages": [
+                  "en/guide/settings",
+                  "en/guide/mcp",
+                  "en/guide/knowledge",
+                  "en/guide/pricing"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Developer Handbook",
+            "groups": [
+              {
+                "group": "Introduction",
+                "pages": ["en/introduction"]
+              },
+              {
+                "group": "Self-hosting & deployment",
+                "pages": [
+                  "en/getting-started/index",
+                  "en/getting-started/self-hosted",
+                  "en/getting-started/cloud",
+                  "en/getting-started/vercel"
+                ]
+              },
+              {
+                "group": "Architecture",
+                "pages": [
+                  "en/architecture/index",
+                  "en/architecture/monorepo",
+                  "en/architecture/deployment-modes",
+                  "en/architecture/state-management",
+                  "en/architecture/http-clients",
+                  "en/architecture/resume-schema",
+                  "en/architecture/templates"
+                ]
+              },
+              {
+                "group": "MCP server",
+                "pages": [
+                  "en/mcp/index",
+                  "en/mcp/setup",
+                  "en/mcp/tools",
+                  "en/mcp/internals"
+                ]
+              },
+              {
+                "group": "Development",
+                "pages": [
+                  "en/development/index",
+                  "en/development/commands",
+                  "en/development/contributing"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "language": "zh",
+        "tabs": [
+          {
+            "tab": "使用指南",
+            "groups": [
+              {
+                "group": "开始使用",
+                "pages": [
+                  "zh/guide/index",
+                  "zh/guide/quickstart",
+                  "zh/guide/account"
+                ]
+              },
+              {
+                "group": "简历基础",
+                "pages": [
+                  "zh/guide/create-import",
+                  "zh/guide/editor",
+                  "zh/guide/templates",
+                  "zh/guide/export"
+                ]
+              },
+              {
+                "group": "AI Lab",
+                "pages": [
+                  "zh/guide/ai-lab",
+                  "zh/guide/ai-create",
+                  "zh/guide/ai-optimize",
+                  "zh/guide/ai-analyze",
+                  "zh/guide/ai-translate",
+                  "zh/guide/ai-interview"
+                ]
+              },
+              {
+                "group": "协作与同步",
+                "pages": [
+                  "zh/guide/cloud-sync",
+                  "zh/guide/share-feedback",
+                  "zh/guide/history",
+                  "zh/guide/notifications"
+                ]
+              },
+              {
+                "group": "进阶",
+                "pages": [
+                  "zh/guide/settings",
+                  "zh/guide/mcp",
+                  "zh/guide/knowledge",
+                  "zh/guide/pricing"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "开发手册",
+            "groups": [
+              {
+                "group": "简介",
+                "pages": ["zh/introduction"]
+              },
+              {
+                "group": "自建与部署",
+                "pages": [
+                  "zh/getting-started/index",
+                  "zh/getting-started/self-hosted",
+                  "zh/getting-started/cloud",
+                  "zh/getting-started/vercel"
+                ]
+              },
+              {
+                "group": "架构",
+                "pages": [
+                  "zh/architecture/index",
+                  "zh/architecture/monorepo",
+                  "zh/architecture/deployment-modes",
+                  "zh/architecture/state-management",
+                  "zh/architecture/http-clients",
+                  "zh/architecture/resume-schema",
+                  "zh/architecture/templates"
+                ]
+              },
+              {
+                "group": "MCP 服务器",
+                "pages": [
+                  "zh/mcp/index",
+                  "zh/mcp/setup",
+                  "zh/mcp/tools",
+                  "zh/mcp/internals"
+                ]
+              },
+              {
+                "group": "开发",
+                "pages": [
+                  "zh/development/index",
+                  "zh/development/commands",
+                  "zh/development/contributing"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

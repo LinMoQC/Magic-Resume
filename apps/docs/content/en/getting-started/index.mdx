@@ -3,17 +3,13 @@ title: Getting Started
 description: Pick a path — run locally with no backend, or deploy with Clerk auth and cloud sync.
 ---
 
-import { Cards } from 'nextra/components'
-
-# Getting Started
-
 Magic Resume runs in two modes. Pick the one that matches what you want to do.
 
-<Cards>
-  <Cards.Card title="Self-Hosted — run locally, no backend" href="/getting-started/self-hosted" arrow />
-  <Cards.Card title="Cloud Mode — Clerk + sync + sharing" href="/getting-started/cloud" arrow />
-  <Cards.Card title="Deploy to Vercel" href="/getting-started/vercel" arrow />
-</Cards>
+<CardGroup>
+  <Card title="Self-Hosted — run locally, no backend" href="/en/getting-started/self-hosted" />
+  <Card title="Cloud Mode — Clerk + sync + sharing" href="/en/getting-started/cloud" />
+  <Card title="Deploy to Vercel" href="/en/getting-started/vercel" />
+</CardGroup>
 
 ## TL;DR
 
@@ -25,7 +21,7 @@ cp apps/web/.env.example apps/web/.env.local
 pnpm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) for the app and [http://localhost:3001](http://localhost:3001) for these docs.
+Open [http://localhost:3000](http://localhost:3000) for the app. (These docs are a separate Mintlify site — preview them from `apps/docs/content` with `npx mint dev`.)
 
 ## Which mode should I pick?
 

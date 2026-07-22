@@ -1,54 +1,46 @@
 ---
 title: 部署到 Vercel
-description: 使用 Vercel + Clerk 一键部署云端模式。
+description: 一键部署 web 应用（自托管/本地模式）——无需任何环境变量。
 ---
 
-import { Callout, Steps } from 'nextra/components'
+这会**只部署 web 应用，且用[自托管模式](/zh/getting-started/self-hosted)**——一个纯本地优先的编辑器。**无需登录、无需后端、无需任何环境变量。** 简历数据存在每个访客自己的浏览器里（IndexedDB）。**这个模式下没有 AI** —— AI Lab 和 AI PDF 导入都需要后端（云端模式）。
 
-# 部署到 Vercel
-
-这一步只部署 **Web 应用** 的 [云端模式](/zh/getting-started/cloud)。NestJS Core API 和 Python agent 是单独的服务 —— 把 `NEXT_PUBLIC_CLOUD_API_URL` 和 `BACKEND_URL` 指向你部署它们的地方就行。
+<Note>
+自托管是**默认模式**——不设任何环境变量时，应用会自动判定为自托管（只有检测到 Clerk publishable key 才切到云端模式）。所以直接在 Vercel 导入就能跑。
+</Note>
 
 <Steps>
-
-### 点击部署
-
+<Step title="点击部署">
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FLinMoQC%2FMagic-Resume)
 
-Vercel 会识别为 Turborepo 单仓。如果没自动识别 root，把它设为 `apps/web`。
+Vercel 会识别成 Turborepo 单仓。如果没自动识别，把项目 **Root Directory** 设为 `apps/web`。
+</Step>
 
-### 创建 Clerk 应用
+<Step title="确认构建设置">
+Vercel 应使用：
 
-在 [clerk.com](https://clerk.com) 注册并创建一个应用，复制两个 API Key（公钥 + 私钥）。
+- **Install command：** `pnpm install`
+- **Build command：** `cd ../.. && pnpm turbo build --filter=@magic-resume/web`
+- **Output directory：** `apps/web/.next`
 
-### 设置环境变量
+如果是 fork 的仓库，确认 `package.json` 里有 `packageManager: pnpm@10.28.1`，让 Vercel 锁对版本。
+</Step>
 
-在 Vercel 项目设置里：
-
-```env
-NEXT_PUBLIC_APP_MODE=cloud
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_...
-CLERK_SECRET_KEY=sk_...
-NEXT_PUBLIC_CLOUD_API_URL=https://your-core-api.example.com
-BACKEND_URL=https://your-agent.example.com
-```
-
-### 重新部署
-
-触发一次重新部署，让新的环境变量在构建时被烤进去。
-
+<Step title="部署">
+点 **Deploy**。就这样——**不用配任何环境变量**。构建完成后，你就有了一个可用的、本地优先的 Magic Resume。
+</Step>
 </Steps>
 
-<Callout type="warning">
-点击部署按钮 **不会** 部署 Core API 和 Python agent。你需要自己准备 —— 跑在同一个 Vercel 项目（不推荐用于 agent）、Fly、Railway，或自己的服务器都行。没有它们，云端同步和 AI Lab 功能就用不了。
-</Callout>
+<Tip>
+可选：把 `NEXT_PUBLIC_APP_URL` 设成你的部署地址，让站内绝对链接/规范 URL 正确。不设也能正常用。
+</Tip>
 
-## 构建设置
+## 自托管模式给你什么（和不给什么）
 
-Vercel 应该使用：
+- ✅ 完整编辑器、模板、实时预览、导出 PDF——全在前端完成。
+- ❌ 没有 AI —— AI Lab 和 AI PDF 导入都会代理到后端、需要已登录用户，纯自托管模式下用不了。
+- ❌ 没有账户、云同步、分享链接、服务端 AI 额度——这些要**云端模式**。
 
-- **Install command:** `pnpm install`
-- **Build command:** `cd ../.. && pnpm turbo build --filter=@magic-resume/web`
-- **Output directory:** `apps/web/.next`
-
-如果你 fork 了仓库，再次确认 `packageManager` 里写的是 `pnpm@10.28.1`，这样 Vercel 才会用对版本。
+<Warning>
+想要账户 + 云同步 + 分享（云端模式）？那是更大的一套：需要一个 Clerk 应用 + 后端服务（Core API + agent），再用 `NEXT_PUBLIC_API_URL` 把应用指向你的网关。见 [云端模式](/zh/getting-started/cloud)。这个一键按钮**不会**部署后端。
+</Warning>

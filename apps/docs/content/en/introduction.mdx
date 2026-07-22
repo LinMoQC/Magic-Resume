@@ -1,0 +1,88 @@
+---
+title: Introduction
+description: Magic Resume is an open-source, AI-native resume platform — a Turborepo frontend plus a NestJS backend behind a single gateway. This is the contributor & integrator handbook.
+---
+
+**Magic Resume** is an open-source, AI-native resume platform built around three ideas:
+
+- **Local-first by default** — all resume data lives in IndexedDB. No account or backend is required to run the app. Cloud sync is opt-in.
+- **Schema-first templates** — every resume is a typed Zod value. Templates render from a shared schema, and AI tools edit resumes via JSON Patch against that schema (no guessing).
+- **AI tools as first-class citizens** — a native MCP server (`@magic-resume/mcp`) lets Claude Code, Cursor and Windsurf read and safely edit your resumes through the same data layer the web app uses.
+
+This site is the contributor and integrator handbook. If you want to use the hosted app, see [magic-resume.cn](https://magic-resume.cn). If you want to **run it, hack on it, or wire AI tools into it**, you are in the right place.
+
+## System architecture
+
+The product spans **two repositories**: this one (frontend, MCP, shared schema) and **Magic-Resume-Core** (the backend). The frontend talks to **one gateway origin**, which routes `/api/*` by path prefix to the backend services.
+
+![Magic Resume system topology](/images/topology.png)
+
+### 1. `Magic-Resume` (this repo)
+
+[github.com/LinMoQC/Magic-Resume](https://github.com/LinMoQC/Magic-Resume) — pnpm + Turborepo monorepo:
+
+| Workspace | Role |
+|---|---|
+| `apps/web` | Next.js 15 frontend — editor, template preview, AI Lab UI, PDF export |
+| `apps/docs/content` | The docs you are reading (Mintlify) |
+| `packages/mcp` | `@magic-resume/mcp` on npm — stdio MCP server + CLI |
+| `packages/resume-schema` | Zod schema, types, sample data — the shared resume source of truth across repos |
+| `packages/resume-templates` | Template DSL, renderer, registry |
+| `packages/env` / `packages/utils` / `packages/tsconfig` | Shared utilities and configs |
+
+**Responsibility:** all user-facing UI, local editing, IndexedDB persistence, MCP tooling. The web app also carries its own Next.js route handlers under `app/api/*` (e.g. `chat-agent`, `pdf/parse`) that authenticate the user and proxy AI requests to the backend.
+
+### 2. `Magic-Resume-Core` (backend, separate repo)
+
+A NestJS pnpm-workspace monorepo, split by runtime profile and fronted by one gateway:
+
+- **`gateway`** — the single public entry point. Edge auth + trusted identity injection, per-IP/user rate limiting, and streaming reverse-proxy routing of `/api/*` by prefix. Zero DB.
+- **`platform-api`** — CRUD: resumes, users, sharing/collaboration, notifications, JSON Patch application, Zod validation. Owns **PostgreSQL**.
+- **`agent-service`** — the AI backend: DeepAgents-driven chat / workflows / interview (LangGraph), streamed over **SSE**; PDF parse; translation.
+
+**Why it's separate:** the browser-side React tree and the server-side database are different concerns. Splitting the backend out means the MCP server (and future third-party clients — mobile, CLI) share one backend without dragging the frontend along.
+
+### Contracts
+
+| From → To | Protocol | Auth |
+|---|---|---|
+| Browser → Gateway | HTTP (Axios) + SSE | Clerk JWT (attached by interceptor) |
+| `@magic-resume/mcp` → platform-api | HTTP | PAT (`~/.magic-resume/mcp.json`) |
+| Gateway → platform-api / agent-service | HTTP (path-prefix routing) | trusted identity from the edge |
+| agent-service → LLM provider | HTTP | user-supplied or platform-managed key |
+
+Schema consistency is enforced through `@magic-resume/resume-schema` — published to npm and consumed by the backend as a dependency. **Defined once, validated everywhere.**
+
+## Deployment modes
+
+- **Self-hosted:** only `apps/web` needs to run. Data stays in IndexedDB — resume editing and export only. **No account, no backend, no AI** (AI needs the backend / cloud mode). See [Self-hosted](/en/getting-started/self-hosted).
+- **Cloud (magic-resume.cn):** the two repos deploy separately — Web on Vercel, the Core backend on a container platform. The frontend points `NEXT_PUBLIC_API_URL` at the gateway. See [Cloud mode](/en/getting-started/cloud).
+
+## Tech stack
+
+| Layer | Choice | Notes |
+|---|---|---|
+| Monorepo | **pnpm** + **Turborepo** | `pnpm@10.28.1` |
+| Web app | **Next.js 15** (App Router) + React 19 | `apps/web` |
+| State | **Zustand** + Immer | persisted to IndexedDB via `idb-keyval` |
+| Auth (cloud) | **Clerk** | only loaded when `NEXT_PUBLIC_APP_MODE=cloud` |
+| Schema | **Zod 4** | source of truth in `@magic-resume/resume-schema` |
+| Editor | **Tiptap** | rich text on resume fields |
+| Templates | Custom DSL → React renderer | `@magic-resume/resume-templates` |
+| Backend | **NestJS** + **PostgreSQL** | gateway / platform-api / agent-service (Magic-Resume-Core) |
+| Agent | **DeepAgents** + **LangGraph** | `agent-service` (in Core), SSE streaming |
+| MCP server | **`@modelcontextprotocol/sdk`** + `fast-json-patch` | `@magic-resume/mcp` (stdio, Node ESM) |
+| Docs | **Mintlify** | `apps/docs/content` (this site) |
+
+## Where to go next
+
+<CardGroup>
+  <Card title="Getting Started" href="/en/getting-started" />
+  <Card title="Architecture overview" href="/en/architecture" />
+  <Card title="MCP server" href="/en/mcp" />
+  <Card title="Local development" href="/en/development" />
+</CardGroup>
+
+<Info>
+This documentation tracks the `master` branch. If you are working on a feature branch and something here is out of date, the `CLAUDE.md` at the repo root is the canonical short-form reference.
+</Info>

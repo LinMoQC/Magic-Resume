@@ -3,17 +3,13 @@ title: 快速开始
 description: 选一条路径 —— 无后端本地运行，或部署带 Clerk 鉴权和云端同步的完整版。
 ---
 
-import { Cards } from 'nextra/components'
-
-# 快速开始
-
 Magic Resume 有两种运行模式。根据你的目的选择：
 
-<Cards>
-  <Cards.Card title="自托管 —— 本地运行，无需后端" href="/zh/getting-started/self-hosted" arrow />
-  <Cards.Card title="云端模式 —— Clerk 鉴权 + 同步 + 分享" href="/zh/getting-started/cloud" arrow />
-  <Cards.Card title="部署到 Vercel" href="/zh/getting-started/vercel" arrow />
-</Cards>
+<CardGroup>
+  <Card title="自托管 —— 本地运行，无需后端" href="/zh/getting-started/self-hosted" />
+  <Card title="云端模式 —— Clerk 鉴权 + 同步 + 分享" href="/zh/getting-started/cloud" />
+  <Card title="部署到 Vercel" href="/zh/getting-started/vercel" />
+</CardGroup>
 
 ## 一句话上手
 
@@ -25,7 +21,7 @@ cp apps/web/.env.example apps/web/.env.local
 pnpm run dev
 ```
 
-打开 [http://localhost:3000](http://localhost:3000) 访问应用，[http://localhost:3001](http://localhost:3001) 访问文档（即本站）。
+打开 [http://localhost:3000](http://localhost:3000) 访问应用。（本文档是独立的 Mintlify 站点，在 `apps/docs/content` 里用 `npx mint dev` 本地预览。）
 
 ## 我该选哪种模式？
 

@@ -3,11 +3,7 @@ title: Local development
 description: Day-to-day development workflow for the Magic Resume monorepo.
 ---
 
-import { Callout } from 'nextra/components'
-
-# Local development
-
-Day-to-day workflow once you have the repo cloned and `pnpm install` done. If you don't yet, start at [Self-Hosted](/getting-started/self-hosted).
+Day-to-day workflow once you have the repo cloned and `pnpm install` done. If you don't yet, start at [Self-Hosted](/en/getting-started/self-hosted).
 
 ## Repo at a glance
 
@@ -15,7 +11,7 @@ Day-to-day workflow once you have the repo cloned and `pnpm install` done. If yo
 Magic-Resume/
 ├── apps/
 │   ├── web/         # @magic-resume/web   — Next.js 15 frontend
-│   └── docs/        # @magic-resume/docs  — this Nextra site
+│   └── docs/        # Mintlify docs — content/ only, no build step
 ├── packages/
 │   ├── mcp/             # @magic-resume/mcp
 │   ├── resume-schema/   # @magic-resume/resume-schema
@@ -45,16 +41,16 @@ The repo is TypeScript end-to-end. The recommended editor setup:
 | Workspace | What `dev` does |
 |---|---|
 | `apps/web` | `next dev` on `:3000` |
-| `apps/docs` | `next dev --port 3001` |
+| `apps/docs/content` | Mintlify — preview with `npx mint dev` (not part of `turbo dev`) |
 | `packages/resume-schema` | `tsc --watch` |
 | `packages/resume-templates` | `tsc --watch` |
 | `packages/mcp` | `tsc --watch` |
 
 So a change in `packages/resume-schema/src/index.ts` triggers a rebuild that the web app picks up automatically via the workspace link.
 
-<Callout type="info">
+<Info>
 The web app supports Turbopack with `pnpm --filter @magic-resume/web dev:turbo`. It's faster but occasionally lags behind a Next.js minor — fall back to `dev` if you hit a Turbopack-specific bug.
-</Callout>
+</Info>
 
 ## Lint and test before pushing
 

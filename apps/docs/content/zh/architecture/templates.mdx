@@ -3,10 +3,6 @@ title: 模板系统
 description: Magic Template DSL、注册表，以及如何添加一套新模板。
 ---
 
-import { Callout, Steps } from 'nextra/components'
-
-# 模板系统
-
 模板住在 `packages/resume-templates` 里。一个模板是一个 `MagicTemplateDSL` 值 —— 描述 design token、布局、按 section 渲染规则的声明式数据。本包里的渲染器把"一个 DSL 值 + 一份 `Resume`"渲染成 JSX。
 
 也就是说，模板是 **数据**，不是组件。Web 应用和 PDF 导出共用一套渲染器。
@@ -55,17 +51,15 @@ export const templateRegistry: Record<TemplateId, MagicTemplateDSL> = {
 ## 加一套新模板
 
 <Steps>
-
-### 在 Schema 里加 ID
-
+<Step title="在 Schema 里加 ID">
 在 `packages/resume-schema/src/` 里，把新 ID 追加到 `templateIds` 元组。
+</Step>
 
-### 写 DSL 配置
-
+<Step title="写 DSL 配置">
 在 `packages/resume-templates/src/config/` 下加一个新文件，导出 `MagicTemplateDSL`。从布局形状最接近的现有模板开始改。
+</Step>
 
-### 注册它
-
+<Step title="注册它">
 ```ts
 // packages/resume-templates/src/registry.ts
 import { myTemplate } from './config/myTemplate'
@@ -75,9 +69,9 @@ export const templateRegistry = {
   'my-template': myTemplate,
 }
 ```
+</Step>
 
-### 加缩略图
-
+<Step title="加缩略图">
 把一张 JPEG 放在：
 
 ```
@@ -85,19 +79,19 @@ apps/web/public/templates/jpg/my-template.jpg
 ```
 
 模板库按 ID 取图；文件名必须与模板 ID 完全相同。
+</Step>
 
-### 重新构建
-
+<Step title="重新构建">
 ```bash
 pnpm --filter @magic-resume/resume-schema build
 pnpm --filter @magic-resume/resume-templates build
 ```
-
+</Step>
 </Steps>
 
-<Callout type="warning">
+<Warning>
 三个地方必须同步：Schema 里的 `templateIds`、resume-templates 里的 `templateRegistry`、`apps/web/public/templates/jpg/` 里的缩略图文件名。任何一个缺失都会以 404 或 Zod 校验错的形式浮出来。
-</Callout>
+</Warning>
 
 ## TemplateCustomizer
 

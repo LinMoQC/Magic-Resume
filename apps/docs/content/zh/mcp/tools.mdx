@@ -3,10 +3,6 @@ title: 工具参考
 description: "@magic-resume/mcp 暴露的每一个工具，它们做什么、什么时候用。"
 ---
 
-import { Callout } from 'nextra/components'
-
-# 工具参考
-
 所有简历 mutation 都是 JSON Patch（RFC 6902）—— 外科手术式编辑，绝不整片重写。AI 工具一般每会话调一次 `get_resume_schema`，每次 `update_resume_content` 之前先调 `preview_resume_patch` 校验，避免一次失败导致整轮重来。
 
 ## 读
@@ -63,9 +59,9 @@ update_resume_content({ resumeId, patch }) → Resume
 
 应用 patch、用 Schema 校验、落地到 Core API。返回新的简历。失败时抛出结构化错误。
 
-<Callout type="warning">
+<Warning>
 这是唯一会改数据的工具。如果模型说"重写"或"替换"一份简历，那也仍然是一个 patch —— 一般是在 section 根做一次 `replace`。没有 `set_resume_content` 这种接口。
-</Callout>
+</Warning>
 
 ## Patch 形状
 

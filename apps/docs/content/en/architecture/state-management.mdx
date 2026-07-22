@@ -3,10 +3,6 @@ title: State management
 description: Zustand stores, Immer drafts, IndexedDB persistence, and how cloud sync ties in.
 ---
 
-import { Callout } from 'nextra/components'
-
-# State management
-
 State lives in **Zustand** stores under `apps/web/src/store/`. Every store uses the Immer middleware so reducers read like mutation. IndexedDB is the persistence layer (`MagicResumeDB` via `src/lib/api/IndexDBClient.ts`).
 
 ## Stores
@@ -40,9 +36,9 @@ Reads always hit memory. Writes:
 
 The store does not maintain a separate "dirty fields" map — the sync diff is computed at push time. This keeps the store boring and makes undo/redo easier to reason about.
 
-<Callout type="info">
+<Info>
 The cloud sync side-effect runs only when both `APP_MODE === 'cloud'` and the user opted in via Settings. Self-hosted users never trigger a network request from the store.
-</Callout>
+</Info>
 
 ## IndexedDB layer
 

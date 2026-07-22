@@ -1,54 +1,46 @@
 ---
 title: Deploy to Vercel
-description: One-click cloud-mode deployment using Vercel and Clerk.
+description: One-click deploy of the web app in self-hosted mode — no environment variables required.
 ---
 
-import { Callout, Steps } from 'nextra/components'
+This deploys **the web app only, in [self-hosted mode](/en/getting-started/self-hosted)** — a pure, local-first editor. **No login, no backend, and no environment variables required.** Resume data lives in each visitor's browser (IndexedDB). **There is no AI in this mode** — AI Lab and AI PDF import need the backend (cloud mode).
 
-# Deploy to Vercel
-
-This deploys the **web app only** in [cloud mode](/getting-started/cloud). The NestJS Core API and Python agent are separate services — point `NEXT_PUBLIC_CLOUD_API_URL` and `BACKEND_URL` at wherever you're running them.
+<Note>
+Self-hosted is the **default** — with no env vars set, the app auto-detects self-hosted mode (it only switches to cloud mode when a Clerk publishable key is present). So a plain Vercel import just works.
+</Note>
 
 <Steps>
-
-### Click deploy
-
+<Step title="Click deploy">
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FLinMoQC%2FMagic-Resume)
 
-Vercel will detect this as a Turborepo monorepo. Set the root to `apps/web` if it isn't auto-detected.
+Vercel detects this as a Turborepo monorepo. Set the project **Root Directory** to `apps/web` if it isn't auto-detected.
+</Step>
 
-### Create a Clerk application
-
-Sign in at [clerk.com](https://clerk.com), create an application, and copy both API keys (publishable + secret).
-
-### Set environment variables
-
-In the Vercel project settings:
-
-```env
-NEXT_PUBLIC_APP_MODE=cloud
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_...
-CLERK_SECRET_KEY=sk_...
-NEXT_PUBLIC_CLOUD_API_URL=https://your-core-api.example.com
-BACKEND_URL=https://your-agent.example.com
-```
-
-### Redeploy
-
-Trigger a redeploy so the new env vars are baked into the build.
-
-</Steps>
-
-<Callout type="warning">
-The Core API and Python agent are not deployed by this button. You need to bring your own — either run them on the same Vercel project (not recommended for the agent), Fly, Railway, or self-hosted. Without them, cloud sync and AI Lab features won't work.
-</Callout>
-
-## Build settings
-
+<Step title="Confirm build settings">
 Vercel should use:
 
 - **Install command:** `pnpm install`
 - **Build command:** `cd ../.. && pnpm turbo build --filter=@magic-resume/web`
 - **Output directory:** `apps/web/.next`
 
-If you forked the repo, double-check that `pnpm@10.28.1` is in `packageManager` so Vercel pins the correct version.
+If you forked the repo, double-check that `pnpm@10.28.1` is in `packageManager` so Vercel pins the right version.
+</Step>
+
+<Step title="Deploy">
+Click **Deploy**. That's it — no environment variables to set. When the build finishes you have a working, local-first Magic Resume.
+</Step>
+</Steps>
+
+<Tip>
+Optional: set `NEXT_PUBLIC_APP_URL` to your deployed URL if you want canonical links / correct absolute URLs. It's not required for the app to work.
+</Tip>
+
+## What self-hosted mode gives you (and doesn't)
+
+- ✅ Full editor, templates, live preview, PDF export — all client-side.
+- ❌ No AI — AI Lab and AI PDF import are proxied to the backend and need a signed-in user, so they don't work in pure self-hosted mode.
+- ❌ No accounts, no cloud sync, no share links, no server-managed AI quota — those need **cloud mode**.
+
+<Warning>
+Want accounts + cloud sync + sharing (cloud mode)? That's a bigger setup: a Clerk application plus the backend services (Core API + agent), then point the app at your gateway with `NEXT_PUBLIC_API_URL`. See [Cloud mode](/en/getting-started/cloud). This one-click button does **not** deploy the backend.
+</Warning>

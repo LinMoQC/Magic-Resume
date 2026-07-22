@@ -3,20 +3,14 @@ title: Setup
 description: Configure the MCP server and register it with Claude Code, Cursor, or any MCP client.
 ---
 
-import { Callout, Steps, Tabs } from 'nextra/components'
-
-# Setup
-
 The MCP server runs as a stdio process spawned by your AI tool. Two steps: configure your credentials once, then register the spawn command with each tool.
 
 <Steps>
-
-### Generate a Personal Access Token
-
+<Step title="Generate a Personal Access Token">
 In the web app: **Settings → Personal Access Tokens → Create**. Copy the `mr_pat_…` value — it is shown once. Treat it like a password: it grants read/write access to all your resumes.
+</Step>
 
-### Configure the MCP server
-
+<Step title="Configure the MCP server">
 ```bash
 npx -y @magic-resume/mcp config set \
   --api-url "https://api.magic-resume.cn" \
@@ -24,17 +18,17 @@ npx -y @magic-resume/mcp config set \
 ```
 
 This writes `~/.magic-resume/mcp.json`. If you're running the Core API locally, point `--api-url` at it (default dev URL is `http://localhost:3111`).
+</Step>
 
-### Register with your AI tool
-
-<Tabs items={['Claude Code', 'Cursor', 'Manual / Windsurf']}>
-<Tabs.Tab>
+<Step title="Register with your AI tool">
+<Tabs>
+<Tab title="Claude Code">
 ```bash
 claude mcp add magic-resume -- npx -y @magic-resume/mcp mcp
 ```
 This adds Magic Resume to the user-scoped MCP list. Restart Claude Code so it picks up the new server.
-</Tabs.Tab>
-<Tabs.Tab>
+</Tab>
+<Tab title="Cursor">
 Open `~/.cursor/mcp.json` (create if missing) and add:
 
 ```json
@@ -47,8 +41,8 @@ Open `~/.cursor/mcp.json` (create if missing) and add:
   }
 }
 ```
-</Tabs.Tab>
-<Tabs.Tab>
+</Tab>
+<Tab title="Manual / Windsurf">
 Any MCP client that supports stdio servers can spawn it:
 
 ```bash
@@ -56,18 +50,18 @@ npx -y @magic-resume/mcp mcp
 ```
 
 The server speaks the standard MCP protocol over stdin/stdout — no flags needed.
-</Tabs.Tab>
+</Tab>
 </Tabs>
+</Step>
 
-### Verify
-
+<Step title="Verify">
 In your AI tool, ask: *"List my Magic Resume resumes."* The model should call `list_resumes` and return your list. If it errors, run `npx -y @magic-resume/mcp config print` and confirm the API URL and PAT are correct.
-
+</Step>
 </Steps>
 
-<Callout type="info">
+<Info>
 The MCP server communicates over **stdio** — it does not open a network port, listen on a socket, or use SSE. Your AI tool spawns it as a child process and shuts it down when the session ends.
-</Callout>
+</Info>
 
 ## Updating
 
