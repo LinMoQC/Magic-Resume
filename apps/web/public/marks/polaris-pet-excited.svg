@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" shape-rendering="crispEdges">
+  <style>
+    /* hover 专属「雀跃」帧:注意到你了 —— 快速连跳 + 睁大眼 + 头两侧欢喜小星迸发。
+       周期短(~0.5s)读作兴奋;仍是像素硬切,不弹springy。 */
+    .pet   { animation: exhop 0.52s steps(1, end) infinite; }
+    .tw    { animation: extw 0.4s steps(1, end) infinite; }
+    .pop-l { animation: popl 0.52s steps(1, end) infinite; }
+    .pop-r { animation: popr 0.52s steps(1, end) infinite; }
+    @keyframes exhop {
+      0%, 100% { transform: translateY(0); }
+      45% { transform: translateY(-2.2px); }
+    }
+    @keyframes extw {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+    @keyframes popl {
+      0%, 100% { opacity: 0; transform: translate(0.6px, 0.6px); }
+      50% { opacity: 1; transform: translate(0, 0); }
+    }
+    @keyframes popr {
+      0%, 100% { opacity: 0; transform: translate(-0.6px, 0.6px); }
+      55% { opacity: 1; transform: translate(0, 0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .pet, .tw, .pop-l, .pop-r { animation: none; }
+      .pop-l, .pop-r { opacity: 1; }
+    }
+  </style>
+  <!-- 小短腿留在地面 -->
+  <rect x="7" y="19" width="3" height="3" fill="#2fa8ea"/>
+  <rect x="14" y="19" width="3" height="3" fill="#2fa8ea"/>
+  <!-- 头两侧迸发的欢喜小星 -->
+  <g class="pop-l" fill="#dbeffe" transform-box="fill-box" transform-origin="center">
+    <rect x="1.5" y="3.5" width="1" height="3"/>
+    <rect x="0.5" y="4.5" width="3" height="1"/>
+  </g>
+  <g class="pop-r" fill="#dbeffe" transform-box="fill-box" transform-origin="center">
+    <rect x="21.5" y="3.5" width="1" height="3"/>
+    <rect x="20.5" y="4.5" width="3" height="1"/>
+  </g>
+  <g class="pet">
+    <!-- 天线星:兴奋时更亮更快 -->
+    <g class="tw" fill="#eaf6ff">
+      <rect x="11.5" y="0.5" width="1" height="3"/>
+      <rect x="10.5" y="1.5" width="3" height="1"/>
+    </g>
+    <rect x="11.5" y="4" width="1" height="3" fill="#67cdf9"/>
+    <rect x="5" y="6" width="14" height="13" fill="#67cdf9"/>
+    <rect x="4" y="7" width="16" height="11" fill="#67cdf9"/>
+    <rect x="5" y="6" width="7" height="1" fill="#a8e2fd"/>
+    <rect x="4" y="7" width="1" height="6" fill="#a8e2fd"/>
+    <rect x="5" y="18" width="14" height="1" fill="#2fa8ea"/>
+    <rect x="19" y="12" width="1" height="6" fill="#2fa8ea"/>
+    <rect x="2" y="9" width="2" height="4" fill="#a8e2fd"/>
+    <rect x="20" y="9" width="2" height="4" fill="#2fa8ea"/>
+    <!-- 睁大的圆眼:比静息更高更亮,带一点高光 -->
+    <rect x="7.5" y="9" width="3" height="5" fill="#082f49"/>
+    <rect x="13.5" y="9" width="3" height="5" fill="#082f49"/>
+    <rect x="8" y="9.5" width="1" height="1" fill="#bfe6fb"/>
+    <rect x="14" y="9.5" width="1" height="1" fill="#bfe6fb"/>
+  </g>
+</svg>

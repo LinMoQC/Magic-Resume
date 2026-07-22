@@ -124,6 +124,6 @@ Format: `<emoji> <type>(<scope>?): <subject>` — e.g. `:sparkles: feat(web): ad
 > Full version + design principles live in `.impeccable.md` (project root); read it before any UI / UX work. Source: `docs/specs/ai-lab-living-canvas/design.md`.
 
 - **Users**: 求职者(中文市场为主),为某个目标岗位搭建 / 打磨简历。`create`(引导创建)服务"从零 / 另起一份"的人——含经验少需引导者与求快出稿者;其余能力面向已有简历、准备投递的人。
-- **Personality**: 锐利、协作、有主见的"搭档"(Codex / Claude 式 agentic),不是被动工具。文案简短、动词开头、不复述用户已见。让用户有掌控感与被理解感。
+- **Personality**: 呆萌外表·靠谱内核——像素小蓝宠的温暖俏皮语气(俏皮不进建议本体,开场可展现性格),建议本体永远具体、诚实、专业,不是被动工具。对话自然长度不强求简短;UI 微文案仍简短、动词开头;都不复述用户已见。让用户有掌控感与被理解感。
 - **Aesthetic**: 深色工作台 `#0A0A0A` + sky `#38bdf8` 点缀、少 border;简历修订红删 `#dc2626` / 绿增 `#15803d`。动效轻快贴元素,仅 transform / opacity,不弹跳。Anti:花哨空洞、冷冰冰填表、AI 不可控、冗长问卷。
 - **Principles**: ①画布是舞台,对话是旁白 ②能力按需浮现 ③AI 是合作者(改动先提案、可拒绝、有理由、可跳过) ④就地而非另开 ⑤脚手架不是栅栏(给起点也允许自由表达 / 跳过)。

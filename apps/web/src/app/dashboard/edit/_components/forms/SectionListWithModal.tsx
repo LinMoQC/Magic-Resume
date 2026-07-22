@@ -102,11 +102,11 @@ function SortableItem<T extends BaseItem>({ id, item, index, handleEdit, handleD
       <div {...attributes} {...listeners} className={cn("flex h-8 w-5 items-center justify-center text-neutral-600 transition-colors duration-150 hover:text-neutral-300", disabled ? "cursor-default" : "cursor-grab active:cursor-grabbing")}>
         <FaGripVertical size={12} />
       </div>
-      <div className="grow">
+      <div className="min-w-0 grow">
         {itemRender ? itemRender(item) : (
           <div>
-            <p className="font-semibold">{item.title || item.name || item.degree || t('sections.shared.untitled')}</p>
-            <p className="text-sm text-neutral-400">{item.subtitle || item.company || item.school || ''}</p>
+            <p className="truncate font-semibold">{item.title || item.name || item.degree || t('sections.shared.untitled')}</p>
+            <p className="truncate text-sm text-neutral-400">{item.subtitle || item.company || item.school || ''}</p>
           </div>
         )}
       </div>
@@ -354,7 +354,7 @@ export default function SectionListWithModal<T extends BaseItem>({
             <Label className="text-[13px] font-medium text-neutral-300">
               {t('modals.dynamicForm.descriptionLabel')}
             </Label>
-            <div className="overflow-hidden rounded-lg border border-white/[0.07] bg-sunk">
+            <div className="overflow-hidden rounded-lg border border-white/[0.07] bg-sunk transition-colors focus-within:border-sky-500/40 focus-within:ring-1 focus-within:ring-sky-500/25">
               <TiptapEditor
                 content={(currentItem?.[richtextKey] as string) || ''}
                 onChange={handleQuillChange}

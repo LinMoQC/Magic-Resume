@@ -37,8 +37,11 @@ import {
   type SelectionActionId,
 } from '../../lib/changeModel';
 import { requestEdit, type EditParams } from '../../lib/services/editClient';
-import type { AgentLlmConfig } from '../../lib/services/types';
-import { useSettingStore } from '@/store/useSettingStore';
+import {
+  invalidateAiEntitlement,
+  isQuotaOrCustomConfigError,
+  resolveAiAccessConfig,
+} from '../../lib/services/aiAccess';
 import { diffResumeToChanges, type BatchKind, type TargetedSelectionDiff } from '../../lib/diffResume';
 
 const PAGE_WIDTH = 794;
@@ -137,11 +140,6 @@ export default function LivingCanvas({
   // unmount / canvas close aborts them all.
   const abortRef = useRef<Record<string, AbortController>>({});
 
-  // User model config drives every edit; read live via ref so callbacks don't churn on keystrokes.
-  const { apiKey, baseUrl, model, maxTokens } = useSettingStore();
-  const configRef = useRef<AgentLlmConfig>({ apiKey, baseUrl, modelName: model, maxTokens });
-  configRef.current = { apiKey, baseUrl, modelName: model, maxTokens };
-
   useEffect(
     () => () => {
       Object.values(abortRef.current).forEach((c) => c.abort());
@@ -224,9 +222,15 @@ export default function LivingCanvas({
       params: Omit<EditParams, 'config' | 'signal'>,
       build: (r: EditResultLike) => PendingChange
     ) => {
-      const config = configRef.current;
-      if (!config.apiKey) {
-        setErrors((prev) => ({ ...prev, [path]: '先在设置里配置 AI 服务，再来改这一处' }));
+      const access = await resolveAiAccessConfig();
+      if (!access.ok) {
+        setErrors((prev) => ({
+          ...prev,
+          [path]:
+            access.reason === 'entitlement_unavailable'
+              ? access.message || '账户额度检查失败，请稍后重试'
+              : '账户额度不足，请配置自定义 AI 服务后再试',
+        }));
         return;
       }
       errorAttemptsRef.current[path] = { params, build };
@@ -241,10 +245,11 @@ export default function LivingCanvas({
       });
       setProcessing((prev) => (prev.includes(path) ? prev : [...prev, path]));
       try {
-        const result = await requestEdit({ ...params, config, signal: ctrl.signal });
+        const result = await requestEdit({ ...params, config: access.config, signal: ctrl.signal });
         commit(build(result));
       } catch (e) {
         if ((e as Error)?.name === 'AbortError') return; // user cancelled — stay quiet
+        if (isQuotaOrCustomConfigError(e)) invalidateAiEntitlement();
         setErrors((prev) => ({ ...prev, [path]: (e as Error)?.message || '这处没改成，点一下重试' }));
       } finally {
         if (abortRef.current[path] === ctrl) delete abortRef.current[path];
@@ -368,7 +373,9 @@ export default function LivingCanvas({
           action: 'insert',
           resumePath: `sections.${sectionKey}`,
           before: '',
-          instruction: `为「${title}」补一条同风格、可量化的新要点`,
+          // Model-facing (hidden) instruction — English per the prompt convention;
+          // the generated bullet follows the section's own language.
+          instruction: `Add one new bullet under "${title}" matching the section's existing style and language, quantifiable where honest.`,
         },
         (r) => buildInsertChange(target, r)
       );
@@ -440,25 +447,31 @@ export default function LivingCanvas({
   const regenerate = useCallback((path: string) => {
     const change = pendingRef.current[path];
     if (!change) return;
-    const config = configRef.current;
-    if (!config.apiKey) {
-      setErrors((prev) => ({ ...prev, [path]: '先在设置里配置 AI 服务，再来一版' }));
-      return;
-    }
     abortRef.current[path]?.abort();
     const ctrl = new AbortController();
     abortRef.current[path] = ctrl;
     setProcessing((prev) => (prev.includes(path) ? prev : [...prev, path]));
-    requestEdit({
-      action: change.isInsert ? 'insert' : (change.action as ActionKind),
-      resumePath: pathOf(change.target),
-      before: change.before,
-      selectionText: change.selectionText,
-      instruction: [change.freeText, '换一种写法'].filter(Boolean).join('；'),
-      lang: change.lang,
-      config,
-      signal: ctrl.signal,
-    })
+    resolveAiAccessConfig()
+      .then((access) => {
+        if (!access.ok) {
+          throw new Error(
+            access.reason === 'entitlement_unavailable'
+              ? access.message || '账户额度检查失败，请稍后重试'
+              : '账户额度不足，请配置自定义 AI 服务后再试',
+          );
+        }
+        return requestEdit({
+          action: change.isInsert ? 'insert' : (change.action as ActionKind),
+          resumePath: pathOf(change.target),
+          before: change.before,
+          selectionText: change.selectionText,
+          // Hidden nudge is English (prompt convention); user freeText may be any language.
+          instruction: [change.freeText, 'try a different phrasing'].filter(Boolean).join('; '),
+          lang: change.lang,
+          config: access.config,
+          signal: ctrl.signal,
+        });
+      })
       .then((r) => {
         setPending((prev) =>
           prev[path]
@@ -476,6 +489,7 @@ export default function LivingCanvas({
       })
       .catch((e) => {
         if ((e as Error)?.name === 'AbortError') return;
+        if (isQuotaOrCustomConfigError(e)) invalidateAiEntitlement();
         setErrors((prev) => ({ ...prev, [path]: (e as Error)?.message || '再来一版没成，点一下重试' }));
       })
       .finally(() => {

@@ -48,6 +48,13 @@ export function mergeTemplateConfig(
           ...customConfig.designTokens.typography.fontWeight,
         };
       }
+      // lineHeight / letterSpacing 是标量,直接覆盖(不是嵌套对象,不能 spread)
+      if (customConfig.designTokens.typography.lineHeight !== undefined) {
+        mergedTemplate.designTokens.typography.lineHeight = customConfig.designTokens.typography.lineHeight;
+      }
+      if (customConfig.designTokens.typography.letterSpacing !== undefined) {
+        mergedTemplate.designTokens.typography.letterSpacing = customConfig.designTokens.typography.letterSpacing;
+      }
     }
 
     if (customConfig.designTokens.spacing) {
@@ -70,6 +77,9 @@ export function mergeTemplateConfig(
     // 只合并定义了的属性
     if (customConfig.layout.type !== undefined) {
       mergedTemplate.layout.type = customConfig.layout.type;
+    }
+    if (customConfig.layout.pageSize !== undefined) {
+      mergedTemplate.layout.pageSize = customConfig.layout.pageSize;
     }
     if (customConfig.layout.containerWidth !== undefined) {
       mergedTemplate.layout.containerWidth = customConfig.layout.containerWidth;
@@ -117,14 +127,57 @@ export function mergeTemplateConfig(
     }
   }
 
+  // 合并 header 覆盖:头像/联系方式样式落到 Header / ProfileCard 组件的 props。
+  // 这些字段存在 component.props 而非 designTokens/layout,故单独处理。
+  if (customConfig.header) {
+    mergedTemplate.components = mergedTemplate.components.map((component) =>
+      component.type === 'Header' || component.type === 'ProfileCard'
+        ? { ...component, props: { ...component.props, ...customConfig.header } }
+        : component,
+    );
+  }
+
   // 如果有自定义配置，更新模板ID和名称以标识为自定义版本
-  if (customConfig.designTokens || customConfig.layout) {
+  if (customConfig.designTokens || customConfig.layout || customConfig.header) {
     mergedTemplate.id = `${baseTemplate.id}-custom`;
     mergedTemplate.name = `${baseTemplate.name} (Custom)`;
     mergedTemplate.updatedAt = new Date().toISOString();
   }
 
   return mergedTemplate;
+}
+
+// header 覆盖涉及的 props 键(与 Header.tsx / PDF HeaderBlock 消费的一致)
+const HEADER_PROP_KEYS = [
+  'avatarPosition',
+  'avatarWidth',
+  'avatarHeight',
+  'avatarRounded',
+  'contactStyle',
+] as const;
+
+const findHeaderComponent = (template: MagicTemplateDSL) =>
+  template.components.find((c) => c.type === 'Header' || c.type === 'ProfileCard');
+
+// 提取 header 组件 props 相对基础模板的差异 → customConfig.header
+function extractHeaderDiffs(
+  baseTemplate: MagicTemplateDSL,
+  fullTemplate: MagicTemplateDSL,
+): CustomTemplateConfig['header'] | undefined {
+  const baseProps = findHeaderComponent(baseTemplate)?.props ?? {};
+  const fullProps = findHeaderComponent(fullTemplate)?.props;
+  if (!fullProps) return undefined;
+
+  const diffs: Record<string, unknown> = {};
+  let hasDiffs = false;
+  for (const key of HEADER_PROP_KEYS) {
+    const value = fullProps[key];
+    if (value !== undefined && value !== baseProps[key]) {
+      diffs[key] = value;
+      hasDiffs = true;
+    }
+  }
+  return hasDiffs ? (diffs as CustomTemplateConfig['header']) : undefined;
 }
 
 /**
@@ -164,6 +217,13 @@ export function extractCustomConfig(
       customConfig.layout = layoutDiffs;
       hasChanges = true;
     }
+  }
+
+  // 检查 header 组件 props 的差异
+  const headerDiffs = extractHeaderDiffs(baseTemplate, fullTemplate);
+  if (headerDiffs) {
+    customConfig.header = headerDiffs;
+    hasChanges = true;
   }
 
   return hasChanges ? customConfig : undefined;
@@ -214,6 +274,17 @@ function extractTypographyDiffs(base: Record<string, unknown>, custom: Record<st
       diffs.fontWeight = fontWeightDiffs;
       hasDiffs = true;
     }
+  }
+
+  // lineHeight / letterSpacing 是标量(number / string),直接比对 —— 不是嵌套对象,
+  // 不能走 extractObjectDiffs,否则改动永远进不了 diff、控件会弹回(拖不动)。
+  if (custom.lineHeight !== base.lineHeight) {
+    diffs.lineHeight = custom.lineHeight;
+    hasDiffs = true;
+  }
+  if (custom.letterSpacing !== base.letterSpacing) {
+    diffs.letterSpacing = custom.letterSpacing;
+    hasDiffs = true;
   }
 
   return hasDiffs ? diffs : undefined;

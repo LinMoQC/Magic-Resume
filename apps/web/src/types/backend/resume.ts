@@ -59,6 +59,14 @@ export type CloudResumeResponse = {
   shareRole?: string;
 };
 
+/** 列表接口(GET /api/resumes/mine)的分页信封:服务端 findAll 的返回形状。 */
+export type CloudResumeListResponse = {
+  data: CloudResumeResponse[];
+  total: number;
+  page: number;
+  limit: number;
+};
+
 export type CloudVersionResponse = {
   id: string;
   resumeId: string;

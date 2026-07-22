@@ -78,8 +78,23 @@
     "modal": {
       "title": "Account"
     },
+    "subscription": {
+      "currentPlan": "Current plan",
+      "today": "Today",
+      "week": "This week",
+      "usage": "Usage this period",
+      "unlimited": "Unlimited",
+      "remaining": "{{count}} left",
+      "resetAt": "Resets {{time}}",
+      "upgrade": "Upgrade to Pro"
+    },
     "profile": {
-      "tabs": { "profile": "Profile", "security": "Security", "activity": "Activity" },
+      "tabs": {
+        "profile": "Profile",
+        "security": "Security",
+        "activity": "Activity",
+        "subscription": "Subscription"
+      },
       "personalInfo": "Personal information",
       "firstName": "First name",
       "lastName": "Last name",
@@ -97,11 +112,21 @@
       "backupCodes": "Backup codes",
       "enabled": "Enabled",
       "disabled": "Off",
-      "stats": { "resumes": "Resumes", "social": "Social", "days": "Member days" },
+      "stats": {
+        "resumes": "Resumes",
+        "social": "Social",
+        "days": "Member days"
+      },
       "recentResumes": "Recent resumes",
       "noResumes": "No resumes yet",
       "untitled": "Untitled",
-      "side": { "userId": "User ID", "primaryEmail": "Primary email", "joinedAt": "User since", "updatedAt": "Profile updated", "lastSignIn": "Last sign-in" },
+      "side": {
+        "userId": "User ID",
+        "primaryEmail": "Primary email",
+        "joinedAt": "User since",
+        "updatedAt": "Profile updated",
+        "lastSignIn": "Last sign-in"
+      },
       "never": "Never",
       "activeToday": "Last active today",
       "activeYesterday": "Last active yesterday",
@@ -275,6 +300,49 @@
         "jsonButton": "JSON",
         "diffButton": "Diff",
         "nodeInspector": {
+          "unknown_agent": "Unknown Agent",
+          "agent_status": "Agent Status",
+          "idle": "Idle",
+          "execution_log": "Execution Log",
+          "no_logs": "No logs yet...",
+          "payload_data": "Payload Data",
+          "realtime_link": "Realtime Link",
+          "active": "Active",
+          "nodes": "Nodes"
+        },
+        "companyNameLabel": "Company Name *",
+        "companyNamePlaceholder": "e.g. Google, Meta",
+        "jobTitleLabel": "Job Title *",
+        "jobTitlePlaceholder": "e.g. Senior Frontend Engineer",
+        "neuralEngine": {
+          "title": "Neural Engine",
+          "subtitle": "Multi-Agent Collaboration • Real-time Optimization",
+          "processing": "Processing",
+          "minimize": "Minimize",
+          "progress": {
+            "title": "Neural Optimization in Progress",
+            "description": "The AI agents are restructuring your resume content in the background.",
+            "showButton": "Show Neural Engine"
+          },
+          "stats": {
+            "coreStatus": "Core Status",
+            "agentCount": "Agents",
+            "activeChannels": "Active Channels"
+          },
+          "console": {
+            "initiating": "> Deconstructing task logic...",
+            "analyzing": "> Agent {{id}} is analyzing data...",
+            "system": "System:",
+            "validating": "Running semantic validation...",
+            "success": "> Operation succeeded. Data buffered.",
+            "waiting": "> Waiting for trigger signal...",
+            "standby": "Standby",
+            "process_locus": "Process::Core",
+            "execution_time": "Execution Time",
+            "status_ok": "OK",
+            "status_active": "Active"
+          },
+          "nodeInspector": {
             "unknown_agent": "Unknown Agent",
             "agent_status": "Agent Status",
             "idle": "Idle",
@@ -284,52 +352,9 @@
             "realtime_link": "Realtime Link",
             "active": "Active",
             "nodes": "Nodes"
+          }
         },
-        "companyNameLabel": "Company Name *",
-        "companyNamePlaceholder": "e.g. Google, Meta",
-        "jobTitleLabel": "Job Title *",
-        "jobTitlePlaceholder": "e.g. Senior Frontend Engineer",
-        "neuralEngine": {
-            "title": "Neural Engine",
-            "subtitle": "Multi-Agent Collaboration • Real-time Optimization",
-            "processing": "Processing",
-            "minimize": "Minimize",
-            "progress": {
-                "title": "Neural Optimization in Progress",
-                "description": "The AI agents are restructuring your resume content in the background.",
-                "showButton": "Show Neural Engine"
-            },
-            "stats": {
-                "coreStatus": "Core Status",
-                "agentCount": "Agents",
-                "activeChannels": "Active Channels"
-            },
-            "console": {
-                "initiating": "> Deconstructing task logic...",
-                "analyzing": "> Agent {{id}} is analyzing data...",
-                "system": "System:",
-                "validating": "Running semantic validation...",
-                "success": "> Operation succeeded. Data buffered.",
-                "waiting": "> Waiting for trigger signal...",
-                "standby": "Standby",
-                "process_locus": "Process::Core",
-                "execution_time": "Execution Time",
-                "status_ok": "OK",
-                "status_active": "Active"
-            },
-            "nodeInspector": {
-                "unknown_agent": "Unknown Agent",
-                "agent_status": "Agent Status",
-                "idle": "Idle",
-                "execution_log": "Execution Log",
-                "no_logs": "No logs yet...",
-                "payload_data": "Payload Data",
-                "realtime_link": "Realtime Link",
-                "active": "Active",
-                "nodes": "Nodes"
-            }
-          },
-          "steps": {
+        "steps": {
           "preparer": {
             "title": "Preparing Inputs",
             "personality": "Input Preprocessor",
@@ -853,7 +878,17 @@
       "jsonDownloadStarted": "JSON file download started!"
     },
     "ai": {
-      "generatingSuggestion": "Generating personalized optimization suggestions for you..."
+      "generatingSuggestion": "Generating personalized optimization suggestions for you...",
+      "narrate": {
+        "reading": "Flipping through your resume…",
+        "thinking": "Hmm, thinking it over…",
+        "writing": "Writing…",
+        "polishing": "Buffing the wording…",
+        "still": "Tricky one — still chewing on it…",
+        "drafting": "Drafting…",
+        "writingSection": "Writing “{{label}}”…",
+        "draftDone": "Draft ready!"
+      }
     },
     "errors": {
       "resumeNotFound": "Resume Not Found",
@@ -1018,18 +1053,14 @@
   "sidebar": {
     "resumes": "My Resumes",
     "notifications": "Notifications",
-    "knowledge": "Content Hub",
+    "knowledge": "Recruiting Timeline",
     "settings": "Settings",
     "open": "Open sidebar",
     "close": "Close sidebar"
   },
   "knowledge": {
-    "title": "Content Hub",
+    "title": "Recruiting Timeline",
     "back": "Back to dashboard",
-    "tabs": {
-      "timelines": "Recruiting Timelines",
-      "qa": "Interview Q&A"
-    },
     "common": {
       "error": "Couldn't load the content — please try again in a moment",
       "retry": "Retry",
@@ -1048,30 +1079,19 @@
         "none": "Open-ended",
         "past": "Closed",
         "today": "Closes today",
-        "days": "Closes in {{count}} days"
+        "days": "Closes in {{count}} days",
+        "soon": "in {{count}}d",
+        "on": "Closes {{date}}"
       },
       "ongoing": "Ongoing",
+      "today": "Today",
+      "groups": {
+        "evergreen": "Open-ended",
+        "past": "Closed"
+      },
       "empty": {
         "title": "Nothing here yet",
         "hint": "Try different filters, or check back in a few days"
-      }
-    },
-    "qa": {
-      "searchPlaceholder": "Search questions, companies or roles…",
-      "filters": {
-        "role": "All roles",
-        "difficulty": "All levels",
-        "company": "Company"
-      },
-      "difficulty": {
-        "easy": "Easy",
-        "medium": "Medium",
-        "hard": "Hard"
-      },
-      "noAnswer": "No reference answer for this one yet",
-      "empty": {
-        "title": "No matching questions",
-        "hint": "Try another keyword or filter"
       }
     }
   },
@@ -1129,38 +1149,78 @@
       "experience": {
         "company": { "label": "Company", "placeholder": "Company Name" },
         "position": { "label": "Position", "placeholder": "Position" },
-        "date": { "label": "Date or Date Range", "placeholder": "March 2023 - Present" },
+        "date": {
+          "label": "Date or Date Range",
+          "placeholder": "March 2023 - Present"
+        },
         "location": { "label": "Location", "placeholder": "City" },
         "website": { "label": "Website", "placeholder": "Website URL" }
       },
       "profiles": {
-        "platform": { "label": "Platform", "placeholder": "e.g., LinkedIn, GitHub" },
+        "platform": {
+          "label": "Platform",
+          "placeholder": "e.g., LinkedIn, GitHub"
+        },
         "url": { "label": "URL", "placeholder": "URL" }
       },
       "skills": {
         "name": { "label": "Skill Name", "placeholder": "Skill Name" },
-        "level": { "label": "Level", "placeholder": "e.g., Expert, Intermediate, Beginner" }
+        "level": {
+          "label": "Level",
+          "placeholder": "e.g., Expert, Intermediate, Beginner"
+        }
       },
       "projects": {
         "name": { "label": "Project Name", "placeholder": "Project Name" },
         "role": { "label": "Role", "placeholder": "Your Role" },
-        "date": { "label": "Date or Date Range", "placeholder": "Jan 2022 - Dec 2022" },
+        "date": {
+          "label": "Date or Date Range",
+          "placeholder": "Jan 2022 - Dec 2022"
+        },
         "link": { "label": "Link", "placeholder": "Project Link" }
       },
       "languages": {
         "language": { "label": "Language", "placeholder": "Language" },
-        "level": { "label": "Level", "placeholder": "e.g., Native, Fluent, Intermediate" }
+        "level": {
+          "label": "Level",
+          "placeholder": "e.g., Native, Fluent, Intermediate"
+        }
       },
       "certificates": {
-        "name": { "label": "Certificate Name", "placeholder": "Certificate Name" },
+        "name": {
+          "label": "Certificate Name",
+          "placeholder": "Certificate Name"
+        },
         "issuer": { "label": "Issuer", "placeholder": "Issuing Organization" },
         "date": { "label": "Date", "placeholder": "Date Received" }
       }
     }
   },
   "tiptap": {
-    "prompt": {
-      "url": "URL"
+    "toolbar": {
+      "bold": "Bold",
+      "italic": "Italic",
+      "underline": "Underline",
+      "strike": "Strikethrough",
+      "link": "Link",
+      "code": "Inline code",
+      "h1": "Heading 1",
+      "h2": "Heading 2",
+      "h3": "Heading 3",
+      "alignLeft": "Align left",
+      "alignCenter": "Align center",
+      "alignRight": "Align right",
+      "alignJustify": "Justify",
+      "bulletList": "Bullet list",
+      "orderedList": "Numbered list",
+      "undo": "Undo",
+      "redo": "Redo"
+    },
+    "link": {
+      "placeholder": "Paste or type a link",
+      "apply": "Apply link",
+      "open": "Open link",
+      "remove": "Remove link"
     },
     "notifications": {
       "polishingInProgress": "AI is already polishing. Please wait for it to finish.",
@@ -1267,10 +1327,34 @@
     "back": "Back",
     "confirm": "Confirm"
   },
+  "pricing": {
+    "title": "Upgrade plan",
+    "popular": "Popular",
+    "current": "Your current plan",
+    "upgradeTo": "Upgrade to {{name}}",
+    "included": "Included",
+    "free": "Free",
+    "perMonth": "/mo",
+    "created": "Subscription created",
+    "error": "Something went wrong, please try again",
+    "footnote": "Tiers, prices and features are configured in the backend and may change.",
+    "tagline": {
+      "free": "Explore the essentials",
+      "paid": "Unlock everything"
+    },
+    "features": {
+      "models": "{{count}} models available",
+      "coreModel": "Core model",
+      "daily": "{{count}} generations/day",
+      "dailyUnlimited": "Unlimited daily",
+      "weekly": "{{count}} generations/week",
+      "weeklyUnlimited": "Unlimited weekly"
+    }
+  },
   "aiLab": {
     "configGate": {
-      "title": "Connect a model first",
-      "description": "Choose a provider and paste your API key to begin. The key is stored only in your browser.",
+      "title": "Account credits are unavailable",
+      "description": "AI is paused. Add credits or subscribe to use the internal model, or configure a custom provider to continue. Your key is stored only in this browser.",
       "later": "Later",
       "saveAndContinue": "Save and continue"
     },
@@ -1285,7 +1369,10 @@
       "title": "AI Lab",
       "liveCanvas": "Live canvas",
       "liveCanvasTitle": "Edit directly on the resume with AI",
-      "newChat": "New chat"
+      "newChat": "New chat",
+      "quota": "Quota",
+      "quotaTitle": "View remaining quota",
+      "quotaUnavailable": "Quota is unavailable right now"
     },
     "reset": {
       "title": "Start a new chat?",
@@ -1294,11 +1381,21 @@
       "confirm": "Start new chat"
     },
     "greeting": {
-      "title": "How should we improve this resume today?",
-      "description": "Describe what you need, and I will call the right skill to help"
+      "title": "Hi! What shall we polish today?",
+      "description": "Tell me the goal — I'll pick the right skill and work through it with you."
+    },
+    "intent": {
+      "create": "I want to build a resume from scratch — walk me through it",
+      "optimize": "Optimize my resume for my target job.",
+      "translate": "Translate my resume into the target language.",
+      "analyze": "Analyze how competitive this resume is",
+      "interview": "Mock interview"
+    },
+    "error": {
+      "serviceUnavailable": "Oops, I hit a snag — give it a beat and try again."
     },
     "artifact": {
-      "emptyAnalysis": "No analysis result yet.",
+      "emptyAnalysis": "Nothing here yet — ask me for a checkup and I'm on it.",
       "summary": "Combined assessment from three virtual interviewers (peer / hiring manager / HRBP).",
       "strengths": "Strengths",
       "improvements": "Improvements",
@@ -1319,7 +1416,7 @@
         "needsWork": "Competitiveness needs improvement"
       },
       "match": {
-        "empty": "No fit result yet. Paste a target JD and Polaris will score this resume against the role.",
+        "empty": "No fit report yet. Paste the target JD and I'll size up how close this resume is.",
         "dims": {
           "technical": "Technical",
           "experience": "Experience",
@@ -1367,6 +1464,19 @@
       "placeholderQuoted": "Tell AI how to change the selected text...",
       "placeholderSkill": "Add optional context, then press Enter to run \"{{skill}}\"...",
       "placeholderDefault": "Describe a request, or type / to call a skill..."
+    },
+    "picker": {
+      "model": "Model",
+      "auto": "Auto",
+      "autoHint": "Internal when you have credits, otherwise your model",
+      "internalGroup": "Internal credits",
+      "customGroup": "Custom model",
+      "needCredits": "Needs credits",
+      "loadingModels": "Loading internal models…",
+      "addCustom": "Add a custom model in settings",
+      "noModel": "Configure a model in settings first",
+      "strengthLabel": "Reasoning",
+      "strength": { "low": "Low", "medium": "Medium", "high": "High" }
     },
     "widgets": {
       "unsupported": "(Unable to render card: {{kind}})",

@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" shape-rendering="crispEdges">
+  <style>
+    .pet { animation: type 0.3s steps(1, end) infinite; }
+    .tw { animation: tw 0.6s steps(1, end) infinite; }
+    @keyframes type {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(0.6px, -0.4px); }
+    }
+    @keyframes tw {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .pet, .tw { animation: none; }
+    }
+  </style>
+  <rect x="7" y="19" width="3" height="3" fill="#2fa8ea"/>
+  <rect x="14" y="19" width="3" height="3" fill="#2fa8ea"/>
+  <g class="pet">
+    <g class="tw" fill="#dbeffe">
+      <rect x="11.5" y="0.5" width="1" height="3"/>
+      <rect x="10.5" y="1.5" width="3" height="1"/>
+    </g>
+    <rect x="11.5" y="4" width="1" height="3" fill="#67cdf9"/>
+    <rect x="5" y="6" width="14" height="13" fill="#67cdf9"/>
+    <rect x="4" y="7" width="16" height="11" fill="#67cdf9"/>
+    <rect x="5" y="6" width="7" height="1" fill="#a8e2fd"/>
+    <rect x="4" y="7" width="1" height="6" fill="#a8e2fd"/>
+    <rect x="5" y="18" width="14" height="1" fill="#2fa8ea"/>
+    <rect x="19" y="12" width="1" height="6" fill="#2fa8ea"/>
+    <rect x="2" y="9" width="2" height="4" fill="#a8e2fd"/>
+    <rect x="20" y="9" width="2" height="4" fill="#2fa8ea"/>
+    <!-- 专注眯眼:扁横条 -->
+    <rect x="8" y="11" width="3" height="1.4" fill="#082f49"/>
+    <rect x="13" y="11" width="3" height="1.4" fill="#082f49"/>
+  </g>
+</svg>

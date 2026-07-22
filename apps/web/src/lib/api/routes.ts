@@ -33,10 +33,9 @@ export const API_ROUTES = {
     list:     '/api/notifications',
     markRead: (id: string) => `/api/notifications/${id}/read`,
   },
-  // 内容中心公开读（匿名可访问，gateway allowlist 已放行这两个精确路径）
+  // 校招时间线公开读（匿名可访问，gateway allowlist 已放行该精确路径）
   knowledge: {
     timelines: '/api/knowledge/timelines',
-    qa:        '/api/knowledge/qa',
   },
 } as const;
 

@@ -45,10 +45,16 @@ export interface AgentSseEvent {
   error?: string;
 }
 
+/** Reasoning strength ("强度") → OpenAI-compatible `reasoning_effort`. */
+export type ReasoningEffort = 'low' | 'medium' | 'high';
+
 /** User-provided model config carried in request bodies. */
 export interface AgentLlmConfig {
+  source?: 'internal' | 'byok';
   apiKey?: string;
   baseUrl?: string;
   modelName?: string;
   maxTokens?: number;
+  /** Picked in the composer; only sent when set. */
+  effort?: ReasoningEffort;
 }

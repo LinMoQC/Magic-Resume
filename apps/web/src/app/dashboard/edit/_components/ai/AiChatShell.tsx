@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FlaskConical, FileText, SquarePen, X, PencilRuler, Check, CircleStop, KeyRound } from 'lucide-react';
+import { FileText, SquarePen, X, PencilRuler, Check, KeyRound, Gauge } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { nanoid } from 'nanoid';
@@ -16,20 +16,29 @@ import ChatThread from './conversation/ChatThread';
 import Composer from './conversation/Composer';
 import WelcomeSuggestions from './conversation/WelcomeSuggestions';
 import ArtifactCanvas from './canvas/ArtifactCanvas';
-import { PolarisAvatar } from './PolarisMark';
+import CreateStage from './canvas/CreateStage';
+import { PolarisAvatar, LabMark } from './PolarisMark';
 import InterviewOverlay from './interview/InterviewOverlay';
 import LivingCanvas, { type BatchRequest, type FocusRequest } from './canvas/living/LivingCanvas';
 import { type BatchKind, type TargetedSelectionDiff } from './lib/diffResume';
 import type { MultiPersonaResumeAnalysis } from '@/types/agent/multi-persona';
 import type { FitReport } from '@/types/agent/fit-report';
 import { streamChat, approveTool, endSessionThread } from './lib/services/agentClient';
-import type { AgentSseEvent } from './lib/services/types';
+import type { AgentLlmConfig, AgentSseEvent } from './lib/services/types';
+import {
+  invalidateAiEntitlement,
+  isQuotaOrCustomConfigError,
+  resolveAiAccessConfig,
+} from './lib/services/aiAccess';
 import { resolveResumePatchBatch } from './lib/resumePatch';
 import { useResumeDraftStore } from '@/store/useResumeDraftStore';
 import { useSettingStore } from '@/store/useSettingStore';
 import { useAiSessionStore } from '@/store/useAiSessionStore';
 import { ModelConfigFields } from '@/components/llm/ModelConfigFields';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
+import i18nInstance from '@/i18n';
+import { useEntitlement } from '@/lib/billing/useEntitlement';
+import { isCloudMode } from '@/lib/config/app';
 
 type AiChatShellProps = {
   resumeData: Resume;
@@ -42,13 +51,16 @@ type AiChatShellProps = {
 };
 
 const CLOSED_CANVAS: CanvasState = { open: false, skillId: null, view: 'preview', status: 'idle' };
+/** Localized at call time — module-level, so it reads the i18n instance directly. */
+const aiServiceErrorMessage = () => i18nInstance.t('aiLab.error.serviceUnavailable');
 
 /** Default conversational intent when a content skill is launched without typed text.
  *  The AI gathers specifics (JD / target language) in-conversation via a `request_form`
- *  card — the frontend no longer pre-collects them in a gated popup. */
-const SKILL_INTENT: Record<BatchKind, string> = {
-  optimize: '帮我针对目标岗位优化我的简历。',
-  translate: '把我的简历翻译成目标语言。',
+ *  card — the frontend no longer pre-collects them in a gated popup. These are VISIBLE
+ *  user turns (and the backend mirrors their language), so they follow the UI locale. */
+const SKILL_INTENT: Record<BatchKind, () => string> = {
+  optimize: () => i18nInstance.t('aiLab.intent.optimize'),
+  translate: () => i18nInstance.t('aiLab.intent.translate'),
 };
 
 /** A user action deferred until they supply an LLM key — replayed once the in-chat gate is satisfied. */
@@ -218,7 +230,9 @@ export default function AiChatShell({
   );
   const setResumeDraft = useResumeDraftStore((s) => s.setResumeDraft);
   // Each AI session uses the user's configured model settings.
-  const { apiKey, baseUrl, model, maxTokens, saveSettings, hasLlmConfig } = useSettingStore();
+  const { saveSettings, hasLlmConfig } = useSettingStore();
+  const [configGateOpen, setConfigGateOpen] = useState(false);
+  const pendingRunRef = useRef<PendingRun | null>(null);
   const messagesRef = useRef(messages);
   messagesRef.current = messages;
   // The analyze skill renders a live review todolist (a `plan` card) instead of a
@@ -320,7 +334,10 @@ export default function AiChatShell({
   // Streams message_chunk into a live assistant bubble; a resume surfaces as a
   // reviewable draft.
   const consumeStream = useCallback(
-    async (makeGen: (signal: AbortSignal) => AsyncGenerator<AgentSseEvent>) => {
+    async (
+      makeGen: (signal: AbortSignal) => AsyncGenerator<AgentSseEvent>,
+      pendingOnQuota?: PendingRun,
+    ) => {
       const aiId = nanoid();
       // The assistant bubble is created lazily on the first chunk so any
       // `read_resume` activity line lands *above* the reply (design §8.5).
@@ -620,7 +637,11 @@ export default function AiChatShell({
               }
             }
           } else if (ev.type === 'error') {
-            throw new Error(ev.error || '对话出错');
+            // The backend sends a stable machine code only. Older deployments may
+            // still send a raw provider/LangChain message, but it must never reach
+            // the visible thread or toast.
+            const code = typeof ev.payload?.code === 'string' ? ev.payload.code : ev.error;
+            throw new Error(code || 'agent_run_failed');
           }
         }
         if (pausedForApproval && !bubbleCreated) {
@@ -636,12 +657,38 @@ export default function AiChatShell({
         if (controller.signal.aborted || !isCurrent()) {
           return;
         }
-        const msg = err instanceof Error ? err.message : '对话失败';
+        if (isQuotaOrCustomConfigError(err)) {
+          const refreshedAccess = await resolveAiAccessConfig({ forceRefresh: true }).catch(() => null);
+          if (refreshedAccess?.ok && refreshedAccess.config.source === 'internal') {
+            const msg = aiServiceErrorMessage();
+            ensureBubble();
+            setMessages((prev) =>
+              prev.map((m) => (m.id === aiId ? { ...m, content: acc || `（${msg}）`, status: 'done' } : m))
+            );
+            toast.error(msg);
+            return;
+          }
+          invalidateAiEntitlement();
+          if (pendingOnQuota) pendingRunRef.current = pendingOnQuota;
+          setStarted(true);
+          setConfigGateOpen(true);
+          const msg = '账户额度不足，已暂停 AI。可以充值/订阅，或配置自定义模型继续。';
+          ensureBubble();
+          setMessages((prev) =>
+            prev.map((m) => (m.id === aiId ? { ...m, content: acc || `（${msg}）`, status: 'done' } : m))
+          );
+          toast.error(msg);
+          return;
+        }
         ensureBubble();
         setMessages((prev) =>
-          prev.map((m) => (m.id === aiId ? { ...m, content: acc || `（出错：${msg}）`, status: 'done' } : m))
+          prev.map((m) =>
+            m.id === aiId
+              ? { ...m, content: acc || `（${aiServiceErrorMessage()}）`, status: 'done' }
+              : m
+          )
         );
-        toast.error(msg);
+        toast.error(aiServiceErrorMessage());
       } finally {
         // Only the current run cleans up shared UI state — a superseded/unmounted run
         // must not flip the new run's spinners off or write into its thread.
@@ -677,6 +724,7 @@ export default function AiChatShell({
     },
     [
       addMessage,
+      setStarted,
       markReadActivityDone,
       resumeData,
       setAnalysis,
@@ -691,44 +739,63 @@ export default function AiChatShell({
     ]
   );
 
-  // ── In-chat LLM config gate (BYOK) ───────────────────────────────────────
-  // AI runs on the user's configured model provider. Instead of letting a missing
-  // config fail mid-
-  // stream, the first action stashes itself and surfaces an inline config card
-  // above the composer (就地, not a detour to /settings); we replay it once a key
-  // lands. Interview is exempt because it uses a separate realtime setup.
-  const [configGateOpen, setConfigGateOpen] = useState(false);
-  const pendingRunRef = useRef<PendingRun | null>(null);
-
-  // Returns true when AI can run now; otherwise stashes the action + opens the gate.
-  const guardLlmConfig = useCallback((pending: PendingRun) => {
-    if (useSettingStore.getState().hasLlmConfig()) return true;
-    pendingRunRef.current = pending;
-    setStarted(true); // reveal the thread/composer area so the gate card is in view
-    setConfigGateOpen(true);
-    return false;
-  }, [setStarted]);
+  // ── AI access gate: account credits first, BYOK fallback ──────────────────
+  const resolveRunConfig = useCallback(
+    async (pending: PendingRun): Promise<AgentLlmConfig | null> => {
+      // Show loading from the moment the run starts — the internal-credit path does
+      // an /ai-entitlement round-trip first, and the user should see feedback on tap
+      // rather than after that request lands.
+      setRunning(true);
+      setIsAiJobRunning(true);
+      setAwaitingReply(true);
+      const access = await resolveAiAccessConfig({
+        forceRefresh: configGateOpen || Boolean(pendingRunRef.current),
+      });
+      if (access.ok) {
+        pendingRunRef.current = null;
+        setConfigGateOpen(false);
+        return access.config;
+      }
+      // Not proceeding to a stream — clear the loading state we optimistically set.
+      setRunning(false);
+      setIsAiJobRunning(false);
+      setAwaitingReply(false);
+      if (access.reason === 'entitlement_unavailable') {
+        toast.error('账户额度检查失败，请稍后重试。');
+        return null;
+      }
+      pendingRunRef.current = pending;
+      setStarted(true); // reveal the thread/composer area so the gate card is in view
+      setConfigGateOpen(true);
+      return null;
+    },
+    [configGateOpen, setStarted, setIsAiJobRunning],
+  );
 
   // analyze · runs in-conversation and streams a checklist plus final analysis
   // result. The live todolist card is owned by consumeStream via planCardRef.
   const runAnalyze = useCallback(
     async () => {
-      if (!guardLlmConfig({ kind: 'analyze' })) return;
+      const pending: PendingRun = { kind: 'analyze' };
+      const config = await resolveRunConfig(pending);
+      if (!config) return;
       planCardRef.current = null; // a fresh review todolist for this run
       skillBatchRunRef.current = null; // not a whole-resume skill batch run
-      await consumeStream((signal) =>
-        streamChat({
-          messages: [{ role: 'user', content: SKILLS.analyze.buildIntent({}) }],
-          mode: 'analyze',
-          // No sessionId: analyze is a one-shot transform. sessionId is reserved
-          // for create/general chat.
-          resumeId: resumeData.id,
-          config: { apiKey, baseUrl, modelName: model, maxTokens },
-          signal,
-        })
+      await consumeStream(
+        (signal) =>
+          streamChat({
+            messages: [{ role: 'user', content: SKILLS.analyze.buildIntent({}) }],
+            mode: 'analyze',
+            // No sessionId: analyze is a one-shot transform. sessionId is reserved
+            // for create/general chat.
+            resumeId: resumeData.id,
+            config,
+            signal,
+          }),
+        pending,
       );
     },
-    [consumeStream, resumeData.id, apiKey, baseUrl, model, maxTokens, guardLlmConfig]
+    [consumeStream, resumeData.id, resolveRunConfig]
   );
 
   // Whole-resume content skill (optimize / translate) → CONVERSATIONAL run via
@@ -737,31 +804,31 @@ export default function AiChatShell({
   // thread. The final full-resume update diffs onto the living canvas
   // (skillBatchRunRef survives the form interrupt).
   const runContentSkill = useCallback(
-    (kind: BatchKind, message: string) => {
-      if (!guardLlmConfig({ kind: 'content', skill: kind, message })) return;
+    async (kind: BatchKind, message: string) => {
+      const pending: PendingRun = { kind: 'content', skill: kind, message };
+      const config = await resolveRunConfig(pending);
+      if (!config) return;
       setCanvas(CLOSED_CANVAS);
       setLivingSkillId(kind);
       skillBatchRunRef.current = { kind };
       markSessionUsed(); // multi-turn (ask → fill → optimize) needs the thread
-      void consumeStream((signal) =>
-        streamChat({
-          messages: [{ role: 'user', content: message }],
-          mode: kind,
-          sessionId: sessionIdRef.current,
-          resumeId: resumeData.id,
-          config: { apiKey, baseUrl, modelName: model, maxTokens },
-          signal,
-        })
+      void consumeStream(
+        (signal) =>
+          streamChat({
+            messages: [{ role: 'user', content: message }],
+            mode: kind,
+            sessionId: sessionIdRef.current,
+            resumeId: resumeData.id,
+            config,
+            signal,
+          }),
+        pending,
       );
     },
     [
       consumeStream,
       resumeData.id,
-      apiKey,
-      baseUrl,
-      model,
-      maxTokens,
-      guardLlmConfig,
+      resolveRunConfig,
       markSessionUsed,
       setCanvas,
       setLivingSkillId,
@@ -800,39 +867,54 @@ export default function AiChatShell({
               },
             }
           : { type: 'reject' as const, message: '用户取消了填写' };
-      void consumeStream((signal) =>
-        approveTool({
-          sessionId: sessionIdRef.current,
-          decisions: [decision],
-          resumeId: resumeData.id,
-          config: { apiKey, baseUrl, modelName: model, maxTokens },
-          signal,
-        })
-      );
+      void (async () => {
+        const pending: PendingRun = {
+          kind: 'chat',
+          history: toBackendHistory(messagesRef.current),
+          mode: 'general',
+        };
+        const config = await resolveRunConfig(pending);
+        if (!config) return;
+        await consumeStream(
+          (signal) =>
+            approveTool({
+              sessionId: sessionIdRef.current,
+              decisions: [decision],
+              resumeId: resumeData.id,
+              config,
+              signal,
+            }),
+          pending,
+        );
+      })();
     },
-    [consumeStream, resumeData.id, apiKey, baseUrl, model, maxTokens, setMessages]
+    [consumeStream, resumeData.id, resolveRunConfig, setMessages]
   );
 
   // create / general · streaming chat. Sends the visible turn history scoped by
   // sessionId.
   const runChat = useCallback(
-    (history: { role: 'user' | 'assistant'; content: string }[], mode: 'create' | 'general') => {
-      if (!guardLlmConfig({ kind: 'chat', history, mode })) return;
+    async (history: { role: 'user' | 'assistant'; content: string }[], mode: 'create' | 'general') => {
+      const pending: PendingRun = { kind: 'chat', history, mode };
+      const config = await resolveRunConfig(pending);
+      if (!config) return;
       skillBatchRunRef.current = null; // not a whole-resume skill batch run
       markSessionUsed(); // server-side session now exists → reclaim on explicit new chat
-      return consumeStream((signal) =>
-        streamChat({
-          messages: history,
-          mode,
-          sessionId: sessionIdRef.current,
-          // Scope the chat to this resume without pushing a full snapshot each turn.
-          resumeId: resumeData.id,
-          config: { apiKey, baseUrl, modelName: model, maxTokens },
-          signal,
-        })
+      return consumeStream(
+        (signal) =>
+          streamChat({
+            messages: history,
+            mode,
+            sessionId: sessionIdRef.current,
+            // Scope the chat to this resume without pushing a full snapshot each turn.
+            resumeId: resumeData.id,
+            config,
+            signal,
+          }),
+        pending,
       );
     },
-    [consumeStream, resumeData.id, apiKey, baseUrl, model, maxTokens, guardLlmConfig, markSessionUsed]
+    [consumeStream, resumeData.id, resolveRunConfig, markSessionUsed]
   );
 
   // Human-in-the-loop: the user answered an approval card. Continue the session
@@ -846,17 +928,28 @@ export default function AiChatShell({
             : m
         )
       );
-      void consumeStream((signal) =>
-        approveTool({
-          sessionId: sessionIdRef.current,
-          decisions: [{ type: approved ? 'approve' : 'reject' }],
-          resumeId: resumeData.id,
-          config: { apiKey, baseUrl, modelName: model, maxTokens },
-          signal,
-        })
-      );
+      void (async () => {
+        const pending: PendingRun = {
+          kind: 'chat',
+          history: toBackendHistory(messagesRef.current),
+          mode: 'general',
+        };
+        const config = await resolveRunConfig(pending);
+        if (!config) return;
+        await consumeStream(
+          (signal) =>
+            approveTool({
+              sessionId: sessionIdRef.current,
+              decisions: [{ type: approved ? 'approve' : 'reject' }],
+              resumeId: resumeData.id,
+              config,
+              signal,
+            }),
+          pending,
+        );
+      })();
     },
-    [consumeStream, resumeData.id, apiKey, baseUrl, model, maxTokens, setMessages]
+    [consumeStream, resumeData.id, resolveRunConfig, setMessages]
   );
 
   const handleSend = useCallback(
@@ -868,9 +961,9 @@ export default function AiChatShell({
       if (chatMode === 'create') {
         void runChat(history, 'create');
       } else if (/优化|jd|岗位/i.test(text)) {
-        runContentSkill('optimize', text); // conversational; AI asks for JD via a FormCard
+        void runContentSkill('optimize', text); // conversational; AI asks for JD via a FormCard
       } else if (/翻|英文|english|日|韩/i.test(text)) {
-        runContentSkill('translate', text);
+        void runContentSkill('translate', text);
       } else if (/分析|体检|评分|竞争力/.test(text)) {
         void runAnalyze();
       } else if (/面试|模拟/.test(text)) {
@@ -904,9 +997,9 @@ export default function AiChatShell({
       // turn; with no text we send a natural intent and the AI gathers specifics via a
       // FormCard. No upfront param popup.
       if (id === 'translate' || id === 'optimize') {
-        const msg = t || SKILL_INTENT[id];
+        const msg = t || SKILL_INTENT[id]();
         addMessage({ id: nanoid(), role: 'user', content: msg, skillId: id });
-        runContentSkill(id, msg);
+        void runContentSkill(id, msg);
         return;
       }
 
@@ -950,24 +1043,30 @@ export default function AiChatShell({
   // as an in-place canvas proposal. `mode: 'general'` deliberately — NOT the optimize
   // skill (which reads the whole resume / gathers a JD); Polaris just edits this片段.
   const runTargetedEdit = useCallback(
-    (message: string, targetedSelection?: TargetedSelectionDiff) => {
-      if (!guardLlmConfig({ kind: 'chat', history: [{ role: 'user', content: message }], mode: 'general' })) {
-        return;
-      }
+    async (message: string, targetedSelection?: TargetedSelectionDiff) => {
+      const pending: PendingRun = {
+        kind: 'chat',
+        history: [{ role: 'user', content: message }],
+        mode: 'general',
+      };
+      const config = await resolveRunConfig(pending);
+      if (!config) return;
       skillBatchRunRef.current = { kind: 'optimize', targetedSelection }; // route resume_update → living canvas
       markSessionUsed();
-      void consumeStream((signal) =>
-        streamChat({
-          messages: [{ role: 'user', content: message }],
-          mode: 'general',
-          sessionId: sessionIdRef.current,
-          resumeId: resumeData.id,
-          config: { apiKey, baseUrl, modelName: model, maxTokens },
-          signal,
-        }),
+      void consumeStream(
+        (signal) =>
+          streamChat({
+            messages: [{ role: 'user', content: message }],
+            mode: 'general',
+            sessionId: sessionIdRef.current,
+            resumeId: resumeData.id,
+            config,
+            signal,
+          }),
+        pending,
       );
     },
-    [consumeStream, resumeData.id, apiKey, baseUrl, model, maxTokens, guardLlmConfig, markSessionUsed],
+    [consumeStream, resumeData.id, resolveRunConfig, markSessionUsed],
   );
 
   // 「询问 Polaris」send: keep a旁白 user message (with quote, no skill chip), then run the
@@ -993,7 +1092,7 @@ export default function AiChatShell({
         ? { path: quoted.path, selectionText: quoted.selectionText }
         : undefined;
       setQuoted(null);
-      runTargetedEdit(message, targetedSelection);
+      void runTargetedEdit(message, targetedSelection);
     },
     [quoted, addMessage, runTargetedEdit],
   );
@@ -1005,7 +1104,7 @@ export default function AiChatShell({
     setConfigGateOpen(false);
     if (!pending) return;
     if (pending.kind === 'analyze') void runAnalyze();
-    else if (pending.kind === 'content') runContentSkill(pending.skill, pending.message);
+    else if (pending.kind === 'content') void runContentSkill(pending.skill, pending.message);
     else void runChat(pending.history, pending.mode);
   }, [runAnalyze, runContentSkill, runChat]);
 
@@ -1153,31 +1252,6 @@ export default function AiChatShell({
           </div>
         </div>
       )}
-      <AnimatePresence initial={false}>
-        {running && (
-          <motion.div
-            key="stop-run"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-            className="overflow-hidden"
-          >
-            <div className="px-4 pb-2">
-              <div className="max-w-3xl mx-auto flex justify-center">
-                <button
-                  type="button"
-                  onClick={stopRun}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-700 bg-neutral-900/80 px-3 py-1.5 text-xs text-neutral-300 hover:text-white hover:border-neutral-600 transition-colors cursor-pointer"
-                >
-                  <CircleStop size={13} />
-                  {t('aiLab.run.stop')}
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
       <Composer
         onRunSkill={runSkillWithText}
         onSend={handleSend}
@@ -1185,6 +1259,8 @@ export default function AiChatShell({
         onSendWithContext={sendTargetedEdit}
         onClearQuoted={() => setQuoted(null)}
         disabled={running}
+        running={running}
+        onStop={stopRun}
       />
     </>
   );
@@ -1192,8 +1268,8 @@ export default function AiChatShell({
   return (
     <div className="relative flex flex-col h-full">
       <header className="flex items-center gap-3 px-5 py-3 shrink-0">
-        <div className="w-8 h-8 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400">
-          <FlaskConical size={18} />
+        <div className="w-8 h-8 rounded-xl bg-gradient-to-b from-sky-500/15 to-sky-500/[0.04] border border-sky-500/25 flex items-center justify-center text-sky-300">
+          <LabMark size={19} />
         </div>
         <span className="text-base font-semibold text-white tracking-tight">{t('aiLab.header.title')}</span>
         <span className="inline-flex items-center gap-1.5 text-xs text-neutral-400 border border-neutral-800 rounded-full px-2.5 py-1">
@@ -1201,6 +1277,7 @@ export default function AiChatShell({
           {resumeData.name || '未命名简历'}
         </span>
         <div className="ml-auto flex items-center gap-3 text-neutral-500">
+          <HeaderQuota />
           <button
             type="button"
             onClick={toggleLiving}
@@ -1308,6 +1385,7 @@ export default function AiChatShell({
                   onApproval={handleApproval}
                   onWidgetAction={handleWidgetAction}
                   thinking={awaitingReply}
+                  running={running}
                   openCanvasSkillId={
                     canvas.open ? canvas.skillId : livingOpen ? livingSkillId : null
                   }
@@ -1364,18 +1442,27 @@ export default function AiChatShell({
             </motion.div>
           )}
         </AnimatePresence>
-        {!livingOpen && (
-          <ArtifactCanvas
-            state={canvas}
-            resumeData={resumeData}
-            templateId={templateId}
-            analysis={analysis}
-            fitReport={fitReport}
-            onApply={applyChanges}
-            onDiscard={() => setCanvas(CLOSED_CANVAS)}
-            onExport={() => addAssistant('体检报告已导出为 PDF。')}
-          />
-        )}
+        {!livingOpen &&
+          // 引导创建的生成中/草稿期占用右舞台（逐段成形）；其余时刻交还 ArtifactCanvas。
+          (chatMode === 'create' && !canvas.open && (running || !!draftReady) ? (
+            <CreateStage
+              open
+              generating={running && !draftReady}
+              draft={draftReady}
+              templateId={templateId}
+            />
+          ) : (
+            <ArtifactCanvas
+              state={canvas}
+              resumeData={resumeData}
+              templateId={templateId}
+              analysis={analysis}
+              fitReport={fitReport}
+              onApply={applyChanges}
+              onDiscard={() => setCanvas(CLOSED_CANVAS)}
+              onExport={() => addAssistant('体检报告已导出为 PDF。')}
+            />
+          ))}
       </div>
 
       <InterviewOverlay
@@ -1386,6 +1473,111 @@ export default function AiChatShell({
           addAssistant('模拟面试结束，已生成面试纪要。想让我据此分析你的表现吗？');
         }}
       />
+    </div>
+  );
+}
+
+/** Header pill that pops a small panel with the remaining internal quota
+ *  (today / this week + reset times). Cloud-only — BYOK runs on the user's own
+ *  key and has no internal quota to show. */
+function HeaderQuota() {
+  const { t, i18n } = useTranslation();
+  const [open, setOpen] = useState(false);
+  // Lazy: only hits /ai-entitlement once the panel is opened (cached client-side).
+  const { data, loading, error } = useEntitlement(open);
+  if (!isCloudMode) return null;
+
+  const locale = i18n.language.startsWith('en') ? 'en-US' : 'zh-CN';
+  const fmtReset = (d?: string | null) =>
+    d
+      ? new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(d))
+      : '';
+  const remainingText = (used: number, limit: number) =>
+    !limit || limit <= 0
+      ? t('account.subscription.unlimited')
+      : t('account.subscription.remaining', { count: Math.max(0, limit - used) });
+
+  const rows = data
+    ? [
+        { label: t('account.subscription.today'), used: data.usage.dailyUsed, limit: data.usage.dailyLimit, resetAt: data.usage.dailyResetAt },
+        { label: t('account.subscription.week'), used: data.usage.weeklyUsed, limit: data.usage.weeklyLimit, resetAt: data.usage.weeklyResetAt },
+      ]
+    : [];
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-label={t('aiLab.header.quotaTitle')}
+        title={t('aiLab.header.quotaTitle')}
+        className={cn(
+          'inline-flex items-center gap-1.5 text-xs rounded-full px-2.5 py-1 border transition-colors cursor-pointer',
+          open
+            ? 'text-sky-300 border-sky-500/40 bg-sky-500/10'
+            : 'text-neutral-400 border-neutral-800 hover:text-white hover:border-neutral-700'
+        )}
+      >
+        <Gauge size={13} />
+        {t('aiLab.header.quota')}
+      </button>
+      <AnimatePresence>
+        {open && (
+          <React.Fragment key="quota-popover">
+            <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+            <motion.div
+              initial={{ opacity: 0, y: -4, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -4, scale: 0.98 }}
+              transition={{ duration: 0.15, ease: 'easeOut' }}
+              className="absolute right-0 top-full z-50 mt-2 w-60 rounded-xl border border-white/10 bg-neutral-900 p-3.5 shadow-2xl"
+            >
+              {!data && loading ? (
+                <div className="space-y-2">
+                  <div className="h-4 animate-pulse rounded bg-white/[0.06]" />
+                  <div className="h-4 animate-pulse rounded bg-white/[0.06]" />
+                </div>
+              ) : !data ? (
+                <p className="text-xs text-neutral-500">{error || t('aiLab.header.quotaUnavailable')}</p>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[11px] text-neutral-500">{t('account.subscription.currentPlan')}</span>
+                    <span className="inline-flex h-5 items-center rounded-md border border-sky-400/25 bg-sky-400/10 px-1.5 text-[11px] font-semibold text-sky-300">
+                      {data.currentPlan?.name ?? '—'}
+                    </span>
+                  </div>
+                  <div className="mt-3 space-y-3">
+                    {rows.map((row) => {
+                      const unlimited = !row.limit || row.limit <= 0;
+                      const pct = unlimited ? 100 : Math.min(100, Math.round((row.used / row.limit) * 100));
+                      return (
+                        <div key={row.label}>
+                          <div className="flex items-center justify-between gap-3 text-[11px]">
+                            <span className="text-neutral-400">{row.label}</span>
+                            <span className="tabular-nums text-neutral-300">{remainingText(row.used, row.limit)}</span>
+                          </div>
+                          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+                            <div
+                              className={cn('h-full rounded-full bg-gradient-to-r from-sky-500 to-sky-400', unlimited && 'opacity-60')}
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                          {row.resetAt && (
+                            <div className="mt-1 text-[10px] text-neutral-600">
+                              {t('account.subscription.resetAt', { time: fmtReset(row.resetAt) })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </motion.div>
+          </React.Fragment>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

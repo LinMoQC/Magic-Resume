@@ -78,8 +78,23 @@
     "modal": {
       "title": "账户"
     },
+    "subscription": {
+      "currentPlan": "当前计划",
+      "today": "今日",
+      "week": "本周",
+      "usage": "本期用量",
+      "unlimited": "无限制",
+      "remaining": "剩 {{count}} 次",
+      "resetAt": "{{time}} 重置",
+      "upgrade": "升级到 Pro"
+    },
     "profile": {
-      "tabs": { "profile": "资料", "security": "安全", "activity": "活动" },
+      "tabs": {
+        "profile": "资料",
+        "security": "安全",
+        "activity": "活动",
+        "subscription": "订阅"
+      },
       "personalInfo": "个人信息",
       "firstName": "名字",
       "lastName": "姓氏",
@@ -97,11 +112,21 @@
       "backupCodes": "备用代码",
       "enabled": "已启用",
       "disabled": "未启用",
-      "stats": { "resumes": "简历数", "social": "社交账户", "days": "加入天数" },
+      "stats": {
+        "resumes": "简历数",
+        "social": "社交账户",
+        "days": "加入天数"
+      },
       "recentResumes": "最近简历",
       "noResumes": "暂无简历",
       "untitled": "未命名",
-      "side": { "userId": "用户 ID", "primaryEmail": "主邮箱", "joinedAt": "加入时间", "updatedAt": "最后更新", "lastSignIn": "最后登录" },
+      "side": {
+        "userId": "用户 ID",
+        "primaryEmail": "主邮箱",
+        "joinedAt": "加入时间",
+        "updatedAt": "最后更新",
+        "lastSignIn": "最后登录"
+      },
       "never": "从未",
       "activeToday": "今日活跃",
       "activeYesterday": "昨日活跃",
@@ -269,7 +294,7 @@
         "optimizeButton": "开始 AI 优化",
         "optimizingButton": "优化中...",
         "previewButton": "预览",
-      "diffButton": "前后对比",
+        "diffButton": "前后对比",
         "companyNameLabel": "公司名称 *",
         "companyNamePlaceholder": "例如: Google, 阿里巴巴",
         "jobTitleLabel": "岗位名称 *",
@@ -294,9 +319,9 @@
           "subtitle": "多智能体协同 • 实时优化中",
           "minimize": "最小化",
           "progress": {
-              "title": "智能优化进行中",
-              "description": "AI 智能体正在后台重构您的简历内容。",
-              "showButton": "显示"
+            "title": "智能优化进行中",
+            "description": "AI 智能体正在后台重构您的简历内容。",
+            "showButton": "显示"
           },
           "processing": "实时处理流",
           "stats": {
@@ -853,7 +878,17 @@
       "jsonDownloadStarted": "JSON 文件下载已开始！"
     },
     "ai": {
-      "generatingSuggestion": "正在为您生成专属优化建议..."
+      "generatingSuggestion": "正在为您生成专属优化建议...",
+      "narrate": {
+        "reading": "正在翻你的简历…",
+        "thinking": "想想怎么改最好…",
+        "writing": "正在落笔…",
+        "polishing": "再磨磨措辞…",
+        "still": "这句有点难，再琢磨一下…",
+        "drafting": "正在起草…",
+        "writingSection": "正在写「{{label}}」…",
+        "draftDone": "草稿好啦"
+      }
     },
     "errors": {
       "resumeNotFound": "简历未找到",
@@ -1018,18 +1053,14 @@
   "sidebar": {
     "resumes": "简历",
     "notifications": "通知中心",
-    "knowledge": "内容中心",
+    "knowledge": "校招时间线",
     "settings": "设置",
     "open": "打开侧边栏",
     "close": "关闭侧边栏"
   },
   "knowledge": {
-    "title": "内容中心",
+    "title": "校招时间线",
     "back": "返回工作台",
-    "tabs": {
-      "timelines": "秋招时间线",
-      "qa": "面经题库"
-    },
     "common": {
       "error": "内容没加载出来，稍等一下再试试",
       "retry": "重试",
@@ -1048,30 +1079,19 @@
         "none": "长期有效",
         "past": "已截止",
         "today": "今日截止",
-        "days": "{{count}} 天后截止"
+        "days": "{{count}} 天后截止",
+        "soon": "{{count}} 天后",
+        "on": "{{date}} 截止"
       },
       "ongoing": "进行中",
+      "today": "今天",
+      "groups": {
+        "evergreen": "长期有效",
+        "past": "已截止"
+      },
       "empty": {
         "title": "这里还空着",
         "hint": "换个筛选条件，或者过几天再来看看"
-      }
-    },
-    "qa": {
-      "searchPlaceholder": "搜题目、公司或岗位…",
-      "filters": {
-        "role": "全部岗位",
-        "difficulty": "全部难度",
-        "company": "公司"
-      },
-      "difficulty": {
-        "easy": "简单",
-        "medium": "中等",
-        "hard": "困难"
-      },
-      "noAnswer": "这题还没有参考答案",
-      "empty": {
-        "title": "没找到相关题目",
-        "hint": "换个关键词或筛选条件试试"
       }
     }
   },
@@ -1228,8 +1248,30 @@
     }
   },
   "tiptap": {
-    "prompt": {
-      "url": "网址"
+    "toolbar": {
+      "bold": "加粗",
+      "italic": "斜体",
+      "underline": "下划线",
+      "strike": "删除线",
+      "link": "链接",
+      "code": "行内代码",
+      "h1": "标题 1",
+      "h2": "标题 2",
+      "h3": "标题 3",
+      "alignLeft": "左对齐",
+      "alignCenter": "居中对齐",
+      "alignRight": "右对齐",
+      "alignJustify": "两端对齐",
+      "bulletList": "无序列表",
+      "orderedList": "有序列表",
+      "undo": "撤销",
+      "redo": "重做"
+    },
+    "link": {
+      "placeholder": "粘贴或输入链接",
+      "apply": "应用链接",
+      "open": "打开链接",
+      "remove": "移除链接"
     },
     "notifications": {
       "polishingInProgress": "AI 已经在润色中，请等待完成。",
@@ -1336,10 +1378,34 @@
     "back": "返回",
     "confirm": "确定"
   },
+  "pricing": {
+    "title": "升级套餐",
+    "popular": "热门",
+    "current": "你当前的套餐",
+    "upgradeTo": "升级至 {{name}}",
+    "included": "已包含",
+    "free": "免费",
+    "perMonth": "/月",
+    "created": "订阅已创建",
+    "error": "操作失败，请重试",
+    "footnote": "档位、价格与功能由后台配置，可随时调整。",
+    "tagline": {
+      "free": "体验核心能力",
+      "paid": "解锁全部能力"
+    },
+    "features": {
+      "models": "{{count}} 个可用模型",
+      "coreModel": "核心模型",
+      "daily": "每日 {{count}} 次生成",
+      "dailyUnlimited": "每日不限次数",
+      "weekly": "每周 {{count}} 次生成",
+      "weeklyUnlimited": "每周不限次数"
+    }
+  },
   "aiLab": {
     "configGate": {
-      "title": "先连一个模型",
-      "description": "选择服务商、粘贴你的 API Key 就能开始。密钥只保存在你的浏览器本地。",
+      "title": "账户额度不足",
+      "description": "AI 已暂停。你可以充值/订阅恢复内部额度，或配置自定义模型继续使用。密钥只保存在你的浏览器本地。",
       "later": "稍后",
       "saveAndContinue": "保存并继续"
     },
@@ -1354,7 +1420,10 @@
       "title": "AI 实验室",
       "liveCanvas": "实时画布",
       "liveCanvasTitle": "在简历上直接让 AI 改",
-      "newChat": "新对话"
+      "newChat": "新对话",
+      "quota": "剩余额度",
+      "quotaTitle": "查看剩余额度",
+      "quotaUnavailable": "暂时无法获取额度"
     },
     "reset": {
       "title": "开启新对话？",
@@ -1363,11 +1432,21 @@
       "confirm": "开启新对话"
     },
     "greeting": {
-      "title": "今天想怎么打磨简历？",
-      "description": "描述你的需求，我会调用合适的技能来完成"
+      "title": "嗨，今天想把简历打磨成什么样？",
+      "description": "说说你的目标，我来挑合适的技能，陪你一起改。"
+    },
+    "intent": {
+      "create": "我想从零创建一份简历，带我开始",
+      "optimize": "帮我针对目标岗位优化我的简历。",
+      "translate": "把我的简历翻译成目标语言。",
+      "analyze": "分析这份简历的竞争力",
+      "interview": "模拟面试"
+    },
+    "error": {
+      "serviceUnavailable": "呀，我这边卡住了——歇一小会儿再试一次。"
     },
     "artifact": {
-      "emptyAnalysis": "暂无分析结果。",
+      "emptyAnalysis": "还没有分析结果——喊我做一次体检就有啦。",
       "summary": "三位虚拟面试官（同行 / 用人主管 / HRBP）综合评估。",
       "strengths": "亮点",
       "improvements": "待改进",
@@ -1388,7 +1467,7 @@
         "needsWork": "竞争力有待提升"
       },
       "match": {
-        "empty": "暂无匹配结果。粘贴目标 JD，让 Polaris 评估这份简历与岗位的匹配度。",
+        "empty": "还没有匹配结果。把目标 JD 贴给我，我来看看这份简历离岗位还差多远。",
         "dims": {
           "technical": "技术匹配",
           "experience": "经验匹配",
@@ -1436,6 +1515,19 @@
       "placeholderQuoted": "就选中这段告诉 AI 怎么改…",
       "placeholderSkill": "补充说明（可选），回车运行「{{skill}}」…",
       "placeholderDefault": "描述需求，或输入 / 调用技能…"
+    },
+    "picker": {
+      "model": "模型",
+      "auto": "自动",
+      "autoHint": "有内部额度用内部，否则用你的模型",
+      "internalGroup": "内部额度",
+      "customGroup": "自定义模型",
+      "needCredits": "需内部额度",
+      "loadingModels": "正在加载内部模型…",
+      "addCustom": "在设置里添加自定义模型",
+      "noModel": "请先在设置里配置模型",
+      "strengthLabel": "推理强度",
+      "strength": { "low": "低", "medium": "中", "high": "高" }
     },
     "widgets": {
       "unsupported": "（无法渲染的卡片：{{kind}}）",

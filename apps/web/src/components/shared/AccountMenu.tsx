@@ -11,7 +11,6 @@ import {
   User as UserIcon,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 import { useAppAuth, useAppUser } from "@/lib/auth";
 import { isCloudMode } from "@/lib/config/app";
 import { useAccountUiStore } from "@/store/useAccountUiStore";
@@ -40,7 +39,7 @@ export default function AccountMenu({ placement = "up", label }: AccountMenuProp
   const { t, i18n } = useTranslation();
   const { user } = useAppUser();
   const { signOut } = useAppAuth();
-  const { openSettings, openAccount } = useAccountUiStore();
+  const { openSettings, openAccount, openPricing } = useAccountUiStore();
   const reduce = useReducedMotion();
 
   const [mounted, setMounted] = useState(false);
@@ -178,7 +177,7 @@ export default function AccountMenu({ placement = "up", label }: AccountMenuProp
         <button
           type="button"
           role="menuitem"
-          onClick={() => run(() => toast(t("account.menu.upgradeSoon")))}
+          onClick={() => run(openPricing)}
           className="mb-1 flex w-full items-center gap-2.5 rounded-xl border border-sky-400/20 bg-sky-400/[0.06] px-3 py-2.5 text-left transition-colors hover:border-sky-400/30 hover:bg-sky-400/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/40"
         >
           <Sparkles size={16} className="shrink-0 text-sky-300" />

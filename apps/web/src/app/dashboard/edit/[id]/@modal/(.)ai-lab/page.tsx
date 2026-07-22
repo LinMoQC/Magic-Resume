@@ -1,11 +1,11 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useResumeStore } from '@/store/useResumeStore';
+import { useInterceptModalRoute } from '@/hooks/useInterceptModalRoute';
 import AIModal from '../../../_components/modals/AIModal';
 
 export default function AIModalPage() {
-  const router = useRouter();
+  const { open, close } = useInterceptModalRoute();
   const {
     activeResume,
     updateSections,
@@ -17,18 +17,12 @@ export default function AIModalPage() {
 
   const templateId = activeResume?.template || 'classic';
 
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      router.back();
-    }
-  };
-
   if (!activeResume) return null;
 
   return (
     <AIModal
-      isOpen={true}
-      onClose={() => handleOpenChange(false)}
+      isOpen={open}
+      onClose={close}
       resumeData={activeResume}
       onApplySectionChanges={updateSections}
       onApplyInfo={updateInfo}

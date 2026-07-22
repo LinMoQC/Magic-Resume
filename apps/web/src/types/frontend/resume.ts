@@ -30,6 +30,8 @@ export type CustomTemplateConfig = {
         medium: number;
         bold: number;
       }>;
+      lineHeight?: number;
+      letterSpacing?: string;
     };
     spacing?: Partial<{
       xs: string;

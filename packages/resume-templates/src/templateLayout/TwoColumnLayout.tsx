@@ -33,12 +33,13 @@ export function TwoColumnLayout({ children, layout }: Props) {
     }
   });
 
-  const a4MinHeight = Math.round(parseInt(layout.containerWidth) * 297 / 210);
+  const pageAspect = layout.pageSize === 'Letter' ? 279.4 / 215.9 : 297 / 210;
+  const pageMinHeight = Math.round(parseInt(layout.containerWidth) * pageAspect);
 
   const containerStyle: React.CSSProperties = {
     width: 'var(--container-width)',
     maxWidth: 'var(--container-width)',
-    minHeight: `${a4MinHeight}px`,
+    minHeight: `${pageMinHeight}px`,
     backgroundColor: 'var(--color-background)',
     fontFamily: 'var(--font-family-primary)',
     lineHeight: 'var(--line-height)',
@@ -48,7 +49,7 @@ export function TwoColumnLayout({ children, layout }: Props) {
 
   const sidebarStyle: React.CSSProperties = {
     width: twoColumn.leftWidth,
-    minHeight: `${a4MinHeight}px`,
+    minHeight: `${pageMinHeight}px`,
     backgroundColor: 'var(--color-sidebar, var(--color-primary))',
     padding: 'var(--container-padding)',
     gap: 'var(--container-gap)',

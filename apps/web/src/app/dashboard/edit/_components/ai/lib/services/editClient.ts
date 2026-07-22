@@ -1,4 +1,5 @@
 import { WEB_AGENT_ROUTES } from '@/lib/api/routes';
+import i18n from '@/i18n';
 import type { ActionKind } from '../changeModel';
 import type { AgentLlmConfig } from './types';
 
@@ -48,10 +49,13 @@ async function readError(res: Response): Promise<string> {
 
 /** One-shot snippet/element edit. Throws on transport / empty-result errors. */
 export async function requestEdit({ signal, ...body }: EditParams): Promise<EditResult> {
+  // The backend prompts are English; the user-visible `rationale` follows this
+  // UI locale (the stateless edit path has no user message to mirror).
+  const isEn = i18n.language?.toLowerCase().startsWith('en') ?? false;
   const res = await fetch(WEB_AGENT_ROUTES.chatEdit, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+    body: JSON.stringify({ ...body, locale: isEn ? 'en' : 'zh' }),
     signal,
   });
   if (!res.ok) throw new Error(await readError(res));
@@ -63,11 +67,11 @@ export async function requestEdit({ signal, ...body }: EditParams): Promise<Edit
   const payload: Partial<EditResult> | null =
     raw && typeof raw === 'object' && raw.data && typeof raw.data === 'object' ? raw.data : raw;
   if (!payload || typeof payload.after !== 'string' || !payload.after.trim()) {
-    throw new Error('AI 没有返回内容，点一下重试');
+    throw new Error(isEn ? 'The AI returned nothing — tap to retry' : 'AI 没有返回内容，点一下重试');
   }
   return {
     after: payload.after,
-    rationale: payload.rationale?.trim() || '已按指令改写',
+    rationale: payload.rationale?.trim() || (isEn ? 'Rewritten as instructed' : '已按指令改写'),
     rationaleDetail: payload.rationaleDetail,
   };
 }

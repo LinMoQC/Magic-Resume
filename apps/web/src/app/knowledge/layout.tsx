@@ -1,25 +1,18 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { ArrowLeft, BookOpenText, CalendarClock } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-const TABS = [
-  { href: '/knowledge/timelines', key: 'knowledge.tabs.timelines', icon: CalendarClock },
-  { href: '/knowledge/qa', key: 'knowledge.tabs.qa', icon: BookOpenText },
-] as const;
-
 /**
- * 内容中心壳：公开可匿名访问（middleware 只保护 /dashboard），顶栏 + Tab 切换。
- * 筛选状态都在各页的 URL search params 里，链接可直接分享。
+ * 校招时间线壳：公开可匿名访问（middleware 只保护 /dashboard），顶栏 = 返回 + 标题。
+ * 筛选状态都在页面的 URL search params 里，链接可直接分享。
  */
 export default function KnowledgeLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
   const { t } = useTranslation();
 
   return (
@@ -36,25 +29,6 @@ export default function KnowledgeLayout({
           <h1 className="text-sm font-semibold tracking-wide">
             {t('knowledge.title')}
           </h1>
-          <nav className="ml-auto flex items-center gap-1">
-            {TABS.map(({ href, key, icon: Icon }) => {
-              const active = pathname.startsWith(href);
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  className={
-                    active
-                      ? 'flex items-center gap-1.5 rounded-md bg-sky-400/10 px-3 py-1.5 text-sm text-sky-400'
-                      : 'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]'
-                  }
-                >
-                  <Icon size={15} />
-                  {t(key)}
-                </Link>
-              );
-            })}
-          </nav>
         </div>
       </header>
       <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6">{children}</main>

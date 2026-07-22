@@ -23,7 +23,12 @@ export async function POST(req: NextRequest) {
             // Log the upstream body server-side only; never surface it to the client.
             const errorText = await backendResponse.text();
             console.error(`[CHAT_AGENT] Backend error ${backendResponse.status}: ${errorText}`);
-            throw new Error(`Backend request failed with status ${backendResponse.status}`);
+            // Forward the upstream status (e.g. 402) so the client's quota gate can
+            // react, but with a generic message — never surface the upstream body.
+            return NextResponse.json(
+                { error: `Backend request failed with status ${backendResponse.status}` },
+                { status: backendResponse.status },
+            );
         }
 
         // 检查响应是否为流式

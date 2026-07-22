@@ -21,6 +21,17 @@ const ensureDbInitialized = async () => {
   }
 };
 
+/** Reasoning strength ("强度") picked in the AI Lab composer. */
+export type Strength = 'low' | 'medium' | 'high';
+
+/**
+ * Which model source the user wants for the next run.
+ * - `auto`: let the system decide (internal when entitled, else the user's key).
+ * - `internal`: force internal credits (falls back to auto if not entitled).
+ * - `byok`: force the user's own configured model (falls back to auto if unset).
+ */
+export type PreferredSource = 'auto' | 'internal' | 'byok';
+
 interface SettingsData {
   /** selected provider id (see MODEL_PROVIDERS); '' until the user picks one. */
   provider: string;
@@ -30,6 +41,12 @@ interface SettingsData {
   maxTokens: number;
   cloudSync: boolean;
   syncDisclaimerAgreed: boolean;
+  /** Composer-picked model for internal (subscription) runs; '' = server default. */
+  selectedModel: string;
+  /** Composer-picked reasoning strength → reasoning_effort. */
+  strength: Strength;
+  /** Which model source the user explicitly picked in the composer. */
+  preferredSource: PreferredSource;
 }
 
 interface SettingsState extends SettingsData {
@@ -43,6 +60,10 @@ interface SettingsState extends SettingsData {
   setMaxTokens: (maxTokens: number) => void;
   setCloudSync: (cloudSync: boolean) => void;
   setSyncDisclaimerAgreed: (agreed: boolean) => void;
+  /** Composer prefs — persisted immediately (not part of the Save-form dirty flow). */
+  setSelectedModel: (model: string) => void;
+  setStrength: (strength: Strength) => void;
+  setPreferredSource: (source: PreferredSource) => void;
   /** True when provider + key + baseUrl + model + maxTokens are all set — AI is usable. */
   hasLlmConfig: () => boolean;
   saveSettings: () => Promise<void>;
@@ -64,9 +85,24 @@ const defaultSettings: SettingsData = {
   // their saved preference (loadSettings merges saved values over this default).
   cloudSync: isCloudMode,
   syncDisclaimerAgreed: false,
+  selectedModel: '',
+  strength: 'medium',
+  preferredSource: 'auto',
 };
 
 const isNonEmpty = (value: unknown) => String(value ?? '').trim().length > 0;
+
+/**
+ * Immediately persist just the composer prefs, merged onto the last-saved
+ * settings so a mid-edit form (unsaved apiKey etc.) is never clobbered.
+ */
+const persistPreference = async (
+  patch: Partial<Pick<SettingsData, 'selectedModel' | 'strength' | 'preferredSource'>>,
+) => {
+  await ensureDbInitialized();
+  const saved = (await dbClient.getItem('settings')) as Partial<SettingsData> | null;
+  await dbClient.setItem('settings', { ...(saved ?? {}), ...patch });
+};
 
 export const useSettingStore = create<SettingsState>((set, get) => ({
   ...defaultSettings,
@@ -118,6 +154,19 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
     set({ syncDisclaimerAgreed, isDirty: JSON.stringify(currentSettings) !== JSON.stringify(initialSettings) });
   },
 
+  setSelectedModel: (selectedModel) => {
+    set({ selectedModel });
+    void persistPreference({ selectedModel });
+  },
+  setStrength: (strength) => {
+    set({ strength });
+    void persistPreference({ strength });
+  },
+  setPreferredSource: (preferredSource) => {
+    set({ preferredSource });
+    void persistPreference({ preferredSource });
+  },
+
   hasLlmConfig: () => {
     const { provider, apiKey, baseUrl, model, maxTokens } = get();
     const tokens = Number(maxTokens);
@@ -131,8 +180,8 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
 
   saveSettings: async () => {
     await ensureDbInitialized();
-    const { provider, apiKey, baseUrl, model, maxTokens, cloudSync, syncDisclaimerAgreed } = get();
-    const newSettings = { provider, apiKey, baseUrl, model, maxTokens, cloudSync, syncDisclaimerAgreed };
+    const { provider, apiKey, baseUrl, model, maxTokens, cloudSync, syncDisclaimerAgreed, selectedModel, strength, preferredSource } = get();
+    const newSettings = { provider, apiKey, baseUrl, model, maxTokens, cloudSync, syncDisclaimerAgreed, selectedModel, strength, preferredSource };
     await dbClient.setItem('settings', newSettings);
     set({ initialSettings: newSettings, isDirty: false });
   },

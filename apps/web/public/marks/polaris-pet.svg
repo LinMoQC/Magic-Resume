@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" shape-rendering="crispEdges">
+  <style>
+    /* 多个去同步的微动作叠在一起 = 桌宠「活着」:
+       轻跳 / 晃头 / 看两边 / 竖耳 / 点脚 / 眨眼 / 天线探头 / 星闪。
+       周期两两错开(素数感)避免同步呼吸;像素位移全用 steps(1) 硬切,保持像素质感。 */
+    .sway { animation: sway 6.4s steps(1, end) infinite; }
+    .pet  { animation: hop 1.4s steps(1, end) infinite; }
+    .ears { animation: ear 3.8s steps(1, end) infinite; }
+    .eyes { animation: blink 5.2s steps(1, end) infinite; transform-box: fill-box; transform-origin: center; }
+    .gaze { animation: gaze 6.8s steps(1, end) infinite; transform-box: fill-box; transform-origin: center; }
+    .antenna { animation: antenna 4.6s steps(1, end) infinite; transform-box: fill-box; transform-origin: center bottom; }
+    .ear-l, .ear-r { transform-box: fill-box; transform-origin: center; }
+    .ear-l { animation: ear-flick-l 4.2s steps(1, end) infinite; }
+    .ear-r { animation: ear-flick-r 4.9s steps(1, end) infinite; }
+    .leg-l, .leg-r { transform-box: fill-box; transform-origin: center top; }
+    .leg-l { animation: leg-step-l 5.7s steps(1, end) infinite; }
+    .leg-r { animation: leg-step-r 6.3s steps(1, end) infinite; }
+    .tw   { animation: tw 1.8s steps(1, end) infinite; }
+    .mote-l, .mote-r { opacity: 0; transform-box: fill-box; transform-origin: center; }
+    .mote-l { animation: mote-l 7.1s steps(1, end) infinite; }
+    .mote-r { animation: mote-r 8.3s steps(1, end) infinite; }
+    /* 身体跳起时小短腿留在地面露缝 = 两帧小跳 */
+    @keyframes hop {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-1.2px); }
+    }
+    /* 左右轻移重心 = 慢慢左顾右盼 */
+    @keyframes sway {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-0.6px); }
+      50% { transform: translateX(0); }
+      75% { transform: translateX(0.6px); }
+    }
+    /* 眼神轮换:先看看左边,再看看右边,像是在找下一步方向 */
+    @keyframes gaze {
+      0%, 24%, 100% { transform: translateX(0); }
+      29%, 37% { transform: translateX(-0.7px); }
+      42%, 70% { transform: translateX(0); }
+      75%, 83% { transform: translateX(0.7px); }
+      88% { transform: translateX(0); }
+    }
+    /* 天线先探一下头,再弹回原位 */
+    @keyframes antenna {
+      0%, 56%, 100% { transform: translateX(0); }
+      61% { transform: translateX(-0.7px); }
+      66% { transform: translateX(0.5px); }
+      71% { transform: translateX(0); }
+    }
+    /* 偶尔竖一下耳朵 */
+    @keyframes ear {
+      0%, 92%, 100% { transform: translateY(0); }
+      96% { transform: translateY(-0.7px); }
+    }
+    /* 两只耳朵不同时抖,动作更像真实的小家伙 */
+    @keyframes ear-flick-l {
+      0%, 68%, 100% { transform: translate(0, 0); }
+      73% { transform: translate(-0.4px, -0.8px); }
+      78% { transform: translate(0, 0); }
+    }
+    @keyframes ear-flick-r {
+      0%, 82%, 100% { transform: translate(0, 0); }
+      87% { transform: translate(0.4px, -0.8px); }
+      92% { transform: translate(0, 0); }
+    }
+    /* 左右轮流点一下地,和身体的跳跃错开 */
+    @keyframes leg-step-l {
+      0%, 18%, 100% { transform: translate(0, 0); }
+      23% { transform: translate(-0.4px, -0.6px); }
+      28% { transform: translate(0, 0); }
+    }
+    @keyframes leg-step-r {
+      0%, 53%, 100% { transform: translate(0, 0); }
+      58% { transform: translate(0.4px, -0.6px); }
+      63% { transform: translate(0, 0); }
+    }
+    @keyframes blink {
+      0%, 88%, 96%, 100% { transform: scaleY(1); }
+      92% { transform: scaleY(0.15); }
+    }
+    @keyframes tw {
+      0%, 100% { opacity: 0.65; }
+      50% { opacity: 1; }
+    }
+    /* 偶尔抖落两枚小像素,动作发生得很轻,不会抢主体 */
+    @keyframes mote-l {
+      0%, 46%, 100% { opacity: 0; transform: translate(0.5px, 1px); }
+      51% { opacity: 0.8; transform: translate(0, 0); }
+      58% { opacity: 0; transform: translate(-0.7px, -0.8px); }
+    }
+    @keyframes mote-r {
+      0%, 68%, 100% { opacity: 0; transform: translate(-0.5px, 1px); }
+      73% { opacity: 0.8; transform: translate(0, 0); }
+      80% { opacity: 0; transform: translate(0.7px, -0.8px); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .sway, .pet, .ears, .eyes, .gaze, .antenna,
+      .ear-l, .ear-r, .leg-l, .leg-r, .tw, .mote-l, .mote-r { animation: none; }
+      .mote-l, .mote-r { opacity: 0; }
+    }
+  </style>
+  <!-- 小短腿留在地面 -->
+  <g class="leg-l"><rect x="7" y="19" width="3" height="3" fill="#2fa8ea"/></g>
+  <g class="leg-r"><rect x="14" y="19" width="3" height="3" fill="#2fa8ea"/></g>
+  <g class="mote-l" fill="#dbeffe" aria-hidden="true"><rect x="3" y="16" width="1" height="1"/></g>
+  <g class="mote-r" fill="#dbeffe" aria-hidden="true"><rect x="20" y="16" width="1" height="1"/></g>
+  <g class="sway">
+    <g class="pet">
+      <!-- 星星天线:一格天线杆 + 像素小星,品牌暗示不抢戏 -->
+      <g class="antenna">
+        <g class="tw" fill="#dbeffe">
+          <rect x="11.5" y="0.5" width="1" height="3"/>
+          <rect x="10.5" y="1.5" width="3" height="1"/>
+        </g>
+        <rect x="11.5" y="4" width="1" height="3" fill="#67cdf9"/>
+      </g>
+      <!-- 圆角方块身体(两矩形并集切角) + 左上受光/右下背光 -->
+      <rect x="5" y="6" width="14" height="13" fill="#67cdf9"/>
+      <rect x="4" y="7" width="16" height="11" fill="#67cdf9"/>
+      <rect x="5" y="6" width="7" height="1" fill="#a8e2fd"/>
+      <rect x="4" y="7" width="1" height="6" fill="#a8e2fd"/>
+      <rect x="5" y="18" width="14" height="1" fill="#2fa8ea"/>
+      <rect x="19" y="12" width="1" height="6" fill="#2fa8ea"/>
+      <!-- 侧边小耳朵 -->
+      <g class="ears">
+        <rect class="ear-l" x="2" y="9" width="2" height="4" fill="#a8e2fd"/>
+        <rect class="ear-r" x="20" y="9" width="2" height="4" fill="#2fa8ea"/>
+      </g>
+      <!-- 方块眼睛 -->
+      <g class="eyes">
+        <g class="gaze">
+          <rect x="8" y="10" width="2.5" height="4" fill="#082f49"/>
+          <rect x="13.5" y="10" width="2.5" height="4" fill="#082f49"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

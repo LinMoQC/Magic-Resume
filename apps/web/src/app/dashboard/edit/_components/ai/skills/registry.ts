@@ -1,4 +1,5 @@
 import { Wand2, BarChart3, BotMessageSquare, Mic, Languages } from 'lucide-react';
+import i18n from '@/i18n';
 import type { AiSkill, SkillId } from '../types';
 
 /**
@@ -19,7 +20,7 @@ export const SKILLS: Record<SkillId, AiSkill> = {
     surface: 'inline',
     isChat: true,
     params: [],
-    buildIntent: () => '我想从零创建一份简历，带我开始',
+    buildIntent: () => i18n.t('aiLab.intent.create'),
     doneSummary: '',
   },
   optimize: {
@@ -59,7 +60,7 @@ export const SKILLS: Record<SkillId, AiSkill> = {
     surface: 'inline',
     params: [],
     canvas: { views: ['score', 'json'], defaultView: 'score' },
-    buildIntent: () => '分析这份简历的竞争力',
+    buildIntent: () => i18n.t('aiLab.intent.analyze'),
     doneSummary: '多角色体检完成',
   },
   translate: {
@@ -100,7 +101,7 @@ export const SKILLS: Record<SkillId, AiSkill> = {
     accentHex: '#fb7185',
     surface: 'immersive',
     params: [],
-    buildIntent: () => '模拟面试',
+    buildIntent: () => i18n.t('aiLab.intent.interview'),
     doneSummary: '',
   },
 };

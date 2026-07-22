@@ -340,11 +340,9 @@ const useResumeStore = create<ResumeState>()(
         try {
           const cloudResult = await resumeApi.fetchCloudResumes();
           if (cloudResult && cloudResult.data) {
-            // Some API responses wrap the useful payload one level deeper.
-            const cloudResumes = (Array.isArray(cloudResult.data) 
-                ? cloudResult.data 
-                : (cloudResult.data?.data || [])) as CloudResume[];
-            
+            // fetchCloudResumes 返回分页信封 { data, total, page, limit },data 即列表。
+            const cloudResumes = cloudResult.data as CloudResume[];
+
             if (Array.isArray(cloudResumes)) {
                 // Set of valid Cloud IDs
                 const cloudIds = new Set(cloudResumes.map(cr => cr.id));

@@ -1,18 +1,16 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useResumeStore, getSanitizedResume } from '@/store/useResumeStore';
 import JsonModal from '@/app/dashboard/edit/_components/modals/JsonModal';
+import { useInterceptModalRoute } from '@/hooks/useInterceptModalRoute';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { appLifecycle } from '@/lib/extensions/app-lifecycle';
 
 export default function JsonModalPage() {
-  const router = useRouter();
+  const { open, close } = useInterceptModalRoute();
   const { activeResume } = useResumeStore();
   const { t } = useTranslation();
-
-  const handleClose = () => router.back();
 
   const handleDownloadJson = () => {
     if (activeResume) {
@@ -37,8 +35,8 @@ export default function JsonModalPage() {
 
   return (
     <JsonModal
-      isJsonModalOpen={true}
-      closeJsonModal={handleClose}
+      isJsonModalOpen={open}
+      closeJsonModal={close}
       handleDownloadJson={handleDownloadJson}
       activeResume={activeResume}
       t={t}

@@ -8,6 +8,7 @@ import {
   AddCommentRequest,
   AddReplyRequest,
   CloudResumeResponse,
+  CloudResumeListResponse,
   CloudVersionResponse,
 } from '@/types/backend/resume';
 import { API_ROUTES, API_ORIGIN } from './routes';
@@ -123,15 +124,15 @@ export const resumeApi = {
     return response.data.data;
   },
 
-  /** 获取当前用户的所有云端简历（含版本信息） */
-  fetchCloudResumes: async () => {
-    const response = await httpClient.api.get(API_ROUTES.resumes.list);
+  /** 获取当前用户的所有云端简历（分页信封:{ data, total, page, limit }） */
+  fetchCloudResumes: async (): Promise<CloudResumeListResponse> => {
+    const response = await httpClient.api.get<ApiResponse<CloudResumeListResponse>>(API_ROUTES.resumes.list);
     return response.data.data;
   },
 
   /** 按 ID 获取单份云端简历的完整数据 */
-  fetchCloudResumeById: async (id: string) => {
-    const response = await httpClient.api.get(API_ROUTES.resumes.byId(id));
+  fetchCloudResumeById: async (id: string): Promise<CloudResumeResponse> => {
+    const response = await httpClient.api.get<ApiResponse<CloudResumeResponse>>(API_ROUTES.resumes.byId(id));
     return response.data.data;
   },
 

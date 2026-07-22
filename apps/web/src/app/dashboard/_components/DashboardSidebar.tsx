@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useReducedMotion } from 'framer-motion';
-import { FileText, Bell, BookOpenText, ChevronLeft } from 'lucide-react';
+import { FileText, Bell, Milestone, ChevronLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import AccountMenu from '@/components/shared/AccountMenu';
@@ -120,7 +120,7 @@ export default function DashboardSidebar() {
             href="/knowledge/timelines"
             label={label('sidebar.knowledge')}
             active={pathname.startsWith('/knowledge')}
-            icon={<BookOpenText size={18} />}
+            icon={<Milestone size={18} />}
             collapsed={collapsed}
             labelStyle={labelStyle}
           />

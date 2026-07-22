@@ -62,6 +62,8 @@ export interface MagicTemplateDSL {
   // 布局系统
   layout: {
     type: 'single-column' | 'two-column' | 'sidebar' | 'grid';
+    /** 纸张规格,决定页面纵横比(高度 = 宽度 × 比例)。缺省按 A4。 */
+    pageSize?: 'A4' | 'Letter';
     containerWidth: string;
     containerHeight?: string;
     padding: string;
