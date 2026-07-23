@@ -2,6 +2,11 @@
 
 All notable changes to Magic Resume are documented in this file.
 
+# [v2.3.0](https://github.com/Magic-Resume/Magic-Resume/compare/v2.2.1...v2.3.0) (2026-07-23)
+
+## ✨ New Features
+- [`ce42675`](https://github.com/Magic-Resume/Magic-Resume/commit/ce42675)  feat(web): default system theme + credit-free monthly quota UI (#149) (Issues: [`#149`](https://github.com/Magic-Resume/Magic-Resume/issues/149))
+
 # [v2.2.0](https://github.com/Magic-Resume/Magic-Resume/compare/v2.1.1...v2.2.0) (2026-07-13)
 
 ## ✨ New Features
