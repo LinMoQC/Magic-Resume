@@ -1,7 +1,7 @@
 /**
  * The single API origin — the whole frontend talks to ONE configured address.
  * Resolved at RUNTIME so one build can target any backend:
- *   - browser → `window.__ENV.apiOrigin`, injected by CommercialRuntimeProvider
+ *   - browser → `window.__ENV.apiOrigin`, injected by RuntimeEnvScript (layout)
  *   - server  → `process.env.APP_API_ORIGIN` (container env, read per request)
  *   - fallback → build-time `NEXT_PUBLIC_API_URL` / dev default
  * The runtime var is deliberately WITHOUT the `NEXT_PUBLIC_` prefix: Next inlines
