@@ -23,7 +23,10 @@ export type ThemePreference = "light" | "dark" | "system";
 export type ResolvedTheme = "light" | "dark";
 
 export const THEME_STORAGE_KEY = "mr-theme";
-const DEFAULT_PREFERENCE: ThemePreference = "dark";
+// New users default to following the OS appearance; an explicit choice (stored
+// under THEME_STORAGE_KEY) always wins. The anti-FOUC init script + the effect
+// below resolve "system" to the OS preference before first paint.
+const DEFAULT_PREFERENCE: ThemePreference = "system";
 
 interface ThemeContextValue {
   /** 用户的选择(可为 system) */

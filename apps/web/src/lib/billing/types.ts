@@ -8,12 +8,13 @@ export interface PlanSummary {
   kind: PlanKind;
   priceCents: number;
   currency: string;
-  includedCredits: string;
   modelAllowlist: string[];
   dailyLimit: number;
   weeklyLimit: number;
   interval?: string | null;
   isDefault: boolean;
+  // `includedCredits` intentionally omitted: credits are the internal billing
+  // unit and are never sent to the client — the API exposes only a percentage.
 }
 
 export interface SubscriptionSummary {
@@ -34,19 +35,24 @@ export interface UsageSummary {
   weeklyResetAt: string;
 }
 
-/** Response of GET /api/billing/ai-entitlement (usage + plan + subscription). */
+/**
+ * Response of GET /api/billing/ai-entitlement. Credit-free by design: the client
+ * only learns the plan type, whether internal AI is usable right now
+ * (`canUseInternal` + `reason`), and how much of the monthly allowance is left
+ * (`remainingPercent`). Raw credit balances/caps and day/week counts never leave
+ * the server (credits are our internal billing unit).
+ */
 export interface Entitlement {
   mode: 'internal' | 'byok_required';
+  /** Whether internal AI can be used right now (credits + day/week caps). */
   canUseInternal: boolean;
   reason?: string | null;
-  balanceCredits: string;
-  currency: string;
-  checkedAt: string;
+  /** 计划类型 — no credit fields. */
   currentPlan: PlanSummary | null;
-  subscription: SubscriptionSummary | null;
-  usage: UsageSummary;
-  overDailyLimit: boolean;
-  overWeeklyLimit: boolean;
+  /** 还剩百分之多少 (0-100) of the monthly allowance; null = unlimited. */
+  remainingPercent: number | null;
+  /** When the monthly allowance refreshes (ISO). */
+  resetAt?: string | null;
   /** Supported models the composer can offer for internal runs (allowlist-filtered). */
   availableModels?: string[];
 }

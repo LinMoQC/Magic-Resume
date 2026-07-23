@@ -80,6 +80,7 @@
     },
     "subscription": {
       "currentPlan": "当前计划",
+      "monthly": "本月额度",
       "today": "今日",
       "week": "本周",
       "usage": "本期用量",
@@ -152,7 +153,7 @@
       "general": {
         "description": "偏好设置保持克制，只保留会影响日常创作的选项。",
         "appearance": "外观",
-        "appearanceDescription": "深色是长时段编辑的默认工作台。可切换为浅色，或跟随系统。",
+        "appearanceDescription": "默认跟随系统外观。也可固定为深色（长时段编辑更护眼）或浅色。",
         "appearanceDark": "深色",
         "appearanceLight": "浅色",
         "appearanceSystem": "跟随系统",

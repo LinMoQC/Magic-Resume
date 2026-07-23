@@ -442,14 +442,8 @@ function SideCopy({
 
 type TFn = (k: string, o?: Record<string, unknown>) => string;
 
-function remainingLabel(used: number, limit: number, t: TFn) {
-  if (!limit || limit <= 0) return t('account.subscription.unlimited');
-  return t('account.subscription.remaining', { count: Math.max(0, limit - used) });
-}
-
-function MiniBar({ used, limit }: { used: number; limit: number }) {
-  const unlimited = !limit || limit <= 0;
-  const pct = unlimited ? 100 : Math.min(100, Math.round((used / limit) * 100));
+function MiniBar({ percent, unlimited }: { percent: number; unlimited?: boolean }) {
+  const pct = Math.max(0, Math.min(100, percent));
   return (
     <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-white/[0.06]">
       <div
@@ -474,13 +468,11 @@ function UsageCluster({
   fmtDateTime: (d?: Date | number | string | null) => string;
   t: TFn;
 }) {
-  const { usage, currentPlan } = entitlement;
-  const rows = [
-    { label: t('account.subscription.today'), used: usage.dailyUsed, limit: usage.dailyLimit, resetAt: usage.dailyResetAt },
-    { label: t('account.subscription.week'), used: usage.weeklyUsed, limit: usage.weeklyLimit, resetAt: usage.weeklyResetAt },
-  ];
+  const { remainingPercent, resetAt, currentPlan } = entitlement;
+  const unlimited = remainingPercent === null;
   // Horizontal, header-height layout — the card must stay roughly as tall as the
   // avatar block or the whole header inflates and the left side looks stranded.
+  // Credits are internal, so we show only the monthly allowance remaining (%).
   return (
     <button
       type="button"
@@ -495,18 +487,20 @@ function UsageCluster({
         </span>
       </div>
       <div className="w-px self-stretch bg-white/[0.08]" />
-      <div className="w-48 space-y-2">
-        {rows.map((row) => (
-          <div
-            key={row.label}
-            className="flex items-center gap-2 text-[11px]"
-            title={row.resetAt ? t('account.subscription.resetAt', { time: fmtDateTime(row.resetAt) }) : undefined}
-          >
-            <span className="shrink-0 text-neutral-400">{row.label}</span>
-            <MiniBar used={row.used} limit={row.limit} />
-            <span className="shrink-0 tabular-nums text-neutral-300">{remainingLabel(row.used, row.limit, t)}</span>
-          </div>
-        ))}
+      {/* Stacked to mirror the plan column: label ("本月额度") on the top row —
+          level with "当前计划" — and the bar + % on the second row, level with
+          the plan badge. */}
+      <div
+        className="flex w-48 flex-col gap-1"
+        title={resetAt ? t('account.subscription.resetAt', { time: fmtDateTime(resetAt) }) : undefined}
+      >
+        <span className="whitespace-nowrap text-[11px] text-neutral-500">{t('account.subscription.monthly')}</span>
+        <div className="flex h-5 items-center gap-2 text-[11px]">
+          <MiniBar percent={unlimited ? 100 : (remainingPercent ?? 0)} unlimited={unlimited} />
+          <span className="shrink-0 tabular-nums text-neutral-300">
+            {unlimited ? t('account.subscription.unlimited') : `${remainingPercent}%`}
+          </span>
+        </div>
       </div>
     </button>
   );
