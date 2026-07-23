@@ -1492,17 +1492,12 @@ function HeaderQuota() {
     d
       ? new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(d))
       : '';
-  const remainingText = (used: number, limit: number) =>
-    !limit || limit <= 0
-      ? t('account.subscription.unlimited')
-      : t('account.subscription.remaining', { count: Math.max(0, limit - used) });
-
-  const rows = data
-    ? [
-        { label: t('account.subscription.today'), used: data.usage.dailyUsed, limit: data.usage.dailyLimit, resetAt: data.usage.dailyResetAt },
-        { label: t('account.subscription.week'), used: data.usage.weeklyUsed, limit: data.usage.weeklyLimit, resetAt: data.usage.weeklyResetAt },
-      ]
-    : [];
+  // Monthly allowance remaining as a single percentage from the API. Credits are
+  // our internal billing unit, so the client never receives raw balances — only
+  // this percentage. null = unlimited (no credit cap).
+  const credit = data
+    ? { percent: data.remainingPercent, resetAt: data.resetAt ?? null }
+    : null;
 
   return (
     <div className="relative">
@@ -1547,31 +1542,27 @@ function HeaderQuota() {
                       {data.currentPlan?.name ?? '—'}
                     </span>
                   </div>
-                  <div className="mt-3 space-y-3">
-                    {rows.map((row) => {
-                      const unlimited = !row.limit || row.limit <= 0;
-                      const pct = unlimited ? 100 : Math.min(100, Math.round((row.used / row.limit) * 100));
-                      return (
-                        <div key={row.label}>
-                          <div className="flex items-center justify-between gap-3 text-[11px]">
-                            <span className="text-neutral-400">{row.label}</span>
-                            <span className="tabular-nums text-neutral-300">{remainingText(row.used, row.limit)}</span>
-                          </div>
-                          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
-                            <div
-                              className={cn('h-full rounded-full bg-gradient-to-r from-sky-500 to-sky-400', unlimited && 'opacity-60')}
-                              style={{ width: `${pct}%` }}
-                            />
-                          </div>
-                          {row.resetAt && (
-                            <div className="mt-1 text-[10px] text-neutral-600">
-                              {t('account.subscription.resetAt', { time: fmtReset(row.resetAt) })}
-                            </div>
-                          )}
+                  {credit && (
+                    <div className="mt-3">
+                      <div className="flex items-center justify-between gap-3 text-[11px]">
+                        <span className="text-neutral-400">{t('account.subscription.monthly')}</span>
+                        <span className="tabular-nums text-neutral-300">
+                          {credit.percent === null ? t('account.subscription.unlimited') : `${credit.percent}%`}
+                        </span>
+                      </div>
+                      <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+                        <div
+                          className={cn('h-full rounded-full bg-gradient-to-r from-sky-500 to-sky-400', credit.percent === null && 'opacity-60')}
+                          style={{ width: `${credit.percent === null ? 100 : Math.max(0, Math.min(100, credit.percent))}%` }}
+                        />
+                      </div>
+                      {credit.resetAt && (
+                        <div className="mt-1 text-[10px] text-neutral-600">
+                          {t('account.subscription.resetAt', { time: fmtReset(credit.resetAt) })}
                         </div>
-                      );
-                    })}
-                  </div>
+                      )}
+                    </div>
+                  )}
                 </>
               )}
             </motion.div>

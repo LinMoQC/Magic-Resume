@@ -80,6 +80,7 @@
     },
     "subscription": {
       "currentPlan": "Current plan",
+      "monthly": "This month",
       "today": "Today",
       "week": "This week",
       "usage": "Usage this period",
@@ -152,7 +153,7 @@
       "general": {
         "description": "Preferences stay quiet and focused on choices that affect everyday editing.",
         "appearance": "Appearance",
-        "appearanceDescription": "Dark is the default workbench for long editing sessions. Switch to light, or follow your system.",
+        "appearanceDescription": "Follows your system appearance by default. Pin it to dark (easier on the eyes for long editing sessions) or light.",
         "appearanceDark": "Dark",
         "appearanceLight": "Light",
         "appearanceSystem": "System",
