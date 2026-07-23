@@ -21,6 +21,7 @@ import StructuredData from "@/components/shared/StructuredData";
 import I18nProvider from "@/components/providers/I18nProvider";
 import { HttpClientProvider } from "@/components/providers/HttpClientProvider";
 import { CommercialRuntimeProvider } from "@/lib/commercial/runtime";
+import { RuntimeEnvScript } from "@/lib/commercial/runtime-env";
 import { CloudAuthBridge } from "@/lib/auth";
 
 export const metadata: Metadata = {
@@ -55,6 +56,10 @@ export default function RootLayout({
               />
             </head>
             <body className={`font-sans ${brandFont.variable}`}>
+              {/* Runtime API origin → window.__ENV, injected before any client
+                  bundle reads it. Kept OUT of CommercialRuntimeProvider because
+                  the commercial overlay replaces that module — see runtime-env.tsx. */}
+              <RuntimeEnvScript />
               <CommercialRuntimeProvider>
                 <I18nProvider>
                   <ThemeProvider>
