@@ -7,6 +7,11 @@ All notable changes to Magic Resume are documented in this file.
 ## ✨ New Features
 - [`ce42675`](https://github.com/Magic-Resume/Magic-Resume/commit/ce42675)  feat(web): default system theme + credit-free monthly quota UI (#149) (Issues: [`#149`](https://github.com/Magic-Resume/Magic-Resume/issues/149))
 
+# [v2.2.1](https://github.com/Magic-Resume/Magic-Resume/compare/v2.2.0...v2.2.1) (2026-07-23)
+
+## 🐛 Bug Fixes
+- [`52b6533`](https://github.com/Magic-Resume/Magic-Resume/commit/52b6533)  fix(web): move window.__ENV injection out of the commercial-overlaid runtime module (#147) (Issues: [`#147`](https://github.com/Magic-Resume/Magic-Resume/issues/147))
+
 # [v2.2.0](https://github.com/Magic-Resume/Magic-Resume/compare/v2.1.1...v2.2.0) (2026-07-13)
 
 ## ✨ New Features
